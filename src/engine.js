@@ -159,9 +159,14 @@ export function craftableKeys(db, state) {
 
 /* ---- ホーム ---- */
 
+/* まだ解放していない英雄。ホームのカルーセルと挑戦先の選択で使う */
+export function lockedHeroes(db, state) {
+  return db.heroes.filter(h => !state.owned[h.id]);
+}
+
 /* 次に解放できる英雄（ロスターの並び順で、まだ持っていない先頭） */
 export function nextHero(db, state) {
-  return db.heroes.find(h => !state.owned[h.id]) || null;
+  return lockedHeroes(db, state)[0] || null;
 }
 
 /* まだ1問も解いていない教科。知識マップの白い行にあたる */

@@ -2,7 +2,7 @@
 
 import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedChapters, buildRun, gaugeBreakdown, challengeStage,
-         cellKey, craftableKeys, nextHero, adviceFor } from "./engine.js";
+         cellKey, craftableKeys, nextHero, lockedHeroes, adviceFor } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
 import { saveState } from "./state.js";
@@ -31,7 +31,7 @@ function render() {
   document.body.classList.toggle("home", home);
 
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
-     heroes: vHeroes, hero: vHero, challenge: vChallenge }[S.view])();
+     heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge }[S.view])();
   drawToast();
   if (home) startClock();
   saveState(S);
@@ -86,9 +86,11 @@ function drawToast() {
 /* ---------- ホーム ---------- */
 
 function vHome() {
-  const next = nextHero(DB, S);
-  const gauge = next && next.rel ? gaugeBreakdown(DB, S, next) : null;
-  const percent = gauge ? Math.round(gauge.damage / gauge.hp * 100) : 0;
+  // どれだけ削れるかはホームには出さない。挑戦先を選ぶ画面で見せる
+  const locked = lockedHeroes(DB, S);
+  const i = locked.length ? Math.min(S.stage.i, locked.length - 1) : 0;
+  S.stage.i = i;
+  const target = locked[i] || null;
   const craftable = craftableKeys(DB, S);
   const p = S.profile || {};
 
@@ -109,20 +111,27 @@ function vHome() {
   <div class="layer layer-stage">
     <div class="stage-bg" style="background-image:url('${assetPath.bg("1006")}')"></div>
     <div class="cal"><img src="${assetPath.icon("mch_icon")}" alt="">${dateText()}</div>
-    ${next ? `
+    ${target ? `
+    <div class="tv">
+      <div class="tv-art">
+        ${locked.length > 1 ? `<button class="tv-arrow" id="prevhero" aria-label="前の英雄">‹</button>` : ""}
+        <div class="tv-figure">
+          <img src="${assetPath.rep(target.id)}" alt="${esc(target.name)}">
+          <span class="tv-shadow"></span>
+        </div>
+        ${locked.length > 1 ? `<button class="tv-arrow" id="nexthero" aria-label="次の英雄">›</button>` : ""}
+      </div>
+      <div class="tv-name"><span class="hr r${target.rarity}">${esc(target.rarity)}</span>
+        <b>${esc(target.name)}</b></div>
+      ${locked.length > 1 ? `<div class="tv-dots">${locked.map((h, n) =>
+        `<i class="${n === i ? "on" : ""}"></i>`).join("")}</div>` : ""}
+    </div>
     <button class="chal" id="tochal"
-      style="background-image:var(--g-chal),url('${assetPath.bg("1038")}')">
-      <img src="${assetPath.rep(next.id)}" alt="">
-      <span class="ct">
-        <b>${esc(next.name)}に挑む</b>
-        <span>${esc(next.rarity)} ・ いまの知識でゲージを ${percent}% 削れます</span>
-        <span class="cg2"><i style="width:${percent}%"></i></span>
-      </span>
-    </button>` : `
-    <div class="chal all"
-      style="background-image:var(--g-chal),url('${assetPath.bg("1038")}')">
-      <span class="ct"><b>英雄はすべて解放しました</b>
-        <span>問題を増やすと、また新しい教室が開きます</span></span>
+      style="background-image:var(--g-chal),url('${assetPath.bg("1038")}')">挑戦</button>`
+    : `
+    <div class="tv">
+      <div class="tv-name"><b>英雄はすべて解放しました</b></div>
+      <p class="fine" style="text-align:center">問題を増やすと、また新しい教室が開きます</p>
     </div>`}
   </div>
 
@@ -148,7 +157,26 @@ function vHome() {
   document.getElementById("tocraft").onclick = () => go("craft");
   document.getElementById("toheroes").onclick = () => go("heroes");
   const c = document.getElementById("tochal");
-  if (c) c.onclick = () => startChallenge(next.id);
+  if (c) c.onclick = () => go("target");
+
+  // カルーセル。矢印・ドットのほか、指で払っても動かす
+  const shift = d => { S.stage.i = (i + d + locked.length) % locked.length; render(); };
+  const prev = document.getElementById("prevhero");
+  const nextBtn = document.getElementById("nexthero");
+  if (prev) prev.onclick = () => shift(-1);
+  if (nextBtn) nextBtn.onclick = () => shift(1);
+
+  const art = app.querySelector(".tv-art");
+  if (art && locked.length > 1) {
+    let x0 = null;
+    art.addEventListener("touchstart", ev => { x0 = ev.changedTouches[0].clientX; }, { passive: true });
+    art.addEventListener("touchend", ev => {
+      if (x0 === null) return;
+      const dx = ev.changedTouches[0].clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 40) shift(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
 }
 
 /* ---------- 出題選択（在庫表示つき） ---------- */
@@ -619,6 +647,39 @@ function vHeroes() {
     b.onclick = () => { S.heroView = b.dataset.h; go("hero"); });
 }
 
+/* ---------- 挑戦先を選ぶ ---------- */
+
+function vTarget() {
+  const locked = lockedHeroes(DB, S);
+  const here = locked[S.stage.i]?.id;
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">どの英雄に挑むか</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <p class="fine" style="margin-top:16px">ゲージを削るのは知識カードです。エクステンションは、どの知識が関連としてカウントされるかを広げます。</p>
+    ${locked.map(h => {
+      const g = h.rel ? gaugeBreakdown(DB, S, h) : null;
+      const pct = g ? Math.round(g.damage / g.hp * 100) : 0;
+      const top = g && g.rows.length ? g.rows.map(r => `${r.label} −${r.value}`).join(" ・ ")
+                                     : "この英雄に関わる知識をまだ持っていません";
+      return `<button class="trow ${h.id === here ? "on" : ""}" data-h="${h.id}">
+        <img src="${assetPath.hero(h.id)}" alt="">
+        <span class="ti">
+          <span class="tn">${esc(h.name)}<span class="hr r${h.rarity}">${esc(h.rarity)}</span></span>
+          <span class="tg"><i style="width:${pct}%"></i></span>
+          <span class="tp">いまの知識でゲージを ${pct}% 削れます</span>
+          <span class="ts">${esc(top)}</span>
+        </span></button>`;
+    }).join("")}
+    ${locked.length ? "" : `<p class="empty">挑める英雄はもういません。</p>`}
+    <p class="cue">削りきれていなくても挑めます。負けても、その英雄にまつわる知識は残ります。</p>
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("home");
+  app.querySelectorAll(".trow").forEach(b => b.onclick = () => startChallenge(b.dataset.h));
+}
+
 /* ---------- チャレンジ ---------- */
 
 function startChallenge(id) {
@@ -670,7 +731,7 @@ function vChallenge() {
         </div>`}`}
   </div>`;
 
-  document.getElementById("back").onclick = () => go("home");
+  document.getElementById("back").onclick = () => go(c.done ? "home" : "target");
   const f = document.getElementById("fight");
   if (f) f.onclick = animateGauge;
   const submit = document.getElementById("submit");
@@ -686,7 +747,8 @@ function vChallenge() {
     input.onkeydown = e => { if (e.key === "Enter") send(); };
     input.focus();
   }
-  const d = document.getElementById("done"); if (d) d.onclick = () => go("codex");
+  const d = document.getElementById("done");
+  if (d) d.onclick = () => { S.heroesTab = "codex"; go("heroes"); };
   const hm = document.getElementById("home2"); if (hm) hm.onclick = () => go("home");
 }
 
