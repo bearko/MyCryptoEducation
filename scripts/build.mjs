@@ -65,6 +65,7 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>世界の教室</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20fill%3D%22%23FBFBF7%22%2F%3E%3Cpath%20d%3D%22M0%2010.5h32M0%2021.5h32M10.5%200v32M21.5%200v32%22%20stroke%3D%22%23E0E8EC%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M7%2022%20L16%207%20L25%2022%22%20fill%3D%22none%22%20stroke%3D%22%2317243F%22%20stroke-width%3D%222.6%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6%2026h20%22%20stroke%3D%22%23C4362C%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <style>
 ${css}
 </style>
