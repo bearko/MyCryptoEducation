@@ -28,6 +28,25 @@ check("ナビが4枠そろっている",
   ["toheroes", "toshop", "tocraft", "toquiz"].every(id => !!d.getElementById(id)));
 check("ショップは準備中で押せない", d.getElementById("toshop").disabled);
 check("挑戦ボタンは主役層にある", !!d.querySelector(".layer-stage #tochal"));
+check("挑戦ボタンは文字だけ", d.getElementById("tochal").textContent.trim() === "挑戦",
+  d.getElementById("tochal").textContent.trim());
+check("挑む相手はボタンの外に大きく出る", !!d.querySelector(".layer-stage .tv-figure img"));
+check("相手の名前とレアリティはアートと組で出る",
+  /Common/.test(d.querySelector(".tv-name").textContent) &&
+  d.querySelector(".tv-name").textContent.includes("ピタゴラス"),
+  d.querySelector(".tv-name")?.textContent);
+check("削れ具合はホームに出さない", !/削れ/.test(txt()), txt().slice(0, 160));
+
+// 未解放の英雄をカルーセルで送れる
+const firstHero = d.querySelector(".tv-name b").textContent;
+check("カルーセルのドットが未解放ぶんある",
+  d.querySelectorAll(".tv-dots i").length === ev("lockedHeroes(DB,S).length"),
+  `${d.querySelectorAll(".tv-dots i").length}個`);
+d.getElementById("nexthero").click();
+check("次の英雄へ送れる", d.querySelector(".tv-name b").textContent !== firstHero,
+  d.querySelector(".tv-name b").textContent);
+d.getElementById("prevhero").click();
+check("前へ戻せる", d.querySelector(".tv-name b").textContent === firstHero);
 check("ホームから魔石・カード枚数・英雄一覧を外した",
   !txt().includes("手持ちの英雄") && !d.querySelector(".gemrow"), txt().slice(0, 120));
 
@@ -135,6 +154,12 @@ if (c) { c.click(); const m = [...d.querySelectorAll(".mini")].filter(b => !b.di
 
 ev('S.view="home";render()');
 d.getElementById("tochal").click();
+check("挑戦先を選ぶ画面を挟む", txt().includes("どの英雄に挑むか"), txt().slice(0, 80));
+check("削れ具合はここで見せる", /ゲージを \d+% 削れます/.test(txt()), txt().slice(0, 200));
+check("未解放の英雄がすべて並ぶ",
+  d.querySelectorAll(".trow").length === ev("lockedHeroes(DB,S).length"),
+  `${d.querySelectorAll(".trow").length}件`);
+d.querySelector(".trow").click();
 check("チャレンジ画面", txt().includes("持っている知識で削る"));
 d.getElementById("fight").click();
 await wait(1500);

@@ -267,7 +267,7 @@
 
   :root{
     /* ボタンに重ねるグラデーション。下地は MCH の背景画像 */
-    --g-chal:linear-gradient(180deg,rgba(10,16,30,.46),rgba(10,16,30,.82));
+    --g-chal:linear-gradient(180deg,rgba(10,16,30,.60),rgba(10,16,30,.86));
     --g-hero:linear-gradient(135deg,rgba(206,163,48,.86),rgba(36,72,124,.90));
     --g-shop:linear-gradient(135deg,rgba(72,166,178,.86),rgba(20,48,102,.92));
     --g-craft:linear-gradient(135deg,rgba(180,54,42,.86),rgba(212,166,44,.88));
@@ -315,21 +315,33 @@
     display:flex;align-items:center;gap:5px;font:inherit;font-size:11px;color:var(--ink-soft);cursor:default}
   .cal img{width:17px;height:17px}
 
-  /* 挑戦ボタン。解放前の英雄を Rep.画像で見せる（原本64pxなので拡大しすぎない） */
-  .chal{position:relative;width:100%;border:none;border-radius:var(--tile-r);cursor:pointer;
-    font:inherit;color:#fff;text-align:left;overflow:hidden;padding:0;
-    display:flex;align-items:center;gap:12px;min-height:96px;
-    background-size:cover;background-position:center;background-repeat:no-repeat}
-  .chal img{width:clamp(64px,17vw,104px);height:clamp(64px,17vw,104px);flex:none;margin:10px 0 10px 12px;
-    filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
-  .chal .ct{flex:1;min-width:0;padding:10px 14px 10px 0}
-  .chal .ct b{display:block;font-family:var(--mincho);font-size:clamp(15px,4.4vw,19px);
-    font-weight:600;letter-spacing:.04em;text-shadow:0 1px 4px rgba(0,0,0,.6)}
-  .chal .ct span{display:block;font-size:clamp(10.5px,3.1vw,12px);line-height:1.4;opacity:.9;
-    margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,.7)}
-  .chal .ct .cg2{height:5px;background:rgba(255,255,255,.28);border-radius:3px;margin-top:8px;overflow:hidden}
-  .chal .ct .cg2 i{display:block;height:100%;background:linear-gradient(90deg,var(--pen),#E08A5F)}
-  .chal.all{align-items:center;justify-content:center;text-align:center}
+  /* 挑む相手。ボタンの中に置くアイコンとは別物なので、ボタンの外に大きく出す。
+     原本が 64x64 しかないため、拡大時はドットを残す（にじませるとただの低解像度に見える） */
+  .tv{display:flex;flex-direction:column;align-items:center;gap:9px;min-height:0}
+  .tv-art{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:0}
+  .tv-figure{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:0}
+  .tv-figure img{width:clamp(104px,min(46vw,26vh),200px);height:clamp(104px,min(46vw,26vh),200px);
+    image-rendering:pixelated;filter:drop-shadow(0 3px 8px rgba(0,0,0,.32))}
+  .tv-shadow{width:58%;height:12px;border-radius:50%;background:rgba(23,36,63,.18);
+    filter:blur(1px);margin-top:-10px}
+  .tv-arrow{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(251,251,247,.82);color:var(--ink-soft);font-size:20px;line-height:1;
+    padding:0;cursor:pointer}
+  .tv-name{display:flex;align-items:center;gap:7px;font-family:var(--mincho);
+    background:rgba(251,251,247,.86);border:1px solid var(--line);border-radius:3px;padding:3px 12px}
+  .tv-name b{font-size:clamp(15px,4.4vw,19px);font-weight:600;letter-spacing:.04em}
+  .tv-dots{display:flex;gap:5px}
+  .tv-dots i{width:6px;height:6px;border-radius:50%;background:rgba(23,36,63,.22)}
+  .tv-dots i.on{background:var(--pen)}
+
+  /* 挑戦ボタン。一番目立たせたいのはクイズなので、横幅はクイズと同じまま縦だけ低くする */
+  .chal{flex:none;width:100%;margin-top:12px;padding:8px;
+    border:1px solid rgba(255,255,255,.72);border-radius:var(--tile-r);cursor:pointer;
+    font:inherit;font-family:var(--mincho);color:#fff;
+    font-size:clamp(15px,4.4vw,18px);font-weight:600;letter-spacing:.16em;
+    min-height:clamp(42px,9vh,58px);
+    background-size:cover;background-position:center;background-repeat:no-repeat;
+    box-shadow:0 2px 8px rgba(23,36,63,.24);text-shadow:0 1px 4px rgba(0,0,0,.65)}
 
   /* --- ナビ層 --- */
   .nav3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;flex:1 1 auto;min-height:0}
@@ -346,3 +358,17 @@
   .tile.quiz b{font-size:clamp(15px,4.6vw,19px)}
   .tile .dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;
     background:var(--pen);box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+
+  /* --- 挑戦先を選ぶ画面。削れ具合はホームではなくここに出す --- */
+  .trow{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;padding:12px;
+    text-align:left;font:inherit;color:var(--ink);cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:3px}
+  .trow:hover{border-color:var(--ink-faint)}
+  .trow.on{border-color:var(--brass)}
+  .trow img{width:56px;height:56px;flex:none;image-rendering:pixelated}
+  .trow .ti{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+  .trow .tn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600}
+  .trow .tg{display:block;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+  .trow .tg i{display:block;height:100%;background:linear-gradient(90deg,var(--pen),#E08A5F)}
+  .trow .tp{font-size:12px;color:var(--ink-soft)}
+  .trow .ts{font-size:11px;color:var(--ink-faint);line-height:1.5}

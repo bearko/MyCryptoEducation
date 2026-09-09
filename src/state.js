@@ -39,6 +39,7 @@ function defaults() {
                  tries: 0, done: false, message: "" },
 
     heroesTab: "own",   // ヒーロー画面のタブ（own / codex）
+    stage: { i: 0 },    // ホームで見ている挑戦相手（未解放の英雄の何番目か）
     heroView: null,
     toast: null,
   };
