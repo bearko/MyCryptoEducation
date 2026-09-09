@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 問題DBの整合性チェック
+        run: node scripts/validate.mjs
+
+      - name: 単一ファイルへのビルド
+        run: node scripts/build.mjs
+
+      - name: 通しテスト
+        run: |
+          npm install --no-save jsdom
+          node scripts/smoke.mjs
+
+      - name: ビルド成果物を保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: standalone-html
+          path: dist/index.html

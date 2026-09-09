@@ -1,0 +1,17 @@
+{
+  "name": "sekai-no-kyoushitsu",
+  "version": "0.4.0",
+  "private": true,
+  "description": "歴代の英雄と、世界の義務教育カリキュラムを旅するクイズゲーム",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve . -l 3000",
+    "validate": "node scripts/validate.mjs",
+    "build": "node scripts/build.mjs",
+    "fetch:mch": "node scripts/fetch-mch-assets.mjs",
+    "fetch:crystals": "node scripts/fetch-crystals.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.0"
+  }
+}
