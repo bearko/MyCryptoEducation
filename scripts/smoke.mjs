@@ -24,6 +24,28 @@ check("ホームは3層", d.querySelectorAll("#app.home > .layer").length === 3,
   `${d.querySelectorAll("#app > *").length}要素`);
 check("ステータス層にマイちゃんの助言", (d.getElementById("advice")?.textContent || "").length > 5,
   d.getElementById("advice")?.textContent);
+check("助言は吹き出しに入る", d.getElementById("advice").classList.contains("bubble"));
+check("背景はホーム全体に敷く", !!d.querySelector("#app.home > .home-bg") && !d.querySelector(".stage-bg"));
+check("ユーザーアイコンが出る", !!d.querySelector(".st-ava"));
+check("称号の枠がある", !!d.querySelector(".st-title"), txt().slice(0, 60));
+check("ユーザー名の枠がある", d.querySelector(".st-name").textContent.trim() === "旅人",
+  d.querySelector(".st-name")?.textContent);
+check("GUMは桁区切りで出す", (() => {
+  ev("S.gum=999999;render()");
+  const ok = d.querySelector(".st-gum").textContent.includes("999,999");
+  ev("S.gum=0;render()");
+  return ok;
+})());
+check("電池はAPIが無い環境では隠す", d.getElementById("batt").hidden);
+check("ユーザー名は255文字まで", ev('capName("あ".repeat(400)).length') === 255,
+  String(ev('capName("あ".repeat(400)).length')));
+check("長い名前でも1行に収める", (() => {
+  ev('S.profile.name="あ".repeat(120);render()');
+  const el = d.querySelector(".st-name");
+  const ok = el.textContent.length === 120;
+  ev('S.profile.name="旅人";render()');
+  return ok;
+})());
 check("ナビが4枠そろっている",
   ["toheroes", "toshop", "tocraft", "toquiz"].every(id => !!d.getElementById(id)));
 check("ショップは準備中で押せない", d.getElementById("toshop").disabled);
