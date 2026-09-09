@@ -31,7 +31,18 @@ node scripts/smoke.mjs   # 全画面を実際にクリックして回る通し�
 
 ## デプロイ
 
-`main` への push で Vercel が自動デプロイします。ビルド不要の静的サイトです。
+`main` への push で Vercel が本番へ、それ以外のブランチへの push はプレビューURLへ
+自動デプロイします。ビルド不要の静的サイトで、リポジトリ直下をそのまま配信します。
+
+**`vercel.json` の `outputDirectory` を消さないでください。** フレームワークを使わない
+プロジェクトで `public/` があると、Vercel はそこを公開ディレクトリに選びます。
+このリポジトリの `public/` は画像だけで `index.html` が無いため、既定のままだと
+サイト全体が 404 になります。`"outputDirectory": "."` がそれを止めています。
+
+Vercel は `package.json` に `build` スクリプトがあるので `npm install` と
+`npm run build` を走らせますが、配信されるのはリポジトリ直下なので結果は使いません。
+デプロイを速くしたい場合は、Vercel の Project Settings → Build & Development Settings で
+Build Command を空にしてください。
 
 ---
 
