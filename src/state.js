@@ -2,6 +2,13 @@
 
 const STORAGE_KEY = "sekai-no-kyoushitsu/v1";
 
+export const NAME_MAX = 255;
+
+/* ユーザー名の上限。差し替えUIが入る前から、保存データ経由でも効かせる */
+export function capName(name) {
+  return typeof name === "string" ? name.slice(0, NAME_MAX) : name;
+}
+
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
 const PERSISTED = ["settings", "profile", "gum", "gems", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score"];
@@ -16,8 +23,9 @@ function defaults() {
       showExplanationOnCorrect: true,  // OFFにすると正解時は演出だけで次へ進む
     },
 
-    // ステータス層の表示。称号は「称号・カレンダー」の実装まで null のまま
-    profile: { name: "旅人", title: null },
+    // ステータス層の表示。称号は「称号・カレンダー」の実装まで null のまま。
+    // icon は手持ちの英雄のID。マイページができたら差し替えられるようにしておく
+    profile: { name: "旅人", title: null, icon: "10001" },
     gum: 0,
 
     gems: { ifrit: 0, levia: 0, tiamat: 0, garuda: 0 },
@@ -90,5 +98,6 @@ export function createState() {
     state[k] = (v && typeof v === "object" && !Array.isArray(v))
       ? { ...state[k], ...v } : v;
   }
+  state.profile.name = capName(state.profile.name);
   return state;
 }

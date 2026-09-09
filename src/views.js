@@ -33,7 +33,7 @@ function render() {
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge }[S.view])();
   drawToast();
-  if (home) startClock();
+  if (home) { startClock(); drawBattery(); fitAdvice(); }
   saveState(S);
 }
 
@@ -44,6 +44,57 @@ const dateText = () => {
   const d = new Date();
   return `${d.getMonth() + 1}月${d.getDate()}日`;
 };
+
+/* 残バッテリー。Battery Status API は iOS Safari が未対応なので、
+   取れたときだけ出す（取れなければ枠ごと隠したまま） */
+function batteryIcon() {
+  return `<svg viewBox="0 0 24 12" aria-hidden="true">
+    <rect class="cell" x="0.6" y="0.6" width="19" height="10.8" rx="2"></rect>
+    <rect class="fill" x="2" y="2" width="0" height="8" rx="1"></rect>
+    <rect class="cell" x="21" y="3.6" width="2.4" height="4.8" rx="1"></rect></svg>`;
+}
+
+function drawBattery() {
+  const el = document.getElementById("batt");
+  if (!el || typeof navigator === "undefined" || !navigator.getBattery) return;
+  navigator.getBattery().then(b => {
+    const pct = Math.max(0, Math.min(100, Math.round(b.level * 100)));
+    const bar = el.querySelector(".fill");
+    if (bar) {
+      bar.setAttribute("width", String(16.4 * pct / 100));
+      bar.classList.toggle("low", pct <= 20);
+    }
+    const label = el.querySelector("b");
+    if (label) label.textContent = `${pct}%`;
+    el.hidden = false;
+  }).catch(() => {});
+}
+
+const MIN_ADVICE_PX = 9;
+
+/**
+ * マイちゃんの吹き出しは文字数ぶん伸びる。ただし3行が上限で、
+ * それを超えたら枠に収まるまで字を縮める（切り詰めると助言が読めなくなる）。
+ * jsdom では寸法が取れないので、その場合は何もしない。
+ */
+function fitAdvice() {
+  const p = document.getElementById("advice");
+  if (!p) return;
+  p.style.fontSize = "";
+  p.style.maxHeight = "";
+  const cs = getComputedStyle(p);
+  const line = parseFloat(cs.lineHeight);
+  if (!line || !Number.isFinite(line)) return;
+  const pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+            + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+  p.style.maxHeight = `${line * 3 + pad}px`;
+  // これ以上小さくしても読めないので下限で止め、残りは line-clamp が畳む
+  let size = parseFloat(cs.fontSize);
+  for (let i = 0; i < 24 && p.scrollHeight > p.clientHeight && size > MIN_ADVICE_PX; i++) {
+    size = Math.max(MIN_ADVICE_PX, size - 0.5);
+    p.style.fontSize = `${size}px`;
+  }
+}
 
 let clockTimer = null;
 function startClock() {
@@ -95,21 +146,30 @@ function vHome() {
   const p = S.profile || {};
 
   app.innerHTML = `
+  <div class="home-bg" style="background-image:url('${assetPath.bg("1006")}')"></div>
+
   <div class="layer layer-status">
-    <div class="st-row">
-      <span class="st-title ${p.title ? "" : "none"}">${p.title ? esc(p.title) : "称号なし"}</span>
-      <span class="st-name">${esc(p.name || "旅人")}</span>
-      <span class="st-gum"><img src="${assetPath.icon("gum")}" alt="GUM">${S.gum || 0}</span>
+    <div class="st-top">
+      <span class="st-batt" id="batt" hidden>${batteryIcon()}<b></b></span>
       <span class="st-clock" id="clock">${clockText()}</span>
+    </div>
+    <div class="st-main">
+      <img class="st-ava" src="${assetPath.hero(p.icon || "10001")}" alt="ユーザーアイコン">
+      <div class="st-fields">
+        <div class="st-line">
+          <span class="st-title ${p.title ? "" : "none"}">${p.title ? esc(p.title) : "称号なし"}</span>
+          <span class="st-gum"><img src="${assetPath.icon("gum")}" alt="GUM">${(S.gum || 0).toLocaleString("ja-JP")}</span>
+        </div>
+        <div class="st-name">${esc(p.name || "旅人")}</div>
+      </div>
     </div>
     <div class="st-advice">
       <img src="${assetPath.icon("mai_sd")}" alt="">
-      <p id="advice">${esc(adviceFor(DB, S))}</p>
+      <p class="bubble" id="advice">${esc(adviceFor(DB, S))}</p>
     </div>
   </div>
 
   <div class="layer layer-stage">
-    <div class="stage-bg" style="background-image:url('${assetPath.bg("1006")}')"></div>
     <div class="cal"><img src="${assetPath.icon("mch_icon")}" alt="">${dateText()}</div>
     ${target ? `
     <div class="tv">
@@ -117,7 +177,6 @@ function vHome() {
         ${locked.length > 1 ? `<button class="tv-arrow" id="prevhero" aria-label="前の英雄">‹</button>` : ""}
         <div class="tv-figure">
           <img src="${assetPath.rep(target.id)}" alt="${esc(target.name)}">
-          <span class="tv-shadow"></span>
         </div>
         ${locked.length > 1 ? `<button class="tv-arrow" id="nexthero" aria-label="次の英雄">›</button>` : ""}
       </div>

@@ -277,39 +277,82 @@
 
   body.home{overflow:hidden}
   #app.home{
+    position:relative;
     height:100vh;height:100dvh;
     display:flex;flex-direction:column;overflow:hidden;
     padding:env(safe-area-inset-top) env(safe-area-inset-right)
             env(safe-area-inset-bottom) env(safe-area-inset-left)}
 
+  /* 背景は主役層だけでなくホーム全体に敷く。#app は max-width:560px なので、
+     fixed ではなく absolute にして、広い画面でも本体の幅に収める */
+  .home-bg{position:absolute;inset:0;z-index:0;opacity:.46;pointer-events:none;
+    background-size:cover;background-position:center;background-repeat:no-repeat}
+  #app.home > .layer{position:relative;z-index:1}
+
   /* 上段12% と下段32% は固定。主役層だけが伸縮して端末差を吸収する */
   .layer{min-height:0;padding:0 12px}
-  .layer-status{flex:0 0 12%;display:flex;flex-direction:column;justify-content:center;gap:4px;
-    padding-top:6px;border-bottom:1px solid var(--line);overflow:hidden}
+  /* 上段はユーザー情報とマイちゃんの助言が入るので、内容ぶんの高さを取る。
+     下段は固定、主役層が残りを吸収する構造は変わらない */
+  .layer-status{flex:0 0 auto;display:flex;flex-direction:column;gap:5px;
+    padding-top:7px;padding-bottom:3px;overflow:hidden}
   .layer-stage{flex:1 1 auto;position:relative;display:flex;flex-direction:column;
     justify-content:center;padding:10px 12px 12px;overflow:hidden}
   .layer-nav{flex:0 0 32%;display:flex;flex-direction:column;gap:7px;padding:8px 12px 10px}
 
   /* --- ステータス層 --- */
-  .st-row{display:flex;align-items:center;gap:8px;font-size:clamp(10.5px,3vw,12.5px);
-    color:var(--ink-soft);white-space:nowrap}
-  .st-title{font-family:var(--mincho);color:var(--brass);flex:none}
-  .st-title.none{color:var(--ink-faint)}
-  .st-name{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-  .st-gum{display:flex;align-items:center;gap:3px;flex:none;color:var(--ink)}
-  .st-gum img{width:15px;height:15px}
-  .st-clock{font-family:var(--mincho);flex:none;color:var(--ink-faint)}
-  .st-advice{display:flex;align-items:flex-start;gap:7px;min-height:0;overflow:hidden}
-  .st-advice img{width:26px;height:26px;flex:none;margin-top:1px}
-  .st-advice p{margin:0;font-size:clamp(10.5px,2.9vw,12.5px);line-height:1.45;color:var(--ink-soft);
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+  .st-top{display:flex;align-items:center;justify-content:flex-end;gap:8px;
+    font-size:clamp(10.5px,3vw,12.5px);color:var(--ink-soft)}
+  .st-batt{display:flex;align-items:center;gap:4px;
+    background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:3px;padding:1px 6px}
+  .st-batt svg{width:20px;height:11px;display:block}
+  .st-batt .cell{fill:none;stroke:var(--ink-soft);stroke-width:1.1}
+  .st-batt .fill{fill:var(--moss)}
+  .st-batt .fill.low{fill:var(--pen)}
+  .st-batt b{font-weight:600;color:var(--ink);font-size:10.5px}
+  .st-clock{font-family:var(--mincho);font-size:clamp(13px,4vw,16px);font-weight:600;color:var(--ink);
+    background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:3px;padding:0 7px}
+
+  .st-main{display:flex;align-items:center;gap:9px;min-width:0}
+  .st-ava{flex:none;width:clamp(44px,13vw,58px);height:clamp(44px,13vw,58px);border-radius:50%;
+    border:2px solid rgba(255,255,255,.92);background:var(--card);object-fit:cover;
+    image-rendering:pixelated;box-shadow:0 1px 5px rgba(23,36,63,.22)}
+  .st-fields{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .st-line{display:flex;align-items:center;gap:8px;min-width:0}
+  .st-title{flex:1;min-width:0;text-align:center;font-family:var(--mincho);
+    font-size:clamp(11px,3.2vw,13.5px);color:#fff;background:#79201C;
+    border:1px solid var(--brass);border-radius:3px;padding:2px 10px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .st-title.none{background:rgba(255,255,255,.78);border-color:var(--line);color:var(--ink-faint)}
+  .st-gum{flex:none;display:flex;align-items:center;gap:4px;font-size:clamp(11px,3.2vw,13px);
+    font-weight:600;color:var(--ink)}
+  .st-gum img{width:16px;height:16px}
+  .st-name{background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:11px;
+    padding:2px 12px;text-align:center;font-size:clamp(11.5px,3.2vw,13px);font-weight:600;
+    color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .st-advice{display:flex;align-items:flex-start;gap:7px;min-width:0}
+  .st-advice > img{width:30px;height:30px;flex:none;image-rendering:pixelated}
+  /* 吹き出しは文字数ぶん伸びる。3行を超えたら、収まるまで views.js が字を縮める */
+  .bubble{flex:1;min-width:0;margin:0;padding:6px 11px;overflow:hidden;
+    background:rgba(255,255,255,.80);border:1px solid var(--line);border-radius:12px;
+    font-size:clamp(11px,3vw,13px);line-height:1.45;color:var(--ink);
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+
+  /* 縦の狭い端末では上段を詰めて、主役層に高さを回す */
+  @media (max-height:640px){
+    .layer-status{gap:4px;padding-top:5px}
+    .st-ava{width:38px;height:38px}
+    .st-advice > img{width:24px;height:24px}
+    .bubble{padding:4px 9px}
+    .tv{gap:6px}
+    .tv-name{padding:1px 10px}
+    .chal{margin-top:8px}
+    /* 縦が狭いときはナビも少し削って、挑む相手に高さを回す */
+    .layer-nav{flex-basis:29%}
+  }
 
   /* --- 主役層 --- */
-  /* 背景画像は要素の style 属性で指定する。カスタムプロパティに url() を入れると、
-     Chrome は var() を使った側（src/styles.css）からの相対パスとして解決してしまう */
-  .stage-bg{background-size:cover;background-position:center;background-repeat:no-repeat}
   .layer-stage > *{position:relative;z-index:1}
-  .layer-stage > .stage-bg{position:absolute;inset:0;z-index:0;opacity:.62}
   .cal{position:absolute;top:10px;right:12px;z-index:2;border:1px solid var(--line);
     background:rgba(251,251,247,.86);border-radius:var(--tile-r);padding:5px 8px;
     display:flex;align-items:center;gap:5px;font:inherit;font-size:11px;color:var(--ink-soft);cursor:default}
@@ -317,13 +360,18 @@
 
   /* 挑む相手。ボタンの中に置くアイコンとは別物なので、ボタンの外に大きく出す。
      原本が 64x64 しかないため、拡大時はドットを残す（にじませるとただの低解像度に見える） */
-  .tv{display:flex;flex-direction:column;align-items:center;gap:9px;min-height:0}
-  .tv-art{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:0}
-  .tv-figure{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:0}
-  .tv-figure img{width:clamp(104px,min(46vw,26vh),200px);height:clamp(104px,min(46vw,26vh),200px);
+  .tv{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:9px;width:100%;min-height:0}
+  .tv-art{flex:1 1 auto;display:flex;align-items:stretch;justify-content:center;gap:4px;
+    width:100%;min-height:0}
+  /* 足元の影は擬似的な楕円。要素を足すと img の height:100% が効かなくなる */
+  .tv-figure{flex:1 1 auto;min-height:0;padding-bottom:11px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse 32% 6px at 50% calc(100% - 3px),
+      rgba(23,36,63,.22),rgba(23,36,63,0) 70%)}
+  .tv-figure img{height:100%;width:auto;max-width:100%;max-height:208px;object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 3px 8px rgba(0,0,0,.32))}
-  .tv-shadow{width:58%;height:12px;border-radius:50%;background:rgba(23,36,63,.18);
-    filter:blur(1px);margin-top:-10px}
+  .tv-arrow{align-self:center}
   .tv-arrow{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
     background:rgba(251,251,247,.82);color:var(--ink-soft);font-size:20px;line-height:1;
     padding:0;cursor:pointer}
