@@ -146,3 +146,71 @@ export function challengeStage(damage, hp) {
   const r = damage / (hp || 100);
   return r >= 1 ? 3 : r >= 0.67 ? 2 : r >= 0.34 ? 1 : 0;
 }
+
+/* ---- クラフト ---- */
+
+/* いま素材が足りているエクステンションのキー。
+   ホームの通知ドットとクラフト画面が同じ判定を見るために、ここに置く */
+export function craftableKeys(db, state) {
+  return Object.entries(db.extensions)
+    .filter(([, e]) => Object.entries(e.cost).every(([g, v]) => (state.gems[g] || 0) >= v))
+    .map(([k]) => k);
+}
+
+/* ---- ホーム ---- */
+
+/* 次に解放できる英雄（ロスターの並び順で、まだ持っていない先頭） */
+export function nextHero(db, state) {
+  return db.heroes.find(h => !state.owned[h.id]) || null;
+}
+
+/* まだ1問も解いていない教科。知識マップの白い行にあたる */
+function blankSubjects(db, state) {
+  const open = unlockedChapters(db, state);
+  return SUBJECTS.filter(s =>
+    db.questions.some(q => q.subject === s && open.has(q.chapter)) &&
+    !GRADES.some(g => state.cells[s + "|" + g.k]));
+}
+
+/**
+ * ホーム上段でマイちゃんが話す一言を選ぶ。
+ * data/advice.json の rules を上から見て、最初に条件が当たったものを返す。
+ * 当たらなければ fallback を runs で順番に回す（ランダムにはしない）。
+ */
+export function adviceFor(db, state) {
+  const advice = db.advice;
+  if (!advice) return "";
+
+  const next = nextHero(db, state);
+  const gauge = next && next.rel ? gaugeBreakdown(db, state, next) : null;
+  const percent = gauge ? Math.round(gauge.damage / gauge.hp * 100) : 0;
+  const craftable = craftableKeys(db, state);
+  const blanks = blankSubjects(db, state);
+  const extCount = Object.values(state.exts).reduce((a, b) => a + b, 0);
+  const equipped = Object.values(state.equip).filter(Boolean).length;
+  const emptyGem = Object.keys(db.gems).find(g => !state.gems[g]);
+  const gemSubject = emptyGem
+    ? Object.entries(db.subjectToGem).find(([, g]) => g === emptyGem)?.[0] : null;
+
+  const test = {
+    firstVisit:     () => state.runs === 0,
+    challengeReady: () => !!gauge && percent >= 100,
+    nearUnlock:     () => !!gauge && percent >= 34 && percent < 100,
+    craftable:      () => craftable.length > 0,
+    blankSubject:   () => blanks.length > 0,
+    unequipped:     () => extCount > 0 && equipped === 0,
+    gemShortage:    () => state.runs > 0 && !!gemSubject,
+  };
+
+  const fill = t => t
+    .replace("{hero}", next ? next.name : "")
+    .replace("{percent}", String(percent))
+    .replace("{count}", String(craftable.length))
+    .replace("{subject}", blanks[0] || gemSubject || "");
+
+  for (const rule of advice.rules || []) {
+    if (test[rule.when]?.()) return fill(rule.text);
+  }
+  const fb = advice.fallback || [];
+  return fb.length ? fill(fb[state.runs % fb.length]) : "";
+}

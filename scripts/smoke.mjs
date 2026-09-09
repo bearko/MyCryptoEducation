@@ -19,8 +19,36 @@ const check = (name, cond, extra = "") => {
 await wait(200);
 check("起動", !!d.getElementById("toquiz"), txt().slice(0, 60));
 
+/* ---- UI基盤: 1画面完結レイアウト ---- */
+check("ホームは3層", d.querySelectorAll("#app.home > .layer").length === 3,
+  `${d.querySelectorAll("#app > *").length}要素`);
+check("ステータス層にマイちゃんの助言", (d.getElementById("advice")?.textContent || "").length > 5,
+  d.getElementById("advice")?.textContent);
+check("ナビが4枠そろっている",
+  ["toheroes", "toshop", "tocraft", "toquiz"].every(id => !!d.getElementById(id)));
+check("ショップは準備中で押せない", d.getElementById("toshop").disabled);
+check("挑戦ボタンは主役層にある", !!d.querySelector(".layer-stage #tochal"));
+check("ホームから魔石・カード枚数・英雄一覧を外した",
+  !txt().includes("手持ちの英雄") && !d.querySelector(".gemrow"), txt().slice(0, 120));
+
+// クラフトの通知ドットは、素材が足りているときだけ出す
+check("素材0なら通知ドットなし", !d.querySelector("#tocraft .dot"));
+const keptGems = ev("JSON.stringify(S.gems)");
+ev("S.gems={ifrit:99,levia:99,tiamat:99,garuda:99};render()");
+check("クラフトできると通知ドット", !!d.querySelector("#tocraft .dot"));
+ev(`S.gems=${keptGems};render()`);
+
+// 英雄詳細と図鑑への入口は、ホームからヒーロー画面へ移した
+d.getElementById("toheroes").click();
+check("ヒーロー画面の手持ちタブ", txt().includes("手持ちの英雄"), txt().slice(0, 80));
+[...d.querySelectorAll("#htab button")].find(b => b.dataset.t === "codex").click();
+check("図鑑タブに知識マップ", txt().includes("知識マップ"), txt().slice(0, 80));
+d.getElementById("back").click();
+check("ホームへ戻れる", !!d.getElementById("toquiz"));
+
 /* ---- 修正1: 重複しない出題 ---- */
 d.getElementById("toquiz").click();
+check("ホーム以外は方眼紙のまま", !d.getElementById("app").classList.contains("home"));
 // 開始時は第3・4章が未解放なので、在庫は38問中25問
 check("在庫バッジが出ている", /おまかせ\s*25/.test(txt()), txt().slice(0, 160));
 check("未解放の教科は選べない",

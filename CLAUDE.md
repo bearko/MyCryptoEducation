@@ -80,19 +80,25 @@ CI（`.github/workflows/ci.yml`）は PR ごとに validate → build → smoke 
 data/          問題と設定。ここを増やすのが本体
   questions/   教科別JSON（kokugo / sansu / rika / shakai / gaikokugo / joho）
   heroes.json  英雄・チャレンジ問題
+  advice.json  ホームでマイちゃんが話す文言と、その出しわけ条件
   extensions.json / gemstones.json / figures.json
 public/        画像
+  heroes/      ロスターと Rep.画像（id + 10000）。原本は 64x64
+  backgrounds/ ホームのボタン背景。small/ は単一ファイル版に畳む縮小コピー
+  extensions/ / icons/ / materials/gemstones/
 src/
   normalize.js 表記ゆれの吸収（LLMは使わない）
   engine.js    出題ロジック・難易度ゲージ。★DOMに触れない純粋関数だけ
   data.js      JSONの読み込みと索引づくり
-  state.js     ゲーム状態
+  state.js     ゲーム状態。進行ぶんを localStorage に保存する
   views.js     画面描画
 scripts/       validate / build / smoke / アセット取得
 docs/          実装計画と設計判断の記録
 ```
 
 **`src/engine.js` に DOM 操作を持ち込まないでください。** 出題や難易度の計算をここだけで追えることが、テストのしやすさを支えています。
+
+**CSSのカスタムプロパティに `url()` を入れないでください。** Chrome は `var()` を使った側のスタイルシート（`src/styles.css`）からの相対パスとして解決するため、`./public/...` が `./src/public/...` になって404します。画像は要素の `style` 属性に直接書いてください。
 
 ---
 
@@ -125,12 +131,16 @@ docs/          実装計画と設計判断の記録
 - 知識マップ、知識カード、魔石とクラフト、装備
 - チャレンジバトル（難易度ゲージ・自由入力・表記ゆれ吸収）
 - 出題の重複解消、解説スキップ設定
+- **UI基盤** — ホームだけ 100dvh を3層に固定配分（12% / 可変 / 32%）。
+  MCHの背景・アイコン・Rep.画像を導入。ホーム以外は方眼紙のまま
+- 手持ち英雄・知識カード・魔石・図鑑・知識マップはヒーロー画面に集約（2タブ）
+- 進行の localStorage 保存（`sekai-no-kyoushitsu/v1`）
 
 ## 次にやること
 
 `docs/implementation-plan.md` に詳細があります。順番は次のとおり。
 
-1. **UI基盤** — 1画面完結レイアウト（100dvh を3層に固定配分）、MCHアセットの本格導入
+1. ~~**UI基盤**~~ — 実装済み。ショップのボタンは枠だけ置いて `disabled`（4番で中身を入れる）
 2. **レンジ回答** — 年代当て。許容幅は正解年から自動算出（`W = clamp(age/10 + 10, 10, 500)`）
 3. **チャレンジ再設計** — 3問構成、Lv0でも固有名詞を要求、人物の素性に寄せる
 4. **GUM・ショップ・クリスタル・40種エクステンション**
