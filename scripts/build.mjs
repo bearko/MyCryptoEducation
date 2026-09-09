@@ -22,6 +22,7 @@ const db = {
   heroes:     await json("data/heroes.json"),
   extensions: await json("data/extensions.json"),
   gemstones:  await json("data/gemstones.json"),
+  advice:     await json("data/advice.json"),
 };
 
 /* --- 画像を data URI に --- */
@@ -39,6 +40,10 @@ async function embed(dir, prefix) {
 }
 await embed("public/heroes", "h");
 await embed("public/materials/gemstones", "g");
+await embed("public/icons", "i");
+await embed("public/extensions", "e");
+/* 背景は縮小コピーのほうを畳む。1080px のまま base64 にすると配布ファイルが実用外の大きさになる */
+await embed("public/backgrounds/small", "b");
 
 /* --- スクリプト（import/export を剥がして結合） --- */
 const ORDER = ["normalize.js", "engine.js", "data.js", "state.js", "views.js", "main.js"];

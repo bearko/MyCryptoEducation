@@ -2,9 +2,10 @@
 
 import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedChapters, buildRun, gaugeBreakdown, challengeStage,
-         cellKey } from "./engine.js";
+         cellKey, craftableKeys, nextHero, adviceFor } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
+import { saveState } from "./state.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -24,9 +25,34 @@ export function mount(db, state, root) {
 function go(view) { S.view = view; render(); window.scrollTo(0, 0); }
 
 function render() {
+  // ホームだけ 100dvh の3層固定。それ以外は方眼紙のまま縦に流す
+  const home = S.view === "home";
+  app.classList.toggle("home", home);
+  document.body.classList.toggle("home", home);
+
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
-     codex: vCodex, hero: vHero, challenge: vChallenge }[S.view])();
+     heroes: vHeroes, hero: vHero, challenge: vChallenge }[S.view])();
   drawToast();
+  if (home) startClock();
+  saveState(S);
+}
+
+/* ステータス層の時刻。1画面に留まったままでも進むように、20秒ごとに差し替える */
+const clockText = () =>
+  new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+const dateText = () => {
+  const d = new Date();
+  return `${d.getMonth() + 1}月${d.getDate()}日`;
+};
+
+let clockTimer = null;
+function startClock() {
+  if (clockTimer) return;
+  clockTimer = setInterval(() => {
+    const el = document.getElementById("clock");
+    if (!el) { clearInterval(clockTimer); clockTimer = null; return; }
+    el.textContent = clockText();
+  }, 20000);
 }
 
 /* ---------- 共通パーツ ---------- */
@@ -60,46 +86,69 @@ function drawToast() {
 /* ---------- ホーム ---------- */
 
 function vHome() {
-  const owned = heroesOwned();
-  const next = DB.heroes.find(h => !S.owned[h.id]);
+  const next = nextHero(DB, S);
+  const gauge = next && next.rel ? gaugeBreakdown(DB, S, next) : null;
+  const percent = gauge ? Math.round(gauge.damage / gauge.hp * 100) : 0;
+  const craftable = craftableKeys(DB, S);
+  const p = S.profile || {};
+
   app.innerHTML = `
-  <header><div class="hbar"><div class="place">世界の教室</div>
-    <div class="score">${S.score}</div></div></header>
-  <div class="pad">
-    <div class="panel">
-      <div class="phead"><h2>魔石</h2><span class="sub">${Object.values(S.gems).reduce((a, b) => a + b, 0)}個</span></div>
-      ${gemStrip(S.gems)}
-      <p class="fine">魔石は正解した単元の分野から確定で落ちます。運の要素はありません。</p>
+  <div class="layer layer-status">
+    <div class="st-row">
+      <span class="st-title ${p.title ? "" : "none"}">${p.title ? esc(p.title) : "称号なし"}</span>
+      <span class="st-name">${esc(p.name || "旅人")}</span>
+      <span class="st-gum"><img src="${assetPath.icon("gum")}" alt="GUM">${S.gum || 0}</span>
+      <span class="st-clock" id="clock">${clockText()}</span>
     </div>
-    <div class="panel">
-      <div class="phead"><h2>手持ちの英雄</h2><span class="sub">${owned.length} / ${DB.heroes.length}</span></div>
-      <div class="hgrid">${owned.map(h => `
-        <button class="hcard" data-h="${h.id}">
-          <img src="${assetPath.hero(h.id)}" alt="">
-          <span class="hn">${esc(h.name)}</span>
-          <span class="hr r${h.rarity}">${esc(h.rarity)}</span>
-          <span class="heq ${S.equip[h.id] ? "" : "none"}">${
-            S.equip[h.id] ? esc(DB.extensions[S.equip[h.id]].name) : "装備なし"}</span>
-        </button>`).join("")}</div>
+    <div class="st-advice">
+      <img src="${assetPath.icon("mai_sd")}" alt="">
+      <p id="advice">${esc(adviceFor(DB, S))}</p>
     </div>
-    <div class="panel">
-      <div class="phead"><h2>知識カード</h2><span class="sub">${cardCount()}枚</span></div>
-      <p class="fine">カードは英雄を解放するための鍵になります。集めた分野が、そのまま挑める相手を決めます。</p>
+  </div>
+
+  <div class="layer layer-stage">
+    <div class="stage-bg" style="background-image:url('${assetPath.bg("1006")}')"></div>
+    <div class="cal"><img src="${assetPath.icon("mch_icon")}" alt="">${dateText()}</div>
+    ${next ? `
+    <button class="chal" id="tochal"
+      style="background-image:var(--g-chal),url('${assetPath.bg("1038")}')">
+      <img src="${assetPath.rep(next.id)}" alt="">
+      <span class="ct">
+        <b>${esc(next.name)}に挑む</b>
+        <span>${esc(next.rarity)} ・ いまの知識でゲージを ${percent}% 削れます</span>
+        <span class="cg2"><i style="width:${percent}%"></i></span>
+      </span>
+    </button>` : `
+    <div class="chal all"
+      style="background-image:var(--g-chal),url('${assetPath.bg("1038")}')">
+      <span class="ct"><b>英雄はすべて解放しました</b>
+        <span>問題を増やすと、また新しい教室が開きます</span></span>
+    </div>`}
+  </div>
+
+  <div class="layer layer-nav">
+    <div class="nav3">
+      <button class="tile" id="toheroes"
+        style="background-image:var(--g-hero),url('${assetPath.bg("1038")}')">
+        <img src="${assetPath.hero("10001")}" alt=""><b>ヒーロー</b></button>
+      <button class="tile" id="toshop" disabled
+        style="background-image:var(--g-shop),url('${assetPath.bg("1004")}')">
+        <img src="${assetPath.hero("3037")}" alt=""><b>ショップ</b><small>準備中</small></button>
+      <button class="tile" id="tocraft"
+        style="background-image:var(--g-craft),url('${assetPath.bg("1046")}')">
+        <img src="${assetPath.hero("2023")}" alt=""><b>クラフト</b>
+        ${craftable.length ? `<i class="dot" title="クラフトできます"></i>` : ""}</button>
     </div>
-    <div class="stack">
-      <button class="btn" id="toquiz">${RUN_LENGTH}問を解く</button>
-      ${next ? `<button class="btn stretch" id="tochal">チャレンジバトル ・ ${esc(next.name)}</button>` : ""}
-      <button class="btn ghost" id="tocraft">クラフト</button>
-      <button class="btn ghost" id="tocodex">英雄図鑑</button>
-    </div>
+    <button class="tile quiz" id="toquiz"
+      style="background-image:var(--g-quiz),url('${assetPath.bg("1030")}')">
+      <img src="${assetPath.ext("5003")}" alt=""><b>${RUN_LENGTH}問を解く</b></button>
   </div>`;
+
   document.getElementById("toquiz").onclick = () => go("select");
   document.getElementById("tocraft").onclick = () => go("craft");
-  document.getElementById("tocodex").onclick = () => go("codex");
+  document.getElementById("toheroes").onclick = () => go("heroes");
   const c = document.getElementById("tochal");
   if (c) c.onclick = () => startChallenge(next.id);
-  app.querySelectorAll(".hcard").forEach(b =>
-    b.onclick = () => { S.heroView = b.dataset.h; go("hero"); });
 }
 
 /* ---------- 出題選択（在庫表示つき） ---------- */
@@ -380,7 +429,7 @@ function vResult() {
   S.runs++;
   const answered = S.run.right + S.run.wrong;
   const rate = answered ? Math.round(S.run.right / answered * 100) : 0;
-  const craftable = Object.values(DB.extensions).filter(canCraft).length;
+  const craftable = craftableKeys(DB, S).length;
   const next = DB.heroes.find(h => !S.owned[h.id]);
   const nextGauge = next ? gaugeBreakdown(DB, S, next) : null;
 
@@ -418,8 +467,6 @@ function vResult() {
 
 /* ---------- クラフト・装備 ---------- */
 
-const canCraft = ext => Object.entries(ext.cost).every(([k, v]) => S.gems[k] >= v);
-
 function extIcon(key) {
   const color = { lamp: "var(--pen)", codex: "var(--ai)", proto: "var(--brass)",
                   chart: "var(--moss)", ring: "var(--ink)" }[key];
@@ -437,8 +484,8 @@ function vCraft() {
     <button class="mapbtn" id="back">もどる</button></div></header>
   <div class="pad">${gemStrip(S.gems, "big")}
     <p class="fine">エクステンションは攻撃力ではありません。持っている知識が、どこまで遠くの問いに届くかを広げます。</p>
-    ${Object.entries(DB.extensions).map(([k, e]) => {
-      const have = S.exts[k] || 0, able = canCraft(e);
+    ${(() => { const able0 = new Set(craftableKeys(DB, S)); return Object.entries(DB.extensions).map(([k, e]) => {
+      const have = S.exts[k] || 0, able = able0.has(k);
       return `<div class="ext ${able ? "" : "dim"}">
         <div class="exthead"><div class="exticon">${extIcon(k)}</div>
           <div><div class="extname">${esc(e.name)}${have ? ` <span class="cnt">×${have}</span>` : ""}</div>
@@ -447,11 +494,11 @@ function vCraft() {
         <div class="cost">${Object.entries(e.cost).map(([g, v]) =>
           `<span class="${S.gems[g] >= v ? "" : "short"}"><img src="${assetPath.gem(DB.gems[g].id)}" alt="">${v}</span>`).join("")}
           <button class="mini" data-k="${k}" ${able ? "" : "disabled"}>クラフト</button></div></div>`;
-    }).join("")}</div>`;
+    }).join(""); })()}</div>`;
   document.getElementById("back").onclick = () => go(S.runs ? "result" : "home");
   app.querySelectorAll(".mini").forEach(b => b.onclick = () => {
     const e = DB.extensions[b.dataset.k];
-    if (!canCraft(e)) return;
+    if (!craftableKeys(DB, S).includes(b.dataset.k)) return;
     Object.entries(e.cost).forEach(([g, v]) => S.gems[g] -= v);
     S.exts[b.dataset.k] = (S.exts[b.dataset.k] || 0) + 1;
     render();
@@ -480,7 +527,7 @@ function vHero() {
           : "得意分野とは噛み合っていません。効果は通常のままです。"}</p>` : ""}`
         : `<p class="empty">まだ持っていません。魔石を集めてクラフトしてください。</p>`}</div>
   </div>`;
-  document.getElementById("back").onclick = () => go("home");
+  document.getElementById("back").onclick = () => go("heroes");
   app.querySelectorAll(".eqi").forEach(b => b.onclick = () => {
     const k = b.dataset.k;
     if (k) {
@@ -512,11 +559,34 @@ const LEGEND = `<div class="legend"><span><i class="sw-st"></i>応用まで</spa
   <span><i class="sw-ok"></i>解けた</span><span><i class="sw-ng"></i>未達</span>
   <span><i class="sw-un"></i>未挑戦</span></div>`;
 
-function vCodex() {
-  app.innerHTML = `
-  <header><div class="hbar"><div class="place">英雄図鑑</div>
-    <button class="mapbtn" id="back">もどる</button></div></header>
-  <div class="pad">
+function vHeroes() {
+  const tab = S.heroesTab === "codex" ? "codex" : "own";
+  const owned = heroesOwned();
+
+  const ownPanel = `
+    <div class="panel">
+      <div class="phead"><h2>手持ちの英雄</h2><span class="sub">${owned.length} / ${DB.heroes.length}</span></div>
+      <div class="hgrid">${owned.map(h => `
+        <button class="hcard" data-h="${h.id}">
+          <img src="${assetPath.hero(h.id)}" alt="">
+          <span class="hn">${esc(h.name)}</span>
+          <span class="hr r${h.rarity}">${esc(h.rarity)}</span>
+          <span class="heq ${S.equip[h.id] ? "" : "none"}">${
+            S.equip[h.id] ? esc(DB.extensions[S.equip[h.id]].name) : "装備なし"}</span>
+        </button>`).join("")}</div>
+      <p class="fine">英雄を選ぶとエクステンションを付け替えられます。得意分野と噛み合うと効果が2倍になります。</p>
+    </div>
+    <div class="panel">
+      <div class="phead"><h2>知識カード</h2><span class="sub">${cardCount()}枚</span></div>
+      <p class="fine">カードは英雄を解放するための鍵になります。集めた分野が、そのまま挑める相手を決めます。</p>
+    </div>
+    <div class="panel">
+      <div class="phead"><h2>魔石</h2><span class="sub">${Object.values(S.gems).reduce((a, b) => a + b, 0)}個</span></div>
+      ${gemStrip(S.gems)}
+      <p class="fine">魔石は正解した単元の分野から確定で落ちます。運の要素はありません。</p>
+    </div>`;
+
+  const codexPanel = `
     <p class="fine">解放は運ではありません。関係する知識カードを集めるほど、難易度ゲージは最初から削れた状態で始まります。</p>
     <div class="cgrid">${DB.heroes.map(h => {
       const own = S.owned[h.id];
@@ -529,9 +599,24 @@ function vCodex() {
         ${own ? "" : `<div class="cg"><i style="width:${pct}%"></i></div><div class="cgt">${pct}%</div>`}</div>`;
     }).join("")}</div>
     <div class="panel" style="margin-top:20px"><div class="phead"><h2>知識マップ</h2>
-      <span class="sub">${cardCount()}枚</span></div>${mapHTML()}${LEGEND}</div>
+      <span class="sub">${cardCount()}枚</span></div>${mapHTML()}${LEGEND}</div>`;
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">ヒーロー</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="seg" id="htab">
+      <button data-t="own" class="${tab === "own" ? "on" : ""}">手持ち<i>${owned.length}</i></button>
+      <button data-t="codex" class="${tab === "codex" ? "on" : ""}">図鑑<i>${DB.heroes.length}</i></button>
+    </div>
+    ${tab === "own" ? ownPanel : codexPanel}
   </div>`;
+
   document.getElementById("back").onclick = () => go("home");
+  app.querySelectorAll("#htab button").forEach(b =>
+    b.onclick = () => { S.heroesTab = b.dataset.t; render(); });
+  app.querySelectorAll(".hcard").forEach(b =>
+    b.onclick = () => { S.heroView = b.dataset.h; go("hero"); });
 }
 
 /* ---------- チャレンジ ---------- */

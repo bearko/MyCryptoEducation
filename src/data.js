@@ -12,14 +12,15 @@ export async function loadDatabase(base = "./data") {
   // ビルド済み単一ファイルの場合は、あらかじめ埋め込まれたものを使う
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
-  const [questionSets, figures, heroes, extensions, gemstones] = await Promise.all([
+  const [questionSets, figures, heroes, extensions, gemstones, advice] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
     json(`${base}/extensions.json`),
     json(`${base}/gemstones.json`),
+    json(`${base}/advice.json`),
   ]);
-  return index({ questions: questionSets.flat(), figures, heroes, extensions, gemstones });
+  return index({ questions: questionSets.flat(), figures, heroes, extensions, gemstones, advice });
 }
 
 function index(raw) {
@@ -38,8 +39,14 @@ function index(raw) {
   return db;
 }
 
-/* ビルド済み単一ファイルでは data URI に差し替わる */
+/* ビルド済み単一ファイルでは data URI に差し替わる。
+   背景だけは埋め込み用に縮小したコピー（public/backgrounds/small）が入る */
 export const assetPath = {
   hero: id => globalThis.__ASSETS__?.["h" + id] ?? `./public/heroes/${id}.webp`,
   gem:  id => globalThis.__ASSETS__?.["g" + id] ?? `./public/materials/gemstones/${id}.webp`,
+  bg:   id => globalThis.__ASSETS__?.["b" + id] ?? `./public/backgrounds/${id}.webp`,
+  icon: name => globalThis.__ASSETS__?.["i" + name] ?? `./public/icons/${name}.webp`,
+  ext:  id => globalThis.__ASSETS__?.["e" + id] ?? `./public/extensions/${id}.webp`,
+  /* 解放前の英雄を見せるための Rep.画像。原本は id + 10000 */
+  rep:  id => assetPath.hero(String(Number(id) + 10000)),
 };
