@@ -193,10 +193,53 @@ check("今回のGUMは正解数と釣り合う",
   `${ev("S.run.gum")} GUM / 正解 ${ev("S.run.right")}問`);
 check("リザルトに到達", !!d.getElementById("again"), txt().slice(0, 80));
 
-const c = d.getElementById("craft");
-if (c) { c.click(); const m = [...d.querySelectorAll(".mini")].filter(b => !b.disabled);
-  check("クラフトできる", m.length > 0); if (m.length) m[0].click();
-  d.querySelector(".mapbtn").click(); }
+/* ---- クラフト（40種・クリスタル込み） ---- */
+ev('S.view="craft";S.craftTab="ペン";render()');
+check("40種そろっている", ev("Object.keys(DB.extensions).length") === 40,
+  `${ev("Object.keys(DB.extensions).length")}種`);
+check("系統ごとのタブは8つ", d.querySelectorAll("#linetab button").length === 8,
+  `${d.querySelectorAll("#linetab button").length}件`);
+check("1つの系統は5段階", d.querySelectorAll(".ext").length === 5,
+  `${d.querySelectorAll(".ext").length}件`);
+
+// Common は魔石だけで作れる
+ev('S.gems={ifrit:0,levia:3,tiamat:0,garuda:0};S.exts={};S.crystals={};render()');
+const common = [...d.querySelectorAll(".mini[data-k]")].filter(b => !b.disabled);
+check("Commonは魔石だけで作れる", common.length === 1 && common[0].dataset.k === "1003",
+  common.map(b => b.dataset.k).join(","));
+common[0].click();
+check("作ると魔石が減る", ev("S.gems.levia") === 0, `${ev("S.gems.levia")}`);
+check("作ったものが手元に入る", ev(`S.exts["1003"]`) === 1);
+
+// Uncommon はクリスタルが要る
+ev('S.gems={ifrit:0,levia:5,tiamat:0,garuda:0};render()');
+check("クリスタルが無いとUncommonは作れない",
+  d.querySelector('.mini[data-k="2003"]').disabled);
+ev('S.crystals={"003":7};render()');   // 銅8GUM ×7 = 56相当 ≧ 50
+check("クリスタルがあれば作れる", !d.querySelector('.mini[data-k="2003"]').disabled);
+check("使うクリスタルを前もって見せる", txt().includes("使うクリスタル"), txt().slice(0, 40));
+d.querySelector('.mini[data-k="2003"]').click();
+check("クリスタルは安いものから減る", ev(`S.crystals["003"] || 0`) === 0,
+  `残り ${ev(`S.crystals["003"] || 0`)}`);
+
+// Rare は下位を1つ食う
+ev('S.gems={ifrit:0,levia:8,tiamat:0,garuda:0};S.crystals={"003":20};S.exts={};render()');
+check("下位が無いとRareは作れない", d.querySelector('.mini[data-k="3003"]').disabled,
+  `2003の所持 ${ev(`S.exts["2003"] || 0`)}`);
+ev(`S.exts["2003"]=1;render()`);
+check("下位があればRareを作れる", !d.querySelector('.mini[data-k="3003"]').disabled);
+d.querySelector('.mini[data-k="3003"]').click();
+check("Rareを作ると下位が消える", !ev(`S.exts["2003"]`), `残り ${ev(`S.exts["2003"] || 0`)}`);
+
+// Legendary は知識カードの所持も条件
+ev('S.gems={ifrit:0,levia:12,tiamat:0,garuda:0};S.crystals={"003":60};S.exts={"4003":1};render()');
+const cardCount0 = ev("Object.keys(S.cards).length");
+check("知識カードが足りないとLegendaryは作れない",
+  cardCount0 >= 30 || d.querySelector('.mini[data-k="5003"]').disabled,
+  `カード ${cardCount0}枚`);
+
+ev('S.view="craft";S.craftTab="ペン";S.gems={ifrit:0,levia:0,tiamat:0,garuda:0};S.exts={};S.crystals={};render()');
+d.querySelector(".mapbtn").click();
 
 ev('S.view="home";render()');
 d.getElementById("tochal").click();
@@ -419,6 +462,51 @@ check("クリスタルは知識カードにならない",
 ev('S.gum=0;S.crystals={};S.view="home";render()');
 check("アートを参照できる", ev(`assetPath.crystal("001")`).length > 0, ev(`assetPath.crystal("001")`));
 check("豆知識が全種にある", ev(`DB.crystals.crystals.every(c => c.fact && c.fact.length > 8)`));
+
+/* ---- 原則1: 装備はゲージで知識を超えない ---- */
+check("知識が0なら装備も効かない", ev(`(() => {
+  const st = JSON.parse(JSON.stringify(S));
+  st.cards = {}; st.owned = { "10001": 1, "10002": 1, "10003": 1 };
+  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };
+  return gaugeBreakdown(DB, st, DB.heroById["3030"]).damage;
+})()`) === 0);
+
+check("装備の合計は知識カードの合計を超えない", ev(`(() => {
+  const st = JSON.parse(JSON.stringify(S));
+  st.cards = {}; st.owned = { "10001": 1, "10002": 1, "10003": 1 };
+  const hero = DB.heroById["3030"];
+  st.cards[hero.rel.cards[0]] = true;                 // 直結1枚 = 8
+  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };   // Legendary +60（噛み合えば120）
+  const g = gaugeBreakdown(DB, st, hero);
+  return g.damage;
+})()`) === 16, "知識8 + 装備は同額まで = 16 のはず");
+
+check("上限が効いたことを内訳に出す", ev(`(() => {
+  const st = JSON.parse(JSON.stringify(S));
+  st.cards = {}; st.owned = { "10001": 1, "10002": 1, "10003": 1 };
+  const hero = DB.heroById["3030"];
+  st.cards[hero.rel.cards[0]] = true;
+  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };
+  return gaugeBreakdown(DB, st, hero).rows.some(r => r.label === "装備は知識を超えない");
+})()`) === true);
+
+check("知識が増えれば装備も効くようになる", ev(`(() => {
+  const st = JSON.parse(JSON.stringify(S));
+  st.owned = { "10001": 1, "10002": 1, "10003": 1 };
+  const hero = DB.heroById["3030"];
+  st.cards = {}; hero.rel.cards.forEach(c => st.cards[c] = true);   // 直結4枚 = 32
+  // damage は英雄のHPで頭打ちになるので、頭打ち前の raw で見る
+  const bare = gaugeBreakdown(DB, st, hero).raw;
+  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };
+  const geared = gaugeBreakdown(DB, st, hero).raw;
+  return geared === bare * 2;                                       // 装備は最大で倍まで
+})()`) === true);
+
+check("レアリティが上がるほどゲージ寄与も上がる", ev(`(() => {
+  const ids = ["1003", "2003", "3003", "4003", "5003"];
+  const g = ids.map(id => DB.extensions[id].gauge);
+  return g.every((v, i) => i === 0 || v > g[i - 1]);
+})()`) === true);
 
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));
 console.log(failed ? `\n${failed}件 失敗\n` : "\nすべて通過\n");

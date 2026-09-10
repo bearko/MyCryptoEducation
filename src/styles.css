@@ -155,16 +155,19 @@
   .ext{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:14px 15px;margin-top:12px}
   .ext.dim{opacity:.55}
   .exthead{display:flex;gap:11px;align-items:center}
-  .exticon{width:40px;height:40px;flex:none;background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:3px}
-  .exticon.sm{width:22px;height:22px;padding:1px;border:none;background:none}
-  .exticon svg{width:100%;height:100%;display:block}
+  .exticon{width:44px;height:44px;flex:none;background:var(--paper);border:1px solid var(--line);
+    border-radius:3px;padding:3px;image-rendering:pixelated;object-fit:contain}
+  .exticon.sm{width:24px;height:24px;padding:1px;border:none;background:none}
   .extname{font-size:14px;font-weight:600}
   .extname .cnt{color:var(--moss);font-size:12px}
-  .extsub{font-size:11.5px;color:var(--ink-faint)}
+  .extsub{font-size:11.5px;color:var(--ink-faint);display:flex;align-items:center;gap:6px;
+    flex-wrap:wrap;margin-top:3px}
   .extt{font-size:13px;color:var(--ink-soft);line-height:1.7;margin:10px 0 0}
   .cost{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
   .cost span{display:flex;align-items:center;gap:3px;font-size:13px}
   .cost span.short{color:var(--pen)}
+  .cost{flex-wrap:wrap}
+  .cost .mini{margin-left:auto}
   .cost img{width:22px;height:22px}
   .mini{margin-left:auto;border:1px solid var(--ink);background:var(--ink);color:#fff;font:inherit;
     font-size:12.5px;padding:6px 14px;border-radius:3px;cursor:pointer}
@@ -206,6 +209,7 @@
   .bt{font-size:13px;font-weight:600}
   .bs{font-size:11px;color:var(--ink-faint);line-height:1.5}
   .bv{font-family:var(--mincho);font-size:15px;color:var(--pen);flex:none}
+  .bv.back{color:var(--ink-faint)}
   .bhp{font-family:var(--gothic);font-size:11px;color:var(--ink-faint);margin-left:8px}
   .btotal{text-align:right;font-family:var(--mincho);font-size:17px;color:var(--pen);margin-top:10px}
   .answer input{width:100%;font:inherit;font-size:17px;font-family:var(--mincho);padding:13px 14px;
