@@ -362,19 +362,16 @@
      原本が 64x64 しかないため、拡大時はドットを残す（にじませるとただの低解像度に見える） */
   .tv{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:9px;width:100%;min-height:0}
-  .tv-art{flex:1 1 auto;display:flex;align-items:stretch;justify-content:center;gap:4px;
-    width:100%;min-height:0}
+  .tv-art{flex:1 1 auto;width:100%;min-height:0;overflow:hidden}
+  .tv-track{display:flex;height:100%;width:100%}
+  .tv-track.move{transition:transform .42s cubic-bezier(.34,.68,.28,1)}
   /* 足元の影は擬似的な楕円。要素を足すと img の height:100% が効かなくなる */
-  .tv-figure{flex:1 1 auto;min-height:0;padding-bottom:11px;
+  .tv-figure{flex:0 0 100%;height:100%;min-width:0;min-height:0;padding-bottom:11px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:radial-gradient(ellipse 32% 6px at 50% calc(100% - 3px),
       rgba(23,36,63,.22),rgba(23,36,63,0) 70%)}
   .tv-figure img{height:100%;width:auto;max-width:100%;max-height:208px;object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 3px 8px rgba(0,0,0,.32))}
-  .tv-arrow{align-self:center}
-  .tv-arrow{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
-    background:rgba(251,251,247,.82);color:var(--ink-soft);font-size:20px;line-height:1;
-    padding:0;cursor:pointer}
   .tv-name{display:flex;align-items:center;gap:7px;font-family:var(--mincho);
     background:rgba(251,251,247,.86);border:1px solid var(--line);border-radius:3px;padding:3px 12px}
   .tv-name b{font-size:clamp(15px,4.4vw,19px);font-weight:600;letter-spacing:.04em}
@@ -393,16 +390,28 @@
 
   /* --- ナビ層 --- */
   .nav3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;flex:1 1 auto;min-height:0}
+  /* アイコンは原本64pxを2倍で見せる。ボタンの寸法は変えないので、
+     ラベルは絵の上に重ねる（等倍だと絵が小さく、ただの低解像度に見える） */
   .tile{position:relative;border:none;border-radius:var(--tile-r);cursor:pointer;font:inherit;color:#fff;
-    overflow:hidden;padding:6px;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:3px;min-height:0;background-size:cover;background-position:center}
-  .tile img{width:clamp(28px,9vw,44px);height:clamp(28px,9vw,44px);flex:none;
-    filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
+    overflow:hidden;padding:0;display:block;min-height:0;
+    background-size:cover;background-position:center}
+  /* 幅で狙いのサイズを決め、低いタイルでは max-height が縦を詰める。
+     縦横比は保たれるので、正方形の原本が歪むことはない */
+  .tile img{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+    width:clamp(52px,22vw,104px);height:clamp(52px,22vw,104px);max-height:84%;
+    object-fit:contain;
+    image-rendering:pixelated;filter:drop-shadow(0 2px 5px rgba(0,0,0,.55))}
+  .tile .lab{position:absolute;left:0;right:0;bottom:5px;display:flex;flex-direction:column;
+    align-items:center;line-height:1.25}
   .tile b{font-family:var(--mincho);font-size:clamp(12px,3.6vw,14.5px);font-weight:600;
-    letter-spacing:.06em;text-shadow:0 1px 4px rgba(0,0,0,.6)}
-  .tile small{font-size:10px;opacity:.85;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+    letter-spacing:.06em;text-shadow:0 1px 3px rgba(0,0,0,.85),0 0 8px rgba(0,0,0,.6)}
+  .tile small{font-size:10px;opacity:.9;text-shadow:0 1px 3px rgba(0,0,0,.85)}
   .tile:disabled{cursor:default;filter:grayscale(.6) brightness(.85);opacity:.75}
-  .tile.quiz{flex:0 0 auto;min-height:clamp(58px,15vh,84px);flex-direction:row;gap:11px}
+
+  .tile.quiz{flex:0 0 auto;min-height:clamp(58px,15vh,84px);
+    display:flex;flex-direction:row;align-items:center;justify-content:center;gap:13px}
+  .tile.quiz img{position:static;transform:none;object-fit:contain;
+    width:clamp(64px,22vw,112px);height:clamp(64px,22vw,112px);max-height:92%}
   .tile.quiz b{font-size:clamp(15px,4.6vw,19px)}
   .tile .dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;
     background:var(--pen);box-shadow:0 0 0 2px rgba(255,255,255,.85)}

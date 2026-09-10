@@ -164,6 +164,11 @@ export function lockedHeroes(db, state) {
   return db.heroes.filter(h => !state.owned[h.id]);
 }
 
+/* カルーセルの次の位置。端は反対側へ回り込む */
+export function nextIndex(i, n, dir = 1) {
+  return n > 0 ? (((i + dir) % n) + n) % n : 0;
+}
+
 /* 次に解放できる英雄（ロスターの並び順で、まだ持っていない先頭） */
 export function nextHero(db, state) {
   return lockedHeroes(db, state)[0] || null;

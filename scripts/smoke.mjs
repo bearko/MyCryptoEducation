@@ -59,16 +59,25 @@ check("相手の名前とレアリティはアートと組で出る",
   d.querySelector(".tv-name")?.textContent);
 check("削れ具合はホームに出さない", !/削れ/.test(txt()), txt().slice(0, 160));
 
-// 未解放の英雄をカルーセルで送れる
-const firstHero = d.querySelector(".tv-name b").textContent;
+// カルーセルは自動送り。矢印は置かず、末尾に先頭のクローンを1枚足して繋ぐ
+const lockedN = ev("lockedHeroes(DB,S).length");
+check("矢印は置かない", !d.getElementById("nexthero") && !d.getElementById("prevhero"));
 check("カルーセルのドットが未解放ぶんある",
-  d.querySelectorAll(".tv-dots i").length === ev("lockedHeroes(DB,S).length"),
+  d.querySelectorAll(".tv-dots i").length === lockedN,
   `${d.querySelectorAll(".tv-dots i").length}個`);
-d.getElementById("nexthero").click();
-check("次の英雄へ送れる", d.querySelector(".tv-name b").textContent !== firstHero,
-  d.querySelector(".tv-name b").textContent);
-d.getElementById("prevhero").click();
-check("前へ戻せる", d.querySelector(".tv-name b").textContent === firstHero);
+check("トラックはクローン1枚ぶん多い",
+  d.querySelectorAll("#tvtrack .tv-figure").length === lockedN + 1,
+  `${d.querySelectorAll("#tvtrack .tv-figure").length}枚 / 未解放 ${lockedN}体`);
+check("末尾のクローンは先頭と同じ絵", (() => {
+  const f = [...d.querySelectorAll("#tvtrack .tv-figure img")];
+  return f[0].getAttribute("src") === f[f.length - 1].getAttribute("src");
+})());
+check("巡回インデックスは端で回り込む",
+  ev("nextIndex(8,9,1)") === 0 && ev("nextIndex(0,9,-1)") === 8 && ev("nextIndex(3,9,1)") === 4,
+  `${ev("nextIndex(8,9,1)")} / ${ev("nextIndex(0,9,-1)")}`);
+check("ナビのアイコンはラベルと分けて重ねる",
+  d.querySelectorAll(".nav3 .tile .lab b").length === 3,
+  `${d.querySelectorAll(".nav3 .tile .lab b").length}件`);
 check("ホームから魔石・カード枚数・英雄一覧を外した",
   !txt().includes("手持ちの英雄") && !d.querySelector(".gemrow"), txt().slice(0, 120));
 
