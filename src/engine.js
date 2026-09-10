@@ -108,6 +108,42 @@ export function buildRun(db, state, opts = {}) {
   return chosen.map(q => q.id);
 }
 
+/* ---- レンジ回答（年代当て） ---- */
+
+/**
+ * 許容できる幅（全幅・年）。時代が古いほど広い。
+ *
+ * 人類が持つ年代の記録解像度は、古いほど粗い。だから幅は「現在からの隔たり」に
+ * 比例させる。手で値を決める必要がない。
+ *
+ *   age = 現在年 − 正解年
+ *   W   = clamp(round(age / 10) + 10, 10, 500)
+ *
+ * precision は問題ごとの微調整。語呂で覚えられる年（1600、1492）は 0.5 にして
+ * 厳しくし、諸説ある年代は 2.0 に緩める。既定は 1.0。
+ */
+export function rangeWidth(year, precision = 1, now = new Date().getFullYear()) {
+  const base = Math.round((now - year) / 10) + 10;
+  return Math.max(10, Math.min(500, Math.round(base * (precision || 1))));
+}
+
+/**
+ * レンジ回答の採点（0〜1000）。
+ *
+ * 正解年が範囲の外なら0点。範囲を広く取れば当たるが、点は伸びない。
+ * 狭く取るには知識が要る。**どのくらい自信があるかを賭ける形式**なので、
+ * 知識の解像度がそのまま点になる。
+ */
+export function scoreRange(a, b, year, width) {
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  if (!(year >= lo && year <= hi)) return 0;
+  if (lo === hi) return 1000;
+  return Math.max(50, Math.round(1000 * (1 - (hi - lo) / width)));
+}
+
+/* 高い精度で当てたときだけ、魔石がもう1つ落ちる。運の要素は無い */
+export const RANGE_BONUS_SCORE = 800;
+
 /* ---- チャレンジバトル ---- */
 
 export function gaugeBreakdown(db, state, hero) {

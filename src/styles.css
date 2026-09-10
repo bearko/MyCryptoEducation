@@ -519,3 +519,16 @@
   .sp.short{color:var(--pen)}
   .sp img{width:15px;height:15px}
   .sbuy .mini{margin:0}
+
+  /* --- レンジ回答（年代当て） --- */
+  .rangebox{background:var(--card);border:1px solid var(--line);border-radius:3px;
+    padding:16px 15px;margin-bottom:20px}
+  .rio{display:flex;align-items:center;gap:8px}
+  .rio input{flex:1;min-width:0;width:100%;font:inherit;font-family:var(--mincho);font-size:19px;
+    text-align:center;padding:11px 8px;border:1px solid var(--line);border-radius:3px;
+    background:var(--paper);color:var(--ink)}
+  .rio input:disabled{opacity:.7}
+  .rio span{flex:none;font-size:14px;color:var(--ink-soft)}
+  .rio .ru{font-family:var(--mincho);font-size:15px;color:var(--ink)}
+  .rlive{margin:12px 0 14px;font-size:13.5px;color:var(--ink-soft);text-align:center}
+  .rlive b{font-family:var(--mincho);font-size:19px;color:var(--pen)}

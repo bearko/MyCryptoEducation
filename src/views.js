@@ -6,7 +6,8 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
          titleProgress, earnedTitles, countryOf,
          shopList, canBuy, crystalPrice, crystalsValue, crystalKinds,
-         CRYSTAL_UNIT, craftCheck } from "./engine.js";
+         CRYSTAL_UNIT, craftCheck,
+         rangeWidth, scoreRange, RANGE_BONUS_SCORE } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
@@ -422,8 +423,20 @@ function vQuiz() {
       <span class="unit">${esc(q.unit)}</span></div>
     <div class="qtext">${esc(q.prompt)}</div>
     ${q.figure ? `<div class="figure">${DB.figures[q.figure]}</div>` : ""}
-    <div class="choices">${q.choices.map((t, i) =>
-      `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
+    ${q.format === "range" ? `
+      <div class="rangebox">
+        <div class="rio">
+          <input id="ra" type="number" inputmode="numeric" step="1" placeholder="から" aria-label="範囲の始まりの年">
+          <span>〜</span>
+          <input id="rb" type="number" inputmode="numeric" step="1" placeholder="まで" aria-label="範囲の終わりの年">
+          <span class="ru">年</span>
+        </div>
+        <div class="rlive" id="rlive">幅を決めてください</div>
+        <button class="btn" id="rsubmit" disabled>この幅で答える</button>
+        <p class="fine">狭く答えるほど高い点になります。紀元前はマイナスで書いてください（例 −221）。</p>
+      </div>`
+    : `<div class="choices">${q.choices.map((t, i) =>
+      `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>`}
     <div class="hero-row">
       <img class="ava" src="${assetPath.hero(h.id)}" alt="">
       <div><div class="hero-name">${esc(h.name)}</div>
@@ -436,7 +449,66 @@ function vQuiz() {
   document.getElementById("hint").onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
   app.querySelectorAll(".choices > .choice").forEach(b =>
     b.onclick = () => onPick(Number(b.dataset.i)));
+  if (q.format === "range") wireRange(q);
   drawHints(q, h);
+}
+
+/**
+ * レンジ回答の入力。
+ *
+ * **途中で点数の見込みを出さない。** 点は 1000×(1 − 幅/許容幅) なので、
+ * 幅と点が分かると許容幅が割れる。許容幅は正解年から決まるので、
+ * そこから年が逆算できてしまう。出すのは自分で決めた幅だけにする。
+ */
+function wireRange(q) {
+  const a = document.getElementById("ra");
+  const b = document.getElementById("rb");
+  const live = document.getElementById("rlive");
+  const submit = document.getElementById("rsubmit");
+  if (!a || !b || !submit) return;
+
+  const read = () => [parseInt(a.value, 10), parseInt(b.value, 10)];
+  const update = () => {
+    const [x, y] = read();
+    const ok = Number.isInteger(x) && Number.isInteger(y);
+    submit.disabled = !ok || S.run.picked !== null;
+    live.textContent = ok
+      ? (x === y ? "幅 0年 ・ 一点で言い切る" : `幅 ${Math.abs(y - x)}年`)
+      : "幅を決めてください";
+  };
+  [a, b].forEach(el => { el.oninput = update; el.onkeydown = e => {
+    if (e.key === "Enter" && !submit.disabled) onRange(q);
+  }; });
+  submit.onclick = () => onRange(q);
+  update();
+  a.focus();
+}
+
+/* レンジ回答の採点と報酬。4択と同じ流れに合流させる */
+function onRange(q) {
+  if (S.run.picked !== null) return;
+  const lo = parseInt(document.getElementById("ra").value, 10);
+  const hi = parseInt(document.getElementById("rb").value, 10);
+  if (!Number.isInteger(lo) || !Number.isInteger(hi)) return;
+
+  const h = heroFor(q);
+  const width = rangeWidth(q.year, q.precision);
+  const score = scoreRange(lo, hi, q.year, width);
+  const ok = score > 0;
+
+  S.run.picked = { lo: Math.min(lo, hi), hi: Math.max(lo, hi), score, width };
+  const { gained, gum } = grantAnswer(q, ok, score >= RANGE_BONUS_SCORE ? 1 : 0);
+
+  document.getElementById("ra").disabled = true;
+  document.getElementById("rb").disabled = true;
+  document.getElementById("rsubmit").disabled = true;
+  document.getElementById("rlive").innerHTML = ok
+    ? `<b>${score}点</b> ・ 許容幅は ±${Math.floor(width / 2)}年でした`
+    : `正解は <b>${q.year < 0 ? `紀元前${-q.year}` : q.year}年</b> ・ 許容幅は ±${Math.floor(width / 2)}年`;
+
+  drawHints(q, h);
+  S.run.tipOpen = false; S.run.applied = null;
+  drawVerdict(q, h, ok, gained, gum, score);
 }
 
 function drawHints(q, h) {
@@ -464,6 +536,44 @@ function markChoice(btn, ok) {
         <line x1="${w / 2 - 13}" y1="${h / 2 - 13}" x2="${w / 2 + 13}" y2="${h / 2 + 13}"/>
         <line x1="${w / 2 + 13}" y1="${h / 2 - 13}" x2="${w / 2 - 13}" y2="${h / 2 + 13}"/></svg>`);
   }
+}
+
+/**
+ * 解答1問ぶんの記録と報酬。4択もレンジ回答もここに合流する。
+ * bonusGem はレンジ回答で高い精度を出したときの上乗せ（1個）。
+ *
+ * GUM は上乗せしない。1問の上限は10GUMで、難易度は学年だけで決めると
+ * 決めてあるため（CLAUDE.md 原則6）。
+ */
+function grantAnswer(q, ok, bonusGem = 0) {
+  const gemKey = DB.subjectToGem[q.subject];
+  const reward = !S.run.noReward;
+  let gained = 0, gum = 0;
+  S.run.results[q.id] = ok ? "ok" : "ng";
+  if (!reward) S.seen[q.id] = S.seen[q.id];   // 再挑戦では出題履歴も動かさない
+
+  if (ok) {
+    S.run.right++;
+    if (reward) {
+      S.score += Math.max(4, 10 - S.run.hintsUsed * 2);
+      gained = 1 + (q.chapter >= 2 ? 1 : 0) + bonusGem;
+      S.gems[gemKey] += gained;
+      S.run.gems[gemKey] = (S.run.gems[gemKey] || 0) + gained;
+      gum = gumFor(q);
+      S.gum += gum;
+      S.run.gum += gum;
+      S.totalRight++;
+      if (q.chapter >= 2) S.crossRight++;
+      const country = countryOf(q);
+      if (country) S.countries[country] = 1;
+      if (S.cells[cellKey(q)] !== "st") S.cells[cellKey(q)] = "ok";
+    }
+  } else {
+    S.run.wrong++;
+    if (reward && !S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
+  }
+  if (reward) S.cards[q.card] = true;
+  return { gained, gum };
 }
 
 function onPick(idx) {
@@ -521,9 +631,11 @@ function onPick(idx) {
   drawVerdict(q, h, ok, gained, gum);
 }
 
-function drawVerdict(q, h, ok, gained, gum = 0) {
+function drawVerdict(q, h, ok, gained, gum = 0, rangeScore = null) {
   const head = ok
-    ? (S.run.hintsUsed ? "正解。ヒントを使っても、解けたことに変わりはない。" : "正解。")
+    ? (rangeScore !== null
+        ? (rangeScore === 1000 ? "言い切って、当てた。" : "その幅の中にある。")
+        : S.run.hintsUsed ? "正解。ヒントを使っても、解けたことに変わりはない。" : "正解。")
     : "面白い単元に当たった。ここは聞いていこう。";
   const gemKey = DB.subjectToGem[q.subject];
   document.getElementById("verdict").innerHTML = `
@@ -537,6 +649,8 @@ function drawVerdict(q, h, ok, gained, gum = 0) {
         <span>${esc(DB.gems[gemKey].name)} × ${gained}</span></div>` : ""}
       ${gum ? `<div class="gain gem2"><img src="${assetPath.icon("gum")}" alt="GUM">
         <span>GUM × ${gum} ・ ${esc(q.gradeLabel)}の問題</span></div>` : ""}
+      ${rangeScore !== null && rangeScore >= RANGE_BONUS_SCORE ? `<div class="gain">
+        <span class="seal">＋</span><span>精度 ${rangeScore}点 ・ 魔石がもう1つ</span></div>` : ""}
     </div>
     <div id="tipslot"></div><div id="exslot"></div><div class="stack" id="acts"></div></div>`;
   drawTip(q); drawApplied(q, ok); drawActions(q, ok);

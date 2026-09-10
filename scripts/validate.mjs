@@ -40,7 +40,12 @@ const promptsBySubject = {};
 for (const q of questions) {
   const id = q.id || `(id未設定 in ${q._file})`;
 
-  for (const k of ["id","chapter","grade","gradeLabel","subject","unit","prompt","choices","answer","hints","lesson","tip","card"]) {
+  const format = q.format || "choice";
+  if (!["choice", "range"].includes(format)) err(id, `未知の出題形式 "${format}"`);
+
+  const common = ["id","chapter","grade","gradeLabel","subject","unit","prompt","hints","lesson","tip","card"];
+  const needed = format === "range" ? [...common, "year"] : [...common, "choices", "answer"];
+  for (const k of needed) {
     if (q[k] === undefined || q[k] === null || q[k] === "") err(id, `必須項目 ${k} がありません`);
   }
   if (seenIds.has(q.id)) err(id, "IDが重複しています");
@@ -50,7 +55,13 @@ for (const q of questions) {
   if (!GRADES.includes(q.grade))     err(id, `未知の学年キー "${q.grade}"`);
   if (!gemstones.subjectToGem[q.subject]) err(id, `教科 "${q.subject}" に対応する魔石がありません`);
 
-  if (!Array.isArray(q.choices) || q.choices.length < 2) err(id, "選択肢が2つ未満です");
+  if (format === "range") {
+    if (!Number.isInteger(q.year)) err(id, `year は整数で書いてください（紀元前は負の数）`);
+    else if (q.year > new Date().getFullYear()) err(id, `year が未来です (${q.year})`);
+    if (q.choices || q.answer !== undefined) err(id, "レンジ回答に choices / answer は要りません");
+    if (q.precision !== undefined && !(q.precision > 0)) err(id, `precision は正の数にしてください (${q.precision})`);
+    if (q.applied) err(id, "レンジ回答の応用編はまだ扱えません");
+  } else if (!Array.isArray(q.choices) || q.choices.length < 2) err(id, "選択肢が2つ未満です");
   else {
     if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.choices.length)
       err(id, `answer が選択肢の範囲外です (${q.answer} / 0-${q.choices.length - 1})`);
@@ -58,7 +69,11 @@ for (const q of questions) {
   }
 
   if (!Array.isArray(q.hints) || q.hints.length !== 3) err(id, "ヒントは3つ必要です");
-  else {
+  else if (format === "range") {
+    // 第3ヒントが年をそのまま書いていないか
+    if (q.hints[2] && String(q.hints[2]).includes(String(q.year)))
+      warn(`${id}: 第3ヒントに正解の年「${q.year}」がそのまま書かれています`);
+  } else {
     // 第3ヒントが正解をそのまま書いていないか
     const answerText = q.choices?.[q.answer] ?? "";
     const bare = String(answerText).replace(/[\s。、]/g, "");
