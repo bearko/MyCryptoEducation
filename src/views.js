@@ -2,7 +2,8 @@
 
 import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedChapters, buildRun, gaugeBreakdown, challengeStage,
-         cellKey, craftableKeys, nextHero, lockedHeroes, adviceFor } from "./engine.js";
+         cellKey, craftableKeys, nextHero, lockedHeroes, nextIndex,
+         adviceFor } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
 import { saveState } from "./state.js";
@@ -33,7 +34,7 @@ function render() {
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge }[S.view])();
   drawToast();
-  if (home) { startClock(); drawBattery(); fitAdvice(); }
+  if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
 }
 
@@ -96,6 +97,87 @@ function fitAdvice() {
   }
 }
 
+const nameplate = h =>
+  `<span class="hr r${h.rarity}">${esc(h.rarity)}</span><b>${esc(h.name)}</b>`;
+
+/* 挑む相手のカルーセル。4秒静止 → 左へ素早く流す → 切り替え、の繰り返し。
+   矢印は置かない（動いていること自体が操作できる合図になる）。指で払う操作も受ける。 */
+const CAROUSEL_HOLD = 4000;
+const CAROUSEL_SLIDE = 420;
+let carouselTimer = null;
+
+function stopCarousel() {
+  if (carouselTimer) { clearInterval(carouselTimer); carouselTimer = null; }
+}
+
+function startCarousel(locked) {
+  stopCarousel();
+  const track = document.getElementById("tvtrack");
+  if (!track || locked.length < 2) return;
+
+  const n = locked.length;
+  let pos = S.stage.i;    // トラック上の位置。n は末尾のクローン（＝先頭と同じ絵）
+  let busy = false;
+
+  const place = animate => {
+    track.classList.toggle("move", animate);
+    track.style.transform = `translateX(${-pos * 100}%)`;
+  };
+
+  const paint = () => {
+    const h = locked[S.stage.i];
+    const name = document.getElementById("tvname");
+    if (name) name.innerHTML = nameplate(h);
+    app.querySelectorAll("#tvdots i").forEach((d, k) => d.classList.toggle("on", k === S.stage.i));
+  };
+
+  const step = dir => {
+    if (busy) return;
+    busy = true;
+
+    // 先頭から右へ戻すときは、いったん末尾のクローンへ飛んでから動かす
+    if (dir < 0 && pos === 0) { pos = n; place(false); void track.offsetWidth; }
+
+    pos += dir;
+    S.stage.i = nextIndex(S.stage.i, n, dir);
+    paint();
+    place(true);
+
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      track.removeEventListener("transitionend", settle);
+      if (pos === n) { pos = 0; place(false); }   // クローンから先頭へ、音もなく戻す
+      busy = false;
+    };
+    track.addEventListener("transitionend", settle);
+    setTimeout(settle, CAROUSEL_SLIDE + 260);     // transitionend が来ないときの保険
+  };
+
+  const rearm = () => {
+    stopCarousel();
+    carouselTimer = setInterval(() => step(1), CAROUSEL_HOLD);
+  };
+
+  // 指で払う操作。動かしたら、そこから4秒数え直す
+  const art = track.parentElement;
+  let x0 = null;
+  art.addEventListener("touchstart", ev => { x0 = ev.changedTouches[0].clientX; }, { passive: true });
+  art.addEventListener("touchend", ev => {
+    if (x0 === null) return;
+    const dx = ev.changedTouches[0].clientX - x0;
+    x0 = null;
+    if (Math.abs(dx) <= 40) return;
+    step(dx < 0 ? 1 : -1);
+    rearm();
+  }, { passive: true });
+
+  // 動きを減らす設定のときは、自動では送らない（払えば動く）
+  if (globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+  rearm();
+}
+
 let clockTimer = null;
 function startClock() {
   if (clockTimer) return;
@@ -142,6 +224,9 @@ function vHome() {
   const i = locked.length ? Math.min(S.stage.i, locked.length - 1) : 0;
   S.stage.i = i;
   const target = locked[i] || null;
+  // 末尾に先頭のクローンを1枚足しておく。最後から先頭へ回るときも
+  // 左方向に流したまま繋げられる（クローンは見た目が同じなので継ぎ目が出ない）
+  const slides = locked.length > 1 ? [...locked, locked[0]] : locked;
   const craftable = craftableKeys(DB, S);
   const p = S.profile || {};
 
@@ -174,15 +259,13 @@ function vHome() {
     ${target ? `
     <div class="tv">
       <div class="tv-art">
-        ${locked.length > 1 ? `<button class="tv-arrow" id="prevhero" aria-label="前の英雄">‹</button>` : ""}
-        <div class="tv-figure">
-          <img src="${assetPath.rep(target.id)}" alt="${esc(target.name)}">
+        <div class="tv-track" id="tvtrack" style="transform:translateX(${-i * 100}%)">
+          ${slides.map(h => `<div class="tv-figure">
+            <img src="${assetPath.rep(h.id)}" alt="${esc(h.name)}"></div>`).join("")}
         </div>
-        ${locked.length > 1 ? `<button class="tv-arrow" id="nexthero" aria-label="次の英雄">›</button>` : ""}
       </div>
-      <div class="tv-name"><span class="hr r${target.rarity}">${esc(target.rarity)}</span>
-        <b>${esc(target.name)}</b></div>
-      ${locked.length > 1 ? `<div class="tv-dots">${locked.map((h, n) =>
+      <div class="tv-name" id="tvname">${nameplate(target)}</div>
+      ${locked.length > 1 ? `<div class="tv-dots" id="tvdots">${locked.map((h, n) =>
         `<i class="${n === i ? "on" : ""}"></i>`).join("")}</div>` : ""}
     </div>
     <button class="chal" id="tochal"
@@ -198,13 +281,16 @@ function vHome() {
     <div class="nav3">
       <button class="tile" id="toheroes"
         style="background-image:var(--g-hero),url('${assetPath.bg("1038")}')">
-        <img src="${assetPath.hero("10001")}" alt=""><b>ヒーロー</b></button>
+        <img src="${assetPath.hero("10001")}" alt="">
+        <span class="lab"><b>ヒーロー</b></span></button>
       <button class="tile" id="toshop" disabled
         style="background-image:var(--g-shop),url('${assetPath.bg("1004")}')">
-        <img src="${assetPath.hero("3037")}" alt=""><b>ショップ</b><small>準備中</small></button>
+        <img src="${assetPath.hero("3037")}" alt="">
+        <span class="lab"><b>ショップ</b><small>準備中</small></span></button>
       <button class="tile" id="tocraft"
         style="background-image:var(--g-craft),url('${assetPath.bg("1046")}')">
-        <img src="${assetPath.hero("2023")}" alt=""><b>クラフト</b>
+        <img src="${assetPath.hero("2023")}" alt="">
+        <span class="lab"><b>クラフト</b></span>
         ${craftable.length ? `<i class="dot" title="クラフトできます"></i>` : ""}</button>
     </div>
     <button class="tile quiz" id="toquiz"
@@ -218,24 +304,7 @@ function vHome() {
   const c = document.getElementById("tochal");
   if (c) c.onclick = () => go("target");
 
-  // カルーセル。矢印・ドットのほか、指で払っても動かす
-  const shift = d => { S.stage.i = (i + d + locked.length) % locked.length; render(); };
-  const prev = document.getElementById("prevhero");
-  const nextBtn = document.getElementById("nexthero");
-  if (prev) prev.onclick = () => shift(-1);
-  if (nextBtn) nextBtn.onclick = () => shift(1);
-
-  const art = app.querySelector(".tv-art");
-  if (art && locked.length > 1) {
-    let x0 = null;
-    art.addEventListener("touchstart", ev => { x0 = ev.changedTouches[0].clientX; }, { passive: true });
-    art.addEventListener("touchend", ev => {
-      if (x0 === null) return;
-      const dx = ev.changedTouches[0].clientX - x0;
-      x0 = null;
-      if (Math.abs(dx) > 40) shift(dx < 0 ? 1 : -1);
-    }, { passive: true });
-  }
+  startCarousel(locked);
 }
 
 /* ---------- 出題選択（在庫表示つき） ---------- */
