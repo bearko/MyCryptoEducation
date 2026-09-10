@@ -323,12 +323,34 @@ export function crystalPrice(scarcity) {
   return Math.max(5, Math.round(50 / s));
 }
 
-/* 族 → 効果のある教科。docs/implementation-plan.md §2-1 の対応表 */
-export const CRYSTAL_FAMILIES = {
-  "貴金属": ["社会"],
-  "宝石": ["外国語"],
-  "元素": ["理科"],
-  "鉱石": ["理科"],
-  "生物起源": ["国語", "理科"],
-  "石英": ["算数・数学"],
-};
+/**
+ * クリスタル1個ぶんの目安（GUM）。
+ *
+ * 価格は 50 / 希少度 なので、**希少度 × 価格 は常に 50** になる。
+ * つまり「その鉱物に出会う割合」と「その鉱物の値段」の積がどれも同じで、
+ * どれを選んでも GUM あたりの重みが変わらない。整数に丸めるぶんだけ
+ * 50 から数%ずれるが、それ以上の有利不利は生まれない。
+ */
+export const CRYSTAL_UNIT = 50;
+
+/**
+ * クリスタルがクラフトに寄せる重み。**払った GUM そのもの。**
+ *
+ * こうしておくと、同じ GUM を使うかぎり、どの鉱物を買っても
+ * クラフトの進み方が変わらない。安い鉱物を回し続けるのが得、
+ * という抜け道が生まれない。
+ *
+ * **族を教科に結び付けるのはやめた。** 貴金属は希少度が低く価格が高いので、
+ * 族と教科を結ぶと、教科ごとに手に入る価値が大きく偏る。鉱物ごとの違いは
+ * 豆知識（`fact`）が担い、仕組みの上では差を付けない。
+ * `family` は図鑑の見出しとして残してあるだけで、効果には使わない。
+ */
+export const crystalValue = scarcity => crystalPrice(scarcity);
+
+/* 持っているクリスタルの合計の重み。owned は { "001": 個数, ... } */
+export function crystalsValue(owned, byId) {
+  return Object.entries(owned || {}).reduce((sum, [id, n]) => {
+    const c = byId?.[id];
+    return c ? sum + crystalValue(c.scarcity) * (n || 0) : sum;
+  }, 0);
+}
