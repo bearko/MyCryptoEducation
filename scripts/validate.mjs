@@ -104,10 +104,28 @@ for (const h of heroes) {
   if (heroIds.has(h.id)) err(h.id, "英雄IDが重複しています");
   heroIds.add(h.id);
   if (h.ch) {
-    if (!Array.isArray(h.ch.v) || h.ch.v.length !== 4)
-      err(h.name, "チャレンジの問い方は4段階必要です");
-    if (!Array.isArray(h.ch.ans) || h.ch.ans.length === 0)
-      err(h.name, "チャレンジの受理解答がありません");
+    const CH_NEED = { Common: 1, Uncommon: 1, Rare: 2, Epic: 2, Legendary: 3 };
+    if (!Array.isArray(h.ch.qs) || h.ch.qs.length !== 3)
+      err(h.name, `チャレンジは3問構成にしてください（いま ${h.ch.qs?.length ?? 0}問）`);
+    (h.ch.qs || []).forEach((q, i) => {
+      const at = `${h.name} 第${i + 1}問`;
+      if (!Array.isArray(q.v) || q.v.length !== 4) err(at, "問い方は4段階必要です");
+      else {
+        // 段階が進むほどやさしくなるように、v は難しい順に並べる。
+        // 目安として、後ろほど長いか同じくらいの説明が付いているはず
+        if (q.v.some(t => typeof t !== "string" || !t.trim())) err(at, "空の問い方があります");
+        if (new Set(q.v).size !== q.v.length) err(at, "同じ問い方が重複しています");
+      }
+      if (!Array.isArray(q.ans) || q.ans.length === 0) err(at, "受理解答がありません");
+      else if (q.ans.some(a => typeof a !== "string" || !a.trim())) err(at, "空の受理解答があります");
+      // 問い方の中に答えがそのまま入っていないか
+      (q.v || []).forEach((t, k) => {
+        const bare = String(q.ans[0]).replace(/[\s。、]/g, "");
+        if (bare.length >= 2 && String(t).replace(/[\s。、]/g, "").includes(bare))
+          warn(`${at} 段階${k}: 問い方に答え「${q.ans[0]}」がそのまま入っています`);
+      });
+    });
+    if (!CH_NEED[h.rarity]) err(h.name, `レアリティ "${h.rarity}" の必要正答数が決まっていません`);
   }
   if (h.rel) {
     h.rel.subjects.forEach(s => {
