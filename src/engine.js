@@ -219,6 +219,36 @@ export function challengeStage(damage, hp) {
   return r >= 1 ? 3 : r >= 0.67 ? 2 : r >= 0.34 ? 1 : 0;
 }
 
+/**
+ * 3問中いくつ当てれば解放かをレアリティで決める。
+ * 1問1答だと、たまたま知っていた1問で解放されてしまう。
+ */
+export const CHALLENGE_NEED = { Common: 1, Uncommon: 1, Rare: 2, Epic: 2, Legendary: 3 };
+export const challengeNeed = hero => CHALLENGE_NEED[hero?.rarity] ?? 1;
+
+/* 1回の挑戦で出す問題数 */
+export const CHALLENGE_QUESTIONS = 3;
+
+/**
+ * 段階に応じた問い方を選ぶ。**v は難しい順に並べる。**
+ * 段階0（ゲージが削れていない）が最も深く、段階3（削りきった）が最も易しい。
+ *
+ * 以前はここが `v[3 - stage]` になっていて、知識を積むほど難しい問いが出ていた。
+ * 画面に出る段階の見出しとも逆だった。
+ */
+export const challengePrompt = (q, stage) =>
+  q.v[Math.max(0, Math.min(q.v.length - 1, stage))];
+
+/**
+ * 挑戦を終えたときに渡す、その人物にまつわる知識カード1枚。
+ * まだ持っていないものから配る。**プールはその英雄の関連カードだけなので、
+ * 挑み続けても無限には増えない。** 負けるほど次が有利になる、を
+ * 「知識を積まずにゲージが埋まる」に変えないための歯止め。
+ */
+export function challengeCard(hero, state) {
+  return (hero?.rel?.cards || []).find(c => !state.cards[c]) || null;
+}
+
 /* ---- クラフト ---- */
 
 /**

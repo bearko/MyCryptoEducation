@@ -532,3 +532,12 @@
   .rio .ru{font-family:var(--mincho);font-size:15px;color:var(--ink)}
   .rlive{margin:12px 0 14px;font-size:13.5px;color:var(--ink-soft);text-align:center}
   .rlive b{font-family:var(--mincho);font-size:19px;color:var(--pen)}
+
+  /* --- チャレンジの3問すすみ具合 --- */
+  .chprog{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px}
+  .chprog i{width:10px;height:10px;border-radius:50%;background:var(--line);
+    border:1px solid var(--ink-faint)}
+  .chprog i.ok{background:var(--pen);border-color:var(--pen)}
+  .chprog i.ng{background:var(--ai);border-color:var(--ai)}
+  .chprog i.now{background:var(--card);border-color:var(--ink);box-shadow:0 0 0 2px rgba(23,36,63,.16)}
+  .chprog span{margin-left:6px;font-size:11px;color:var(--ink-faint)}

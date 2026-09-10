@@ -7,7 +7,9 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          titleProgress, earnedTitles, countryOf,
          shopList, canBuy, crystalPrice, crystalsValue, crystalKinds,
          CRYSTAL_UNIT, craftCheck,
-         rangeWidth, scoreRange, RANGE_BONUS_SCORE } from "./engine.js";
+         rangeWidth, scoreRange, RANGE_BONUS_SCORE,
+         challengeNeed, challengePrompt, challengeCard,
+         CHALLENGE_QUESTIONS } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
@@ -1249,69 +1251,120 @@ function vTarget() {
 
 function startChallenge(id) {
   S.challenge = { heroId: id, phase: "intro", breakdown: gaugeBreakdown(DB, S, DB.heroById[id]),
-                  damage: 0, tries: 0, done: false, message: "" };
+                  damage: 0, tries: 0, done: false, message: "",
+                  qi: 0, results: [], gotCard: null };
   go("challenge");
+}
+
+/**
+ * 3問中いくつ当てたかで解放を決める。1問1答だと、たまたま知っていた1問で
+ * 解放されてしまう。必要正答数はレアリティで変える（Common 1、Rare 2、Legendary 3）。
+ */
+function finishChallenge() {
+  const c = S.challenge, h = DB.heroById[c.heroId];
+  const right = c.results.filter(Boolean).length;
+  c.done = true;
+  c.won = right >= challengeNeed(h);
+  if (c.won) S.owned[h.id] = 1;
+
+  // 挑んだ以上は、その人物にまつわる知識カードを1枚持って帰る。
+  // 負けるほど次が有利になる。プールはこの英雄の関連カードだけなので、
+  // 挑み続けても無限には増えない
+  const card = challengeCard(h, S);
+  if (card) { S.cards[card] = true; c.gotCard = card; }
+  render();
 }
 
 function vChallenge() {
   const c = S.challenge, h = DB.heroById[c.heroId], b = c.breakdown;
   const stage = challengeStage(c.damage, b.hp);
-  const prompt = h.ch.v[3 - stage];
+  const need = challengeNeed(h);
+  const qs = h.ch.qs;
+  const q = qs[Math.min(c.qi, qs.length - 1)];
+  const right = c.results.filter(Boolean).length;
 
   app.innerHTML = `
   <header><div class="hbar"><div class="place">チャレンジ ・ ${esc(h.name)}</div>
     <button class="mapbtn" id="back">${c.done ? "もどる" : "やめる"}</button></div></header>
   <div class="pad">
     <div class="battle">
-      <img class="bhero ${c.done ? "won" : ""}" src="${assetPath.hero(h.id)}" alt="">
+      <img class="bhero ${c.won ? "won" : ""}" src="${assetPath.hero(h.id)}" alt="">
       <div class="bmeta"><div class="bn">${esc(h.name)}</div>
         <div class="hr r${h.rarity}">${esc(h.rarity)}</div></div>
       <div class="gauge"><i style="width:${Math.round((1 - c.damage / b.hp) * 100)}%"></i>
         <span>難易度 ${b.hp - c.damage} / ${b.hp}</span></div>
       <div class="glabel">${esc(STAGE_LABELS[stage])}</div>
+      ${c.phase !== "intro" ? `<div class="chprog">${qs.map((_, i) => {
+        const r = c.results[i];
+        return `<i class="${r === true ? "ok" : r === false ? "ng" : i === c.qi && !c.done ? "now" : ""}"></i>`;
+      }).join("")}<span>${CHALLENGE_QUESTIONS}問中 ${need}問で解放</span></div>` : ""}
     </div>
+
     ${c.phase === "intro" ? `
-      <div class="panel"><div class="phead"><h2>持っている知識で削る</h2></div>
+      <div class="panel"><div class="phead"><h2>持っている知識で削る</h2>
+        <span class="sub">${CHALLENGE_QUESTIONS}問中 ${need}問</span></div>
         ${b.rows.length ? b.rows.map(r => `<div class="brow"><div>
             <div class="bt">${esc(r.label)}</div><div class="bs">${esc(r.detail)}</div></div>
           <div class="bv ${r.value < 0 ? "back" : ""}">${r.value < 0 ? `+${-r.value}` : `−${r.value}`}</div></div>`).join("")
           : `<p class="empty">この英雄に関わる知識をまだ持っていません。まずは問題を解いてください。</p>`}
         <div class="btotal">合計 −${b.damage} <span class="bhp">難易度 ${b.hp}</span></div></div>
+      <p class="fine">ゲージが削れているほど、問い方がやさしくなります。<b>どれだけ削れても、
+        その人物を知らないと答えられないことは変わりません。</b></p>
       <div class="stack"><button class="btn" id="fight">挑む</button></div>`
+
+    : c.done ? `
+      <div class="lesson"><div class="speaker"><img class="ava sm" src="${assetPath.hero(h.id)}" alt="">
+        <span>${esc(h.name)}</span></div>
+        <p>${esc(c.won ? h.flavor : "その距離まで来ている。あとは、私という人間をもう少し知ればよい。")}</p>
+        <div class="gain"><span class="seal">${c.won ? "✓" : "・"}</span>
+          <span>${CHALLENGE_QUESTIONS}問中 <em>${right}問</em> 正解 ・ 解放には${need}問</span></div>
+        ${c.won ? `<div class="gain"><span class="seal">✓</span>
+          <span>解放 ・ <em>${esc(h.name)}</em></span></div>` : ""}
+        ${c.won && h.unlocks != null ? `<div class="gain gem2"><span class="seal">＋</span>
+          <span>新しい出題範囲が開きました</span></div>` : ""}
+        ${c.gotCard ? `<div class="gain gem2"><span class="seal">＋</span>
+          <span>知識カード ・ <em>${esc(c.gotCard)}</em></span></div>` : ""}</div>
+      ${c.won ? "" : `<p class="cue">負けても、いま受け取った知識カードのぶんだけ次はゲージが削れた状態から始まります。</p>`}
+      <div class="stack">
+        ${c.won ? `<button class="btn" id="done">図鑑を見る</button>`
+                : `<button class="btn" id="retry">もう一度挑む</button>`}
+        <button class="btn ghost" id="home2">ホームへ</button></div>`
+
     : `
-      <div class="qtext ch">${esc(prompt)}</div>
-      ${c.done ? `
-        <div class="lesson"><div class="speaker"><img class="ava sm" src="${assetPath.hero(h.id)}" alt="">
-          <span>${esc(h.name)}</span></div><p>${esc(h.flavor)}</p>
-          <div class="gain"><span class="seal">✓</span><span>解放 ・ <em>${esc(h.name)}</em></span></div>
-          ${h.unlocks != null ? `<div class="gain gem2"><span class="seal">＋</span>
-            <span>新しい出題範囲が開きました</span></div>` : ""}</div>
-        <div class="stack"><button class="btn" id="done">図鑑を見る</button>
-          <button class="btn ghost" id="home2">ホームへ</button></div>`
-      : `<div class="answer">
-          <input id="ans" type="text" placeholder="答えを入力（ひらがなでも可）" autocomplete="off">
-          <button class="btn" id="submit">答える</button>
-          ${c.message ? `<div class="chmsg">${esc(c.message)}</div>` : ""}
-          ${c.tries >= 2 && stage < 3 ? `<p class="fine">解けなくても構いません。知識カードが増えれば、次はゲージがもっと削れた状態から始まります。</p>` : ""}
-        </div>`}`}
+      <div class="qmeta"><span class="grade">${c.qi + 1}問目</span>
+        <span class="unit">${esc(STAGE_LABELS[stage])}</span></div>
+      <div class="qtext ch">${esc(challengePrompt(q, stage))}</div>
+      <div class="answer">
+        <input id="ans" type="text" placeholder="答えを入力（ひらがなでも可）" autocomplete="off">
+        <button class="btn" id="submit">答える</button>
+        ${c.message ? `<div class="chmsg">${esc(c.message)}</div>` : ""}
+        <p class="fine">分からなければ空のまま答えても構いません。次の問いへ進みます。</p>
+      </div>`}
   </div>`;
 
   document.getElementById("back").onclick = () => go(c.done ? "home" : "target");
   const f = document.getElementById("fight");
   if (f) f.onclick = animateGauge;
+
   const submit = document.getElementById("submit");
   if (submit) {
     const input = document.getElementById("ans");
     const send = () => {
-      if (matches(input.value, h.ch.ans)) { S.owned[h.id] = 1; c.done = true; c.message = ""; }
-      else if (input.value.trim()) { c.tries++; c.message = "ちがう。もう一度考えてみよう。"; }
-      else return;
-      render();
+      const ok = matches(input.value, q.ans);
+      c.results[c.qi] = ok;
+      c.message = "";
+      if (!ok) c.tries++;
+      c.qi++;
+      if (c.qi >= qs.length) finishChallenge();
+      else render();
     };
     submit.onclick = send;
     input.onkeydown = e => { if (e.key === "Enter") send(); };
     input.focus();
   }
+
+  const rt = document.getElementById("retry");
+  if (rt) rt.onclick = () => startChallenge(h.id);
   const d = document.getElementById("done");
   if (d) d.onclick = () => { S.heroesTab = "codex"; go("heroes"); };
   const hm = document.getElementById("home2"); if (hm) hm.onclick = () => go("home");

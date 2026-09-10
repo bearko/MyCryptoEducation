@@ -269,16 +269,60 @@ check("チャレンジ画面", txt().includes("持っている知識で削る"))
 d.getElementById("fight").click();
 await wait(1500);
 const hero = ev("DB.heroById[S.challenge.heroId].name");
-const ans = JSON.parse(ev("JSON.stringify(DB.heroById[S.challenge.heroId].ch.ans)"));
-const input = d.getElementById("ans");
-check("入力欄が出る", !!input, `相手=${hero}`);
-if (input) {
-  input.value = "でたらめ"; d.getElementById("submit").click();
-  check("誤答をはじく", !ev("S.challenge.done"));
-  d.getElementById("ans").value = ans[1] || ans[0];
-  d.getElementById("submit").click();
-  check("正答で解放", ev("S.challenge.done") === true);
-}
+check("入力欄が出る", !!d.getElementById("ans"), `相手=${hero}`);
+check("3問構成になっている", ev("DB.heroById[S.challenge.heroId].ch.qs.length") === 3);
+check("何問目かを見せる", txt().includes("1問目"), txt().slice(0, 80));
+check("すすみ具合の点が3つ", d.querySelectorAll(".chprog i").length === 3,
+  `${d.querySelectorAll(".chprog i").length}個`);
+
+// 全部外しても、最後まで進んでから判定する
+const answerAll = (correct) => {
+  for (let k = 0; k < 3; k++) {
+    const input = d.getElementById("ans");
+    if (!input) break;
+    const ansList = JSON.parse(ev(`JSON.stringify(DB.heroById[S.challenge.heroId].ch.qs[S.challenge.qi].ans)`));
+    input.value = correct ? ansList[0] : "でたらめ";
+    d.getElementById("submit").click();
+  }
+};
+answerAll(false);
+check("外しても3問すべて出る", ev("S.challenge.results.length") === 3,
+  ev("JSON.stringify(S.challenge.results)"));
+check("必要正答数に届かなければ解放しない", ev("S.challenge.won") !== true);
+check("挑めば知識カードを1枚持ち帰る", !!ev("S.challenge.gotCard"),
+  String(ev("S.challenge.gotCard")));
+check("負けても解説と再挑戦が出る", !!d.getElementById("retry") && txt().includes("次はゲージ"),
+  txt().slice(0, 80));
+
+// 解放に必要なぶんだけ当てる
+d.getElementById("retry").click();
+d.getElementById("fight").click();
+await wait(1500);
+answerAll(true);
+check("必要正答数を満たせば解放", ev("S.challenge.won") === true,
+  ev("JSON.stringify(S.challenge.results)"));
+check("解放されて手持ちに入る", ev(`!!S.owned[S.challenge.heroId]`));
+check("レアリティで必要正答数が変わる",
+  ev('challengeNeed({rarity:"Common"})') === 1 && ev('challengeNeed({rarity:"Rare"})') === 2 &&
+  ev('challengeNeed({rarity:"Legendary"})') === 3);
+check("ゲージが削れているほど問いはやさしくなる", ev(`(() => {
+  const q = DB.heroById["4007"].ch.qs[0];
+  return challengePrompt(q, 0) === q.v[0] && challengePrompt(q, 3) === q.v[3];
+})()`), "段階と問い方の対応が逆");
+check("Legendaryのゲージ上限は140", ev('DB.heroById["5016"].hp') === 140,
+  String(ev('DB.heroById["5016"].hp')));
+check("持ち帰るカードはその英雄の関連カードだけ", ev(`(() => {
+  const h = DB.heroById["5016"];
+  const st = JSON.parse(JSON.stringify(S));
+  st.cards = {};
+  const got = [];
+  for (let k = 0; k < 10; k++) {
+    const c = challengeCard(h, st);
+    if (!c) break;
+    st.cards[c] = true; got.push(c);
+  }
+  return got.length === h.rel.cards.length && got.every(c => h.rel.cards.includes(c));
+})()`), "無限に増えるか、関係ないカードが出ている");
 
 // 解放すると出題範囲が広がる
 ev('S.owned["4007"]=1;S.owned["5016"]=1;S.view="select";S.select.subject="auto";render()');

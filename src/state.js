@@ -55,9 +55,10 @@ function defaults() {
            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
            results: {}, noReward: false, done: false },
 
-    // チャレンジ
+    // チャレンジ。3問構成で、qi が何問目か、results が各問の正誤
     challenge: { heroId: null, phase: "intro", breakdown: null, damage: 0,
-                 tries: 0, done: false, message: "" },
+                 tries: 0, done: false, message: "",
+                 qi: 0, results: [], gotCard: null },
 
     heroesTab: "own",   // ヒーロー画面のタブ（own / codex）
     calendar: null,     // カレンダーで見ている月 { year, month }
