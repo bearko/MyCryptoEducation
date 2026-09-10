@@ -299,6 +299,7 @@ export function titleProgress(db, state) {
     else if (t.when === "subjects")  have = subjectsDone;
     else if (t.when === "crossRight") have = state.crossRight || 0;
     else if (t.when === "totalRight") have = state.totalRight || 0;
+    else if (t.when === "crystalKinds") have = crystalKinds(state);
     else if (t.when === "heroCards") {
       const cards = db.heroById?.[t.hero]?.rel?.cards || [];
       goal = cards.length;
@@ -346,6 +347,23 @@ export const CRYSTAL_UNIT = 50;
  * `family` は図鑑の見出しとして残してあるだけで、効果には使わない。
  */
 export const crystalValue = scarcity => crystalPrice(scarcity);
+
+/**
+ * ショップの品揃え。**固定で、安い順。**
+ * 日替わりでランダムに並べ替えると「良い品が出るまで待つ」待機が生まれるので入れない。
+ */
+export function shopList(db) {
+  return [...(db.crystals?.crystals || [])]
+    .map(c => ({ ...c, price: crystalPrice(c.scarcity) }))
+    .sort((a, b) => a.price - b.price || a.id.localeCompare(b.id));
+}
+
+/* 買えるか。GUM が足りているかだけを見る */
+export const canBuy = (state, price) => (state.gum || 0) >= price;
+
+/* 集めたクリスタルの種類数（称号の判定に使う） */
+export const crystalKinds = state =>
+  Object.values(state.crystals || {}).filter(n => n > 0).length;
 
 /* 持っているクリスタルの合計の重み。owned は { "001": 個数, ... } */
 export function crystalsValue(owned, byId) {

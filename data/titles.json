@@ -1,5 +1,5 @@
 {
-  "_note": "称号。『量』より『越境』を目立たせたいので、この順番で並べる。条件は engine.titleProgress が解釈する。クリスタル収集の称号（石を読む者）は、クリスタル自体が未実装なのでまだ入れていない。",
+  "_note": "称号。『量』より『越境』を目立たせたいので、この順番で並べる。条件は engine.titleProgress が解釈する。",
   "titles": [
     {
       "id": "cross-world",
@@ -32,6 +32,14 @@
       "need": "クレオパトラに連なる知識カードをすべて集める",
       "when": "heroCards",
       "hero": "5016"
+    },
+    {
+      "id": "stone-reader",
+      "kind": "鉱物",
+      "name": "石を読む者",
+      "need": "クリスタルを5種集める",
+      "when": "crystalKinds",
+      "n": 5
     },
     {
       "id": "hundred",
