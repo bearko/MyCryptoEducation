@@ -1,0 +1,18 @@
+{
+  "_note": "クリスタル。まずは 001-010 の10種だけ入れる。種類が多すぎると1種あたりの入手機会が薄まり、クラフトが詰まるため。増やすときは scripts/fetch-crystals.mjs に種類数を渡して再実行し、ここに追記する。",
+  "_todo": "name と scarcity が未記入。出典は図鑑（cryptocrystal.app/picturebook）だが、この作業環境からは到達できない。鉱物名を推測で埋めない。理科の出題や知識カードに転用する前提なので、誤った鉱物名を置くと教材として害になる。_seen は画像を見たままの覚書で、名前の代わりに使わないこと。",
+  "_price": "価格は希少度から自動算出する: price(GUM) = max(5, round(50 / scarcity))",
+  "_license": "CC0。ただし商標にはCC0が及ばないため、提供元の名称はゲーム内で使わない。個々の鉱物名は一般名詞なので可。",
+  "crystals": [
+    { "id": "001", "name": null, "scarcity": null, "family": null, "_seen": "金色のインゴット" },
+    { "id": "002", "name": null, "scarcity": null, "family": null, "_seen": "銀色のインゴット" },
+    { "id": "003", "name": null, "scarcity": null, "family": null, "_seen": "赤茶色の角ばった塊" },
+    { "id": "004", "name": null, "scarcity": null, "family": null, "_seen": "白い金属のインゴット" },
+    { "id": "005", "name": null, "scarcity": null, "family": null, "_seen": "灰色の岩に、発光する結晶が埋まっている" },
+    { "id": "006", "name": null, "scarcity": null, "family": null, "_seen": "流動する金属の塊と、こぼれた粒" },
+    { "id": "007", "name": null, "scarcity": null, "family": null, "_seen": "黄色くもろい塊。淡く光る" },
+    { "id": "008", "name": null, "scarcity": null, "family": null, "_seen": "黒くつやのある塊" },
+    { "id": "009", "name": null, "scarcity": null, "family": null, "_seen": "虹色に輝く多面体" },
+    { "id": "010", "name": null, "scarcity": null, "family": null, "_seen": "灰色の岩に白い結晶" }
+  ]
+}
