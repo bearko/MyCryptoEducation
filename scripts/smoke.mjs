@@ -351,8 +351,21 @@ check("希少なものほど高い", ev(`(() => {
   return cs.every((c,i) => i === 0 || crystalPrice(c.scarcity) <= crystalPrice(cs[i-1].scarcity));
 })()`));
 check("下限は5GUM", ev("crystalPrice(100)") === 5 && ev("crystalPrice(0)") === 5);
-check("族は対応表にある", ev(`DB.crystals.crystals.every(c => CRYSTAL_FAMILIES[c.family])`),
-  ev(`JSON.stringify([...new Set(DB.crystals.crystals.map(c => c.family))])`));
+// 族は図鑑の見出しだけ。教科には結び付けない
+check("族を教科に結び付けていない", ev("typeof CRYSTAL_FAMILIES") === "undefined");
+check("どの鉱物も GUM あたりの重みが同じ", ev(`(() => {
+  const es = DB.crystals.crystals.map(c => c.scarcity * crystalPrice(c.scarcity));
+  return Math.max(...es) / Math.min(...es) < 1.05;   // ずれは整数への丸めぶんだけ
+})()`), ev(`JSON.stringify(DB.crystals.crystals.map(c => +(c.scarcity * crystalPrice(c.scarcity)).toFixed(2)))`));
+check("クラフトの重みは払ったGUMそのもの",
+  ev(`DB.crystals.crystals.every(c => crystalValue(c.scarcity) === crystalPrice(c.scarcity))`));
+check("同じGUMなら鉱物を変えても重みは同じ", ev(`(() => {
+  const byId = DB.crystalById;
+  const spend = id => { const p = crystalPrice(byId[id].scarcity);
+    const n = Math.floor(600 / p); return { paid: n * p, weight: crystalsValue({ [id]: n }, byId) }; };
+  return DB.crystals.crystals.every(c => { const r = spend(c.id); return r.paid === r.weight; });
+})()`));
+check("1個ぶんの目安は50GUM", ev("CRYSTAL_UNIT") === 50);
 check("アートを参照できる", ev(`assetPath.crystal("001")`).length > 0, ev(`assetPath.crystal("001")`));
 check("豆知識が全種にある", ev(`DB.crystals.crystals.every(c => c.fact && c.fact.length > 8)`));
 
