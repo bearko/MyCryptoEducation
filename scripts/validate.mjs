@@ -106,11 +106,37 @@ for (const h of heroes) {
 }
 
 /* ---- エクステンション ---- */
+const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
 for (const [k, e] of Object.entries(extensions)) {
+  for (const f of ["name", "line", "rarity", "subs", "gauge", "cost", "text"]) {
+    if (e[f] === undefined || e[f] === null || e[f] === "") err(k, `必須項目 ${f} がありません`);
+  }
+  if (!RARITIES.includes(e.rarity)) err(k, `未知のレアリティ "${e.rarity}"`);
   Object.keys(e.cost).forEach(g => {
     if (!gemstones.gems[g]) err(k, `未知の魔石 "${g}"`);
   });
   e.subs.forEach(s => { if (!SUBJECTS.includes(s)) err(k, `未知の分野 "${s}"`); });
+  // 下位は実在して、1段だけ下であること
+  if (e.below) {
+    const b = extensions[e.below];
+    if (!b) err(k, `下位 "${e.below}" がありません`);
+    else if (RARITIES.indexOf(b.rarity) !== RARITIES.indexOf(e.rarity) - 1)
+      err(k, `下位 "${e.below}" のレアリティが1段下ではありません（${b.rarity}）`);
+    else if (b.line !== e.line) err(k, `下位 "${e.below}" が別の系統です（${b.line}）`);
+  }
+  if (e.rarity === "Common" && e.crystal) err(k, "Commonにクリスタルを要求しないでください");
+  if (e.rarity === "Legendary" && !e.cards)
+    err(k, "Legendaryには知識カードの所持を条件に入れてください（素材だけで最上位が手に入らないように）");
+  if (!existsSync(join(ROOT, `public/extensions/${k}.webp`)))
+    err(k, "画像が public/extensions にありません");
+}
+
+// 8系統 × 5レアリティが揃っているか
+const byLine = {};
+for (const [k, e] of Object.entries(extensions)) (byLine[e.line] ??= []).push(e.rarity);
+for (const [line, rs] of Object.entries(byLine)) {
+  const missing = RARITIES.filter(r => !rs.includes(r));
+  if (missing.length) err(line, `レアリティが欠けています: ${missing.join(", ")}`);
 }
 
 /* ---- クリスタル ---- */
@@ -148,7 +174,7 @@ for (const s of SUBJECTS) {
 }
 
 /* ---- 出力 ---- */
-console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${Object.keys(extensions).length}種 / クリスタル ${(crystals.crystals || []).length}種\n`);
+console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${Object.keys(extensions).length}種（${Object.keys(byLine).length}系統） / クリスタル ${(crystals.crystals || []).length}種\n`);
 console.table(table);
 
 if (warnings.length) {

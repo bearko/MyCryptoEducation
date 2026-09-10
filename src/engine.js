@@ -134,6 +134,11 @@ export function gaugeBreakdown(db, state, hero) {
     rows.push({ label: `関連分野の知識カード ${related.length}枚`, value: v, detail: hero.rel.subjects.join("・") });
   }
 
+  // ここまでが知識カードぶん。装備はこれを超えられない（原則1）
+  const fromCards = damage;
+
+  let fromGear = 0;
+  const gearRows = [];
   Object.entries(state.equip).forEach(([heroId, extKey]) => {
     if (!extKey || !state.owned[heroId]) return;
     const ext = db.extensions[extKey];
@@ -141,13 +146,32 @@ export function gaugeBreakdown(db, state, hero) {
     if (!ext || !owner) return;
     if (!ext.subs.some(s => hero.rel.subjects.includes(s))) return;
     const aligned = ext.subs.some(s => owner.fit.includes(s));
-    const v = aligned ? 20 : 10;
-    damage += v;
-    rows.push({
+    const v = (ext.gauge || 10) * (aligned ? 2 : 1);
+    fromGear += v;
+    gearRows.push({
       label: `${ext.name}（${owner.name}）`, value: v,
       detail: aligned ? "得意分野と噛み合っている" : "装備効果",
     });
   });
+
+  /**
+   * **装備の合計は、知識カードの合計を超えない。**
+   *
+   * 装備は「どの知識が関連としてカウントされるか」を広げる触媒であって、
+   * それ自体が強さの源ではない（原則1）。上限を置かないと、装備を増やすほど
+   * ゲージが削れる状態になり、成長実感が知識から素材へ移ってしまう。
+   * 知識が0なら装備も0。持っている知識を、装備は最大で倍にするところまで。
+   */
+  const gearCap = Math.min(fromGear, fromCards);
+  rows.push(...gearRows);
+  if (fromGear > gearCap) {
+    rows.push({
+      label: "装備は知識を超えない",
+      value: -(fromGear - gearCap),
+      detail: `装備の合計は知識カードの合計（${fromCards}）までです`,
+    });
+  }
+  damage += gearCap;
 
   const hp = hero.hp || 60;
   return { damage: Math.min(hp, damage), hp, raw: damage, rows };
@@ -161,12 +185,74 @@ export function challengeStage(damage, hp) {
 
 /* ---- クラフト ---- */
 
-/* いま素材が足りているエクステンションのキー。
+/**
+ * レシピが要求するぶんのクリスタルを、**安いものから**選ぶ。
+ *
+ * クリスタルは個数ではなく合計いくらぶんで数える（族の縛りを外した以上、
+ * 個数で数えると安い鉱物を並べるだけで済んでしまうため）。安い順に取るのは、
+ * 使いすぎを最小にするため。それでも1個で足りてしまう高価な鉱物しか
+ * 持っていない場合は、その1個を丸ごと使うことになる。
+ *
+ * 返り値の picks は { "001": 個数 }、value は実際に使う合計。
+ */
+export function pickCrystals(owned, byId, need) {
+  const picks = {};
+  let value = 0;
+  if (need <= 0) return { picks, value, enough: true };
+
+  const stock = Object.entries(owned || {})
+    .filter(([id, n]) => n > 0 && byId?.[id])
+    .map(([id, n]) => ({ id, n, price: crystalPrice(byId[id].scarcity) }))
+    .sort((a, b) => a.price - b.price);
+
+  for (const c of stock) {
+    while (c.n > 0 && value < need) {
+      picks[c.id] = (picks[c.id] || 0) + 1;
+      value += c.price;
+      c.n--;
+    }
+    if (value >= need) break;
+  }
+  return { picks, value, enough: value >= need };
+}
+
+/**
+ * クラフトの可否と、その内訳。画面もホームの通知ドットもこれを見る。
+ * 足りないものが分かるように、満たしているかどうかを項目ごとに返す。
+ */
+export function craftCheck(db, state, id) {
+  const e = db.extensions?.[id];
+  if (!e) return { ok: false, gems: [], crystals: null, below: null, cards: null };
+
+  const gems = Object.entries(e.cost || {}).map(([g, need]) => ({
+    gem: g, need, have: state.gems[g] || 0, ok: (state.gems[g] || 0) >= need,
+  }));
+
+  const crystals = e.crystal
+    ? { need: e.crystal, ...pickCrystals(state.crystals, db.crystalById, e.crystal) }
+    : null;
+
+  const below = e.below
+    ? { id: e.below, name: db.extensions[e.below]?.name || e.below,
+        have: state.exts[e.below] || 0, ok: (state.exts[e.below] || 0) >= 1 }
+    : null;
+
+  // Legendary だけ知識カードの所持を条件に入れる。
+  // 最上位が素材だけで手に入ると「素材の量＝強さ」に戻ってしまうため
+  const cards = e.cards
+    ? { need: e.cards, have: Object.keys(state.cards || {}).length,
+        ok: Object.keys(state.cards || {}).length >= e.cards }
+    : null;
+
+  const ok = gems.every(g => g.ok) && (!crystals || crystals.enough)
+          && (!below || below.ok) && (!cards || cards.ok);
+  return { ok, gems, crystals, below, cards };
+}
+
+/* いま作れるエクステンションのキー。
    ホームの通知ドットとクラフト画面が同じ判定を見るために、ここに置く */
 export function craftableKeys(db, state) {
-  return Object.entries(db.extensions)
-    .filter(([, e]) => Object.entries(e.cost).every(([g, v]) => (state.gems[g] || 0) >= v))
-    .map(([k]) => k);
+  return Object.keys(db.extensions || {}).filter(id => craftCheck(db, state, id).ok);
 }
 
 /* ---- ホーム ---- */

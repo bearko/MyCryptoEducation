@@ -62,6 +62,7 @@ function defaults() {
     heroesTab: "own",   // ヒーロー画面のタブ（own / codex）
     calendar: null,     // カレンダーで見ている月 { year, month }
     myTab: "name",      // マイページのタブ（name / icon / title）
+    craftTab: null,     // クラフト画面で見ている系統
     dayView: null,      // 開いている日 "YYYY-MM-DD"
     stage: { i: 0 },    // ホームで見ている挑戦相手（未解放の英雄の何番目か）
     heroView: null,

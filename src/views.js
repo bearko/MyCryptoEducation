@@ -6,7 +6,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
          titleProgress, earnedTitles, countryOf,
          shopList, canBuy, crystalPrice, crystalsValue, crystalKinds,
-         CRYSTAL_UNIT } from "./engine.js";
+         CRYSTAL_UNIT, craftCheck } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
@@ -23,6 +23,12 @@ let DB, S, app;
 
 export function mount(db, state, root) {
   DB = db; S = state; app = root;
+
+  // エクステンションのキーを MCH の画像IDに変えたので、
+  // 古い保存データに残っている名前は捨てる（残すと参照先が無くて落ちる）
+  Object.keys(S.exts).forEach(k => { if (!db.extensions[k]) delete S.exts[k]; });
+  Object.entries(S.equip).forEach(([id, k]) => { if (k && !db.extensions[k]) delete S.equip[id]; });
+
   render();
 }
 
@@ -664,41 +670,79 @@ function vResult() {
 
 /* ---------- クラフト・装備 ---------- */
 
-function extIcon(key) {
-  const color = { lamp: "var(--pen)", codex: "var(--ai)", proto: "var(--brass)",
-                  chart: "var(--moss)", ring: "var(--ink)" }[key];
-  const path = {
-    lamp: "M20 6 L28 20 L20 34 L12 20 Z", codex: "M8 10 h24 v20 h-24 z M20 10 v20",
-    proto: "M6 30 h28 M6 30 A14 14 0 0 1 34 30", chart: "M20 6 L34 34 L20 26 L6 34 Z",
-    ring: "M20 8 a12 12 0 1 0 0.1 0 M20 2 v6 M20 32 v6 M2 20 h6 M32 20 h6" }[key];
-  return `<svg viewBox="0 0 40 40"><path d="${path}" fill="none" stroke="${color}"
-    stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
-}
-
 function vCraft() {
+  const lines = [];
+  for (const [id, e] of Object.entries(DB.extensions)) {
+    const g = lines.find(x => x.line === e.line) || (lines.push({ line: e.line, items: [] }), lines.at(-1));
+    g.items.push({ id, ...e });
+  }
+  const tab = lines.some(l => l.line === S.craftTab) ? S.craftTab : lines[0].line;
+  const group = lines.find(l => l.line === tab);
+  const made = Object.values(S.exts).reduce((a, b) => a + b, 0);
+
   app.innerHTML = `
   <header><div class="hbar"><div class="place">クラフト</div>
     <button class="mapbtn" id="back">もどる</button></div></header>
-  <div class="pad">${gemStrip(S.gems, "big")}
-    <p class="fine">エクステンションは攻撃力ではありません。持っている知識が、どこまで遠くの問いに届くかを広げます。</p>
-    ${(() => { const able0 = new Set(craftableKeys(DB, S)); return Object.entries(DB.extensions).map(([k, e]) => {
-      const have = S.exts[k] || 0, able = able0.has(k);
-      return `<div class="ext ${able ? "" : "dim"}">
-        <div class="exthead"><div class="exticon">${extIcon(k)}</div>
+  <div class="pad">
+    ${gemStrip(S.gems, "big")}
+    <p class="fine">エクステンションは攻撃力ではありません。持っている知識が、どこまで遠くの問いに届くかを広げます。
+      <b>難易度ゲージを削るのは知識カードで、装備の合計はその範囲を超えません。</b></p>
+    <div class="seg wrap" id="linetab">${lines.map(l => {
+      const n = l.items.filter(i => S.exts[i.id]).length;
+      return `<button data-l="${esc(l.line)}" class="${l.line === tab ? "on" : ""}">${esc(l.line)}<i>${n}/5</i></button>`;
+    }).join("")}</div>
+
+    ${group.items.map(e => {
+      const have = S.exts[e.id] || 0;
+      const c = craftCheck(DB, S, e.id);
+      return `<div class="ext ${c.ok ? "" : "dim"}">
+        <div class="exthead">
+          <img class="exticon" src="${assetPath.ext(e.id)}" alt="">
           <div><div class="extname">${esc(e.name)}${have ? ` <span class="cnt">×${have}</span>` : ""}</div>
-            <div class="extsub">${e.subs.join(" ・ ")}</div></div></div>
+            <div class="extsub"><span class="hr r${e.rarity}">${esc(e.rarity)}</span>
+              ${e.subs.join(" ・ ")} ・ ゲージ +${e.gauge}</div></div></div>
         <p class="extt">${esc(e.text)}</p>
-        <div class="cost">${Object.entries(e.cost).map(([g, v]) =>
-          `<span class="${S.gems[g] >= v ? "" : "short"}"><img src="${assetPath.gem(DB.gems[g].id)}" alt="">${v}</span>`).join("")}
-          <button class="mini" data-k="${k}" ${able ? "" : "disabled"}>クラフト</button></div></div>`;
-    }).join(""); })()}</div>`;
+        <div class="cost">
+          ${c.gems.map(g => `<span class="${g.ok ? "" : "short"}">
+            <img src="${assetPath.gem(DB.gems[g.gem].id)}" alt="">${g.need}</span>`).join("")}
+          ${c.crystals ? `<span class="${c.crystals.enough ? "" : "short"}" title="安いものから使います">
+            <img src="${assetPath.icon("gum")}" alt="">クリスタル ${c.crystals.need}相当</span>` : ""}
+          ${c.below ? `<span class="${c.below.ok ? "" : "short"}">${esc(c.below.name)} ×1</span>` : ""}
+          ${c.cards ? `<span class="${c.cards.ok ? "" : "short"}">知識カード ${c.cards.have}/${c.cards.need}</span>` : ""}
+          <button class="mini" data-k="${e.id}" ${c.ok ? "" : "disabled"}>クラフト</button></div>
+        ${c.crystals && c.crystals.enough && Object.keys(c.crystals.picks).length ? `
+          <p class="fine">使うクリスタル: ${Object.entries(c.crystals.picks)
+            .map(([id, n]) => `${esc(DB.crystalById[id].name)} ×${n}`).join(" ・ ")}
+            （合計 ${c.crystals.value}相当）</p>` : ""}
+      </div>`;
+    }).join("")}
+    <p class="fine">作った数 ${made} ・ 最上位だけは知識カードの所持も条件です。素材だけで最上位が手に入ると、
+      強さの源が知識から素材へ移ってしまうためです。</p>
+  </div>`;
+
   document.getElementById("back").onclick = () => go(S.runs ? "result" : "home");
-  app.querySelectorAll(".mini").forEach(b => b.onclick = () => {
-    const e = DB.extensions[b.dataset.k];
-    if (!craftableKeys(DB, S).includes(b.dataset.k)) return;
-    Object.entries(e.cost).forEach(([g, v]) => S.gems[g] -= v);
-    S.exts[b.dataset.k] = (S.exts[b.dataset.k] || 0) + 1;
+  app.querySelectorAll("#linetab button").forEach(b =>
+    b.onclick = () => { S.craftTab = b.dataset.l; render(); });
+  app.querySelectorAll(".mini[data-k]").forEach(b => b.onclick = () => {
+    const id = b.dataset.k, e = DB.extensions[id];
+    const c = craftCheck(DB, S, id);
+    if (!c.ok) return;
+    c.gems.forEach(g => { S.gems[g.gem] -= g.need; });
+    if (c.crystals) Object.entries(c.crystals.picks).forEach(([cid, n]) => {
+      S.crystals[cid] -= n;
+      if (S.crystals[cid] <= 0) delete S.crystals[cid];
+    });
+    if (c.below) {
+      S.exts[c.below.id] -= 1;
+      if (S.exts[c.below.id] <= 0) {
+        delete S.exts[c.below.id];
+        Object.entries(S.equip).forEach(([hid, k]) => { if (k === c.below.id) delete S.equip[hid]; });
+      }
+    }
+    S.exts[id] = (S.exts[id] || 0) + 1;
+    S.toast = `<img src="${assetPath.ext(id)}" alt=""><em>${esc(e.name)}</em>`;
     render();
+    setTimeout(() => { S.toast = null; drawToast(); }, 1600);
   });
 }
 
@@ -718,7 +762,7 @@ function vHero() {
       ${inv.length ? `<div class="eqlist">
         <button class="eqi ${!eq ? "on" : ""}" data-k="">外す</button>
         ${inv.map(([k]) => `<button class="eqi ${eq === k ? "on" : ""}" data-k="${k}">
-          <span class="exticon sm">${extIcon(k)}</span>${esc(DB.extensions[k].name)}</button>`).join("")}</div>
+          <img class="exticon sm" src="${assetPath.ext(k)}" alt="">${esc(DB.extensions[k].name)}</button>`).join("")}</div>
         ${eq ? `<p class="fine">${DB.extensions[eq].subs.some(s => h.fit.includes(s))
           ? "この英雄の得意分野と噛み合っています。効果が2倍になります。"
           : "得意分野とは噛み合っていません。効果は通常のままです。"}</p>` : ""}`
@@ -1116,7 +1160,7 @@ function vChallenge() {
       <div class="panel"><div class="phead"><h2>持っている知識で削る</h2></div>
         ${b.rows.length ? b.rows.map(r => `<div class="brow"><div>
             <div class="bt">${esc(r.label)}</div><div class="bs">${esc(r.detail)}</div></div>
-          <div class="bv">−${r.value}</div></div>`).join("")
+          <div class="bv ${r.value < 0 ? "back" : ""}">${r.value < 0 ? `+${-r.value}` : `−${r.value}`}</div></div>`).join("")
           : `<p class="empty">この英雄に関わる知識をまだ持っていません。まずは問題を解いてください。</p>`}
         <div class="btotal">合計 −${b.damage} <span class="bhp">難易度 ${b.hp}</span></div></div>
       <div class="stack"><button class="btn" id="fight">挑む</button></div>`
