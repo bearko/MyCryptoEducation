@@ -224,3 +224,43 @@ export function adviceFor(db, state) {
   const fb = advice.fallback || [];
   return fb.length ? fill(fb[state.runs % fb.length]) : "";
 }
+
+/* ---- カレンダー（記録装置。連続日数のボーナスもペナルティも持たない） ---- */
+
+export const dayKey = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/* 月のマス目。month は 1-12。前後の月にはみ出すマスも埋めて週で返す */
+export function monthGrid(year, month) {
+  const first = new Date(year, month - 1, 1);
+  const start = new Date(year, month - 1, 1 - first.getDay());
+  const weeks = [];
+  for (let w = 0; w < 6; w++) {
+    const row = [];
+    for (let d = 0; d < 7; d++) {
+      const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate() + w * 7 + d);
+      row.push({ key: dayKey(cur), day: cur.getDate(), inMonth: cur.getMonth() === month - 1 });
+    }
+    // 月をまたぎきった週は落とす（6行目が丸ごと来月になる月がある）
+    if (row.some(c => c.inMonth)) weeks.push(row);
+  }
+  return weeks;
+}
+
+/* その日の記録に1セッションぶんを足す。上書きではなく積む */
+export function mergeDay(prev, run) {
+  const base = prev || { runs: 0, right: 0, wrong: 0, appliedRight: 0, results: {} };
+  return {
+    runs: base.runs + 1,
+    right: base.right + run.right,
+    wrong: base.wrong + run.wrong,
+    appliedRight: base.appliedRight + run.appliedRight,
+    results: { ...base.results, ...run.results },
+  };
+}
+
+/* 月を送る。{ year, month } を返す */
+export function shiftMonth(year, month, dir) {
+  const d = new Date(year, month - 1 + dir, 1);
+  return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}

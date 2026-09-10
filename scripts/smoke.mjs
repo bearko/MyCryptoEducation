@@ -210,6 +210,68 @@ if (input) {
 ev('S.owned["4007"]=1;S.owned["5016"]=1;S.view="select";S.select.subject="auto";render()');
 check("解放で在庫が増える", /おまかせ\s*38/.test(txt()), txt().slice(0, 140));
 
+/* ---- カレンダー ---- */
+ev('S.view="home";render()');
+check("カレンダーは押せる", !!d.getElementById("tocal"));
+check("1セッションで回数は1だけ増える", ev("S.runs") === 1, `runs=${ev("S.runs")}`);
+check("その日の記録が残る", ev("Object.keys(S.days).length") === 1,
+  ev("JSON.stringify(Object.keys(S.days))"));
+check("記録は解けた数と問題を持つ", ev(`(() => {
+  const r = S.days[dayKey()];
+  return r.right + r.wrong > 0 && Object.keys(r.results).length > 0;
+})()`), ev("JSON.stringify(S.days[dayKey()])").slice(0, 120));
+
+d.getElementById("tocal").click();
+check("カレンダー画面が開く", txt().includes("カレンダー"), txt().slice(0, 60));
+check("連続日数の話は出さない", !/連続.*ボーナス(?!も)/.test(txt()) && txt().includes("ペナルティもありません"));
+const stamped = [...d.querySelectorAll(".cald.on")];
+check("解いた日にスタンプが押される", stamped.length === 1, `${stamped.length}日`);
+check("解いていない日は押せない",
+  [...d.querySelectorAll(".cald[data-k]")].every(b => b.classList.contains("on") || b.disabled),
+  `${[...d.querySelectorAll(".cald[data-k]")].filter(b => !b.classList.contains("on") && !b.disabled).length}件が押せてしまう`);
+
+// 月送り
+const monthText = d.querySelector(".calmonth").textContent;
+d.getElementById("prevmonth").click();
+check("前の月へ送れる", d.querySelector(".calmonth").textContent !== monthText);
+check("年またぎも壊れない", ev("JSON.stringify(shiftMonth(2026,1,-1))") === '{"year":2025,"month":12}');
+d.getElementById("nextmonth").click();
+check("戻ってこられる", d.querySelector(".calmonth").textContent === monthText);
+
+stamped[0].click();
+check("その日の記録を開ける", txt().includes("セッション"), txt().slice(0, 80));
+check("解説を読み返せる", d.querySelectorAll(".panel .extt").length > 0,
+  `${d.querySelectorAll(".panel .extt").length}件`);
+
+// 再挑戦は報酬なし
+const had = {
+  gems: ev("Object.values(S.gems).reduce((a,b)=>a+b,0)"),
+  cards: ev("Object.keys(S.cards).length"),
+  runs: ev("S.runs"),
+  score: ev("S.score"),
+};
+d.getElementById("replay").click();
+check("再挑戦が始まる", ev("S.run.noReward") === true && ev("S.run.ids.length") > 0);
+for (let i = 0; i < 40 && ev('S.view==="quiz"'); i++) {
+  const btns = d.querySelectorAll(".choices > .choice");
+  if (!btns.length) break;
+  btns[ev(`DB.byId[S.run.ids[S.run.i]].answer`)].click();
+  const n = d.getElementById("next");
+  if (n) n.click(); else await wait(900);
+}
+const now = {
+  gems: ev("Object.values(S.gems).reduce((a,b)=>a+b,0)"),
+  cards: ev("Object.keys(S.cards).length"),
+  runs: ev("S.runs"),
+  score: ev("S.score"),
+};
+check("再挑戦では魔石が増えない", now.gems === had.gems, `${had.gems} -> ${now.gems}`);
+check("再挑戦では知識カードが増えない", now.cards === had.cards, `${had.cards} -> ${now.cards}`);
+check("再挑戦は回数に入らない", now.runs === had.runs, `${had.runs} -> ${now.runs}`);
+check("再挑戦では点が入らない", now.score === had.score, `${had.score} -> ${now.score}`);
+check("再挑戦は記録を書き換えない", ev("S.days[dayKey()].runs") === 1,
+  `runs=${ev("S.days[dayKey()].runs")}`);
+
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));
 console.log(failed ? `\n${failed}件 失敗\n` : "\nすべて通過\n");
 process.exit(failed ? 1 : 0);
