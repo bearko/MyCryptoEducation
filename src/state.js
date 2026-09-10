@@ -11,7 +11,8 @@ export function capName(name) {
 
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
 const PERSISTED = ["settings", "profile", "gum", "gems", "exts", "equip",
-                   "owned", "cards", "cells", "seen", "runs", "score", "days"];
+                   "owned", "cards", "cells", "seen", "runs", "score", "days",
+                   "totalRight", "crossRight", "countries"];
 
 function defaults() {
   return {
@@ -38,6 +39,11 @@ function defaults() {
     runs: 0,
     score: 0,
 
+    // 称号の判定に使う積み上げ
+    totalRight: 0,        // 累計の正解数
+    crossRight: 0,        // いまの範囲の外（chapter 2以上）での正解数
+    countries: {},        // 正解した問題の国名
+
     // カレンダーの記録。"YYYY-MM-DD" → { runs, right, wrong, appliedRight, results }
     // 連続日数は数えない。ボーナスもペナルティも持たせないため
     days: {},
@@ -53,6 +59,7 @@ function defaults() {
 
     heroesTab: "own",   // ヒーロー画面のタブ（own / codex）
     calendar: null,     // カレンダーで見ている月 { year, month }
+    myTab: "name",      // マイページのタブ（name / icon / title）
     dayView: null,      // 開いている日 "YYYY-MM-DD"
     stage: { i: 0 },    // ホームで見ている挑戦相手（未解放の英雄の何番目か）
     heroView: null,

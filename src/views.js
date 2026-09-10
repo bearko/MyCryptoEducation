@@ -3,10 +3,11 @@
 import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedChapters, buildRun, gaugeBreakdown, challengeStage,
          cellKey, craftableKeys, nextHero, lockedHeroes, nextIndex,
-         adviceFor, dayKey, monthGrid, mergeDay, shiftMonth } from "./engine.js";
+         adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
+         titleProgress, earnedTitles, countryOf } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
-import { saveState } from "./state.js";
+import { saveState, capName, NAME_MAX } from "./state.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -33,7 +34,7 @@ function render() {
 
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
-     calendar: vCalendar, day: vDay }[S.view])();
+     calendar: vCalendar, day: vDay, mypage: vMypage }[S.view])();
   drawToast();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
@@ -239,16 +240,16 @@ function vHome() {
       <span class="st-batt" id="batt" hidden>${batteryIcon()}<b></b></span>
       <span class="st-clock" id="clock">${clockText()}</span>
     </div>
-    <div class="st-main">
+    <button class="st-main" id="tomypage">
       <img class="st-ava" src="${assetPath.hero(p.icon || "10001")}" alt="ユーザーアイコン">
-      <div class="st-fields">
-        <div class="st-line">
+      <span class="st-fields">
+        <span class="st-line">
           <span class="st-title ${p.title ? "" : "none"}">${p.title ? esc(p.title) : "称号なし"}</span>
           <span class="st-gum"><img src="${assetPath.icon("gum")}" alt="GUM">${(S.gum || 0).toLocaleString("ja-JP")}</span>
-        </div>
-        <div class="st-name">${esc(p.name || "旅人")}</div>
-      </div>
-    </div>
+        </span>
+        <span class="st-name">${esc(p.name || "旅人")}</span>
+      </span>
+    </button>
     <div class="st-advice">
       <img src="${assetPath.icon("mai_sd")}" alt="">
       <p class="bubble" id="advice">${esc(adviceFor(DB, S))}</p>
@@ -303,6 +304,7 @@ function vHome() {
   document.getElementById("tocraft").onclick = () => go("craft");
   document.getElementById("toheroes").onclick = () => go("heroes");
   document.getElementById("tocal").onclick = openCalendar;
+  document.getElementById("tomypage").onclick = () => go("mypage");
   const c = document.getElementById("tochal");
   if (c) c.onclick = () => go("target");
 
@@ -376,7 +378,7 @@ function startRun(opts = {}) {
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             gems: {}, right: 0, wrong: 0, appliedRight: 0,
             shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
-            results: {}, noReward: !!opts.noReward, done: false };
+            gum: 0, results: {}, noReward: !!opts.noReward, done: false };
   go("quiz");
 }
 
@@ -472,6 +474,7 @@ function onPick(idx) {
   const reward = !S.run.noReward;
   let gained = 0;
   S.run.results[q.id] = ok ? "ok" : "ng";
+  let gum = 0;
   if (ok) {
     S.run.right++;
     if (reward) {
@@ -479,6 +482,13 @@ function onPick(idx) {
       gained = 1 + (q.chapter >= 2 ? 1 : 0);
       S.gems[gemKey] += gained;
       S.run.gems[gemKey] = (S.run.gems[gemKey] || 0) + gained;
+      gum = gumFor(q);
+      S.gum += gum;
+      S.run.gum += gum;
+      S.totalRight++;
+      if (q.chapter >= 2) S.crossRight++;
+      const country = countryOf(q);
+      if (country) S.countries[country] = 1;
       if (S.cells[cellKey(q)] !== "st") S.cells[cellKey(q)] = "ok";
     }
   } else {
@@ -491,17 +501,18 @@ function onPick(idx) {
   // テンポ優先モード：正解なら演出だけ見せて次へ
   if (ok && !S.settings.showExplanationOnCorrect) {
     S.toast = `<span class="seal">✓</span><em>${esc(q.card)}</em>` +
-      (gained ? `<img src="${assetPath.gem(DB.gems[gemKey].id)}" alt=""> ×${gained}` : "");
+      (gained ? `<img src="${assetPath.gem(DB.gems[gemKey].id)}" alt=""> ×${gained}` : "") +
+      (gum ? `<img src="${assetPath.icon("gum")}" alt="GUM"> ${gum}` : "");
     drawToast();
     setTimeout(() => { S.toast = null; advance(); }, 750);
     return;
   }
 
   S.run.tipOpen = false; S.run.applied = null;
-  drawVerdict(q, h, ok, gained);
+  drawVerdict(q, h, ok, gained, gum);
 }
 
-function drawVerdict(q, h, ok, gained) {
+function drawVerdict(q, h, ok, gained, gum = 0) {
   const head = ok
     ? (S.run.hintsUsed ? "正解。ヒントを使っても、解けたことに変わりはない。" : "正解。")
     : "面白い単元に当たった。ここは聞いていこう。";
@@ -515,6 +526,8 @@ function drawVerdict(q, h, ok, gained) {
       <div class="gain"><span class="seal">✓</span><span>知識カード ・ <em>${esc(q.card)}</em></span></div>
       ${gained ? `<div class="gain gem2"><img src="${assetPath.gem(DB.gems[gemKey].id)}" alt="">
         <span>${esc(DB.gems[gemKey].name)} × ${gained}</span></div>` : ""}
+      ${gum ? `<div class="gain gem2"><img src="${assetPath.icon("gum")}" alt="GUM">
+        <span>GUM × ${gum} ・ ${esc(q.gradeLabel)}の問題</span></div>` : ""}
     </div>
     <div id="tipslot"></div><div id="exslot"></div><div class="stack" id="acts"></div></div>`;
   drawTip(q); drawApplied(q, ok); drawActions(q, ok);
@@ -618,12 +631,15 @@ function vResult() {
     <div class="stat">
       <div><b>${S.run.right}</b><span>解けた</span></div>
       <div><b>${S.run.appliedRight}</b><span>応用も突破</span></div>
-      <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div></div>
+      <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
+      ${S.run.noReward ? "" : `<div><b>${S.run.gum}</b><span>GUM</span></div>`}</div>
     ${S.run.shortage ? `<p class="cue">この範囲は在庫が ${S.run.ids.length}問だったので、${S.run.ids.length}問で終わりました。</p>` : ""}
     ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、魔石も知識カードも増えていません。</p>`
     : `<div class="panel">
       <div class="phead"><h2>獲得した魔石</h2></div>${gemStrip(S.run.gems, "big")}
       <p class="fine">所持: ${Object.entries(DB.gems).map(([k, g]) => `${g.el} ${S.gems[k]}`).join(" ・ ")}</p>
+      <p class="fine">GUM は難しい問題ほど多く貯まります（小1で1、世界の問題で10）。
+        所持 ${S.gum.toLocaleString("ja-JP")} GUM</p>
     </div>`}
     ${craftable ? `<p class="cue">クラフトできるエクステンションが ${craftable}種あります。</p>` : ""}
     ${next ? `<p class="cue">次に挑めるのは ${esc(next.name)}（${next.rarity}）。いまの知識で難易度ゲージを ${
@@ -797,6 +813,91 @@ function vHeroes() {
     b.onclick = () => { S.heroView = b.dataset.h; go("hero"); });
 }
 
+/* ---------- マイページ ---------- */
+
+function vMypage() {
+  const tab = ["name", "icon", "title"].includes(S.myTab) ? S.myTab : "name";
+  const p = S.profile;
+  const owned = heroesOwned();
+  const titles = titleProgress(DB, S);
+  const got = titles.filter(t => t.done).length;
+
+  const panels = {
+    name: `
+      <div class="panel">
+        <div class="phead"><h2>ユーザー名</h2><span class="sub">${NAME_MAX}文字まで</span></div>
+        <div class="answer"><input id="nameinput" type="text" maxlength="${NAME_MAX}"
+          value="${esc(p.name || "")}" placeholder="旅人" autocomplete="off"></div>
+        <button class="btn" id="savename">この名前にする</button>
+      </div>`,
+    icon: `
+      <div class="panel">
+        <div class="phead"><h2>ユーザーアイコン</h2><span class="sub">手持ちの英雄から</span></div>
+        <div class="hgrid">${owned.map(h => `
+          <button class="hcard ${p.icon === h.id ? "on" : ""}" data-i="${h.id}">
+            <img src="${assetPath.hero(h.id)}" alt="">
+            <span class="hn">${esc(h.name)}</span></button>`).join("")}</div>
+        <p class="fine">解放した英雄が増えるほど、選べる顔も増えます。</p>
+      </div>`,
+    title: `
+      <div class="panel">
+        <div class="phead"><h2>称号</h2><span class="sub">${got} / ${titles.length}</span></div>
+        <div class="eqlist">
+          <button class="eqi ${p.title ? "" : "on"}" data-t="">称号なし</button>
+          ${titles.map(t => `
+            <button class="eqi ${p.title === t.name ? "on" : ""} ${t.done ? "" : "lock"}"
+              data-t="${esc(t.name)}" ${t.done ? "" : "disabled"}>
+              <span class="tkind">${esc(t.kind)}</span>
+              <span class="tname">${t.done ? esc(t.name) : "？？？"}</span>
+              <span class="tneed">${esc(t.need)}<b>${t.have} / ${t.goal}</b></span>
+            </button>`).join("")}
+        </div>
+        <p class="fine">称号は集めた量よりも、どこまで越えたかで付きます。</p>
+      </div>`,
+  };
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">マイページ</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="myhead">
+      <img src="${assetPath.hero(p.icon || "10001")}" alt="">
+      <div>
+        <div class="st-title ${p.title ? "" : "none"}">${p.title ? esc(p.title) : "称号なし"}</div>
+        <div class="myname">${esc(p.name || "旅人")}</div>
+      </div>
+    </div>
+    <div class="seg" id="mytab">
+      <button data-t="name" class="${tab === "name" ? "on" : ""}">名前</button>
+      <button data-t="icon" class="${tab === "icon" ? "on" : ""}">アイコン</button>
+      <button data-t="title" class="${tab === "title" ? "on" : ""}">称号<i>${got}</i></button>
+    </div>
+    ${panels[tab]}
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("home");
+  app.querySelectorAll("#mytab button").forEach(b =>
+    b.onclick = () => { S.myTab = b.dataset.t; render(); });
+
+  const save = document.getElementById("savename");
+  if (save) {
+    const input = document.getElementById("nameinput");
+    const commit = () => {
+      const name = capName(input.value.trim());
+      S.profile.name = name || "旅人";
+      S.toast = `<span class="seal">✓</span><em>${esc(S.profile.name)}</em>`;
+      render();
+      setTimeout(() => { S.toast = null; drawToast(); }, 1400);
+    };
+    save.onclick = commit;
+    input.onkeydown = e => { if (e.key === "Enter") commit(); };
+  }
+  app.querySelectorAll(".hcard[data-i]").forEach(b =>
+    b.onclick = () => { S.profile.icon = b.dataset.i; render(); });
+  app.querySelectorAll(".eqi[data-t]").forEach(b =>
+    b.onclick = () => { S.profile.title = b.dataset.t || null; render(); });
+}
+
 /* ---------- カレンダー ---------- */
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -870,6 +971,7 @@ function vDay() {
       <div><b>${rec.appliedRight}</b><span>応用も突破</span></div>
       <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
       <div><b>${rec.runs}</b><span>セッション</span></div>
+      ${rec.gum ? `<div><b>${rec.gum}</b><span>GUM</span></div>` : ""}
     </div>
     ${ids.length ? `<div class="stack" style="margin-top:18px">
       <button class="btn ghost" id="replay">この日の${ids.length}問をもう一度解く</button></div>

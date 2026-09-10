@@ -1,0 +1,45 @@
+{
+  "_note": "称号。『量』より『越境』を目立たせたいので、この順番で並べる。条件は engine.titleProgress が解釈する。クリスタル収集の称号（石を読む者）は、クリスタル自体が未実装なのでまだ入れていない。",
+  "titles": [
+    {
+      "id": "cross-world",
+      "kind": "越境",
+      "name": "世界を渡る者",
+      "need": "3か国以上の問題に正解する",
+      "when": "countries",
+      "n": 3
+    },
+    {
+      "id": "six-arts",
+      "kind": "越境",
+      "name": "六芸に通ず",
+      "need": "6教科すべてで正解する",
+      "when": "subjects",
+      "n": 6
+    },
+    {
+      "id": "new-course",
+      "kind": "越境",
+      "name": "新課程の徒",
+      "need": "いまの範囲の外の問題に10問正解する",
+      "when": "crossRight",
+      "n": 10
+    },
+    {
+      "id": "cleopatra",
+      "kind": "深度",
+      "name": "クレオパトラを識る者",
+      "need": "クレオパトラに連なる知識カードをすべて集める",
+      "when": "heroCards",
+      "hero": "5016"
+    },
+    {
+      "id": "hundred",
+      "kind": "量",
+      "name": "百問の学徒",
+      "need": "累計100問正解する",
+      "when": "totalRight",
+      "n": 100
+    }
+  ]
+}

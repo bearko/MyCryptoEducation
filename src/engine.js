@@ -56,6 +56,18 @@ function shuffle(a) {
 export const cellKey = q => q.subject + "|" + q.grade;
 
 /**
+ * 正解1問で入る GUM。易しいほど少なく、難しいほど多い（1〜10）。
+ * 学年の梯子がちょうど10段あるので、そのまま段数を渡している。
+ * 小1が1、小6が6、中3が9、世界の問題が10。
+ *
+ * ヒントを使っても減らさない。ヒントは罰の対象ではないため。
+ * 応用編にも上乗せしない。上限が1問10GUMなので、難易度は学年だけで決める。
+ */
+export function gumFor(q) {
+  return Math.max(1, Math.min(10, GRADE_ORDER[q.grade] || 1));
+}
+
+/**
  * 1セッションぶんの出題を組む。
  *
  * ・同じ問題は絶対に2回出さない（在庫が足りなければ、その数だけ出題する）
@@ -249,12 +261,13 @@ export function monthGrid(year, month) {
 
 /* その日の記録に1セッションぶんを足す。上書きではなく積む */
 export function mergeDay(prev, run) {
-  const base = prev || { runs: 0, right: 0, wrong: 0, appliedRight: 0, results: {} };
+  const base = prev || { runs: 0, right: 0, wrong: 0, appliedRight: 0, gum: 0, results: {} };
   return {
     runs: base.runs + 1,
     right: base.right + run.right,
     wrong: base.wrong + run.wrong,
     appliedRight: base.appliedRight + run.appliedRight,
+    gum: (base.gum || 0) + (run.gum || 0),
     results: { ...base.results, ...run.results },
   };
 }
@@ -264,3 +277,35 @@ export function shiftMonth(year, month, dir) {
   const d = new Date(year, month - 1 + dir, 1);
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
 }
+
+/* ---- 称号 ---- */
+
+/* 問題の country は「イギリス / Key Stage 3（11–14歳）」の形。国名だけ取り出す */
+export const countryOf = q => (q.country || "").split(" / ")[0].trim();
+
+/**
+ * 称号の進み具合。data/titles.json の並び順で返す。
+ * 「量」より「越境」を目立たせたいので、並べ替えはせずファイルの順を守る。
+ * 返すのは { ...title, have, goal, done }。
+ */
+export function titleProgress(db, state) {
+  const list = db.titles?.titles || [];
+  const subjectsDone = SUBJECTS.filter(s =>
+    GRADES.some(g => ["ok", "st"].includes(state.cells[s + "|" + g.k]))).length;
+
+  return list.map(t => {
+    let have = 0, goal = t.n || 1;
+    if (t.when === "countries")      have = Object.keys(state.countries || {}).length;
+    else if (t.when === "subjects")  have = subjectsDone;
+    else if (t.when === "crossRight") have = state.crossRight || 0;
+    else if (t.when === "totalRight") have = state.totalRight || 0;
+    else if (t.when === "heroCards") {
+      const cards = db.heroById?.[t.hero]?.rel?.cards || [];
+      goal = cards.length;
+      have = cards.filter(c => state.cards[c]).length;
+    }
+    return { ...t, have: Math.min(have, goal), goal, done: goal > 0 && have >= goal };
+  });
+}
+
+export const earnedTitles = (db, state) => titleProgress(db, state).filter(t => t.done);

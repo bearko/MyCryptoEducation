@@ -176,6 +176,21 @@ for (let k = 0; k < 10; k++) {
 }
 check("魔石が貯まる", ev("Object.values(S.gems).reduce((x,y)=>x+y,0)") > 0,
   ev("JSON.stringify(S.gems)"));
+
+/* ---- GUM は難易度なり（1〜10） ---- */
+check("易しい問題は1GUM", ev('gumFor({grade:"e1"})') === 1);
+check("世界の問題は10GUM", ev('gumFor({grade:"w"})') === 10);
+check("学年が上がるほど増える",
+  ["e1","e2","e3","e4","e5","e6","j1","j2","j3","w"]
+    .map(g => ev(`gumFor({grade:"${g}"})`)).every((v, i, a) => i === 0 || v > a[i - 1]));
+check("未知の学年でも1〜10に収まる",
+  ev('gumFor({grade:"zz"})') === 1 && ev('gumFor({})') === 1);
+// ここまでに何セッションか回しているので、所持は今回ぶん以上になる
+check("正解した問題ぶんGUMが貯まる", ev("S.run.gum") > 0 && ev("S.gum") >= ev("S.run.gum"),
+  `所持 ${ev("S.gum")} / 今回 ${ev("S.run.gum")}`);
+check("今回のGUMは正解数と釣り合う",
+  ev("S.run.gum") >= ev("S.run.right") && ev("S.run.gum") <= ev("S.run.right") * 10,
+  `${ev("S.run.gum")} GUM / 正解 ${ev("S.run.right")}問`);
 check("リザルトに到達", !!d.getElementById("again"), txt().slice(0, 80));
 
 const c = d.getElementById("craft");
@@ -216,6 +231,7 @@ check("カレンダーは押せる", !!d.getElementById("tocal"));
 check("1セッションで回数は1だけ増える", ev("S.runs") === 1, `runs=${ev("S.runs")}`);
 check("その日の記録が残る", ev("Object.keys(S.days).length") === 1,
   ev("JSON.stringify(Object.keys(S.days))"));
+check("記録にGUMも残る", ev("S.days[dayKey()].gum") > 0, `${ev("S.days[dayKey()].gum")} GUM`);
 check("記録は解けた数と問題を持つ", ev(`(() => {
   const r = S.days[dayKey()];
   return r.right + r.wrong > 0 && Object.keys(r.results).length > 0;
@@ -245,6 +261,7 @@ check("解説を読み返せる", d.querySelectorAll(".panel .extt").length > 0,
 
 // 再挑戦は報酬なし
 const had = {
+  gum: ev("S.gum"),
   gems: ev("Object.values(S.gems).reduce((a,b)=>a+b,0)"),
   cards: ev("Object.keys(S.cards).length"),
   runs: ev("S.runs"),
@@ -260,6 +277,7 @@ for (let i = 0; i < 40 && ev('S.view==="quiz"'); i++) {
   if (n) n.click(); else await wait(900);
 }
 const now = {
+  gum: ev("S.gum"),
   gems: ev("Object.values(S.gems).reduce((a,b)=>a+b,0)"),
   cards: ev("Object.keys(S.cards).length"),
   runs: ev("S.runs"),
@@ -269,8 +287,55 @@ check("再挑戦では魔石が増えない", now.gems === had.gems, `${had.gems
 check("再挑戦では知識カードが増えない", now.cards === had.cards, `${had.cards} -> ${now.cards}`);
 check("再挑戦は回数に入らない", now.runs === had.runs, `${had.runs} -> ${now.runs}`);
 check("再挑戦では点が入らない", now.score === had.score, `${had.score} -> ${now.score}`);
+check("再挑戦ではGUMも増えない", now.gum === had.gum, `${had.gum} -> ${now.gum}`);
 check("再挑戦は記録を書き換えない", ev("S.days[dayKey()].runs") === 1,
   `runs=${ev("S.days[dayKey()].runs")}`);
+
+/* ---- マイページと称号 ---- */
+ev('S.view="home";render()');
+check("ステータス層からマイページへ行ける", !!d.getElementById("tomypage"));
+d.getElementById("tomypage").click();
+check("マイページが開く", txt().includes("マイページ"), txt().slice(0, 60));
+
+// 名前
+d.getElementById("nameinput").value = "テスト太郎";
+d.getElementById("savename").click();
+check("名前を変えられる", ev("S.profile.name") === "テスト太郎", ev("S.profile.name"));
+ev('S.myTab="name";render()');
+d.getElementById("nameinput").value = "あ".repeat(400);
+d.getElementById("savename").click();
+check("名前は255文字で切られる", ev("S.profile.name.length") === 255, `${ev("S.profile.name.length")}文字`);
+ev('S.profile.name="旅人";S.myTab="icon";render()');
+
+// アイコン
+const iconBtns = [...d.querySelectorAll(".hcard[data-i]")];
+check("アイコンは手持ちの英雄から選ぶ", iconBtns.length === ev("heroesOwned().length"),
+  `${iconBtns.length}件`);
+iconBtns[1].click();
+check("アイコンを変えられる", ev("S.profile.icon") === iconBtns[1].dataset.i, ev("S.profile.icon"));
+
+// 称号
+ev('S.myTab="title";render()');
+check("称号が一覧になる", d.querySelectorAll(".eqi[data-t]").length === ev("DB.titles.titles.length") + 1,
+  `${d.querySelectorAll(".eqi[data-t]").length}件`);
+check("未取得の称号は選べない",
+  [...d.querySelectorAll(".eqi[data-t]")].filter(b => b.classList.contains("lock")).every(b => b.disabled));
+check("未取得の称号は名前を伏せる",
+  [...d.querySelectorAll(".eqi.lock .tname")].every(e => e.textContent === "？？？"));
+
+// 条件を満たすと選べるようになる
+ev(`S.countries={"イギリス":1,"インド":1,"フランス":1};render()`);
+const world = [...d.querySelectorAll(".eqi[data-t]")].find(b => b.dataset.t === "世界を渡る者");
+check("条件を満たすと称号が開く", !!world && !world.disabled, world ? "disabled" : "見つからない");
+world.click();
+check("称号を付けられる", ev("S.profile.title") === "世界を渡る者", String(ev("S.profile.title")));
+ev('S.view="home";render()');
+check("ホームに称号が出る", d.querySelector(".st-title").textContent.includes("世界を渡る者"),
+  d.querySelector(".st-title").textContent);
+check("越境の称号が量より先に並ぶ",
+  ev(`titleProgress(DB,S)[0].kind`) === "越境" && ev(`titleProgress(DB,S).at(-1).kind`) === "量");
+check("正解した国が記録される", ev("Object.keys(S.countries).length") >= 3);
+ev('S.profile.title=null;render()');
 
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));
 console.log(failed ? `\n${failed}件 失敗\n` : "\nすべて通過\n");
