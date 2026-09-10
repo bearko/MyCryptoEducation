@@ -99,8 +99,12 @@ check("ホームへ戻れる", !!d.getElementById("toquiz"));
 /* ---- 修正1: 重複しない出題 ---- */
 d.getElementById("toquiz").click();
 check("ホーム以外は方眼紙のまま", !d.getElementById("app").classList.contains("home"));
-// 開始時は第3・4章が未解放なので、在庫は38問中25問
-check("在庫バッジが出ている", /おまかせ\s*25/.test(txt()), txt().slice(0, 160));
+// 開始時は第3・4章が未解放。期待値は問題データから出す（問題を足すたびに直さないため）
+const openStock = ev("inventory(DB,S,'auto','auto').length");
+check("在庫バッジが出ている", new RegExp(`おまかせ\\s*${openStock}`).test(txt()),
+  `在庫 ${openStock} / ${txt().slice(0, 120)}`);
+check("未解放ぶんは在庫から外れる", openStock < ev("DB.questions.length"),
+  `${openStock} / 全 ${ev("DB.questions.length")}問`);
 check("未解放の教科は選べない",
   [...d.querySelectorAll("#sub button")].find(b => b.dataset.k === "情報").disabled);
 
@@ -135,8 +139,17 @@ for (let i = 0; i < 20; i++) {
 check("20セッション連続で重複ゼロ", dup === 0, `${dup}件`);
 
 /* ---- 修正2: 解説スキップ ---- */
-ev('S.view="select";S.select.subject="auto";S.settings.showExplanationOnCorrect=true;render()');
-d.getElementById("start").click();
+// レンジ回答が混ざるようになったので、この節は4択だけで組む
+const answerChoice = () => {
+  const i = ev("DB.byId[S.run.ids[S.run.i]].answer");
+  const btns = d.querySelectorAll(".choices > .choice");
+  btns[i].click();
+};
+ev(`(() => {
+  const ids = DB.questions.filter(q => (q.format || "choice") === "choice").slice(0, 6).map(q => q.id);
+  S.settings.showExplanationOnCorrect = true;
+  startRun({ ids });
+})()`);
 let ai = ev("DB.byId[S.run.ids[S.run.i]].answer");
 d.querySelectorAll(".choices > .choice")[ai].click();
 check("ONなら解説が出る", !!d.getElementById("next") && txt().includes("知識カード"));
@@ -161,8 +174,11 @@ await wait(60);
 check("OFFでも不正解なら解説が出る", !!d.getElementById("next") && txt().includes("面白い単元"));
 
 /* ---- 報酬とチャレンジが壊れていないか ---- */
-ev('S.settings.showExplanationOnCorrect=true;S.view="select";render()');
-d.getElementById("start").click();
+ev(`(() => {
+  const ids = DB.questions.filter(q => (q.format || "choice") === "choice").slice(0, 10).map(q => q.id);
+  S.settings.showExplanationOnCorrect = true;
+  startRun({ ids });
+})()`);
 for (let k = 0; k < 10; k++) {
 
   const idx = ev("DB.byId[S.run.ids[S.run.i]].answer");
@@ -266,7 +282,8 @@ if (input) {
 
 // 解放すると出題範囲が広がる
 ev('S.owned["4007"]=1;S.owned["5016"]=1;S.view="select";S.select.subject="auto";render()');
-check("解放で在庫が増える", /おまかせ\s*38/.test(txt()), txt().slice(0, 140));
+check("解放で在庫が増える", new RegExp(`おまかせ\\s*${ev("DB.questions.length")}`).test(txt()),
+  `全 ${ev("DB.questions.length")}問 / ${txt().slice(0, 120)}`);
 
 /* ---- カレンダー ---- */
 ev('S.view="home";render()');
@@ -462,6 +479,87 @@ check("クリスタルは知識カードにならない",
 ev('S.gum=0;S.crystals={};S.view="home";render()');
 check("アートを参照できる", ev(`assetPath.crystal("001")`).length > 0, ev(`assetPath.crystal("001")`));
 check("豆知識が全種にある", ev(`DB.crystals.crystals.every(c => c.fact && c.fact.length > 8)`));
+
+/* ---- レンジ回答（年代当て） ---- */
+check("許容幅は古いほど広い", ev(`(() => {
+  const w = [2011, 1945, 1600, 794, -2560].map(y => rangeWidth(y, 1, 2026));
+  return w.every((v, i) => i === 0 || v > w[i - 1]);
+})()`), ev("JSON.stringify([2011,1945,1600,794,-2560].map(y=>rangeWidth(y,1,2026)))"));
+check("計画表の表と一致する", ev(`(() => {
+  const want = { 2011: 12, 1989: 14, 1945: 18, 1868: 26, 1600: 53,
+                 1467: 66, 1192: 93, 794: 133, "-221": 235, "-2560": 469 };
+  return Object.entries(want).every(([y, w]) => rangeWidth(Number(y), 1, 2026) === w);
+})()`));
+check("許容幅は10〜500に収まる",
+  ev("rangeWidth(2026,1,2026)") === 10 && ev("rangeWidth(-99999,1,2026)") === 500,
+  `${ev("rangeWidth(2026,1,2026)")} / ${ev("rangeWidth(-99999,1,2026)")}`);
+check("precisionで締めたり緩めたりできる",
+  ev("rangeWidth(1600,0.5,2026)") < ev("rangeWidth(1600,1,2026)") &&
+  ev("rangeWidth(1600,2,2026)") > ev("rangeWidth(1600,1,2026)"));
+
+check("言い切って当てれば満点", ev("scoreRange(1467,1467,1467,66)") === 1000);
+check("外せば0点", ev("scoreRange(1500,1600,1467,66)") === 0);
+check("広く取るほど点は伸びない",
+  ev("scoreRange(1450,1480,1467,66)") > ev("scoreRange(1400,1500,1467,66)"));
+check("広すぎても下限50点は残る", ev("scoreRange(1000,1900,1467,66)") === 50);
+check("順序を逆に入れても同じ",
+  ev("scoreRange(1480,1450,1467,66)") === ev("scoreRange(1450,1480,1467,66)"));
+
+// 画面から実際に答える
+ev(`(() => {
+  const q = DB.questions.find(x => x.format === "range");
+  S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
+            gum: 0, results: {}, noReward: false, done: false };
+  S.view = "quiz"; render();
+})()`);
+check("レンジ問題では選択肢を出さない",
+  !!d.getElementById("ra") && d.querySelectorAll(".choices .choice").length === 0);
+check("幅を入れるまで答えられない", d.getElementById("rsubmit").disabled);
+check("点数の見込みは出さない", !/点/.test(d.getElementById("rlive").textContent),
+  d.getElementById("rlive").textContent);
+
+const ry = ev(`DB.byId[S.run.ids[0]].year`);
+const gemsBefore = ev("Object.values(S.gems).reduce((a,b)=>a+b,0)");
+d.getElementById("ra").value = String(ry);
+d.getElementById("rb").value = String(ry);
+d.getElementById("ra").dispatchEvent(new w.Event("input", { bubbles: true }));
+check("幅を入れると答えられる", !d.getElementById("rsubmit").disabled);
+check("入れた幅を見せる", d.getElementById("rlive").textContent.includes("幅 0年"),
+  d.getElementById("rlive").textContent);
+d.getElementById("rsubmit").click();
+check("採点される", ev("S.run.picked && S.run.picked.score") === 1000,
+  ev("JSON.stringify(S.run.picked)"));
+check("答えたあとに許容幅を明かす", d.getElementById("rlive").textContent.includes("許容幅"),
+  d.getElementById("rlive").textContent);
+check("正解として数える", ev("S.run.right") === 1);
+check("精度が高いと魔石がもう1つ落ちる",
+  ev("Object.values(S.gems).reduce((a,b)=>a+b,0)") - gemsBefore >= 2,
+  `+${ev("Object.values(S.gems).reduce((a,b)=>a+b,0)") - gemsBefore}`);
+check("解説は出る", !!d.getElementById("next") && txt().includes("知識カード"));
+check("二重に答えられない", (() => {
+  const before = ev("S.run.right");
+  ev("onRange(DB.byId[S.run.ids[0]])");
+  return ev("S.run.right") === before;
+})());
+
+// 外したときも解説は出る（原則3）
+ev(`(() => {
+  const q = DB.questions.filter(x => x.format === "range")[1];
+  S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
+            gum: 0, results: {}, noReward: false, done: false };
+  S.view = "quiz"; render();
+})()`);
+d.getElementById("ra").value = "1000";
+d.getElementById("rb").value = "1010";
+d.getElementById("ra").dispatchEvent(new w.Event("input", { bubbles: true }));
+d.getElementById("rsubmit").click();
+check("外しても解説は出る", !!d.getElementById("next") && txt().includes("面白い単元"),
+  txt().slice(0, 80));
+check("外したら正解の年を明かす", d.getElementById("rlive").textContent.includes("正解は"),
+  d.getElementById("rlive").textContent);
+check("外したぶんは記録に残る", ev("S.run.wrong") === 1);
 
 /* ---- 原則1: 装備はゲージで知識を超えない ---- */
 check("知識が0なら装備も効かない", ev(`(() => {
