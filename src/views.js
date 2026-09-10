@@ -3,7 +3,7 @@
 import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedChapters, buildRun, gaugeBreakdown, challengeStage,
          cellKey, craftableKeys, nextHero, lockedHeroes, nextIndex,
-         adviceFor } from "./engine.js";
+         adviceFor, dayKey, monthGrid, mergeDay, shiftMonth } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
 import { saveState } from "./state.js";
@@ -32,7 +32,8 @@ function render() {
   document.body.classList.toggle("home", home);
 
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
-     heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge }[S.view])();
+     heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
+     calendar: vCalendar, day: vDay }[S.view])();
   drawToast();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
@@ -255,7 +256,7 @@ function vHome() {
   </div>
 
   <div class="layer layer-stage">
-    <div class="cal"><img src="${assetPath.icon("mch_icon")}" alt="">${dateText()}</div>
+    <button class="cal" id="tocal"><img src="${assetPath.icon("mch_icon")}" alt="">${dateText()}</button>
     ${target ? `
     <div class="tv">
       <div class="tv-art">
@@ -301,6 +302,7 @@ function vHome() {
   document.getElementById("toquiz").onclick = () => go("select");
   document.getElementById("tocraft").onclick = () => go("craft");
   document.getElementById("toheroes").onclick = () => go("heroes");
+  document.getElementById("tocal").onclick = openCalendar;
   const c = document.getElementById("tochal");
   if (c) c.onclick = () => go("target");
 
@@ -369,12 +371,27 @@ function vSelect() {
   document.getElementById("start").onclick = () => startRun();
 }
 
-function startRun() {
-  const ids = buildRun(DB, S);
+function startRun(opts = {}) {
+  const ids = opts.ids || buildRun(DB, S);
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             gems: {}, right: 0, wrong: 0, appliedRight: 0,
-            shortage: Math.max(0, RUN_LENGTH - ids.length) };
+            shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
+            results: {}, noReward: !!opts.noReward, done: false };
   go("quiz");
+}
+
+/**
+ * 1セッションの終わり。ここでだけ回数を数え、その日の記録を積む。
+ * 以前は vResult の中で数えていたので、リザルトを描き直すたびに増えていた。
+ * 記録からの再挑戦（noReward）は、回数にも記録にも入れない。
+ */
+function finishRun() {
+  if (S.run.done) return;
+  S.run.done = true;
+  if (S.run.noReward) return;
+  S.runs++;
+  const k = dayKey();
+  S.days[k] = mergeDay(S.days[k], S.run);
 }
 
 /* ---------- クイズ ---------- */
@@ -442,7 +459,7 @@ function onPick(idx) {
   if (S.run.picked !== null) return;
   const q = currentQ(), h = heroFor(q), ok = idx === q.answer;
   S.run.picked = idx;
-  S.seen[q.id] = 1;
+  if (!S.run.noReward) S.seen[q.id] = 1;
 
   app.querySelectorAll(".choices > .choice").forEach((b, i) => {
     b.disabled = true;
@@ -452,19 +469,23 @@ function onPick(idx) {
   });
 
   const gemKey = DB.subjectToGem[q.subject];
+  const reward = !S.run.noReward;
   let gained = 0;
+  S.run.results[q.id] = ok ? "ok" : "ng";
   if (ok) {
     S.run.right++;
-    S.score += Math.max(4, 10 - S.run.hintsUsed * 2);
-    gained = 1 + (q.chapter >= 2 ? 1 : 0);
-    S.gems[gemKey] += gained;
-    S.run.gems[gemKey] = (S.run.gems[gemKey] || 0) + gained;
-    if (S.cells[cellKey(q)] !== "st") S.cells[cellKey(q)] = "ok";
+    if (reward) {
+      S.score += Math.max(4, 10 - S.run.hintsUsed * 2);
+      gained = 1 + (q.chapter >= 2 ? 1 : 0);
+      S.gems[gemKey] += gained;
+      S.run.gems[gemKey] = (S.run.gems[gemKey] || 0) + gained;
+      if (S.cells[cellKey(q)] !== "st") S.cells[cellKey(q)] = "ok";
+    }
   } else {
     S.run.wrong++;
-    if (!S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
+    if (reward && !S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
   }
-  S.cards[q.card] = true;
+  if (reward) S.cards[q.card] = true;
   drawHints(q, h);
 
   // テンポ優先モード：正解なら演出だけ見せて次へ
@@ -576,13 +597,13 @@ function drawActions(q, ok) {
 function advance() {
   S.run.i++; S.run.picked = null; S.run.hintsUsed = 0;
   S.run.tipOpen = false; S.run.applied = null;
+  if (S.run.i >= S.run.ids.length) finishRun();
   render(); window.scrollTo(0, 0);
 }
 
 /* ---------- リザルト ---------- */
 
 function vResult() {
-  S.runs++;
   const answered = S.run.right + S.run.wrong;
   const rate = answered ? Math.round(S.run.right / answered * 100) : 0;
   const craftable = craftableKeys(DB, S).length;
@@ -599,10 +620,11 @@ function vResult() {
       <div><b>${S.run.appliedRight}</b><span>応用も突破</span></div>
       <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div></div>
     ${S.run.shortage ? `<p class="cue">この範囲は在庫が ${S.run.ids.length}問だったので、${S.run.ids.length}問で終わりました。</p>` : ""}
-    <div class="panel">
+    ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、魔石も知識カードも増えていません。</p>`
+    : `<div class="panel">
       <div class="phead"><h2>獲得した魔石</h2></div>${gemStrip(S.run.gems, "big")}
       <p class="fine">所持: ${Object.entries(DB.gems).map(([k, g]) => `${g.el} ${S.gems[k]}`).join(" ・ ")}</p>
-    </div>
+    </div>`}
     ${craftable ? `<p class="cue">クラフトできるエクステンションが ${craftable}種あります。</p>` : ""}
     ${next ? `<p class="cue">次に挑めるのは ${esc(next.name)}（${next.rarity}）。いまの知識で難易度ゲージを ${
       Math.round(nextGauge.damage / nextGauge.hp * 100)}% 削れます。</p>` : ""}
@@ -773,6 +795,100 @@ function vHeroes() {
     b.onclick = () => { S.heroesTab = b.dataset.t; render(); });
   app.querySelectorAll(".hcard").forEach(b =>
     b.onclick = () => { S.heroView = b.dataset.h; go("hero"); });
+}
+
+/* ---------- カレンダー ---------- */
+
+const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+
+const dayLabel = k => {
+  const [y, m, d] = k.split("-").map(Number);
+  return `${y}年${m}月${d}日（${WEEKDAYS[new Date(y, m - 1, d).getDay()]}）`;
+};
+
+function openCalendar() {
+  const now = new Date();
+  S.calendar = S.calendar || { year: now.getFullYear(), month: now.getMonth() + 1 };
+  go("calendar");
+}
+
+function vCalendar() {
+  const { year, month } = S.calendar;
+  const today = dayKey();
+  const weeks = monthGrid(year, month);
+  const played = weeks.flat().filter(c => c.inMonth && S.days[c.key]).length;
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">カレンダー</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="calhead">
+      <button class="calnav" id="prevmonth" aria-label="前の月">‹</button>
+      <div class="calmonth">${year}年${month}月<span>${played}日</span></div>
+      <button class="calnav" id="nextmonth" aria-label="次の月">›</button>
+    </div>
+    <table class="calgrid">
+      <tr>${WEEKDAYS.map((w, n) =>
+        `<th class="${n === 0 ? "sun" : n === 6 ? "sat" : ""}">${w}</th>`).join("")}</tr>
+      ${weeks.map(row => `<tr>${row.map(c => {
+        const rec = c.inMonth ? S.days[c.key] : null;
+        if (!c.inMonth) return `<td><div class="cald out"></div></td>`;
+        return `<td><button class="cald ${rec ? "on" : ""} ${c.key === today ? "today" : ""}"
+          data-k="${c.key}" ${rec ? "" : "disabled"}>
+          <span class="cn">${c.day}</span>
+          ${rec ? `<img src="${assetPath.icon("mch_icon")}" alt="解いた日">` : ""}
+        </button></td>`;
+      }).join("")}</tr>`).join("")}
+    </table>
+    <p class="fine">解いた日にスタンプが押されます。<b>連続日数のボーナスもペナルティもありません。</b>
+      途切れても、次に開いたときの出題は何も変わりません。</p>
+    ${played ? `<p class="cue">スタンプの日を選ぶと、その日の成績と解説を読み返せます。</p>`
+             : `<p class="empty">この月はまだ記録がありません。</p>`}
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("home");
+  document.getElementById("prevmonth").onclick = () => { S.calendar = shiftMonth(year, month, -1); render(); };
+  document.getElementById("nextmonth").onclick = () => { S.calendar = shiftMonth(year, month, 1); render(); };
+  app.querySelectorAll(".cald[data-k]").forEach(b =>
+    b.onclick = () => { S.dayView = b.dataset.k; go("day"); });
+}
+
+/* その日に解いた問題を読み返す。再挑戦もできるが、報酬は出ない */
+function vDay() {
+  const k = S.dayView, rec = S.days[k];
+  if (!rec) return go("calendar");
+  const ids = Object.keys(rec.results).filter(id => DB.byId[id]);
+  const answered = rec.right + rec.wrong;
+  const rate = answered ? Math.round(rec.right / answered * 100) : 0;
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">${dayLabel(k)}</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="stat" style="margin-top:20px">
+      <div><b>${rec.right}</b><span>解けた</span></div>
+      <div><b>${rec.appliedRight}</b><span>応用も突破</span></div>
+      <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
+      <div><b>${rec.runs}</b><span>セッション</span></div>
+    </div>
+    ${ids.length ? `<div class="stack" style="margin-top:18px">
+      <button class="btn ghost" id="replay">この日の${ids.length}問をもう一度解く</button></div>
+      <p class="fine">再挑戦では魔石も知識カードも増えません。記録も変わりません。読み返すためのものです。</p>` : ""}
+    ${ids.map(id => {
+      const q = DB.byId[id], ok = rec.results[id] === "ok";
+      return `<div class="panel">
+        <div class="phead"><h2>${esc(q.subject)} ・ ${esc(q.gradeLabel)}</h2>
+          <span class="sub ${ok ? "ok" : "ng"}">${ok ? "解けた" : "面白い単元"}</span></div>
+        <p class="dq">${esc(q.prompt)}</p>
+        <p class="da">答え ・ <b>${esc(q.choices[q.answer])}</b></p>
+        <p class="extt">${esc(q.lesson)}</p>
+      </div>`;
+    }).join("")}
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("calendar");
+  const r = document.getElementById("replay");
+  if (r) r.onclick = () => startRun({ ids, noReward: true });
 }
 
 /* ---------- 挑戦先を選ぶ ---------- */

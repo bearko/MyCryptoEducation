@@ -355,7 +355,9 @@
   .layer-stage > *{position:relative;z-index:1}
   .cal{position:absolute;top:10px;right:12px;z-index:2;border:1px solid var(--line);
     background:rgba(251,251,247,.86);border-radius:var(--tile-r);padding:5px 8px;
-    display:flex;align-items:center;gap:5px;font:inherit;font-size:11px;color:var(--ink-soft);cursor:default}
+    display:flex;align-items:center;gap:5px;font:inherit;font-size:11px;color:var(--ink-soft);
+    cursor:pointer}
+  .cal:hover{border-color:var(--ink-faint)}
   .cal img{width:17px;height:17px}
 
   /* 挑む相手。ボタンの中に置くアイコンとは別物なので、ボタンの外に大きく出す。
@@ -401,6 +403,7 @@
     width:clamp(52px,22vw,104px);height:clamp(52px,22vw,104px);max-height:84%;
     object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 2px 5px rgba(0,0,0,.55))}
+  .tile > *{pointer-events:none}
   .tile .lab{position:absolute;left:0;right:0;bottom:5px;display:flex;flex-direction:column;
     align-items:center;line-height:1.25}
   .tile b{font-family:var(--mincho);font-size:clamp(12px,3.6vw,14.5px);font-weight:600;
@@ -429,3 +432,39 @@
   .trow .tg i{display:block;height:100%;background:linear-gradient(90deg,var(--pen),#E08A5F)}
   .trow .tp{font-size:12px;color:var(--ink-soft)}
   .trow .ts{font-size:11px;color:var(--ink-faint);line-height:1.5}
+
+  /* --- カレンダー。記録装置なので、連続日数の演出は一切置かない --- */
+  .calhead{display:flex;align-items:center;gap:10px;margin-top:18px}
+  .calmonth{flex:1;text-align:center;font-family:var(--mincho);font-size:18px;font-weight:600}
+  .calmonth span{display:block;font-family:var(--gothic);font-size:11.5px;
+    font-weight:400;color:var(--ink-faint);margin-top:2px}
+  .calnav{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
+    background:var(--card);color:var(--ink-soft);font-size:20px;line-height:1;padding:0;cursor:pointer}
+  .calnav:hover{border-color:var(--ink-faint)}
+
+  /* table-layout:fixed が無いと、マスの中身に引っ張られて列幅が揃わず、
+     アスペクト比で伸びたボタンが隣のマスに重なる */
+  table.calgrid{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:4px;margin-top:14px}
+  table.calgrid th{font-weight:400;font-size:11px;color:var(--ink-faint);padding-bottom:2px}
+  table.calgrid th.sun{color:var(--pen)}
+  table.calgrid th.sat{color:var(--ai)}
+  table.calgrid td{width:14.28%;padding:0}
+  .cald{position:relative;width:100%;aspect-ratio:1;border:1px solid var(--line);
+    background:var(--card);border-radius:3px;font:inherit;padding:0;cursor:default;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+  .cald.out{border-color:transparent;background:transparent}
+  /* 中の要素でクリックを受けない。ボタン自体が当たり判定になる */
+  .cald > *{pointer-events:none}
+  .cald .cn{font-size:11.5px;color:var(--ink-faint);line-height:1}
+  .cald.on{cursor:pointer;border-color:var(--brass);background:#FDFBF4}
+  .cald.on .cn{color:var(--ink);font-weight:600}
+  .cald.on:hover{border-color:var(--pen)}
+  .cald img{width:60%;max-width:26px;height:auto;image-rendering:pixelated}
+  .cald.today{box-shadow:0 0 0 2px var(--ai)}
+  .cald:disabled{cursor:default}
+
+  .phead .sub.ok{color:var(--pen)}
+  .phead .sub.ng{color:var(--ai)}
+  .dq{font-family:var(--mincho);font-size:15.5px;line-height:1.7;margin:0 0 8px}
+  .da{font-size:13px;color:var(--ink-soft);margin:0 0 10px}
+  .da b{color:var(--ink)}

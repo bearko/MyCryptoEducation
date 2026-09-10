@@ -11,7 +11,7 @@ export function capName(name) {
 
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
 const PERSISTED = ["settings", "profile", "gum", "gems", "exts", "equip",
-                   "owned", "cards", "cells", "seen", "runs", "score"];
+                   "owned", "cards", "cells", "seen", "runs", "score", "days"];
 
 function defaults() {
   return {
@@ -38,15 +38,22 @@ function defaults() {
     runs: 0,
     score: 0,
 
-    // 現在のセッション
+    // カレンダーの記録。"YYYY-MM-DD" → { runs, right, wrong, appliedRight, results }
+    // 連続日数は数えない。ボーナスもペナルティも持たせないため
+    days: {},
+
+    // 現在のセッション。noReward は記録からの再挑戦（報酬なし）
     run: { ids: [], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-           gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0 },
+           gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
+           results: {}, noReward: false, done: false },
 
     // チャレンジ
     challenge: { heroId: null, phase: "intro", breakdown: null, damage: 0,
                  tries: 0, done: false, message: "" },
 
     heroesTab: "own",   // ヒーロー画面のタブ（own / codex）
+    calendar: null,     // カレンダーで見ている月 { year, month }
+    dayView: null,      // 開いている日 "YYYY-MM-DD"
     stage: { i: 0 },    // ホームで見ている挑戦相手（未解放の英雄の何番目か）
     heroView: null,
     toast: null,
