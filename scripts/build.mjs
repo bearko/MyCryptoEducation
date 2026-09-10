@@ -23,6 +23,7 @@ const db = {
   extensions: await json("data/extensions.json"),
   gemstones:  await json("data/gemstones.json"),
   advice:     await json("data/advice.json"),
+  titles:     await json("data/titles.json"),
 };
 
 /* --- 画像を data URI に --- */

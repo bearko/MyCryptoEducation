@@ -12,15 +12,17 @@ export async function loadDatabase(base = "./data") {
   // ビルド済み単一ファイルの場合は、あらかじめ埋め込まれたものを使う
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
-  const [questionSets, figures, heroes, extensions, gemstones, advice] = await Promise.all([
+  const [questionSets, figures, heroes, extensions, gemstones, advice, titles] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
     json(`${base}/extensions.json`),
     json(`${base}/gemstones.json`),
     json(`${base}/advice.json`),
+    json(`${base}/titles.json`),
   ]);
-  return index({ questions: questionSets.flat(), figures, heroes, extensions, gemstones, advice });
+  return index({ questions: questionSets.flat(), figures, heroes, extensions,
+                 gemstones, advice, titles });
 }
 
 function index(raw) {

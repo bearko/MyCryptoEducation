@@ -468,3 +468,30 @@
   .dq{font-family:var(--mincho);font-size:15.5px;line-height:1.7;margin:0 0 8px}
   .da{font-size:13px;color:var(--ink-soft);margin:0 0 10px}
   .da b{color:var(--ink)}
+
+  /* --- マイページ --- */
+  .st-main{width:100%;border:none;background:none;padding:0;font:inherit;color:inherit;
+    text-align:left;cursor:pointer}
+  .st-main .st-fields{display:flex;flex-direction:column;gap:4px}
+  .st-main .st-line{display:flex;align-items:center;gap:8px;min-width:0}
+  .st-main .st-name{display:block}
+
+  .myhead{display:flex;align-items:center;gap:14px;margin-top:20px}
+  .myhead img{width:64px;height:64px;border-radius:50%;border:2px solid var(--line);
+    background:var(--card);image-rendering:pixelated;flex:none}
+  .myhead .st-title{flex:none;text-align:left;display:inline-block}
+  .myname{font-family:var(--mincho);font-size:20px;font-weight:600;margin-top:6px;
+    word-break:break-all;line-height:1.4}
+  .hcard.on{border-color:var(--brass);background:#FDFBF4}
+
+  .eqi{flex-wrap:wrap}
+  .eqi .tkind{flex:none;font-size:10.5px;letter-spacing:.08em;color:#fff;background:var(--ink-soft);
+    border-radius:2px;padding:1px 6px}
+  .eqi.on .tkind{background:var(--moss)}
+  .eqi .tname{font-weight:600;color:var(--ink)}
+  .eqi.on .tname{color:var(--moss)}
+  .eqi.lock .tname{color:var(--ink-faint)}
+  .eqi .tneed{flex-basis:100%;font-size:11px;color:var(--ink-faint);line-height:1.5;
+    display:flex;justify-content:space-between;gap:10px}
+  .eqi .tneed b{color:var(--ink-soft);font-weight:600;flex:none}
+  .eqi:disabled{opacity:.75;cursor:default}
