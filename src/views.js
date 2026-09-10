@@ -4,7 +4,9 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedChapters, buildRun, gaugeBreakdown, challengeStage,
          cellKey, craftableKeys, nextHero, lockedHeroes, nextIndex,
          adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
-         titleProgress, earnedTitles, countryOf } from "./engine.js";
+         titleProgress, earnedTitles, countryOf,
+         shopList, canBuy, crystalPrice, crystalsValue, crystalKinds,
+         CRYSTAL_UNIT } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
@@ -34,7 +36,7 @@ function render() {
 
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
-     calendar: vCalendar, day: vDay, mypage: vMypage }[S.view])();
+     calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop }[S.view])();
   drawToast();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
@@ -285,10 +287,10 @@ function vHome() {
         style="background-image:var(--g-hero),url('${assetPath.bg("1038")}')">
         <img src="${assetPath.hero("10001")}" alt="">
         <span class="lab"><b>ヒーロー</b></span></button>
-      <button class="tile" id="toshop" disabled
+      <button class="tile" id="toshop"
         style="background-image:var(--g-shop),url('${assetPath.bg("1004")}')">
         <img src="${assetPath.hero("3037")}" alt="">
-        <span class="lab"><b>ショップ</b><small>準備中</small></span></button>
+        <span class="lab"><b>ショップ</b></span></button>
       <button class="tile" id="tocraft"
         style="background-image:var(--g-craft),url('${assetPath.bg("1046")}')">
         <img src="${assetPath.hero("2023")}" alt="">
@@ -305,6 +307,7 @@ function vHome() {
   document.getElementById("toheroes").onclick = () => go("heroes");
   document.getElementById("tocal").onclick = openCalendar;
   document.getElementById("tomypage").onclick = () => go("mypage");
+  document.getElementById("toshop").onclick = () => go("shop");
   const c = document.getElementById("tochal");
   if (c) c.onclick = () => go("target");
 
@@ -811,6 +814,64 @@ function vHeroes() {
     b.onclick = () => { S.heroesTab = b.dataset.t; render(); });
   app.querySelectorAll(".hcard").forEach(b =>
     b.onclick = () => { S.heroView = b.dataset.h; go("hero"); });
+}
+
+/* ---------- ショップ ---------- */
+
+/**
+ * クリスタルをGUMで買う。**品揃えは固定で、安い順。**
+ * 日替わりでランダムに並べ替えると「良い品が出るまで待つ」待機が生まれる。
+ *
+ * どれを買っても GUM あたりの重みは同じなので、選ぶ基準は損得ではなく
+ * 「どの鉱物を知りたいか」になる。豆知識は手に入れてから読める。
+ */
+function vShop() {
+  const list = shopList(DB);
+  const kinds = crystalKinds(S);
+  const value = crystalsValue(S.crystals, DB.crystalById);
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">ショップ</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="panel">
+      <div class="phead"><h2>手持ち</h2><span class="sub">${kinds} / ${list.length}種</span></div>
+      <div class="gemrow big"><span class="gem"><img src="${assetPath.icon("gum")}" alt="GUM">
+        <b>${(S.gum || 0).toLocaleString("ja-JP")}</b></span></div>
+      <p class="fine">GUM は解いた問題の難しさに応じて貯まります。魔石は買えません。</p>
+      ${value ? `<p class="fine">集めたクリスタルはクラフトに ${value.toLocaleString("ja-JP")} 相当ぶん効きます
+        （1個ぶんの目安は ${CRYSTAL_UNIT}）。</p>` : ""}
+    </div>
+    <p class="fine">値段は希少度から決まります。<b>どれを買っても、同じ GUM ならクラフトの進み方は同じです。</b>
+      選ぶ基準は損得ではなく、どの鉱物を知りたいかです。</p>
+    ${list.map(c => {
+      const have = S.crystals[c.id] || 0;
+      const afford = canBuy(S, c.price);
+      return `<div class="shopitem ${have ? "owned" : ""}">
+        <img src="${assetPath.crystal(c.id)}" alt="">
+        <div class="si">
+          <div class="sn">${esc(c.name)}<span class="sen">${esc(c.en)}</span>
+            ${have ? `<span class="cnt">×${have}</span>` : ""}</div>
+          <div class="ss">${esc(c.family)} ・ 希少度 ${c.scarcity}%</div>
+          <div class="sfact ${have ? "" : "hide"}">${have ? esc(c.fact) : "手に入れると、この鉱物の話が読めます"}</div>
+        </div>
+        <div class="sbuy">
+          <span class="sp ${afford ? "" : "short"}"><img src="${assetPath.icon("gum")}" alt="">${c.price.toLocaleString("ja-JP")}</span>
+          <button class="mini" data-c="${c.id}" ${afford ? "" : "disabled"}>買う</button>
+        </div></div>`;
+    }).join("")}
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("home");
+  app.querySelectorAll(".mini[data-c]").forEach(b => b.onclick = () => {
+    const c = list.find(x => x.id === b.dataset.c);
+    if (!c || !canBuy(S, c.price)) return;
+    S.gum -= c.price;
+    S.crystals[c.id] = (S.crystals[c.id] || 0) + 1;
+    S.toast = `<img src="${assetPath.crystal(c.id)}" alt=""><em>${esc(c.name)}</em>`;
+    render();
+    setTimeout(() => { S.toast = null; drawToast(); }, 1600);
+  });
 }
 
 /* ---------- マイページ ---------- */

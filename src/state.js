@@ -12,7 +12,7 @@ export function capName(name) {
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
 const PERSISTED = ["settings", "profile", "gum", "gems", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score", "days",
-                   "totalRight", "crossRight", "countries"];
+                   "totalRight", "crossRight", "countries", "crystals"];
 
 function defaults() {
   return {
@@ -38,6 +38,8 @@ function defaults() {
     seen: {},
     runs: 0,
     score: 0,
+
+    crystals: {},         // 買ったクリスタル { "001": 個数, ... }
 
     // 称号の判定に使う積み上げ
     totalRight: 0,        // 累計の正解数

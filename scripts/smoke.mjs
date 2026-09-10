@@ -48,7 +48,7 @@ check("長い名前でも1行に収める", (() => {
 })());
 check("ナビが4枠そろっている",
   ["toheroes", "toshop", "tocraft", "toquiz"].every(id => !!d.getElementById(id)));
-check("ショップは準備中で押せない", d.getElementById("toshop").disabled);
+check("ショップは押せる", !d.getElementById("toshop").disabled);
 check("挑戦ボタンは主役層にある", !!d.querySelector(".layer-stage #tochal"));
 check("挑戦ボタンは文字だけ", d.getElementById("tochal").textContent.trim() === "挑戦",
   d.getElementById("tochal").textContent.trim());
@@ -366,6 +366,57 @@ check("同じGUMなら鉱物を変えても重みは同じ", ev(`(() => {
   return DB.crystals.crystals.every(c => { const r = spend(c.id); return r.paid === r.weight; });
 })()`));
 check("1個ぶんの目安は50GUM", ev("CRYSTAL_UNIT") === 50);
+
+/* ---- ショップ ---- */
+ev('S.view="home";render()');
+d.getElementById("toshop").click();
+check("ショップが開く", txt().includes("ショップ"), txt().slice(0, 60));
+check("10種すべて並ぶ", d.querySelectorAll(".shopitem").length === 10,
+  `${d.querySelectorAll(".shopitem").length}件`);
+check("品揃えは安い順で固定", (() => {
+  const read = () => [...d.querySelectorAll(".shopitem .sn")].map(e => e.textContent.trim());
+  const a = read(); ev("render()"); const b = read();
+  const prices = ev("JSON.stringify(shopList(DB).map(c => c.price))");
+  const p = JSON.parse(prices);
+  return a.join("|") === b.join("|") && p.every((v, i) => i === 0 || v >= p[i - 1]);
+})(), "並びが変わる、または安い順でない");
+check("持っていない鉱物の豆知識は伏せる",
+  d.querySelectorAll(".sfact.hide").length === 10);
+
+// 買えないときは押せない
+ev("S.gum=0;render()");
+check("GUMが0なら何も買えない",
+  [...d.querySelectorAll(".mini[data-c]")].every(b => b.disabled));
+
+// 買う
+ev("S.gum=300;render()");
+const cheap = d.querySelector(".mini[data-c]:not([disabled])");
+const cheapId = cheap.dataset.c;
+const cheapPrice = ev(`shopList(DB).find(c => c.id === "${cheapId}").price`);
+cheap.click();
+check("買うとGUMが減る", ev("S.gum") === 300 - cheapPrice, `${ev("S.gum")} / 価格 ${cheapPrice}`);
+check("買ったぶんが手持ちに入る", ev(`S.crystals["${cheapId}"]`) === 1);
+check("買うと豆知識が読める", d.querySelectorAll(".sfact.hide").length === 9,
+  `伏せたまま ${d.querySelectorAll(".sfact.hide").length}件`);
+check("高いものは買えないままにする",
+  ev(`(() => { const d0 = shopList(DB).find(c => c.price > S.gum); return !!d0; })()`));
+
+// 集めると重みが積み上がる
+ev(`S.gum=100000;S.crystals={};render()`);
+[...d.querySelectorAll(".mini[data-c]")].slice(0, 5).forEach(b => b.click());
+check("5種そろう", ev("crystalKinds(S)") === 5, `${ev("crystalKinds(S)")}種`);
+check("合計の重みは払ったGUMと同じ", ev(`(() => {
+  const spent = 100000 - S.gum;
+  return crystalsValue(S.crystals, DB.crystalById) === spent;
+})()`), `使った ${ev("100000 - S.gum")} / 重み ${ev("crystalsValue(S.crystals, DB.crystalById)")}`);
+
+// 5種で称号が開く
+check("5種集めると「石を読む者」が開く",
+  ev(`titleProgress(DB,S).find(t => t.id === "stone-reader").done`) === true,
+  ev(`JSON.stringify(titleProgress(DB,S).find(t => t.id === "stone-reader"))`));
+check("クリスタルは知識カードにならない",
+  ev(`DB.crystals.crystals.every(c => !S.cards[c.name] && !S.cards[c.fact])`));
+ev('S.gum=0;S.crystals={};S.view="home";render()');
 check("アートを参照できる", ev(`assetPath.crystal("001")`).length > 0, ev(`assetPath.crystal("001")`));
 check("豆知識が全種にある", ev(`DB.crystals.crystals.every(c => c.fact && c.fact.length > 8)`));
 
