@@ -3,6 +3,7 @@
    使い方: npm run validate                                        */
 
 import { readFile, readdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -30,6 +31,7 @@ const figures    = await json("data/figures.json");
 const heroes     = await json("data/heroes.json");
 const extensions = await json("data/extensions.json");
 const gemstones  = await json("data/gemstones.json");
+const crystals   = await json("data/crystals.json");
 
 /* ---- 1問ごとの検証 ---- */
 const seenIds = new Set();
@@ -111,6 +113,25 @@ for (const [k, e] of Object.entries(extensions)) {
   e.subs.forEach(s => { if (!SUBJECTS.includes(s)) err(k, `未知の分野 "${s}"`); });
 }
 
+/* ---- クリスタル ---- */
+const FAMILIES = ["貴金属", "宝石", "元素", "鉱石", "生物起源", "石英"];
+const crystalIds = new Set();
+for (const c of crystals.crystals || []) {
+  const id = c.id || "(id未設定)";
+  if (crystalIds.has(c.id)) err(id, "クリスタルIDが重複しています");
+  crystalIds.add(c.id);
+  if (!/^\d{3}$/.test(String(c.id))) err(id, "IDは3桁の数字にしてください");
+  for (const k of ["name", "en", "family", "scarcity", "fact"]) {
+    if (c[k] === undefined || c[k] === null || c[k] === "") err(id, `必須項目 ${k} がありません`);
+  }
+  if (!FAMILIES.includes(c.family)) err(id, `未知の族 "${c.family}"`);
+  if (typeof c.scarcity !== "number" || !(c.scarcity > 0) || c.scarcity > 100)
+    err(id, `希少度が 0〜100% の範囲にありません (${c.scarcity})`);
+  // 図鑑のアートが取れているか
+  if (!existsSync(join(ROOT, `public/materials/crystals/${c.id}.webp`)))
+    err(id, "アートが public/materials/crystals にありません");
+}
+
 /* ---- 在庫（同じ問題が繰り返し出る原因になる） ---- */
 const stock = (band, subject) => questions.filter(q =>
   (band === "auto" || BANDS[band].includes(q.grade)) &&
@@ -127,7 +148,7 @@ for (const s of SUBJECTS) {
 }
 
 /* ---- 出力 ---- */
-console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${Object.keys(extensions).length}種\n`);
+console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${Object.keys(extensions).length}種 / クリスタル ${(crystals.crystals || []).length}種\n`);
 console.table(table);
 
 if (warnings.length) {

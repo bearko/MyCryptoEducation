@@ -337,6 +337,25 @@ check("越境の称号が量より先に並ぶ",
 check("正解した国が記録される", ev("Object.keys(S.countries).length") >= 3);
 ev('S.profile.title=null;render()');
 
+/* ---- クリスタル10種 ---- */
+check("クリスタルは10種", ev("DB.crystals.crystals.length") === 10,
+  `${ev("DB.crystals.crystals.length")}種`);
+check("和名と英名が両方ある",
+  ev(`DB.crystals.crystals.every(c => c.name && c.en)`),
+  ev(`JSON.stringify(DB.crystals.crystals.filter(c => !c.name || !c.en).map(c => c.id))`));
+check("価格は希少度から出す（計画表の例と一致）",
+  ev("crystalPrice(6.250)") === 8 && ev("crystalPrice(3.950)") === 13,
+  `銅 ${ev("crystalPrice(6.250)")} / 黒鉛 ${ev("crystalPrice(3.950)")}`);
+check("希少なものほど高い", ev(`(() => {
+  const cs = [...DB.crystals.crystals].sort((a,b) => a.scarcity - b.scarcity);
+  return cs.every((c,i) => i === 0 || crystalPrice(c.scarcity) <= crystalPrice(cs[i-1].scarcity));
+})()`));
+check("下限は5GUM", ev("crystalPrice(100)") === 5 && ev("crystalPrice(0)") === 5);
+check("族は対応表にある", ev(`DB.crystals.crystals.every(c => CRYSTAL_FAMILIES[c.family])`),
+  ev(`JSON.stringify([...new Set(DB.crystals.crystals.map(c => c.family))])`));
+check("アートを参照できる", ev(`assetPath.crystal("001")`).length > 0, ev(`assetPath.crystal("001")`));
+check("豆知識が全種にある", ev(`DB.crystals.crystals.every(c => c.fact && c.fact.length > 8)`));
+
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));
 console.log(failed ? `\n${failed}件 失敗\n` : "\nすべて通過\n");
 process.exit(failed ? 1 : 0);

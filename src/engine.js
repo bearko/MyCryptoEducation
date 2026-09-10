@@ -309,3 +309,26 @@ export function titleProgress(db, state) {
 }
 
 export const earnedTitles = (db, state) => titleProgress(db, state).filter(t => t.done);
+
+/* ---- クリスタル ---- */
+
+/**
+ * ショップの価格。図鑑の希少度から自動で決まるので、手で値付けしない。
+ * 希少なものほど高い。下限5GUM（安すぎて意味を失わないように）。
+ * 例: 銅 6.250% → 8GUM、黒鉛 3.950% → 13GUM、ダイヤモンド 0.034% → 1471GUM
+ */
+export function crystalPrice(scarcity) {
+  const s = Number(scarcity);
+  if (!Number.isFinite(s) || s <= 0) return 5;
+  return Math.max(5, Math.round(50 / s));
+}
+
+/* 族 → 効果のある教科。docs/implementation-plan.md §2-1 の対応表 */
+export const CRYSTAL_FAMILIES = {
+  "貴金属": ["社会"],
+  "宝石": ["外国語"],
+  "元素": ["理科"],
+  "鉱石": ["理科"],
+  "生物起源": ["国語", "理科"],
+  "石英": ["算数・数学"],
+};
