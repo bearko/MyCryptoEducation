@@ -48,11 +48,11 @@
       "height": 435
     },
     "lava-flow": {
-      "search": "Kilauea lava flow USGS",
+      "search": "lava flow",
       "alt": "地表を流れる赤い溶岩。表面は黒く固まりかけている",
       "use": "rika-052",
       "where": "lesson",
-      "category": "Photographs by the United States Geological Survey"
+      "insource": "PD-USGov"
     },
     "mars": {
       "search": "Mars Hubble Space Telescope",
@@ -75,7 +75,7 @@
       "where": "lesson",
       "file": "mendeleev",
       "title": "Dmitri Mendeleev 1890s",
-      "author": "Unknown authorUnknown author",
+      "author": "Unknown author",
       "license": "Public domain",
       "licenseUrl": "",
       "source": "https://commons.wikimedia.org/wiki/File%3ADmitri%20Mendeleev%201890s.jpg",
@@ -139,18 +139,11 @@
       "height": 770
     },
     "mandela": {
-      "search": "Nelson Mandela 1994",
-      "alt": "南アフリカ大統領となったころのネルソン・マンデラ",
+      "search": "Nelson Mandela",
+      "alt": "演説するネルソン・マンデラ",
       "use": "shakai-068",
       "where": "lesson",
-      "file": "mandela",
-      "title": "Mandela e Evelyn 1944",
-      "author": "The original uploader was André Koehne at Portuguese Wikipedia.",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AMandela%20e%20Evelyn%201944.jpg",
-      "width": 392,
-      "height": 400
+      "insource": "PD-USGov"
     },
     "kamakura-daibutsu": {
       "search": "Kamakura Daibutsu Kotokuin",
@@ -187,7 +180,7 @@
       "where": "lesson",
       "file": "homer-bust",
       "title": "Bust Homer BM 1825",
-      "author": "Unknown artistUnknown artist",
+      "author": "Unknown artist",
       "license": "Public domain",
       "licenseUrl": "",
       "source": "https://commons.wikimedia.org/wiki/File%3ABust%20Homer%20BM%201825.jpg",
@@ -196,9 +189,9 @@
     },
     "roman-clock": {
       "search": "Clock face Roman numerals",
-      "alt": "ローマ数字が刻まれた時計の文字盤。IVやIXが読める",
+      "alt": "ローマ数字の文字盤をもつ目ざまし時計。4の位置は IV ではなく IIII と書かれている",
       "use": "sansu-095",
-      "where": "prompt",
+      "where": "lesson",
       "file": "roman-clock",
       "title": "Roman numerals on alarm clock (Unsplash)",
       "author": "Ales Krivec aleskrivec",

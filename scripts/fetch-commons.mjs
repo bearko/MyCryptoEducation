@@ -7,6 +7,8 @@
 
    やること
      1. images.json の commons（File:名）を見る。無ければ search で検索する
+        insource に "PD-USGov" のようなライセンス定型文の名を書くと、
+        その定型文を含むファイルだけを探す。PD に寄せたいときに効く
      2. 候補のライセンスを見て、allow に載っているものだけを採る
         どれも使えなければ、見えた候補を題名とライセンス付きで並べる。
         その中から選んで台帳の commons に File:名を書けば、次は確実にそれを採る
@@ -63,6 +65,13 @@ const normalizeLicense = m => {
   return code || "不明";
 };
 const stripTags = s => String(s || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+/* コモンズの Artist 欄は、テンプレートの都合で同じ語が二度続くことがある
+   （"Unknown authorUnknown author"）。繰り返しを1回に畳む */
+const dedupe = s => {
+  const t = stripTags(s);
+  const half = t.length / 2;
+  return (t.length % 2 === 0 && t.slice(0, half) === t.slice(half)) ? t.slice(0, half) : t;
+};
 
 let ok = 0, ng = 0;
 for (const [key, entry] of wanted) {
@@ -76,7 +85,12 @@ for (const [key, entry] of wanted) {
       : entry.search
         ? await api({
             action: "query", generator: "search",
-            gsrsearch: `filetype:bitmap ${entry.category ? `incategory:"${entry.category}" ` : ""}${entry.search}`,
+            gsrsearch: [
+              "filetype:bitmap",
+              entry.category ? `incategory:"${entry.category}"` : "",
+              entry.insource ? `insource:"${entry.insource}"` : "",
+              entry.search,
+            ].filter(Boolean).join(" "),
             gsrnamespace: "6", gsrlimit: "50",
             prop: "imageinfo", iiprop: "url|extmetadata|size", iiurlwidth: String(WIDE),
           })
@@ -125,7 +139,7 @@ for (const [key, entry] of wanted) {
     Object.assign(entry, {
       file,
       title: stripTags(m.ObjectName?.value) || hit.page.title.replace(/^File:/, ""),
-      author: stripTags(m.Artist?.value) || "作者不明",
+      author: dedupe(m.Artist?.value) || "作者不明",
       license: hit.license,
       licenseUrl: m.LicenseUrl?.value || "",
       source: `https://commons.wikimedia.org/wiki/${encodeURIComponent(hit.page.title)}`,
