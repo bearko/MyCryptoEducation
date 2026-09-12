@@ -108,15 +108,27 @@ check("未解放ぶんは在庫から外れる", openStock < ev("DB.questions.le
 check("未解放の教科は選べない",
   [...d.querySelectorAll("#sub button")].find(b => b.dataset.k === "情報").disabled);
 
-// 外国語（解放済み在庫1問）を選ぶ。以前はここで同じ問題が10回出ていた
-[...d.querySelectorAll("#sub button")].find(b => b.dataset.k === "外国語").click();
-check("在庫不足の警告", txt().includes("この範囲は現在 1問です"), txt().slice(0, 200));
-check("開始ボタンが問題数に追従", d.getElementById("start").textContent.includes("1問を始める"));
+// 在庫が1セッションぶんに満たない教科を選ぶ。以前はここで同じ問題が繰り返し出ていた。
+// 問題を足すと在庫は変わるので、期待値はデータから出す
+const thin = ev(`(() => {
+  const counts = inventoryBySubject(DB, S, "auto");
+  const hit = Object.entries(counts).find(([, n]) => n > 0 && n < RUN_LENGTH);
+  return hit ? JSON.stringify({ subject: hit[0], n: hit[1] }) : "null";
+})()`);
+check("1セッションに満たない教科がある（この検査の前提）", thin !== "null", "全教科が10問以上になった");
+const { subject: thinSub, n: thinN } = JSON.parse(thin);
+[...d.querySelectorAll("#sub button")].find(b => b.dataset.k === thinSub).click();
+check("在庫不足の警告", txt().includes(`この範囲は現在 ${thinN}問です`),
+  `${thinSub} ${thinN}問 / ${txt().slice(0, 160)}`);
+check("開始ボタンが問題数に追従",
+  d.getElementById("start").textContent.includes(`${thinN}問を始める`),
+  d.getElementById("start").textContent);
 
 d.getElementById("start").click();
 const ids = ev("JSON.stringify(S.run.ids)");
 const arr = JSON.parse(ids);
-check("在庫1問なら1問だけ出す（旧: 同じ問題が10回）", arr.length === 1, ids);
+check("在庫ぶんだけ出す（旧: 同じ問題が繰り返し出ていた）", arr.length === thinN,
+  `${arr.length}問 / 在庫 ${thinN}問`);
 check("同じ問題が出ない", new Set(arr).size === arr.length, ids);
 
 // おまかせで10問

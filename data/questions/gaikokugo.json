@@ -118,5 +118,201 @@
       "hint": "第二言語まで含めると英語が最多だが、母語話者だけで数えると別だ。",
       "note": "母語話者では中国語が最多。英語は第二言語話者を含めて世界最大になる。どう数えるかで順位が変わるのだ。"
     }
+  },
+  {
+    "id": "gaikokugo-004",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "自己紹介",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"Where are you from?\" と聞かれた。自然な答えはどれ?",
+    "choices": [
+      "I'm from Japan.",
+      "I'm fine, thank you.",
+      "I'm twelve years old.",
+      "I like Japan."
+    ],
+    "answer": 0,
+    "hints": [
+      "「どこから」を聞かれている。",
+      "出身地を答える。",
+      "答えの形も from を使うと素直になる。"
+    ],
+    "lesson": "from は「〜から」。出身を聞くこの形は、世界中の教室で最初に習う型のひとつだ。国名だけでなく都市名でも答えられる。相手の答えにもう一言重ねられると、会話が続く。",
+    "tip": "どこから来たか。旅の始まりは、いつもその問いからだ。",
+    "card": "出身をたずねる"
+  },
+  {
+    "id": "gaikokugo-005",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "三人称単数現在",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "He ___ soccer every day. に入るのは?",
+    "choices": [
+      "plays",
+      "play",
+      "playing",
+      "played"
+    ],
+    "answer": 0,
+    "hints": [
+      "主語は He だ。",
+      "every day とあるので、いつものことを述べている。",
+      "主語が三人称で単数、時制が現在のとき、動詞に決まった形の変化が起きる。"
+    ],
+    "lesson": "英語は主語によって動詞の形が変わる。三人称・単数・現在のときだけ s が付く、という例外的な規則だ。日本語にはこの区別がないので、日本語話者がいちばん落としやすい。",
+    "tip": "言葉が主語に応じて形を変えるのは珍しくない。私の英語でも動詞は主語に従って身をよじった。",
+    "card": "三人称単数現在のs"
+  },
+  {
+    "id": "gaikokugo-006",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "比較",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "This box is ___ than that one. big を正しい形にすると?",
+    "choices": [
+      "bigger",
+      "big",
+      "biggest",
+      "more big"
+    ],
+    "answer": 0,
+    "hints": [
+      "than があるので、二つを比べている。",
+      "短い語は語尾を変えて比べる形にする。",
+      "この語は最後の子音を重ねてから変化させる。"
+    ],
+    "lesson": "than が出てきたら比較級。短い語は語尾を変え、長い語は more を前に置く。big は母音ひとつを子音がはさむ形なので、最後の g を重ねてから変える。同じ規則が hot や sad にも働く。",
+    "tip": "比べる言い方を持つのは、優劣を語りたくなる人の性だな。",
+    "card": "比較級のつくり方"
+  },
+  {
+    "id": "gaikokugo-007",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "受け身",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この本は多くの人に読まれている。This book ___ by many people. に入るのは?",
+    "choices": [
+      "is read",
+      "reads",
+      "is reading",
+      "read"
+    ],
+    "answer": 0,
+    "hints": [
+      "本は「読む」側ではなく「読まれる」側だ。",
+      "受け身は be動詞と過去分詞で作る。",
+      "この動詞は、原形と過去分詞が同じつづりになる。"
+    ],
+    "lesson": "受け身は「be動詞＋過去分詞」。read は原形も過去分詞も同じつづりだが、発音が変わる。行為をした人を示すときは by を添える。誰がしたかより、何が起きたかを前に出したいときに使う形だ。",
+    "tip": "書物は読まれてはじめて書物になる。主語をどちらに置くかで、話の重心が動く。",
+    "card": "受け身の形"
+  },
+  {
+    "id": "gaikokugo-008",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "関係代名詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "I know the boy ___ is running over there. に入るのは?",
+    "choices": [
+      "who",
+      "which",
+      "what",
+      "whose"
+    ],
+    "answer": 0,
+    "hints": [
+      "前にある語を説明するために、後ろの文をつないでいる。",
+      "説明されているのは「人」だ。",
+      "人を受けて、後ろの文の主語になる語を選ぶ。"
+    ],
+    "lesson": "二つの文を一つにまとめる仕組みだ。説明したい語が人なら who、ものなら which を使う。長い説明を名詞の後ろに続けられるので、英語の文は後ろへ伸びていく。日本語は前へ伸びるので、訳すと語順が入れ替わる。",
+    "tip": "名にさらに言葉を重ねて、どの者かを絞る。芝居の台詞もそうやって人物を立ち上げる。",
+    "card": "関係代名詞"
+  },
+  {
+    "id": "gaikokugo-009",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "世界",
+    "subject": "外国語",
+    "unit": "世界の言語",
+    "country": "世界 / 言語の広がり",
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "公用語として定めている国や地域の数が、世界で最も多い言語は?",
+    "choices": [
+      "英語",
+      "中国語",
+      "スペイン語",
+      "アラビア語"
+    ],
+    "answer": 0,
+    "hints": [
+      "話者の数がいちばん多い言語とは限らない。",
+      "かつて広い範囲を統治した国の言葉が、独立後も行政に残った。",
+      "国際機関の公用語にも入っている、あの言語だ。"
+    ],
+    "lesson": "母語話者の数なら中国語が最多だが、公用語として採用している国の数では英語が群を抜く。植民地だった地域が独立したあとも、複数の民族語をまとめる共通語として残った例が多い。言語の広がりは、話者数だけでは測れない。",
+    "tip": "言葉は軍とともに広がり、軍が去ったあとも残る。私の国の言葉もそうやって海を渡った。",
+    "card": "公用語の広がり"
+  },
+  {
+    "id": "gaikokugo-010",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "世界",
+    "subject": "外国語",
+    "unit": "文字の成り立ち",
+    "country": "韓国 / 국어（国語）",
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "15世紀に朝鮮で作られ、いまも韓国で使われている文字を何という?",
+    "choices": [
+      "ハングル",
+      "かな",
+      "注音符号",
+      "キリル文字"
+    ],
+    "answer": 0,
+    "hints": [
+      "作った人物と作った年が分かっている、珍しい文字だ。",
+      "発音のしくみをかたどって作られている。",
+      "韓国では10月9日がこの文字を記念する日になっている。"
+    ],
+    "lesson": "世宗のもとで作られ、1446年に公布された。子音は口や舌の形を、母音は天・地・人をかたどる。成り立ちが記録に残る文字は世界的にも少ない。学びやすさを目的に作られた点でも珍しい。",
+    "tip": "文字を新たに作るとは、国のかたちを作ることだ。誰に読ませたいかで、形まで変わる。",
+    "card": "ハングル"
   }
 ]
