@@ -70,9 +70,10 @@
   .rCommon{color:#7A8794}.rUncommon{color:var(--moss)}.rRare{color:var(--ai)}
   .rEpic{color:#7A4E9B}.rLegendary{color:var(--brass)}.rMCH{color:var(--ink-faint)}
 
-  .seg{display:flex;gap:6px;margin:12px 0}
-  .seg.wrap{flex-wrap:wrap}
-  .seg button{flex:1;min-width:74px;border:1px solid var(--line);background:var(--card);
+  /* 狭い画面でも折り返して収まるようにする。min-width を固定値のままにすると、
+     4つ並ぶ帯（おまかせ/小学校/中学校/世界）が 320px 幅ではみ出す */
+  .seg{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+  .seg button{flex:1 1 0;min-width:clamp(62px,20vw,74px);border:1px solid var(--line);background:var(--card);
     color:var(--ink-soft);font:inherit;font-size:13px;padding:9px 4px;border-radius:3px;cursor:pointer}
   .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .seg button:disabled{opacity:.35;cursor:default}
