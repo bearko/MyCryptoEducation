@@ -1,5 +1,5 @@
 {
-  "_note": "Wikimedia Commons から取り込む写真の台帳。実体は public/commons/ に置く。scripts/fetch-commons.mjs が search を手がかりに探し、ライセンスを確かめてから file 以下の欄を埋める。手で書くのは search と alt と where だけ。",
+  "_note": "Wikimedia Commons から取り込む写真の台帳。実体は public/commons/ に置く。scripts/fetch-commons.mjs が commons（File:名）か search を手がかりに探し、ライセンスを確かめてから file 以下の欄を埋める。search で使えるライセンスが見つからないときは、コモンズで自分で選んで commons に File:名を書く。",
   "_license": "許すのは PD・CC0・CC BY だけ。CC BY-SA は改変物に同じライセンスが波及するので使わない。NC と ND も使わない。fetch-commons.mjs が allow に無いライセンスの画像を弾く。",
   "_where": "prompt=問題文の下 / hint=第3ヒントの横 / lesson=解説の中。hint に置くときは、その画像だけで答えが割れないものに限る（原則5）。",
   "allow": [
@@ -14,8 +14,8 @@
   ],
   "images": {
     "insect-body": {
-      "search": "Locusta migratoria grasshopper",
-      "alt": "バッタの側面。胸の部分から3対のあしが出ている",
+      "search": "bee USGS Bee Inventory and Monitoring Lab",
+      "alt": "ハチの側面を拡大した写真。胸から3対のあしが出ている",
       "use": "rika-001",
       "where": "lesson"
     },
@@ -32,10 +32,11 @@
       "where": "lesson"
     },
     "lava-flow": {
-      "search": "Lava flow Kilauea",
+      "search": "Kilauea lava flow USGS",
       "alt": "地表を流れる赤い溶岩。表面は黒く固まりかけている",
       "use": "rika-052",
-      "where": "lesson"
+      "where": "lesson",
+      "category": "Photographs by the United States Geological Survey"
     },
     "mars": {
       "search": "Mars Hubble Space Telescope",

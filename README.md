@@ -149,6 +149,9 @@ node scripts/fetch-commons.mjs      # Wikimedia Commons の写真（data/images.
 2. `node scripts/fetch-commons.mjs` を走らせる。`allow` にあるライセンスの候補だけを採り、
    題名・作者・ライセンス・出典を台帳に書き戻す
 3. 採れた画像を目で確かめる。**ライセンスは機械が見ますが、写っているものが問題に合うかは人が見ます**
+   - 「使えるライセンスの候補がありません」と出たら、見えた候補が題名つきで並ぶ。
+     コモンズで PD か CC BY の1枚を選び、台帳のその項目に `"commons": "File:〜.jpg"` を足すと、
+     次の実行でそれを直接採る。`"category": "〜"` を足して検索範囲を絞ることもできる
 4. 問題データに `"image": "<キー>"` と `"imageAt": "prompt" | "hint" | "lesson"` を足す
 5. `npm run validate` を通す
 
