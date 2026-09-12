@@ -145,6 +145,16 @@ for (const q of questions) {
   else cardOwner.set(q.card, q.id);
 }
 
+/* ---- 写真の台帳 ---- */
+// 使い先を書いたまま配線し忘れると、取り込んだ写真が誰の目にも触れない
+const usedPhotos = new Set(questions.filter(q => q.image).map(q => q.image));
+for (const [key, p] of Object.entries(imageBook.images || {})) {
+  if (p.use && p.file && !usedPhotos.has(key))
+    warn(`写真「${key}」は取り込み済みですが、どの問題からも参照されていません（使い先: ${p.use}）`);
+  if (p.file && !existsSync(join(ROOT, "public/commons", p.file + ".webp")))
+    warn(`写真「${key}」の実体がありません: public/commons/${p.file}.webp`);
+}
+
 /* ---- 英雄 ---- */
 const heroIds = new Set();
 for (const h of heroes) {
