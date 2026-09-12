@@ -23,13 +23,29 @@
       "search": "Trilobite fossil Elrathia",
       "alt": "岩に残った三葉虫の化石。体が縦に三つに分かれて見える",
       "use": "rika-019",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "trilobite",
+      "title": "Elrathia kingii (fossil trilobites)",
+      "author": "James St. John",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3AElrathia%20kingii%20(fossil%20trilobites).jpg",
+      "width": 640,
+      "height": 855
     },
     "magnet-field": {
       "search": "Magnetic field iron filings bar magnet",
       "alt": "棒磁石の上にまいた砂鉄が、両端を結ぶ曲線に沿って並んでいる",
       "use": "rika-011",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "magnet-field",
+      "title": "Magnet0873",
+      "author": "Newton Henry Black",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AMagnet0873.png",
+      "width": 640,
+      "height": 435
     },
     "lava-flow": {
       "search": "Kilauea lava flow USGS",
@@ -42,73 +58,169 @@
       "search": "Mars Hubble Space Telescope",
       "alt": "赤茶色の火星。極に白い氷の冠が見える",
       "use": "rika-024",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "mars",
+      "title": "Mars Hubble",
+      "author": "NASA and The Hubble Heritage Team (STScI/AURA)",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AMars%20Hubble.jpg",
+      "width": 500,
+      "height": 500
     },
     "mendeleev": {
       "search": "Dmitri Mendeleev portrait",
       "alt": "周期表を作ったメンデレーエフの肖像写真",
       "use": "rika-077",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "mendeleev",
+      "title": "Dmitri Mendeleev 1890s",
+      "author": "Unknown authorUnknown author",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ADmitri%20Mendeleev%201890s.jpg",
+      "width": 478,
+      "height": 608
     },
     "pine-cone": {
       "search": "Pinus cone seeds",
       "alt": "マツのまつかさ。りん片のすきまに種子が見える",
       "use": "rika-058",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "pine-cone",
+      "title": "Ergaki, Siberian pine cone with seeds and foliage, Pinus sibirica, Sayan Mountains, Russia",
+      "author": "Vyacheslav Argenberg",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3AErgaki%2C%20Siberian%20pine%20cone%20with%20seeds%20and%20foliage%2C%20Pinus%20sibirica%2C%20Sayan%20Mountains%2C%20Russia.jpg",
+      "width": 640,
+      "height": 441
     },
     "rainforest": {
       "search": "Amazon rainforest aerial view",
       "alt": "上空から見た熱帯雨林。緑の樹冠が一面に広がる",
       "use": "rika-023",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "rainforest",
+      "title": "Afternoon Clouds over the Amazon Rainforest",
+      "author": "NASA image courtesy Jeff Schmaltz, MODIS Rapid Response at NASA GSFC.",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AAfternoon%20Clouds%20over%20the%20Amazon%20Rainforest.jpg",
+      "width": 640,
+      "height": 823
     },
     "steam-engine": {
       "search": "Watt steam engine",
       "alt": "ワットが改良した蒸気機関。大きなはずみ車とシリンダーが並ぶ",
       "use": "shakai-055",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "steam-engine",
+      "title": "Boulton-Watt steam engine, rocker beam (4804296580)",
+      "author": "Newtown grafitti from Sydney, Australia",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABoulton-Watt%20steam%20engine%2C%20rocker%20beam%20(4804296580).jpg",
+      "width": 640,
+      "height": 740
     },
     "perry": {
       "search": "Matthew Calbraith Perry portrait",
       "alt": "浦賀に来航したペリーの肖像",
       "use": "shakai-108",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "perry",
+      "title": "Commodore Matthew Calbraith Perry",
+      "author": "Mathew Benjamin Brady",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ACommodore%20Matthew%20Calbraith%20Perry.jpg",
+      "width": 640,
+      "height": 770
     },
     "mandela": {
       "search": "Nelson Mandela 1994",
       "alt": "南アフリカ大統領となったころのネルソン・マンデラ",
       "use": "shakai-068",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "mandela",
+      "title": "Mandela e Evelyn 1944",
+      "author": "The original uploader was André Koehne at Portuguese Wikipedia.",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AMandela%20e%20Evelyn%201944.jpg",
+      "width": 392,
+      "height": 400
     },
     "kamakura-daibutsu": {
       "search": "Kamakura Daibutsu Kotokuin",
       "alt": "鎌倉の大仏。屋外に座した青銅の像",
       "use": "shakai-043",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "kamakura-daibutsu",
+      "title": "Daibutsu @ Kotokuin Temple @ Kamakura (13921336524)",
+      "author": "Guilhem Vellut from Annecy, France",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3ADaibutsu%20%40%20Kotokuin%20Temple%20%40%20Kamakura%20(13921336524).jpg",
+      "width": 640,
+      "height": 480
     },
     "basho": {
       "search": "Matsuo Basho portrait",
       "alt": "旅姿で描かれた松尾芭蕉",
       "use": "kokugo-089",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "basho",
+      "title": "Basho by Hokusai-small",
+      "author": "Hokusai",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABasho%20by%20Hokusai-small.jpg",
+      "width": 640,
+      "height": 929
     },
     "homer-bust": {
       "search": "Homer bust British Museum",
       "alt": "目を閉じた詩人ホメロスの胸像",
       "use": "kokugo-096",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "homer-bust",
+      "title": "Bust Homer BM 1825",
+      "author": "Unknown artistUnknown artist",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABust%20Homer%20BM%201825.jpg",
+      "width": 640,
+      "height": 963
     },
     "roman-clock": {
       "search": "Clock face Roman numerals",
       "alt": "ローマ数字が刻まれた時計の文字盤。IVやIXが読める",
       "use": "sansu-095",
-      "where": "prompt"
+      "where": "prompt",
+      "file": "roman-clock",
+      "title": "Roman numerals on alarm clock (Unsplash)",
+      "author": "Ales Krivec aleskrivec",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3ARoman%20numerals%20on%20alarm%20clock%20(Unsplash).jpg",
+      "width": 640,
+      "height": 476
     },
     "parthenon": {
       "search": "Parthenon Athens",
       "alt": "アテネのパルテノン神殿。列柱が横に並ぶ",
       "use": "sansu-100",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "parthenon",
+      "title": "Parthenon from west",
+      "author": "User:Mountain",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AParthenon%20from%20west.jpg",
+      "width": 640,
+      "height": 480
     }
   }
 }
