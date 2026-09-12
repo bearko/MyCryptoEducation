@@ -228,7 +228,8 @@ for (const s of SUBJECTS) {
     realCells++;
     const n = cell[s + "|" + g] || 0;
     if (n === 0) emptyCells++;
-    else if (n < 3) thinCells++;
+    // 1マスが1セッションぶんに満たないと、その学年を選んだ人の体験が薄いまま終わる
+    else if (n < RUN_LENGTH) thinCells++;
     row[GRADE_LABEL[g]] = n || "・";
   }
   row.計 = stock("auto", s);
@@ -241,12 +242,17 @@ for (const s of SUBJECTS) {
   const shape = curriculum.exists[s] || GRADES;
   const holes = shape.filter(g => !(cell[s + "|" + g] || 0)).map(g => GRADE_LABEL[g]);
   if (holes.length) warn(`空きマス: ${s} の ${holes.join("・")} に問題がありません`);
+  const thin = shape.filter(g => {
+    const n = cell[s + "|" + g] || 0;
+    return n > 0 && n < RUN_LENGTH;
+  }).map(g => `${GRADE_LABEL[g]}(${cell[s + "|" + g]})`);
+  if (thin.length) warn(`1セッションに満たないマス: ${s} の ${thin.join("・")}`);
 }
 
 /* ---- 出力 ---- */
 console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${Object.keys(extensions).length}種（${Object.keys(byLine).length}系統） / クリスタル ${(crystals.crystals || []).length}種\n`);
 console.table(table);
-console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ 2問以下 ${thinCells}` +
+console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ ${RUN_LENGTH}問未満 ${thinCells}` +
   `　（「−」はカリキュラムに無い組み合わせ）`);
 
 if (warnings.length) {

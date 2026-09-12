@@ -706,5 +706,1573 @@
     "lesson": "現実と違うことを仮定するとき、英語は仮定法過去を使う。If + 主語 + 過去形, 主語 + would + 動詞の原形という形で、be 動詞は主語にかかわらず were を使うのが原則だ。過去形を使うのは過去の話だからではなく、現実から距離を置くための形式である。",
     "tip": "ありえないことを言葉にできるから、人は計画も後悔もできる。仮定は思考の道具だ。",
     "card": "仮定法過去"
+  },
+  {
+    "id": "gaikokugo-025",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "天気",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"How's the weather?\" と聞かれました。晴れているときの答えはどれですか?",
+    "choices": [
+      "It's sunny.",
+      "It's rainy.",
+      "It's cloudy.",
+      "It's snowy."
+    ],
+    "answer": 0,
+    "hints": [
+      "rainy は雨、cloudy はくもり、snowy は雪だ。",
+      "残る一つが晴れを表す。",
+      "sun は太陽のこと。それに y をつけた語を選ぼう。"
+    ],
+    "lesson": "天気は It's のあとに形容詞を続けて表す。sunny（晴れ）、cloudy（くもり）、rainy（雨）、snowy（雪）、windy（風が強い）だ。名詞の sun、cloud、rain、snow、wind に -y をつけると形容詞になる。この作り方を知っていれば、覚える数は半分で済む。",
+    "tip": "空の様子を言葉にするのは、農作業でも航海でも最初に必要になることだった。",
+    "card": "英語の天気の言い方"
+  },
+  {
+    "id": "gaikokugo-026",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "動物の名前",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語で「うさぎ」はどれですか?",
+    "choices": [
+      "rabbit",
+      "rat",
+      "robot",
+      "rainbow"
+    ],
+    "answer": 0,
+    "hints": [
+      "rat はねずみ、robot はロボット、rainbow は虹だ。",
+      "長い耳と短いしっぽを持つ動物だ。",
+      "r で始まり、b が二つ入っている語を選ぼう。"
+    ],
+    "lesson": "動物の名前は、絵や実物と結びつけて覚えると定着しやすい。rabbit（うさぎ）、rat（ねずみ）、bear（くま）、fox（きつね）などだ。似た綴りの語と混同しやすいので、音と意味をセットで覚える。小学校の外国語活動では、聞く・話すを中心に、こうした身近な語から入る。",
+    "tip": "身のまわりのものから名づけていく。どの言語も、学びはじめは同じ順序をたどる。",
+    "card": "英語の動物の名前"
+  },
+  {
+    "id": "gaikokugo-027",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "好きなものをたずねる",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"Do you like apples?\" に「はい」と答えるとき、自然なのはどれですか?",
+    "choices": [
+      "Yes, I do.",
+      "Yes, I am.",
+      "Yes, I like.",
+      "Yes, you do."
+    ],
+    "answer": 0,
+    "hints": [
+      "問いの先頭にある語をそのまま使って答える。",
+      "この問いは Do で始まっている。",
+      "Yes, I ___ の空所に、その Do を形を変えて入れよう。"
+    ],
+    "lesson": "Do you...? には Yes, I do. / No, I don't. と答える。Are you...? なら Yes, I am.、Can you...? なら Yes, I can. と、問いの先頭の語に対応する。日本語の「はい」「いいえ」だけで済ませられないので、問いの形を聞き取る力が要る。慣れるまでは、先頭の語に注意を向ける。",
+    "tip": "問い方が答え方を決める。形式が決まっていると、聞き取りも楽になる。",
+    "card": "Do you like ~? への答え方"
+  },
+  {
+    "id": "gaikokugo-028",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "数をたずねる",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "りんごの数をたずねるとき、自然な言い方はどれですか?",
+    "choices": [
+      "How many apples?",
+      "How much apples?",
+      "How old apples?",
+      "How long apples?"
+    ],
+    "answer": 0,
+    "hints": [
+      "数えられるものの数をたずねる言い方だ。",
+      "How much は水やお金のように、数えられないものや値段に使う。",
+      "「たくさんの」を意味する many を使うほうを選ぼう。"
+    ],
+    "lesson": "数えられるものの数は How many、数えられないものの量や値段は How much でたずねる。apple は数えられるので How many apples? となり、water なら How much water? だ。名詞が数えられるかどうかで表現が変わるのは、日本語にない区別なので意識が要る。",
+    "tip": "数えられるか量るか。その区別が言葉の形にまで出るのは、英語の特徴だ。",
+    "card": "How many と How much"
+  },
+  {
+    "id": "gaikokugo-029",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "アルファベット",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語のアルファベットは全部で何文字ですか?",
+    "choices": [
+      "26文字",
+      "24文字",
+      "28文字",
+      "30文字"
+    ],
+    "answer": 0,
+    "hints": [
+      "大文字と小文字で同じ数だけある。",
+      "A から Z まで順に並んでいる。",
+      "20より多く、30より少ない。一の位は6だ。"
+    ],
+    "lesson": "英語のアルファベットは26文字で、それぞれに大文字と小文字がある。文の最初と固有名詞は大文字で書き始める。日本語のひらがな・かたかな・漢字に比べると文字数は少ないが、一つの文字が複数の音を表すため、綴りと発音が一致しないことが多い。",
+    "tip": "少ない文字で多くの音を表そうとすると、どこかに無理が出る。英語はそこを綴りで引き受けた。",
+    "card": "アルファベット26文字"
+  },
+  {
+    "id": "gaikokugo-030",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "食べ物",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語で「いちご」はどれですか?",
+    "choices": [
+      "strawberry",
+      "blueberry",
+      "cherry",
+      "peach"
+    ],
+    "answer": 0,
+    "hints": [
+      "blueberry はブルーベリー、cherry はさくらんぼ、peach はももだ。",
+      "berry がつく語のうち、blue がつかないほうだ。",
+      "「わら」を意味する straw で始まる語を選ぼう。"
+    ],
+    "lesson": "果物の名前には、二つの語を組み合わせたものが多い。strawberry、blueberry、blackberry はすべて berry（小さな実）を含む。straw は「わら」の意味で、実を守るために藁を敷いた栽培法に由来するという説がある。語の成り立ちを知ると記憶に残りやすい。",
+    "tip": "外来語として日本語に入っている語も多い。知っている語から手がかりを取るのが近道だ。",
+    "card": "英語の果物の名前"
+  },
+  {
+    "id": "gaikokugo-031",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "自己紹介",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "自分の名前を伝えるとき、自然な言い方はどれですか?",
+    "choices": [
+      "My name is Ken.",
+      "I name Ken.",
+      "Me is Ken.",
+      "My Ken is name."
+    ],
+    "answer": 0,
+    "hints": [
+      "「私の名前」は My name と言う。",
+      "「〜です」にあたる be 動詞が必要だ。",
+      "My name のあとに is を続け、名前を置こう。"
+    ],
+    "lesson": "自己紹介では My name is ~. または I'm ~. を使う。My name is は少し改まった言い方で、I'm ~. のほうが日常的だ。続けて Nice to meet you.（はじめまして）と言うのが定番になる。日本語と語順が違うので、主語・動詞・残りの順を意識しながら組み立てる。",
+    "tip": "名を名乗ることから関係が始まる。どの言語でも最初に覚える型がこれだ。",
+    "card": "My name is ~."
+  },
+  {
+    "id": "gaikokugo-032",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "時刻",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"What time is it?\" と聞かれました。7時のときの答えはどれですか?",
+    "choices": [
+      "It's seven o'clock.",
+      "It's seven years old.",
+      "It's Monday.",
+      "It's sunny."
+    ],
+    "answer": 0,
+    "hints": [
+      "What time は時刻をたずねている。",
+      "答えは It's で始める。",
+      "ちょうどの時刻には o'clock をつける。数と組み合わせよう。"
+    ],
+    "lesson": "時刻は It's で答え、ちょうどの時刻には o'clock をつける。7時15分なら It's seven fifteen. のように数を続けて言うのがふつうだ。天気も曜日も日付も It's で答えるので、この it は特定の何かを指さない形式的な主語になる。日本語に訳しにくいのはそのためだ。",
+    "tip": "時刻を共有できることが、約束を可能にする。時計は社会の道具だ。",
+    "card": "What time is it?"
+  },
+  {
+    "id": "gaikokugo-033",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "教科名",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語で「理科」はどれですか?",
+    "choices": [
+      "science",
+      "social studies",
+      "math",
+      "music"
+    ],
+    "answer": 0,
+    "hints": [
+      "math は算数・数学、music は音楽だ。",
+      "social studies は社会科にあたる。",
+      "実験や観察をする教科の名を選ぼう。"
+    ],
+    "lesson": "教科名は science（理科）、math（算数・数学）、social studies（社会）、Japanese（国語）、English（英語）、P.E.（体育）、music（音楽）、arts and crafts（図画工作）などだ。教科の区切り方は国によって違うので、直訳できない場合もある。social studies は複数の分野をまとめた呼び名になる。",
+    "tip": "何をひとつの教科としてまとめるか。その区切り方にも国ごとの考え方が出る。",
+    "card": "英語の教科名"
+  },
+  {
+    "id": "gaikokugo-034",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "一日の生活",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「私は7時に起きます。」を英語で言うとどれですか?",
+    "choices": [
+      "I get up at seven.",
+      "I get up in seven.",
+      "I get up on seven.",
+      "I get seven up."
+    ],
+    "answer": 0,
+    "hints": [
+      "時刻を表す前置詞を選ぶ問題でもある。",
+      "in は年や月、on は日付や曜日に使う。",
+      "時刻という一点を指す前置詞を選ぼう。"
+    ],
+    "lesson": "get up（起きる）、have breakfast（朝食をとる）、go to school（学校へ行く）、go to bed（寝る）のように、日常の動作は決まった組み合わせで表す。時刻には at を使い、at seven のようになる。動詞と前置詞をひとかたまりで覚えると、組み立てが速くなる。",
+    "tip": "一日の流れを言えるようになると、話せることが一気に増える。型が土台になる。",
+    "card": "I get up at ~."
+  },
+  {
+    "id": "gaikokugo-035",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "場所をたずねる",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"Where is my bag?\" の答えとして適切なのはどれですか?",
+    "choices": [
+      "It's on the desk.",
+      "It's seven o'clock.",
+      "Yes, it is.",
+      "I'm fine."
+    ],
+    "answer": 0,
+    "hints": [
+      "Where は場所をたずねる疑問詞だ。",
+      "疑問詞で始まる問いには Yes / No では答えられない。",
+      "場所を表す前置詞と名詞が入った答えを選ぼう。"
+    ],
+    "lesson": "Where で始まる問いには場所を答える。on（上に接して）、in（中に）、under（下に）、by（そばに）といった前置詞で位置を表す。It's on the desk. は机の上、in the desk なら引き出しの中を指す。前置詞ひとつで場所が変わるので、絵と結びつけて覚えると間違えにくい。",
+    "tip": "どこにあるかを正確に伝える。位置を言葉にする力は、地図を描く力に近い。",
+    "card": "Where is ~? と位置の前置詞"
+  },
+  {
+    "id": "gaikokugo-036",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "月の名前",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語で「9月」はどれですか?",
+    "choices": [
+      "September",
+      "November",
+      "December",
+      "October"
+    ],
+    "answer": 0,
+    "hints": [
+      "October は10月、November は11月、December は12月だ。",
+      "その三つより前に来る月だ。",
+      "S で始まる月の名を選ぼう。"
+    ],
+    "lesson": "月の名はローマ暦に由来し、September は「7番目」、October は「8番目」を意味する語から来ている。かつて3月が年の初めだったためにずれが残った。月名も曜日名も文の途中でも大文字で書き始める。日付は序数で読み、May 5th のようになる。",
+    "tip": "名前と実際の順番がずれたまま残る。暦は改めるより、そのまま使うほうが混乱が少なかった。",
+    "card": "英語の月の名前"
+  },
+  {
+    "id": "gaikokugo-037",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "道案内",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"Go straight and turn right.\" はどんな指示ですか?",
+    "choices": [
+      "まっすぐ行って右に曲がる",
+      "まっすぐ行って左に曲がる",
+      "右に行ってから戻る",
+      "その場で止まる"
+    ],
+    "answer": 0,
+    "hints": [
+      "straight はまっすぐという意味だ。",
+      "turn は曲がるという意味の動詞になる。",
+      "right は「右」と「正しい」の両方の意味を持つ。ここでは方向のほうだ。"
+    ],
+    "lesson": "道案内では Go straight.（まっすぐ行く）、Turn right / left.（右／左に曲がる）、It's on your right.（右手にあります）が基本になる。動詞から始まる命令文で、相手に動作を求める形だ。right は「右」と「正しい」、left は「左」と leave の過去形と同じ形で、文脈で判断する。",
+    "tip": "道を教えるには、相手の向きで考える必要がある。自分の右は相手の左だ。",
+    "card": "英語の道案内"
+  },
+  {
+    "id": "gaikokugo-038",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "あいさつと応答",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"Thank you.\" と言われたときの応答として適切なのはどれですか?",
+    "choices": [
+      "You're welcome.",
+      "I'm sorry.",
+      "Nice to meet you.",
+      "See you."
+    ],
+    "answer": 0,
+    "hints": [
+      "お礼を言われたときの返しだ。",
+      "謝るときは I'm sorry、別れぎわは See you を使う。",
+      "「どういたしまして」にあたる決まり文句を選ぼう。"
+    ],
+    "lesson": "You're welcome. は「どういたしまして」にあたる決まり文句だ。ほかに No problem.、My pleasure. なども使われる。あいさつや応答は決まった形が多く、場面ごとにひとかたまりで覚えるのが早い。意味を一語ずつ訳そうとすると、かえって分かりにくくなる。",
+    "tip": "決まり文句は、考えずに口から出るまで練習する。そこが自由に話す土台になる。",
+    "card": "You're welcome."
+  },
+  {
+    "id": "gaikokugo-039",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "将来の夢",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「私は医者になりたい。」を英語で言うとどれですか?",
+    "choices": [
+      "I want to be a doctor.",
+      "I want be a doctor.",
+      "I want to doctor.",
+      "I am want a doctor."
+    ],
+    "answer": 0,
+    "hints": [
+      "want のあとには to と動詞の原形が続く。",
+      "「〜になる」にあたる動詞は be を使う。",
+      "want to のあとに be を置き、そのあとに職業名を続けよう。"
+    ],
+    "lesson": "want to + 動詞の原形で「〜したい」を表す。I want to be a doctor. は「医者になりたい」だ。職業名の前には a / an がつく。to のあとは必ず原形なので、be を is や am にしない。この形は中学の不定詞の学習にそのままつながる。",
+    "tip": "なりたいものを言葉にできると、そこへ向かう道筋も考えられるようになる。",
+    "card": "I want to be ~."
+  },
+  {
+    "id": "gaikokugo-040",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "can の否定文",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「私は泳げません。」を英語で言うとどれですか?",
+    "choices": [
+      "I can't swim.",
+      "I don't can swim.",
+      "I can swim not.",
+      "I not can swim."
+    ],
+    "answer": 0,
+    "hints": [
+      "can の否定は、can に直接 not をつける。",
+      "don't は一般動詞の否定に使うもので、can とは重ねない。",
+      "can not を短くした形を、動詞の前に置こう。"
+    ],
+    "lesson": "can の否定は cannot、短縮して can't となり、あとに動詞の原形が続く。一般動詞の否定に使う don't / doesn't とは重ねない。助動詞は、それ自体が否定形と疑問形を作る力を持っているからだ。この区別を早く押さえると、中学の助動詞でつまずかない。",
+    "tip": "できないと言えることも大事だ。できることの範囲がはっきりする。",
+    "card": "can の否定文"
+  },
+  {
+    "id": "gaikokugo-041",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "値段をたずねる",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "店で値段をたずねるとき、自然な言い方はどれですか?",
+    "choices": [
+      "How much is it?",
+      "How many is it?",
+      "How long is it?",
+      "How old is it?"
+    ],
+    "answer": 0,
+    "hints": [
+      "値段は数えられない量として扱う。",
+      "How many は数えられるものの数をたずねる。",
+      "量や値段をたずねるほうの語を選ぼう。"
+    ],
+    "lesson": "値段は How much is it? / How much are they? でたずねる。答えは It's five hundred yen. のようになる。買い物の場面では I'd like this one.（これをください）、Here you are.（どうぞ）、Here's your change.（おつりです）といった決まり文句が続けて使われる。",
+    "tip": "値段を聞けることが、外国で暮らす最初の一歩になる。実用から入る学びは強い。",
+    "card": "How much is it?"
+  },
+  {
+    "id": "gaikokugo-042",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "頻度を表す語",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I ___ play tennis on Sundays.\" に「いつも」を表す語を入れるなら、どれですか?",
+    "choices": [
+      "always",
+      "never",
+      "sometimes",
+      "seldom"
+    ],
+    "answer": 0,
+    "hints": [
+      "never は「まったくしない」、sometimes は「ときどき」だ。",
+      "seldom は「めったにしない」を表す。",
+      "頻度が最も高いことを表す語を選ぼう。"
+    ],
+    "lesson": "頻度を表す副詞は、always（いつも）、usually（たいてい）、often（よく）、sometimes（ときどき）、never（まったく〜ない）の順に頻度が下がる。一般動詞の前、be 動詞のあとに置くのが原則だ。never はそれ自体が否定の意味を持つので、don't と重ねない。",
+    "tip": "どれくらいの頻度かを言えると、事実の伝わり方が正確になる。",
+    "card": "頻度を表す副詞"
+  },
+  {
+    "id": "gaikokugo-043",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "be 動詞の使い分け",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"They ___ my friends.\" に入る be 動詞はどれですか?",
+    "choices": [
+      "are",
+      "is",
+      "am",
+      "be"
+    ],
+    "answer": 0,
+    "hints": [
+      "be 動詞は主語によって形が変わる。",
+      "I なら am、he / she / it なら is を使う。",
+      "主語が複数のときに使う形を選ぼう。"
+    ],
+    "lesson": "be 動詞は主語によって am / is / are を使い分ける。I は am、he・she・it と単数名詞は is、you と複数名詞は are だ。過去形では was / were の二つに減る。一般動詞の文と be 動詞の文を混ぜて I am play tennis. と書くのが典型的な誤りで、両者は別の文型になる。",
+    "tip": "主語に応じて動詞が形を変える。この仕組みは多くのヨーロッパの言語に共通する。",
+    "card": "be 動詞の使い分け"
+  },
+  {
+    "id": "gaikokugo-044",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "代名詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"This is ___ book.\" に「私の」を表す語を入れるなら、どれですか?",
+    "choices": [
+      "my",
+      "I",
+      "me",
+      "mine"
+    ],
+    "answer": 0,
+    "hints": [
+      "名詞の前に置いて「〜の」を表す形だ。",
+      "I は主語、me は目的語に使う形だ。",
+      "mine は「私のもの」で、あとに名詞を続けない。名詞の前に置ける形を選ぼう。"
+    ],
+    "lesson": "代名詞は役割によって形が変わる。I（主語）、my（〜の）、me（目的語）、mine（〜のもの）の四つだ。my のあとには必ず名詞が続き、mine のあとには続かない。This is my book. と This book is mine. は同じ内容を別の形で言っている。",
+    "tip": "同じ人を指す語が、文の中の役割で形を変える。日本語は助詞がその役を担う。",
+    "card": "代名詞の形（my / me / mine）"
+  },
+  {
+    "id": "gaikokugo-045",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "日本文化の紹介",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "外国の人に日本の行事を紹介するとき、\"We have a festival in summer.\" の have はどんな意味ですか?",
+    "choices": [
+      "行事がある",
+      "持っている",
+      "食べる",
+      "招待する"
+    ],
+    "answer": 0,
+    "hints": [
+      "have は「持っている」以外の意味でも使われる。",
+      "have breakfast なら「朝食をとる」になる。",
+      "行事について使うと、その行事が行われるという意味になる。"
+    ],
+    "lesson": "have は「持つ」だけでなく、have breakfast（食べる）、have a cold（風邪をひく）、have a festival（祭りがある）のように幅広く使われる。基本的な動詞ほど意味が広く、組み合わせで意味が決まる。辞書の最初の訳だけを当てはめると通じない文になりやすい。",
+    "tip": "自分の土地のことを他の言葉で説明する。そのとき初めて、当たり前が当たり前でないと気づく。",
+    "card": "動詞 have の広い意味"
+  },
+  {
+    "id": "gaikokugo-046",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "過去の疑問文",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"___ you go to the park yesterday?\" に入るのはどれですか?",
+    "choices": [
+      "Did",
+      "Do",
+      "Are",
+      "Was"
+    ],
+    "answer": 0,
+    "hints": [
+      "yesterday があるので、過去の文だ。",
+      "一般動詞 go の疑問文なので、be 動詞は使わない。",
+      "do の過去形を文の先頭に置こう。そのとき go は原形のままになる。"
+    ],
+    "lesson": "一般動詞の過去の疑問文は Did を文頭に置き、動詞は原形にする。Did you go ~? が正しく、Did you went ~? とはしない。過去であることを Did が引き受けるので、動詞は原形に戻る。答えは Yes, I did. / No, I didn't. となる。",
+    "tip": "時を示す役目を一語に集める。そのぶん他の語は形を変えずに済む。",
+    "card": "一般動詞の過去の疑問文"
+  },
+  {
+    "id": "gaikokugo-047",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "There is / There are",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"___ two cats under the table.\" に入るのはどれですか?",
+    "choices": [
+      "There are",
+      "There is",
+      "It is",
+      "They are"
+    ],
+    "answer": 0,
+    "hints": [
+      "「〜がある」を表す There の構文だ。",
+      "be 動詞の形は、そのあとに来る名詞の数で決まる。",
+      "two cats は複数だ。複数に対応する be 動詞を選ぼう。"
+    ],
+    "lesson": "There is / There are は「〜がある、いる」を表す。be 動詞の形は、そのあとに続く名詞の数で決まり、単数なら is、複数なら are を使う。There が主語のように見えるが、実際の主語は後ろの名詞だ。過去なら There was / There were になる。",
+    "tip": "存在することを述べる専用の型がある。あるかないかは、それだけ基本的な情報だ。",
+    "card": "There is / There are"
+  },
+  {
+    "id": "gaikokugo-048",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "be 動詞の過去形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I ___ tired yesterday.\" に入るのはどれですか?",
+    "choices": [
+      "was",
+      "were",
+      "am",
+      "is"
+    ],
+    "answer": 0,
+    "hints": [
+      "yesterday があるので過去の文だ。",
+      "be 動詞の過去形は was と were の二つしかない。",
+      "主語が I のとき使うほうを選ぼう。"
+    ],
+    "lesson": "be 動詞の過去形は was と were の二つだ。I、he、she、it と単数名詞には was、you と複数名詞には were を使う。現在形の am / is / are が三つあるのに対し、過去では二つに減る。否定は wasn't / weren't、疑問は Was / Were を文頭に置く。",
+    "tip": "時を表す形が減っていくのは、言語が使われ続けた結果すり減ったからだ。",
+    "card": "be 動詞の過去形"
+  },
+  {
+    "id": "gaikokugo-049",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "現在進行形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"She ___ a book now.\" に「読んでいるところだ」を表す形を入れるなら、どれですか?",
+    "choices": [
+      "is reading",
+      "reads",
+      "read",
+      "is read"
+    ],
+    "answer": 0,
+    "hints": [
+      "now があるので、今している最中だという文だ。",
+      "進行形は be 動詞と動詞の -ing 形を組み合わせる。",
+      "主語が She なので、be 動詞は is になる。そのあとに reading を続けよう。"
+    ],
+    "lesson": "現在進行形は be 動詞 + 動詞の -ing 形で、今まさに行われている動作を表す。She is reading a book. だ。She reads a book. は習慣として本を読むという意味になり、時間の捉え方が違う。like や know のように、進行形にしない動詞もある。",
+    "tip": "今していることと、いつもしていること。その区別を文法が引き受けている。",
+    "card": "現在進行形"
+  },
+  {
+    "id": "gaikokugo-050",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "接続詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I like summer ___ I can swim.\" に理由をつなぐ語を入れるなら、どれですか?",
+    "choices": [
+      "because",
+      "but",
+      "or",
+      "if"
+    ],
+    "answer": 0,
+    "hints": [
+      "前半が「好き」、後半がその理由になっている。",
+      "but は逆のことをつなぎ、or は選択を表す。",
+      "理由を導く接続詞を選ぼう。「なぜなら」にあたる語だ。"
+    ],
+    "lesson": "because は理由を導く接続詞で、あとに主語と動詞のある文が続く。because of なら名詞が続く。and（そして）、but（しかし）、or（または）、so（だから）とあわせて、文をつなぐ基本の語になる。理由を言えるようになると、自分の考えを説明できる幅が広がる。",
+    "tip": "好きだと言うだけでは伝わらない。なぜかを添えて初めて、相手は理解できる。",
+    "card": "接続詞 because"
+  },
+  {
+    "id": "gaikokugo-051",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "未来の表現",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I ___ visit my grandmother next week.\" に予定を表す語を入れるなら、どれですか?",
+    "choices": [
+      "will",
+      "did",
+      "was",
+      "am"
+    ],
+    "answer": 0,
+    "hints": [
+      "next week があるので、これからのことを述べる文だ。",
+      "did と was は過去に使う語だ。",
+      "未来を表す助動詞を選ぼう。あとには動詞の原形が続く。"
+    ],
+    "lesson": "will + 動詞の原形で未来を表す。I will visit ~. だ。be going to + 動詞の原形も未来を表すが、前もって決めていた予定に使われることが多い。will はその場で決めたことや単なる予測にも使う。どちらも動詞は原形のままになる。",
+    "tip": "まだ起きていないことを語れる。未来形を持つことは、計画を持てるということだ。",
+    "card": "will による未来の表現"
+  },
+  {
+    "id": "gaikokugo-052",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "目的語の代名詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I know ___.\" に「彼を」を表す語を入れるなら、どれですか?",
+    "choices": [
+      "him",
+      "he",
+      "his",
+      "he's"
+    ],
+    "answer": 0,
+    "hints": [
+      "動詞のあとに来るので、目的語の形が必要だ。",
+      "he は主語に使う形、his は「彼の」を表す。",
+      "目的語として使う形を選ぼう。"
+    ],
+    "lesson": "代名詞は、主格（I, he, she, they）、所有格（my, his, her, their）、目的格（me, him, her, them）で形が変わる。動詞や前置詞のあとには目的格を使う。I know him. / Listen to her. のようになる。日本語では助詞が担う役割を、英語は語形の変化で示している。",
+    "tip": "語の形が役割を示すか、助詞が示すか。どちらかで、語順の自由度が決まる。",
+    "card": "目的格の代名詞"
+  },
+  {
+    "id": "gaikokugo-053",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "冠詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I have ___ orange.\" に入る冠詞はどれですか?",
+    "choices": [
+      "an",
+      "a",
+      "the",
+      "不要"
+    ],
+    "answer": 0,
+    "hints": [
+      "数えられる名詞の単数形には冠詞がつく。",
+      "初めて話題に出すものには a / an を使う。",
+      "続く語が母音の音で始まるときは、a ではないほうを使う。"
+    ],
+    "lesson": "a / an は初めて話題に出す数えられる名詞の単数形につき、続く語が母音の音で始まるときは an になる。an orange、an hour（h は発音しない）、a university（ju の音で始まる）のように、綴りではなく音で決まる。すでに話題に出たものや特定できるものには the を使う。",
+    "tip": "音で決まる規則は、書く前に声に出すと間違えにくい。耳が先、文字が後だ。",
+    "card": "冠詞 a と an"
+  },
+  {
+    "id": "gaikokugo-054",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "数えられない名詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "次のうち、ふつう数えられない名詞として扱われるのはどれですか?",
+    "choices": [
+      "water",
+      "apple",
+      "book",
+      "student"
+    ],
+    "answer": 0,
+    "hints": [
+      "形が決まっていて、一つ二つと数えられるものは数えられる名詞だ。",
+      "残る三つは、どれも一つ二つと数えられる。",
+      "容器や単位を使わないと数えられない、液体を選ぼう。"
+    ],
+    "lesson": "water、milk、bread、money、information などは数えられない名詞で、a をつけず複数形にもしない。数えるときは a glass of water、two pieces of bread のように単位を添える。日本語には数えられるかどうかの区別がないため、意識して覚える必要がある。",
+    "tip": "数えるか量るか。その区別は、扱う道具の違いでもある。升と天秤は別物だ。",
+    "card": "数えられない名詞"
+  },
+  {
+    "id": "gaikokugo-055",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "規則動詞の過去形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "study の過去形はどれですか?",
+    "choices": [
+      "studied",
+      "studyed",
+      "studed",
+      "study"
+    ],
+    "answer": 0,
+    "hints": [
+      "規則動詞は -ed をつけて過去形を作る。",
+      "ただし、子音字 + y で終わる語は綴りが変わる。",
+      "y を i に変えてから -ed をつける。"
+    ],
+    "lesson": "規則動詞の過去形は -ed をつけるが、綴りには決まりがある。子音字+y で終わる語は y を i に変えて -ed（study→studied）、e で終わる語は -d だけ（live→lived）、短母音+子音字で終わる語は子音字を重ねる（stop→stopped）。発音も語尾によって三通りに分かれる。",
+    "tip": "規則の中にさらに小さな規則がある。言葉は、例外を抱えたまま使われ続ける。",
+    "card": "規則動詞の過去形の綴り"
+  },
+  {
+    "id": "gaikokugo-056",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "疑問詞 whose",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"___ bag is this?\" と持ち主をたずねるとき、空所に入るのはどれですか?",
+    "choices": [
+      "Whose",
+      "Who",
+      "Which",
+      "What"
+    ],
+    "answer": 0,
+    "hints": [
+      "Who は「誰が」と人そのものをたずねる。",
+      "この問いは「誰の」と所有をたずねている。",
+      "Who に所有を表す形がある。それを選ぼう。"
+    ],
+    "lesson": "Whose は所有をたずねる疑問詞で、あとに名詞を続けて Whose bag is this? となる。名詞を省いて Whose is this? とも言える。答えは It's mine. / It's Ken's. のようになる。Who（誰が）、Whom（誰を）、Whose（誰の）と、疑問詞にも格の区別がある。",
+    "tip": "誰のものかをはっきりさせる言葉が要る。所有は、社会の基本的な取り決めだからだ。",
+    "card": "疑問詞 whose"
+  },
+  {
+    "id": "gaikokugo-057",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "命令文の否定",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「ここで走ってはいけません。」を英語で言うとどれですか?",
+    "choices": [
+      "Don't run here.",
+      "Not run here.",
+      "You don't run here.",
+      "No run here."
+    ],
+    "answer": 0,
+    "hints": [
+      "命令文は動詞から始める。",
+      "その否定は、動詞の前に決まった語を置く。",
+      "Do not を短くした形を先頭に置こう。"
+    ],
+    "lesson": "命令文の否定は Don't + 動詞の原形で、Don't run here. となる。主語が省かれているので、Do の形は変わらない。Please をつけると柔らかくなり、Never を使うとより強い禁止になる。掲示では No running のように動名詞を使う形も見られる。",
+    "tip": "禁じる言い方は短いほど強い。標識の言葉が短いのは、そのためでもある。",
+    "card": "命令文の否定"
+  },
+  {
+    "id": "gaikokugo-058",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "be 動詞と一般動詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I am like soccer.\" が誤りである理由はどれですか?",
+    "choices": [
+      "be 動詞と一般動詞を同時に使っているから",
+      "like は過去形にすべきだから",
+      "soccer に a が必要だから",
+      "主語が間違っているから"
+    ],
+    "answer": 0,
+    "hints": [
+      "like は一般動詞だ。",
+      "am は be 動詞にあたる。",
+      "一つの文に、述語となる動詞を二つ並べてしまっている。"
+    ],
+    "lesson": "一つの文の述語には、be 動詞か一般動詞のどちらか一方を使う。I like soccer. が正しい。be 動詞の文は主語の状態や性質を述べ、一般動詞の文は動作や状態を表す。否定や疑問の作り方も異なり、be 動詞は not を直後に置き、一般動詞は don't / doesn't を使う。",
+    "tip": "どちらの型の文かを最初に決める。決まれば、否定も疑問も自動的に決まる。",
+    "card": "be 動詞の文と一般動詞の文"
+  },
+  {
+    "id": "gaikokugo-059",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "複数形の綴り",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "city の複数形はどれですか?",
+    "choices": [
+      "cities",
+      "citys",
+      "cityes",
+      "city"
+    ],
+    "answer": 0,
+    "hints": [
+      "子音字 + y で終わる名詞の複数形には決まりがある。",
+      "y をそのまま残さない。",
+      "y を i に変えてから -es をつける。"
+    ],
+    "lesson": "複数形は原則 -s をつけるが、s・x・ch・sh で終わる語は -es（boxes）、子音字+y で終わる語は y を i に変えて -es（city→cities）、f・fe で終わる語は v に変えて -es（leaf→leaves）とする。母音+y なら そのまま -s（boys）だ。綴りの規則は動詞の三単現とほぼ共通する。",
+    "tip": "同じ規則が名詞にも動詞にも効く。覚える量は、見た目より少ない。",
+    "card": "複数形の綴りの規則"
+  },
+  {
+    "id": "gaikokugo-060",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "be going to",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I ___ going to visit Kyoto next month.\" に入るのはどれですか?",
+    "choices": [
+      "am",
+      "will",
+      "do",
+      "was"
+    ],
+    "answer": 0,
+    "hints": [
+      "be going to の be は、主語に合わせて形を変える。",
+      "主語は I だ。",
+      "I に対応する be 動詞の現在形を選ぼう。"
+    ],
+    "lesson": "be going to + 動詞の原形は、前もって決めていた予定や、今の状況から予測される未来を表す。be の部分は主語に合わせて am / is / are と変わる。will がその場で決めたことや単なる予測に使われるのに対し、be going to はすでに心づもりがある場合に使う傾向がある。",
+    "tip": "決めてあることと、今決めたこと。英語はそこを言い分ける手段を持っている。",
+    "card": "be going to"
+  },
+  {
+    "id": "gaikokugo-061",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "動名詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I enjoy ___ music.\" に入るのはどれですか?",
+    "choices": [
+      "listening to",
+      "to listen to",
+      "listen to",
+      "listened to"
+    ],
+    "answer": 0,
+    "hints": [
+      "enjoy のあとには不定詞ではなく、別の形が続く。",
+      "動詞を名詞のように使う -ing の形だ。",
+      "listen to を -ing の形にして続けよう。"
+    ],
+    "lesson": "enjoy、finish、stop、practice などの動詞のあとには動名詞（-ing）が続き、want、hope、decide などのあとには不定詞（to + 原形）が続く。どちらも取れる動詞もあるが、remember to do（これからすることを覚えている）と remember doing（したことを覚えている）のように意味が変わる場合がある。",
+    "tip": "続く形が決まっているなら、動詞とセットで覚えるほうが早い。",
+    "card": "動名詞をとる動詞"
+  },
+  {
+    "id": "gaikokugo-062",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "最上級",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"Mt. Fuji is the ___ mountain in Japan.\" に「最も高い」を表す語を入れるなら、どれですか?",
+    "choices": [
+      "highest",
+      "higher",
+      "high",
+      "most high"
+    ],
+    "answer": 0,
+    "hints": [
+      "三つ以上を比べて一番だと述べる文だ。",
+      "短い語の最上級は -est をつけて作る。",
+      "the のあとに、high に -est をつけた形を置こう。"
+    ],
+    "lesson": "最上級は短い語に -est、長い語に most をつけて作り、前に the を置く。比較級は -er または more を使う。in Japan（範囲）や of the three（対象の集まり）で比べる範囲を示す。good-better-best、bad-worse-worst のような不規則変化もある。",
+    "tip": "一番だと言うには、どの範囲で一番かを添えねばならない。範囲のない最上級は意味を持たない。",
+    "card": "最上級"
+  },
+  {
+    "id": "gaikokugo-063",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "接続詞 that",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I think ___ he is right.\" に入る語はどれですか?",
+    "choices": [
+      "that",
+      "what",
+      "who",
+      "if"
+    ],
+    "answer": 0,
+    "hints": [
+      "think のあとに、文をまるごと続けている。",
+      "文と文をつなぐ働きの語が必要だ。",
+      "この位置では省略もできる語だが、あるべき語を選ぼう。"
+    ],
+    "lesson": "think、know、hope、say などのあとに文を続けるとき、接続詞 that でつなぐ。I think that he is right. だが、この that は省略されることが多い。that 自体に意味はなく、後ろが一つのまとまった文であることを示す標識として働く。",
+    "tip": "つなぎ目に印を置くと、文の切れ目が見える。読み手のための標識だ。",
+    "card": "接続詞 that"
+  },
+  {
+    "id": "gaikokugo-064",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "不定詞の副詞的用法",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I went to the library to study.\" の to study はどんな意味を表しますか?",
+    "choices": [
+      "目的",
+      "理由",
+      "結果",
+      "時"
+    ],
+    "answer": 0,
+    "hints": [
+      "なぜ図書館へ行ったのかを述べている。",
+      "「勉強するために」と訳せる。",
+      "何かをするために行く、という関係を表している。"
+    ],
+    "lesson": "不定詞には、名詞的用法（〜すること）、形容詞的用法（〜するための）、副詞的用法（〜するために、〜して）がある。to study は目的を表す副詞的用法だ。感情の原因（I'm glad to see you.）を表す場合も副詞的用法になる。どの用法かは、文中での働きで判断する。",
+    "tip": "同じ形が三つの働きを兼ねる。その分、文脈を読む力が要る。",
+    "card": "不定詞の副詞的用法"
+  },
+  {
+    "id": "gaikokugo-065",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "SVOO の文型",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"My father gave me a watch.\" の me と a watch の関係はどれですか?",
+    "choices": [
+      "me が「誰に」、a watch が「何を」",
+      "me が「何を」、a watch が「誰に」",
+      "どちらも「何を」",
+      "どちらも主語"
+    ],
+    "answer": 0,
+    "hints": [
+      "give は「誰に何を与える」という意味の動詞だ。",
+      "動詞のすぐあとに来るのが受け取る相手になる。",
+      "二つ目に来るのが、渡されるものになる。"
+    ],
+    "lesson": "give、show、teach、send などは目的語を二つ取り、動詞+人+物の順に並ぶ。My father gave me a watch. だ。前置詞を使って gave a watch to me と書き換えることもできる。動詞によって to を使うか for を使うかが決まっていて、buy なら for を使う。",
+    "tip": "誰に何を、という順序が決まっているから、助詞がなくても意味が通る。",
+    "card": "目的語を二つとる文"
+  },
+  {
+    "id": "gaikokugo-066",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "There の過去",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"There ___ many people in the park yesterday.\" に入るのはどれですか?",
+    "choices": [
+      "were",
+      "was",
+      "are",
+      "is"
+    ],
+    "answer": 0,
+    "hints": [
+      "yesterday があるので過去の文だ。",
+      "be 動詞の形は、あとに続く名詞の数で決まる。",
+      "many people は複数だ。複数に対応する過去形を選ぼう。"
+    ],
+    "lesson": "There is / are の過去形は There was / were になる。形は後ろの名詞の数で決まるので、many people なら were だ。There が主語のように見えて主語ではない点が、この構文の紛らわしいところになる。否定は There wasn't、疑問は Was there ~? と語順が入れかわる。",
+    "tip": "見た目の主語と本当の主語がずれる。形だけで判断すると取り違える。",
+    "card": "There was / There were"
+  },
+  {
+    "id": "gaikokugo-067",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "現在完了の完了用法",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I have ___ finished my homework.\" に「すでに」を表す語を入れるなら、どれですか?",
+    "choices": [
+      "already",
+      "yet",
+      "ever",
+      "never"
+    ],
+    "answer": 0,
+    "hints": [
+      "肯定文で「もう終わった」と述べている。",
+      "yet は否定文や疑問文で使う。",
+      "肯定文で「すでに」を表す語を選ぼう。"
+    ],
+    "lesson": "現在完了には完了・経験・継続・結果の用法がある。完了用法では already（もう、肯定文）、yet（まだ・もう、否定文と疑問文）、just（ちょうど）を伴うことが多い。過去形が過去の一点を述べるのに対し、現在完了は過去の出来事が今とつながっていることを示す。",
+    "tip": "終わったことが今に効いている。その連続を一つの形で表すのが現在完了だ。",
+    "card": "現在完了の完了用法"
+  },
+  {
+    "id": "gaikokugo-068",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "分詞の後置修飾",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"The boy ___ under the tree is my brother.\" に「立っている」を表す語を入れるなら、どれですか?",
+    "choices": [
+      "standing",
+      "stands",
+      "stood",
+      "to stand"
+    ],
+    "answer": 0,
+    "hints": [
+      "the boy を後ろから説明している。",
+      "「立っている少年」と、進行の意味で修飾する。",
+      "動詞を -ing の形にして、名詞のあとに置こう。"
+    ],
+    "lesson": "分詞は名詞を修飾できる。現在分詞（-ing）は「〜している」、過去分詞は「〜された」を表す。語句を伴うときは名詞の後ろに置く。The boy standing under the tree（木の下に立っている少年）、a book written in English（英語で書かれた本）のようになる。関係代名詞を使った文を短くした形にあたる。",
+    "tip": "説明を後ろから足していく。英語は情報を後置する言語だ。",
+    "card": "分詞の後置修飾"
+  },
+  {
+    "id": "gaikokugo-069",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "間接疑問",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I don't know ___.\" に「彼がどこに住んでいるか」を入れるなら、どれですか?",
+    "choices": [
+      "where he lives",
+      "where does he live",
+      "where lives he",
+      "where he live"
+    ],
+    "answer": 0,
+    "hints": [
+      "文の一部に組み込まれた疑問は、疑問文の語順にしない。",
+      "疑問詞のあとは、主語・動詞のふつうの語順になる。",
+      "主語が he なので、動詞には三単現の s がつく。"
+    ],
+    "lesson": "疑問詞で始まる疑問文が文の一部になると、疑問文の語順が戻って〈疑問詞+主語+動詞〉になる。これを間接疑問という。Where does he live? が I don't know where he lives. となる。do / does が消え、動詞が主語に合わせて変化する点に注意する。",
+    "tip": "問いを文の中に埋め込むと、問いの形は消える。組み込むとはそういうことだ。",
+    "card": "間接疑問"
+  },
+  {
+    "id": "gaikokugo-070",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "原級比較",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"He is as tall ___ his father.\" に入るのはどれですか?",
+    "choices": [
+      "as",
+      "than",
+      "that",
+      "to"
+    ],
+    "answer": 0,
+    "hints": [
+      "as ~ as で「〜と同じくらい…」を表す。",
+      "than は比較級とともに使う語だ。",
+      "前と同じ語をもう一度使う形になる。"
+    ],
+    "lesson": "as + 形容詞や副詞の原級 + as で「〜と同じくらい…」を表す。否定形の not as ~ as は「〜ほど…でない」となる。比較級には than、最上級には the と範囲を示す語句を使う。三つの形を混同しやすいので、原級・比較級・最上級を並べて整理しておく。",
+    "tip": "同じくらいだと述べるのにも、専用の形がいる。比べることは言語の基本動作だ。",
+    "card": "as ~ as の原級比較"
+  },
+  {
+    "id": "gaikokugo-071",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "受け身の疑問文",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"___ this book written by Soseki?\" に入るのはどれですか?",
+    "choices": [
+      "Was",
+      "Did",
+      "Has",
+      "Does"
+    ],
+    "answer": 0,
+    "hints": [
+      "受け身は be 動詞 + 過去分詞で作る。",
+      "疑問文にするときは、その be 動詞を文頭に出す。",
+      "過去のことを聞いているので、be 動詞の過去形を選ぼう。"
+    ],
+    "lesson": "受け身は be 動詞 + 過去分詞で、疑問文では be 動詞を文頭に出す。Was this book written by Soseki? だ。do / does / did は使わない。行為者を示す必要があるときだけ by ~ を添える。誰がしたかを言わずに済ませられる点が、受け身の使いどころになる。",
+    "tip": "誰がしたかを言わない文を作れる。便利だが、責任の所在をぼかす道具にもなる。",
+    "card": "受け身の疑問文"
+  },
+  {
+    "id": "gaikokugo-072",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "how to",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"I know how ___ this machine.\" に「使い方」を表す形を入れるなら、どれですか?",
+    "choices": [
+      "to use",
+      "using",
+      "use",
+      "used"
+    ],
+    "answer": 0,
+    "hints": [
+      "疑問詞と不定詞を組み合わせた形だ。",
+      "how to + 動詞の原形で「〜のしかた」を表す。",
+      "how のあとに to を続け、そのあとに原形を置こう。"
+    ],
+    "lesson": "疑問詞 + to + 動詞の原形で、how to（〜のしかた）、what to（何を〜すべきか）、where to（どこへ〜すべきか）、when to（いつ〜すべきか）を表す。名詞のかたまりとして働くので、動詞の目的語になれる。I know how to use it. のように使う。",
+    "tip": "やり方そのものを一つのまとまりとして扱う。手順を言葉にできると、人に渡せる。",
+    "card": "how to + 動詞の原形"
+  },
+  {
+    "id": "gaikokugo-073",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "関係代名詞の目的格",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"This is the book ___ I bought yesterday.\" に入る関係代名詞はどれですか?",
+    "choices": [
+      "which",
+      "who",
+      "whose",
+      "what"
+    ],
+    "answer": 0,
+    "hints": [
+      "先行詞は the book で、人ではなく物だ。",
+      "関係詞のあとが I bought と続き、目的語が欠けている。",
+      "物を受け、目的格として使える関係代名詞を選ぼう。"
+    ],
+    "lesson": "関係代名詞は先行詞が人なら who / whom、物なら which、どちらでも that を使える。目的格の関係代名詞は省略できるので、This is the book I bought yesterday. とも言える。主格は省略できない点が違いになる。関係詞のあとの文で何が欠けているかを見ると、格が判断できる。",
+    "tip": "省いても通じるものは、やがて省かれる。言葉は使われるうちに削れていく。",
+    "card": "目的格の関係代名詞"
+  },
+  {
+    "id": "gaikokugo-074",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "世界",
+    "subject": "外国語",
+    "unit": "世界の言語",
+    "country": "世界 / 言語人口",
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "母語として話す人の数が世界で最も多い言語はどれですか?",
+    "choices": [
+      "中国語",
+      "英語",
+      "スペイン語",
+      "ヒンディー語"
+    ],
+    "answer": 0,
+    "hints": [
+      "公用語として採用する国の数で数えると、答えは変わる。",
+      "この問いは、母語とする人の数だ。",
+      "人口が世界最大級の国で使われている言語を選ぼう。"
+    ],
+    "lesson": "母語話者数では中国語が最も多く、スペイン語、英語、ヒンディー語が続く。一方、第二言語まで含めた話者数では英語が最多になる。公用語として採用する国の数でも英語が最も多い。どの数え方をするかで順位が変わるので、数字を見るときは定義を確かめる必要がある。",
+    "tip": "何を数えたかで順位は動く。統計を読むとは、定義を読むことでもある。",
+    "card": "母語話者数の多い言語"
+  },
+  {
+    "id": "gaikokugo-075",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "イギリス",
+    "subject": "外国語",
+    "unit": "英語の変種",
+    "country": "イギリス / English（Key Stage 3）",
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "イギリス英語で「エレベーター」を表す語はどれですか?",
+    "choices": [
+      "lift",
+      "elevator",
+      "escalator",
+      "stairs"
+    ],
+    "answer": 0,
+    "hints": [
+      "アメリカ英語では elevator という。",
+      "イギリスでは別の短い語が使われる。",
+      "「持ち上げる」という意味の動詞と同じ形の語だ。"
+    ],
+    "lesson": "英語には地域による違いがある。エレベーターは英 lift、米 elevator、秋は英 autumn、米 fall、サッカーは英 football、米 soccer だ。綴りも colour / color、centre / center と異なる。どちらも正しい英語で、一方が誤りというわけではない。どの変種で学ぶかを決めておくと混乱が少ない。",
+    "tip": "同じ言語でも、離れて使われれば分かれていく。言葉は使う人のところで変わる。",
+    "card": "イギリス英語とアメリカ英語"
+  },
+  {
+    "id": "gaikokugo-076",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "中国",
+    "subject": "外国語",
+    "unit": "中国語",
+    "country": "中国 / 语文（小学低学年）",
+    "newCurriculum": true,
+    "figure": null,
+    "format": "choice",
+    "prompt": "中国語で、同じ音でも意味が変わる音の上げ下げを何といいますか?",
+    "choices": [
+      "声調",
+      "母音",
+      "子音",
+      "抑揚記号"
+    ],
+    "answer": 0,
+    "hints": [
+      "標準中国語には4種類ある。",
+      "同じ ma でも、言い方によって母・麻・馬・罵と意味が変わる。",
+      "音の高さの変化そのものが意味を区別している。"
+    ],
+    "lesson": "標準中国語には4つの声調があり、同じ音節でも声調が変われば別の語になる。ma は声調によって母、麻、馬、罵を表す。ベトナム語やタイ語も声調を持つ。日本語にも高低アクセントがあるが、語の意味を区別する働きは限定的だ。声調言語の学習では、音の高さを綴りと同じ精度で覚える必要がある。",
+    "tip": "高さそのものが意味を担う。音楽と言語の境目は、思うほどはっきりしていない。",
+    "card": "中国語の声調"
+  },
+  {
+    "id": "gaikokugo-077",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "スイス",
+    "subject": "外国語",
+    "unit": "多言語国家",
+    "country": "スイス / Sprachen（Sekundarstufe I）",
+    "newCurriculum": true,
+    "figure": null,
+    "format": "choice",
+    "prompt": "スイスが4つの言語を公用語としているのは、何を反映していますか?",
+    "choices": [
+      "地域ごとに話される言語が異なること",
+      "観光客が多いこと",
+      "4つの国に分かれていること",
+      "学校が4種類あること"
+    ],
+    "answer": 0,
+    "hints": [
+      "ドイツ語、フランス語、イタリア語、ロマンシュ語が公用語だ。",
+      "州ごとに主に使われる言語が異なる。",
+      "その地域ごとの言語の分布が、そのまま制度になっている。"
+    ],
+    "lesson": "スイスはドイツ語、フランス語、イタリア語、ロマンシュ語を公用語とし、州ごとに使用言語が決まっている。国全体で全員が4言語を話すわけではなく、住む地域の言語と学校で学ぶ第二言語を使い分ける。一つの国が一つの言語という前提が、必ずしも成り立たないことを示す例になる。",
+    "tip": "一国一言語は近代に作られた考え方だ。歴史的にはむしろ例外に近い。",
+    "card": "スイスの4公用語"
+  },
+  {
+    "id": "gaikokugo-078",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "世界",
+    "subject": "外国語",
+    "unit": "国際共通語",
+    "country": "世界 / 英語教育の潮流",
+    "newCurriculum": true,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語が母語話者以外どうしの会話でも使われる状況を指す考え方はどれですか?",
+    "choices": [
+      "リンガフランカ（共通語）",
+      "方言",
+      "母語",
+      "第二公用語"
+    ],
+    "answer": 0,
+    "hints": [
+      "日本人とタイ人が英語で話す場面を思い浮かべよう。",
+      "どちらの母語でもない言語が、意思疎通の手段になっている。",
+      "こうした役割を果たす言語を指す、古い地中海交易の言葉に由来する呼び名だ。"
+    ],
+    "lesson": "リンガフランカは、母語の異なる者どうしが意思疎通に使う共通語を指す。もとは中世地中海の交易で使われた混成語の名だった。現在の英語使用者の多くは非母語話者どうしで、母語話者の発音や慣用にすべて合わせる必要はないという考え方も広がっている。通じることが目的だからだ。",
+    "tip": "共通語は、誰のものでもないから共通語になれる。完璧さより通じることが先に立つ。",
+    "card": "リンガフランカとしての英語"
+  },
+  {
+    "id": "gaikokugo-079",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "世界",
+    "subject": "外国語",
+    "unit": "手話",
+    "country": "世界 / 言語としての手話",
+    "newCurriculum": true,
+    "figure": null,
+    "format": "choice",
+    "prompt": "各国の手話について、正しいのはどれですか?",
+    "choices": [
+      "国や地域ごとに異なる独自の言語である",
+      "世界共通で一つしかない",
+      "音声言語を指で表したものにすぎない",
+      "文法を持たない"
+    ],
+    "answer": 0,
+    "hints": [
+      "日本手話とアメリカ手話は通じない。",
+      "それぞれ独自の語彙と文法を持っている。",
+      "音声言語を置き換えたものではなく、それ自体が一つの言語にあたる。"
+    ],
+    "lesson": "手話は国や地域ごとに異なる独立した言語で、独自の語彙と文法を持つ。日本手話とアメリカ手話は互いに通じない。音声言語を手で置き換えたものではなく、空間と手の動きを使って文法を組み立てる。日本では2011年の障害者基本法改正で、手話が言語であると明記された。",
+    "tip": "言語かどうかは、音があるかどうかでは決まらない。文法を持ち、伝わるかどうかだ。",
+    "card": "手話という言語"
+  },
+  {
+    "id": "gaikokugo-080",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "世界",
+    "subject": "外国語",
+    "unit": "言語の消滅",
+    "country": "世界 / ユネスコ危機言語",
+    "newCurriculum": true,
+    "figure": null,
+    "format": "choice",
+    "prompt": "世界の言語のうち、話者が減って消滅の危機にあるものについて正しいのはどれですか?",
+    "choices": [
+      "全体のおよそ4割が危機にあるとされる",
+      "ほとんど存在しない",
+      "すべて記録が残されている",
+      "増え続けている"
+    ],
+    "answer": 0,
+    "hints": [
+      "世界には約7000の言語があるとされる。",
+      "そのうち多くは話者が数千人以下だ。",
+      "半数に近い割合が、次の世代へ受け継がれないと見られている。"
+    ],
+    "lesson": "世界に約7000ある言語のうち、およそ4割が消滅の危機にあるとされる。話者が多数派言語へ移り、子どもに受け継がれなくなることが主な原因だ。日本でもアイヌ語や八丈語などが危機言語に挙げられている。言語が失われると、その言語でしか表せなかった知識や世界の見方も失われる。",
+    "tip": "一つの言語が消えることは、一つの見方が消えることでもある。記録は最低限の抵抗だ。",
+    "card": "消滅の危機にある言語"
   }
 ]
