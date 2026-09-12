@@ -18,7 +18,15 @@
       "alt": "ハチを真横から拡大した写真。胸から3対のあしが出ている",
       "use": "rika-001",
       "where": "lesson",
-      "insource": "PD-USGov"
+      "insource": "PD-USGov",
+      "file": "insect-body",
+      "title": "Bombus griseocollis",
+      "author": "USGS Native Bee Inventory and Monitoring Laboratory",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABombus%20griseocollis.jpg",
+      "width": 640,
+      "height": 427
     },
     "trilobite": {
       "search": "Trilobite fossil Elrathia",
