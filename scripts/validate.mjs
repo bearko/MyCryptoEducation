@@ -32,10 +32,13 @@ const heroes     = await json("data/heroes.json");
 const extensions = await json("data/extensions.json");
 const gemstones  = await json("data/gemstones.json");
 const crystals   = await json("data/crystals.json");
+const curriculum = await json("data/curriculum.json");
 
 /* ---- 1問ごとの検証 ---- */
 const seenIds = new Set();
 const promptsBySubject = {};
+const allPrompts = new Map();
+const cardOwner = new Map();
 
 for (const q of questions) {
   const id = q.id || `(id未設定 in ${q._file})`;
@@ -53,6 +56,10 @@ for (const q of questions) {
 
   if (!SUBJECTS.includes(q.subject)) err(id, `未知の教科 "${q.subject}"`);
   if (!GRADES.includes(q.grade))     err(id, `未知の学年キー "${q.grade}"`);
+  // カリキュラムに無い組み合わせに問題を置くと、どの教育課程にも対応しない作り物になる
+  const shape = curriculum.exists[q.subject];
+  if (shape && !shape.includes(q.grade))
+    err(id, `${q.subject} は ${q.grade} に存在しません（data/curriculum.json）`);
   if (!gemstones.subjectToGem[q.subject]) err(id, `教科 "${q.subject}" に対応する魔石がありません`);
 
   if (format === "range") {
@@ -96,6 +103,15 @@ for (const q of questions) {
   if (promptsBySubject[q.subject].has(key))
     err(id, `同じ教科に同一の問題文があります（${promptsBySubject[q.subject].get(key)}）`);
   promptsBySubject[q.subject].set(key, q.id);
+
+  // 教科をまたいだ重複も見る。数が増えるほど起きやすい
+  if (allPrompts.has(key)) err(id, `他の教科に同一の問題文があります（${allPrompts.get(key)}）`);
+  allPrompts.set(key, q.id);
+
+  // 知識カード名の重複。同じ名前だとゲージ計算でひとまとめに数えられてしまう
+  if (cardOwner.has(q.card) && cardOwner.get(q.card) !== q.id)
+    warn(`${id}: 知識カード「${q.card}」が ${cardOwner.get(q.card)} と重複しています`);
+  else cardOwner.set(q.card, q.id);
 }
 
 /* ---- 英雄 ---- */
@@ -196,19 +212,42 @@ const stock = (band, subject) => questions.filter(q =>
   (band === "auto" || BANDS[band].includes(q.grade)) &&
   (subject === "auto" || q.subject === subject)).length;
 
+const GRADE_LABEL = { e1: "小1", e2: "小2", e3: "小3", e4: "小4", e5: "小5", e6: "小6",
+                      j1: "中1", j2: "中2", j3: "中3", w: "世界" };
+const cell = {};
+questions.forEach(q => { cell[q.subject + "|" + q.grade] = (cell[q.subject + "|" + q.grade] || 0) + 1; });
+
+/* 教科 × 学年のマス目。「−」はカリキュラムに存在しない組み合わせ */
 const table = [];
+let realCells = 0, emptyCells = 0, thinCells = 0;
 for (const s of SUBJECTS) {
-  const row = { 教科: s, 全体: stock("auto", s) };
-  for (const b of ["e", "j", "w"]) row[{ e: "小", j: "中", w: "世" }[b]] = stock(b, s);
+  const shape = curriculum.exists[s] || GRADES;
+  const row = { 教科: s };
+  for (const g of GRADES) {
+    if (!shape.includes(g)) { row[GRADE_LABEL[g]] = "−"; continue; }
+    realCells++;
+    const n = cell[s + "|" + g] || 0;
+    if (n === 0) emptyCells++;
+    else if (n < 3) thinCells++;
+    row[GRADE_LABEL[g]] = n || "・";
+  }
+  row.計 = stock("auto", s);
   table.push(row);
-  if (row.全体 > 0 && row.全体 < RUN_LENGTH)
-    warn(`在庫不足: ${s} は ${row.全体}問しかありません（1セッション ${RUN_LENGTH}問）`);
-  if (row.全体 === 0) warn(`在庫ゼロ: ${s} に問題がありません`);
+  if (row.計 > 0 && row.計 < RUN_LENGTH)
+    warn(`在庫不足: ${s} は ${row.計}問しかありません（1セッション ${RUN_LENGTH}問）`);
+  if (row.計 === 0) warn(`在庫ゼロ: ${s} に問題がありません`);
+}
+for (const s of SUBJECTS) {
+  const shape = curriculum.exists[s] || GRADES;
+  const holes = shape.filter(g => !(cell[s + "|" + g] || 0)).map(g => GRADE_LABEL[g]);
+  if (holes.length) warn(`空きマス: ${s} の ${holes.join("・")} に問題がありません`);
 }
 
 /* ---- 出力 ---- */
 console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${Object.keys(extensions).length}種（${Object.keys(byLine).length}系統） / クリスタル ${(crystals.crystals || []).length}種\n`);
 console.table(table);
+console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ 2問以下 ${thinCells}` +
+  `　（「−」はカリキュラムに無い組み合わせ）`);
 
 if (warnings.length) {
   console.log(`\n⚠ 警告 ${warnings.length}件`);
