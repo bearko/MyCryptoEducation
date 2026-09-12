@@ -17,7 +17,15 @@
       "search": "bee USGS Bee Inventory and Monitoring Lab",
       "alt": "ハチの側面を拡大した写真。胸から3対のあしが出ている",
       "use": "rika-001",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "insect-body",
+      "title": "Calliphora vicina, u, Face, DC 2014-04-24 -17.46.02 ZS PMax - USGS Bee Inventory and Monitoring Laboratory",
+      "author": "USGS Bee Inventory and Monitoring Lab, Beltsville, Maryland, United States",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ACalliphora%20vicina%2C%20u%2C%20Face%2C%20DC%202014-04-24%20-17.46.02%20ZS%20PMax%20-%20USGS%20Bee%20Inventory%20and%20Monitoring%20Laboratory.jpg",
+      "width": 640,
+      "height": 501
     },
     "trilobite": {
       "search": "Trilobite fossil Elrathia",
