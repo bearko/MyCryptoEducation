@@ -53,7 +53,15 @@
       "alt": "地表を流れる赤い溶岩。表面は黒く固まりかけている",
       "use": "rika-052",
       "where": "lesson",
-      "insource": "PD-USGov"
+      "insource": "PD-USGov",
+      "file": "lava-flow",
+      "title": "Pahoeoe fountain original",
+      "author": "Jim D. Griggs, HVO (USGS) staff photographer[1][2]",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3APahoeoe%20fountain%20original.jpg",
+      "width": 640,
+      "height": 427
     },
     "mars": {
       "search": "Mars Hubble Space Telescope",
@@ -144,7 +152,15 @@
       "alt": "演説するネルソン・マンデラ",
       "use": "shakai-068",
       "where": "lesson",
-      "insource": "PD-USGov"
+      "insource": "PD-USGov",
+      "file": "mandela",
+      "title": "Bill-Clinton-with-Nelson-Mandela",
+      "author": "White House Photograph Office, Clinton Administration",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABill-Clinton-with-Nelson-Mandela.jpg",
+      "width": 640,
+      "height": 428
     },
     "kamakura-daibutsu": {
       "search": "Kamakura Daibutsu Kotokuin",
