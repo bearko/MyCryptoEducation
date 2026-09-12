@@ -9,7 +9,8 @@
     "validate": "node scripts/validate.mjs",
     "build": "node scripts/build.mjs",
     "fetch:mch": "node scripts/fetch-mch-assets.mjs",
-    "fetch:crystals": "node scripts/fetch-crystals.mjs"
+    "fetch:crystals": "node scripts/fetch-crystals.mjs",
+    "fetch:commons": "node scripts/fetch-commons.mjs"
   },
   "devDependencies": {
     "sharp": "^0.33.0"

@@ -18,7 +18,9 @@ import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import sharp from "sharp";
+let sharp;
+try { sharp = (await import("sharp")).default; }
+catch { console.error("sharp が見つかりません。先に npm install を走らせてください。"); process.exit(1); }
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = "public/commons";
@@ -30,7 +32,7 @@ const WAIT = 1200;   // 1件ごとに待つ。相手のサーバに連続で叩�
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const api = async params => {
-  const url = `${API}?${new URLSearchParams({ format: "json", origin: "*", ...params })}`;
+  const url = `${API}?${new URLSearchParams({ format: "json", ...params })}`;
   const res = await fetch(url, { headers: { "User-Agent": UA } });
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
