@@ -13,6 +13,9 @@ const SUBJECTS = ["国語", "算数・数学", "理科", "社会", "外国語", 
 const GRADES = ["e1","e2","e3","e4","e5","e6","j1","j2","j3","w"];
 const BANDS = { e: ["e1","e2","e3","e4","e5","e6"], j: ["j1","j2","j3"], w: ["w"] };
 
+/* 写真に使えるライセンス。CC BY-SA は改変物に波及するので入れない */
+const ALLOWED_LICENSES = [];
+
 const errors = [];
 const warnings = [];
 const err  = (id, msg) => errors.push(`${id}: ${msg}`);
@@ -33,6 +36,12 @@ const extensions = await json("data/extensions.json");
 const gemstones  = await json("data/gemstones.json");
 const crystals   = await json("data/crystals.json");
 const curriculum = await json("data/curriculum.json");
+const imageBook  = await json("data/images.json");
+ALLOWED_LICENSES.push(...(imageBook.allow || []).map(x => String(x).toLowerCase()));
+if (!ALLOWED_LICENSES.length) err("images.json", "allow が空です");
+for (const bad of ALLOWED_LICENSES)
+  if (bad.includes("-sa") || bad.includes("nc") || bad.includes("nd"))
+    err("images.json", `allow に "${bad}" が入っています。SA・NC・ND は使いません`);
 
 /* ---- 1問ごとの検証 ---- */
 const seenIds = new Set();
@@ -89,7 +98,29 @@ for (const q of questions) {
   }
 
   if (q.figure && !figures[q.figure]) err(id, `図版 "${q.figure}" が figures.json にありません`);
-  if (q.commons && !q.license) err(id, "画像問題にライセンス情報がありません");
+
+  /* 写真。クレジットを出せない画像は載せない（CC BY の条件） */
+  if (q.image) {
+    const p = imageBook.images?.[q.image];
+    const where = q.imageAt || "lesson";
+    if (!p) err(id, `写真 "${q.image}" が images.json にありません`);
+    else {
+      if (!p.file) err(id, `写真 "${q.image}" はまだ取り込まれていません（node scripts/fetch-commons.mjs）`);
+      else if (!existsSync(join(ROOT, "public/commons", p.file + ".webp")))
+        err(id, `写真の実体がありません: public/commons/${p.file}.webp`);
+      for (const k of ["alt", "title", "author", "license", "source"])
+        if (!p[k]) err(id, `写真 "${q.image}" に ${k} がありません（クレジットを出せません）`);
+      if (p.license && !ALLOWED_LICENSES.includes(p.license.toLowerCase()))
+        err(id, `写真 "${q.image}" のライセンス "${p.license}" は使えません（images.json の allow を参照）`);
+    }
+    if (!["prompt", "hint", "lesson"].includes(where))
+      err(id, `imageAt は prompt / hint / lesson のどれかです（いま "${where}"）`);
+    // ヒントに置く画像は、それだけで答えが割れてはいけない。
+    // 選択肢そのものを写した写真は検出できないので、ここは形だけ見る
+    if (where === "hint" && format === "choice" && /どれ|どちら|何という/.test(q.prompt) === false)
+      warn(`${id}: ヒントに写真を置いています。それだけで答えが割れないか確かめてください`);
+  }
+  if (q.imageAt && !q.image) err(id, "imageAt があるのに image がありません");
 
   if (q.applied) {
     const a = q.applied;
