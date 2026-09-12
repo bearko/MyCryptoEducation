@@ -1,5 +1,5 @@
 {
-  "_note": "Wikimedia Commons から取り込む写真の台帳。実体は public/commons/ に置く。scripts/fetch-commons.mjs が commons（File:名）か search を手がかりに探し、ライセンスを確かめてから file 以下の欄を埋める。search で使えるライセンスが見つからないときは、コモンズで自分で選んで commons に File:名を書く。",
+  "_note": "Wikimedia Commons から取り込む写真の台帳。実体は public/commons/ に置く。scripts/fetch-commons.mjs が commons（File:名）か search を手がかりに探し、ライセンスを確かめてから file 以下の欄を埋める。search で使えるライセンスが見つからないときは、コモンズで自分で選んで commons に File:名を書く。見せたいものが部位の数や向きなら、search に side のような画角の語も入れる。被写体名だけでは顔の接写が来ることがある。",
   "_license": "許すのは PD・CC0・CC BY だけ。CC BY-SA は改変物に同じライセンスが波及するので使わない。NC と ND も使わない。fetch-commons.mjs が allow に無いライセンスの画像を弾く。",
   "_where": "prompt=問題文の下 / hint=第3ヒントの横 / lesson=解説の中。hint に置くときは、その画像だけで答えが割れないものに限る（原則5）。",
   "allow": [
@@ -50,7 +50,7 @@
     },
     "lava-flow": {
       "search": "lava flow",
-      "alt": "地表を流れる赤い溶岩。表面は黒く固まりかけている",
+      "alt": "噴き上がる赤い溶岩。手前の地表は黒く固まっている",
       "use": "rika-052",
       "where": "lesson",
       "insource": "PD-USGov",
@@ -149,7 +149,7 @@
     },
     "mandela": {
       "search": "Nelson Mandela",
-      "alt": "演説するネルソン・マンデラ",
+      "alt": "ネルソン・マンデラ（中央）。アメリカ大統領とならんで式典に立つ",
       "use": "shakai-068",
       "where": "lesson",
       "insource": "PD-USGov",
