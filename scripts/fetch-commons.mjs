@@ -43,7 +43,8 @@ const api = async params => {
 };
 
 const bookPath = join(ROOT, "data/images.json");
-const book = JSON.parse(await readFile(bookPath, "utf8"));
+const bookBefore = await readFile(bookPath, "utf8");
+const book = JSON.parse(bookBefore);
 const allow = book.allow.map(s => s.toLowerCase());
 const entries = Object.entries(book.images);
 const wanted = process.argv.slice(2).length
@@ -155,6 +156,13 @@ for (const [key, entry] of wanted) {
   await sleep(WAIT);
 }
 
-await writeFile(bookPath, JSON.stringify(book, null, 2) + "\n");
+/* 中身が変わっていないなら書かない。毎回書くと、取り込むものが無い実行でも
+   未コミットの変更が残って、git pull が止まる */
+const bookAfter = JSON.stringify(book, null, 2) + "\n";
+const changed = bookAfter !== bookBefore;
+if (changed) await writeFile(bookPath, bookAfter);
+
 console.log(`\n取り込み ${ok}件 / 見送り ${ng}件  →  ${OUT}/`);
-console.log("data/images.json を更新しました。npm run validate で確かめてください。");
+console.log(changed
+  ? "data/images.json を更新しました。npm run validate で確かめてください。"
+  : "data/images.json は変わっていません。");
