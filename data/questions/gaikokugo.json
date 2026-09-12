@@ -314,5 +314,397 @@
     "lesson": "世宗のもとで作られ、1446年に公布された。子音は口や舌の形を、母音は天・地・人をかたどる。成り立ちが記録に残る文字は世界的にも少ない。学びやすさを目的に作られた点でも珍しい。",
     "tip": "文字を新たに作るとは、国のかたちを作ることだ。誰に読ませたいかで、形まで変わる。",
     "card": "ハングル"
+  },
+  {
+    "id": "gaikokugo-011",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "あいさつ",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "朝、友だちに会ったときのあいさつはどれですか?",
+    "choices": [
+      "Good morning.",
+      "Good night.",
+      "Good bye.",
+      "Good luck."
+    ],
+    "answer": 0,
+    "hints": [
+      "昼は Good afternoon、夕方からは Good evening と言う。",
+      "Good night は、寝る前や別れぎわのあいさつだ。",
+      "朝を表す英語は morning。それを good と組み合わせよう。"
+    ],
+    "lesson": "英語のあいさつは時間帯で変わる。朝は Good morning、昼は Good afternoon、夕方から夜は Good evening、そして寝る前や夜の別れぎわには Good night を使う。Good night だけは出会いのあいさつにならないので、朝の Good morning とは役目がちがう。",
+    "tip": "あいさつの言葉がその日の時間を区切る。日の高さで一日を分ける感覚は、どの土地にもある。",
+    "card": "英語の時間帯のあいさつ"
+  },
+  {
+    "id": "gaikokugo-012",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "数",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語で 12 を表す語はどれですか?",
+    "choices": [
+      "twelve",
+      "twenty",
+      "two",
+      "ten"
+    ],
+    "answer": 0,
+    "hints": [
+      "11 は eleven、13 は thirteen だ。",
+      "13 から 19 までは -teen がつくが、11 と 12 だけは形がちがう。",
+      "eleven の次に来る、特別な形の語を選ぼう。"
+    ],
+    "lesson": "英語の数は 1 から 12 までそれぞれ固有の語を持ち、13 から 19 は -teen、20・30 は -ty がつく。eleven と twelve が不規則なのは、12 を一区切りとして数える古い習慣の名残だ。1ダースが12なのも、1フィートが12インチなのも同じ根を持つ。",
+    "tip": "十二進法は、時計にも角度にも生き残っている。十で数えるのは、あくまで一つの選び方だ。",
+    "card": "英語の数（11・12）"
+  },
+  {
+    "id": "gaikokugo-013",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "色",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語で「紫」を表す語はどれですか?",
+    "choices": [
+      "purple",
+      "orange",
+      "brown",
+      "grey"
+    ],
+    "answer": 0,
+    "hints": [
+      "残りの三つは、だいだい色・茶色・灰色だ。",
+      "赤と青を混ぜてできる色のことだ。",
+      "p で始まる語を選ぼう。貝から採った染料の名に由来する。"
+    ],
+    "lesson": "purple は紫を表す。語源は古代地中海で巻貝から採った染料 purpura で、たいへん高価だったため王や高位の者の色とされた。英語には色の名が物の名から来た例が多く、orange は果物、violet は花の名から生まれている。",
+    "tip": "紫の染料はごく少量しか採れなかった。色そのものが身分を示した時代がある。",
+    "card": "英語の色の名（purple）"
+  },
+  {
+    "id": "gaikokugo-014",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "曜日",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語で「水曜日」はどれですか?",
+    "choices": [
+      "Wednesday",
+      "Thursday",
+      "Tuesday",
+      "Saturday"
+    ],
+    "answer": 0,
+    "hints": [
+      "月曜から順に Monday, Tuesday と続く。",
+      "火曜の次に来る曜日だ。",
+      "W で始まり、発音しない d が真ん中に入っている。"
+    ],
+    "lesson": "英語の曜日名は北欧の神々に由来する。Wednesday は Woden（オーディン）の日、Thursday は Thor の日だ。Wednesday の d は今では発音しないが、綴りには残っている。Sunday と Monday は太陽と月、Saturday はローマの神サトゥルヌスから来ており、由来が混ざっている。",
+    "tip": "曜日の名に神の名を残すのは、日本語も同じだ。日・月・火・水・木・金・土は星の名でもある。",
+    "card": "英語の曜日"
+  },
+  {
+    "id": "gaikokugo-015",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "教室の英語",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "先生が \"Open your textbook.\" と言いました。何をすればよいですか?",
+    "choices": [
+      "教科書を開く",
+      "教科書を閉じる",
+      "立ち上がる",
+      "手をあげる"
+    ],
+    "answer": 0,
+    "hints": [
+      "open は「開ける」という意味の動詞だ。",
+      "your textbook は「あなたの教科書」。",
+      "動詞から始まる文は、相手にそうするよう求める言い方になる。"
+    ],
+    "lesson": "動詞から始まる文は命令文で、相手に何かをするよう求める。Open your textbook. は「教科書を開きなさい」だ。Stand up.（立ちなさい）、Look at the board.（黒板を見なさい）も同じ形で、教室でよく使われる。Please をつけると、ややていねいになる。",
+    "tip": "短い指示の言葉ほど、覚えると場が動く。現場で最初に必要になるのはそこだ。",
+    "card": "英語の命令文（教室表現）"
+  },
+  {
+    "id": "gaikokugo-016",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "自己紹介",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"How old are you?\" と聞かれました。自然な答えはどれですか?",
+    "choices": [
+      "I'm ten years old.",
+      "I'm fine, thank you.",
+      "My name is Ken.",
+      "It's Tuesday."
+    ],
+    "answer": 0,
+    "hints": [
+      "old は「年をとった」という意味の語だ。",
+      "How old は「どのくらいの年齢か」を聞いている。",
+      "数と years old を組み合わせて答えよう。"
+    ],
+    "lesson": "How old are you? は年齢をたずねる言い方で、I'm ten years old. のように答える。How で始まる問いはほかにも How are you?（調子）、How many?（いくつ）、How much?（値段）があり、How のあとの語で何を聞いているかが決まる。問いの形を聞き分けるのが最初の関門だ。",
+    "tip": "年齢を数える数え方も国によって違う。生まれた時点を1と数える国もある。",
+    "card": "How old are you? への答え方"
+  },
+  {
+    "id": "gaikokugo-017",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "三人称単数",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "She ___ to school every day. に入るのはどれですか?",
+    "choices": [
+      "walks",
+      "walk",
+      "walking",
+      "walked"
+    ],
+    "answer": 0,
+    "hints": [
+      "every day は毎日くり返すことを表すので、現在形を使う。",
+      "主語は She で、I でも you でも複数でもない。",
+      "主語が三人称で単数のとき、現在形の動詞には決まった語尾がつく。"
+    ],
+    "lesson": "現在形で主語が三人称単数（he, she, it, 人名など）のとき、動詞に -s または -es がつく。She walks. He plays. It rains. のようになる。I や you、複数の主語ではつかない。日本語にはない区別なので、意識して確かめる癖をつけるところから始まる。",
+    "tip": "動詞の形が主語で変わるのは、ラテン語やフランス語ではもっと激しい。英語は削られたほうだ。",
+    "card": "三人称単数現在の -s"
+  },
+  {
+    "id": "gaikokugo-018",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "疑問詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"___ is your birthday?\" と日付をたずねるとき、空所に入るのはどれですか?",
+    "choices": [
+      "When",
+      "Where",
+      "Who",
+      "Why"
+    ],
+    "answer": 0,
+    "hints": [
+      "Where は場所、Who は人、Why は理由をたずねる語だ。",
+      "たずねているのは「いつ」にあたる。",
+      "時をたずねる疑問詞を選ぼう。W で始まり、n が二つ入る。"
+    ],
+    "lesson": "疑問詞は、たずねたい中身によって使い分ける。When は時、Where は場所、Who は人、What はもの、Why は理由、How は方法や程度だ。When is your birthday? には My birthday is May 5th. のように答える。疑問詞で始まる問いには、Yes / No では答えられない。",
+    "tip": "何を問うかが決まれば、答えの形も決まる。問いの立て方は、それ自体が技術だ。",
+    "card": "英語の疑問詞（When）"
+  },
+  {
+    "id": "gaikokugo-019",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "過去形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "I ___ to Kyoto last summer. に入るのはどれですか?",
+    "choices": [
+      "went",
+      "go",
+      "going",
+      "goes"
+    ],
+    "answer": 0,
+    "hints": [
+      "last summer は、過ぎた時を表す言葉だ。",
+      "だから動詞は過去形にする。",
+      "go の過去形は -ed ではなく、形がまるごと変わる不規則動詞だ。"
+    ],
+    "lesson": "last summer や yesterday のように過ぎた時を示す語があれば、動詞は過去形になる。go の過去形は goed ではなく went で、こうした不規則変化の動詞は日常語に多い。see-saw、eat-ate、come-came など、よく使う語ほど古い形が残っている。",
+    "tip": "よく使われる言葉ほど規則からはみ出す。すり減って形が残るのは、言葉でも道具でも同じだ。",
+    "card": "不規則動詞の過去形"
+  },
+  {
+    "id": "gaikokugo-020",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "can の文",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "\"Can you play the piano?\" への答えとして適切なのはどれですか?",
+    "choices": [
+      "Yes, I can.",
+      "Yes, I do.",
+      "Yes, I am.",
+      "Yes, I play."
+    ],
+    "answer": 0,
+    "hints": [
+      "答えるときは、問いに使われた語をそのまま返すのが原則だ。",
+      "この問いは Do でも Are でもなく、別の語で始まっている。",
+      "問いの先頭にある助動詞を、そのまま Yes, I ___ の形で使おう。"
+    ],
+    "lesson": "英語では、問いの先頭に来た語をそのまま使って答える。Can you...? には Yes, I can. / No, I can't.、Do you...? には Yes, I do.、Are you...? には Yes, I am. と返す。can は「できる」を表す助動詞で、あとに続く動詞は原形のままになる。",
+    "tip": "できるかどうかを聞く言い方は、どの言語でも早い段階で覚える。生活に直結するからだ。",
+    "card": "助動詞 can の応答"
+  },
+  {
+    "id": "gaikokugo-021",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "複数形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "child の複数形はどれですか?",
+    "choices": [
+      "children",
+      "childs",
+      "childes",
+      "child"
+    ],
+    "answer": 0,
+    "hints": [
+      "ふつうは -s や -es をつけて複数形を作る。",
+      "しかしこの語は古い形の複数を残している。",
+      "-ren という古い語尾がつく。ox が oxen になるのと同じ仲間だ。"
+    ],
+    "lesson": "英語の複数形は多くが -s / -es だが、古い形が残った語がある。child-children、ox-oxen は -en 型、man-men、foot-feet、tooth-teeth は母音が変わる型、sheep や fish は単複同形だ。規則形を覚えたうえで、例外を一つずつ拾っていくことになる。",
+    "tip": "例外が残るのは、その語が使われ続けてきた証でもある。使われない語ほど規則に飲まれる。",
+    "card": "英語の不規則な複数形"
+  },
+  {
+    "id": "gaikokugo-022",
+    "chapter": 1,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "前置詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "I was born ___ May 3rd. に入る前置詞はどれですか?",
+    "choices": [
+      "on",
+      "in",
+      "at",
+      "to"
+    ],
+    "answer": 0,
+    "hints": [
+      "時を表す前置詞は、指す範囲の広さで使い分ける。",
+      "年や月には in、時刻には at を使う。",
+      "特定の日付や曜日に使う前置詞を選ぼう。日を指すときの語だ。"
+    ],
+    "lesson": "時を表す前置詞は範囲の広さで決まる。年・月・季節には in（in 2020, in May）、特定の日や曜日には on（on Monday, on May 3rd）、時刻や一点には at（at seven, at noon）を使う。広い順に in > on > at と覚えると整理しやすい。場所の前置詞もほぼ同じ感覚で使い分ける。",
+    "tip": "どこまでを一まとまりと見るか。言葉の区切り方は、地図の縮尺の選び方に似ている。",
+    "card": "時を表す前置詞 in / on / at"
+  },
+  {
+    "id": "gaikokugo-023",
+    "chapter": 1,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "不定詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "I want ___ English every day. に入るのはどれですか?",
+    "choices": [
+      "to study",
+      "study",
+      "studied",
+      "studying"
+    ],
+    "answer": 0,
+    "hints": [
+      "want のあとには、これからしたいことが続く。",
+      "動詞を名詞のように使う形が必要だ。",
+      "to に動詞の原形をつなげた形を選ぼう。"
+    ],
+    "lesson": "want, hope, decide などの動詞のあとには to + 動詞の原形（不定詞）が続く。I want to study English. で「英語を勉強したい」となる。一方 enjoy, finish, stop のあとには動名詞（-ing）が続く。どちらを取るかは動詞ごとに決まっているので、動詞といっしょに覚えるのが早い。",
+    "tip": "したいこととしていることを言い分ける。時制と願望を区別する仕組みは、どの言語にもある。",
+    "card": "不定詞（to + 動詞の原形）"
+  },
+  {
+    "id": "gaikokugo-024",
+    "chapter": 1,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "仮定法",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "If I ___ a bird, I would fly to you. に入るのはどれですか?",
+    "choices": [
+      "were",
+      "am",
+      "is",
+      "will be"
+    ],
+    "answer": 0,
+    "hints": [
+      "実際には鳥ではない、というありえない仮定の文だ。",
+      "この形では、主語が I でも he でも be 動詞は同じ形になる。",
+      "過去形の be 動詞のうち、主語によらず使われるほうを選ぼう。"
+    ],
+    "lesson": "現実と違うことを仮定するとき、英語は仮定法過去を使う。If + 主語 + 過去形, 主語 + would + 動詞の原形という形で、be 動詞は主語にかかわらず were を使うのが原則だ。過去形を使うのは過去の話だからではなく、現実から距離を置くための形式である。",
+    "tip": "ありえないことを言葉にできるから、人は計画も後悔もできる。仮定は思考の道具だ。",
+    "card": "仮定法過去"
   }
 ]

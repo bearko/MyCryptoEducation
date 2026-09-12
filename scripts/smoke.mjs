@@ -108,15 +108,22 @@ check("未解放ぶんは在庫から外れる", openStock < ev("DB.questions.le
 check("未解放の教科は選べない",
   [...d.querySelectorAll("#sub button")].find(b => b.dataset.k === "情報").disabled);
 
-// 在庫が1セッションぶんに満たない教科を選ぶ。以前はここで同じ問題が繰り返し出ていた。
-// 問題を足すと在庫は変わるので、期待値はデータから出す
+// 在庫が1セッションぶんに満たない範囲を選ぶ。以前はここで同じ問題が繰り返し出ていた。
+// 問題を足すと在庫は変わるので、範囲（学年帯×教科）もデータから探す
 const thin = ev(`(() => {
-  const counts = inventoryBySubject(DB, S, "auto");
-  const hit = Object.entries(counts).find(([, n]) => n > 0 && n < RUN_LENGTH);
-  return hit ? JSON.stringify({ subject: hit[0], n: hit[1] }) : "null";
+  for (const band of ["auto", "e", "j", "w"]) {
+    const counts = inventoryBySubject(DB, S, band);
+    const hit = Object.entries(counts).find(([, n]) => n > 0 && n < RUN_LENGTH);
+    if (hit) return JSON.stringify({ band, subject: hit[0], n: hit[1] });
+  }
+  return "null";
 })()`);
-check("1セッションに満たない教科がある（この検査の前提）", thin !== "null", "全教科が10問以上になった");
-const { subject: thinSub, n: thinN } = JSON.parse(thin);
+check("1セッションに満たない範囲がある（この検査の前提）", thin !== "null",
+  "どの学年帯・教科も10問以上になった");
+const { band: thinBand, subject: thinSub, n: thinN } = JSON.parse(thin);
+// 学年帯を選び直すと教科は「おまかせ」に戻るので、帯を先に押す
+if (thinBand !== "auto")
+  [...d.querySelectorAll("#band button")].find(b => b.dataset.k === thinBand).click();
 [...d.querySelectorAll("#sub button")].find(b => b.dataset.k === thinSub).click();
 check("在庫不足の警告", txt().includes(`この範囲は現在 ${thinN}問です`),
   `${thinSub} ${thinN}問 / ${txt().slice(0, 160)}`);
@@ -132,7 +139,7 @@ check("在庫ぶんだけ出す（旧: 同じ問題が繰り返し出ていた�
 check("同じ問題が出ない", new Set(arr).size === arr.length, ids);
 
 // おまかせで10問
-ev('S.view="select";S.select.subject="auto";render()');
+ev('S.view="select";S.select.band="auto";S.select.subject="auto";render()');
 d.getElementById("start").click();
 const arr2 = JSON.parse(ev("JSON.stringify(S.run.ids)"));
 check("おまかせは10問", arr2.length === 10);
