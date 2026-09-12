@@ -25,6 +25,7 @@ const db = {
   advice:     await json("data/advice.json"),
   titles:     await json("data/titles.json"),
   crystals:   await json("data/crystals.json"),
+  images:     await json("data/images.json"),
 };
 
 /* --- 画像を data URI に --- */
@@ -47,6 +48,8 @@ await embed("public/icons", "i");
 await embed("public/extensions", "e");
 /* 背景は縮小コピーのほうを畳む。1080px のまま base64 にすると配布ファイルが実用外の大きさになる */
 await embed("public/backgrounds/small", "b");
+/* コモンズの写真も縮小コピーのほう。base64 は元の1.33倍になるので、大きいままでは畳めない */
+await embed("public/commons/small", "p");
 
 /* --- スクリプト（import/export を剥がして結合） --- */
 const ORDER = ["normalize.js", "engine.js", "data.js", "state.js", "views.js", "main.js"];

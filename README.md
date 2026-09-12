@@ -113,6 +113,8 @@ scripts/       検証・ビルド・アセット取得
 | `hints` | **必ず3つ。第3ヒントも答えそのものは書かない。** validate が検出します |
 | `tip` | 「もう少しだけ知りたい」で、別の英雄が横から言う一言 |
 | `card` | 獲得する知識カード名。英雄の解放条件に使われる |
+| `image` | `data/images.json` のキー。コモンズの写真を1枚出す |
+| `imageAt` | `prompt`（問題文の下）/ `hint`（第3ヒント）/ `lesson`（解説の中、既定） |
 
 ### ヒントの書き方
 
@@ -138,7 +140,20 @@ scripts/       検証・ビルド・アセット取得
 ```bash
 node scripts/fetch-mch-assets.mjs   # 英雄・背景・アイコン・魔石
 node scripts/fetch-crystals.mjs     # クリスタル100種
+node scripts/fetch-commons.mjs      # Wikimedia Commons の写真（data/images.json を埋める）
 ```
+
+### 写真を足す
+
+1. `data/images.json` の `images` に、キーと `search`（検索語）と `alt`（説明）を書く
+2. `node scripts/fetch-commons.mjs` を走らせる。`allow` にあるライセンスの候補だけを採り、
+   題名・作者・ライセンス・出典を台帳に書き戻す
+3. 採れた画像を目で確かめる。**ライセンスは機械が見ますが、写っているものが問題に合うかは人が見ます**
+4. 問題データに `"image": "<キー>"` と `"imageAt": "prompt" | "hint" | "lesson"` を足す
+5. `npm run validate` を通す
+
+使えるのは PD・CC0・CC BY だけです。CC BY-SA は改変物に同じライセンスが波及するので使いません。
+クレジット（作者・ライセンス・出典）は画像のすぐ下に必ず出ます。表示を消すとライセンス条件を満たしません。
 
 ---
 

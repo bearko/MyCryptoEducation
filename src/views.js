@@ -408,6 +408,33 @@ function finishRun() {
   S.days[k] = mergeDay(S.days[k], S.run);
 }
 
+/**
+ * コモンズの写真を1枚出す。クレジットは必ず添える。
+ *
+ * CC BY は「作者・ライセンス・出典」の表示が条件なので、画像だけ出して
+ * クレジットを省くと条件を満たさない。台帳に欄が欠けていたら何も出さない。
+ * どこに出すかは問題データの imageAt（prompt / hint / lesson）で決める。
+ */
+function photoHTML(key, cls = "") {
+  const p = DB.photos?.[key];
+  if (!p || !p.file || !p.license) return "";
+  const by = p.author ? `${esc(p.author)} ・ ` : "";
+  const lic = p.licenseUrl
+    ? `<a href="${esc(p.licenseUrl)}" target="_blank" rel="noopener noreferrer">${esc(p.license)}</a>`
+    : esc(p.license);
+  const src = p.source
+    ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>`
+    : "Wikimedia Commons";
+  return `<figure class="photo ${cls}">
+    <img src="${assetPath.photo(p.file)}" alt="${esc(p.alt || "")}" loading="lazy"
+      ${p.width ? `width="${p.width}" height="${p.height}"` : ""}>
+    <figcaption>${esc(p.title || "")} ・ ${by}${lic} ・ ${src}</figcaption></figure>`;
+}
+
+/* その問題の画像を、置き場所ごとに取り出す */
+const photoAt = (q, where) => (q.image && (q.imageAt || "lesson") === where)
+  ? photoHTML(q.image, where) : "";
+
 /* ---------- クイズ ---------- */
 
 function vQuiz() {
@@ -424,6 +451,7 @@ function vQuiz() {
     <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
       <span class="unit">${esc(q.unit)}</span></div>
     <div class="qtext">${esc(q.prompt)}</div>
+    ${photoAt(q, "prompt")}
     ${q.figure ? `<div class="figure">${DB.figures[q.figure]}</div>` : ""}
     ${q.format === "range" ? `
       <div class="rangebox">
@@ -515,8 +543,12 @@ function onRange(q) {
 
 function drawHints(q, h) {
   const max = fitOf(q, h) ? 3 : 2;
+  // 画像つきのヒントは最後の一段に添える。ヒントは答えの直前で止めるので、
+  // ここに置く画像もそれだけで答えが割れないものに限る（原則5・validate が形だけ見る）
+  const withPhoto = q.imageAt === "hint" ? q.hints.length : -1;
   document.getElementById("hints").innerHTML = q.hints.slice(0, S.run.hintsUsed)
-    .map((t, i) => `<div class="hint"><b>ヒント ${i + 1}</b>${esc(t)}</div>`).join("");
+    .map((t, i) => `<div class="hint"><b>ヒント ${i + 1}</b>${esc(t)}` +
+      (i + 1 === withPhoto ? photoHTML(q.image, "hint") : "") + `</div>`).join("");
   const b = document.getElementById("hint");
   if (!b) return;
   b.disabled = S.run.hintsUsed >= max || S.run.picked !== null;
@@ -646,6 +678,7 @@ function drawVerdict(q, h, ok, gained, gum = 0, rangeScore = null) {
       <div class="speaker"><img class="ava sm" src="${assetPath.hero(h.id)}" alt="">
         <span>${esc(h.name)}</span></div>
       <p>${esc(q.lesson)}</p>
+      ${photoAt(q, "lesson")}
       <div class="gain"><span class="seal">✓</span><span>知識カード ・ <em>${esc(q.card)}</em></span></div>
       ${gained ? `<div class="gain gem2"><img src="${assetPath.gem(DB.gems[gemKey].id)}" alt="">
         <span>${esc(DB.gems[gemKey].name)} × ${gained}</span></div>` : ""}

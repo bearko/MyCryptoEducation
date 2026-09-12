@@ -13,7 +13,7 @@ export async function loadDatabase(base = "./data") {
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
   const [questionSets, figures, heroes, extensions, gemstones,
-         advice, titles, crystals] = await Promise.all([
+         advice, titles, crystals, images] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
@@ -22,9 +22,10 @@ export async function loadDatabase(base = "./data") {
     json(`${base}/advice.json`),
     json(`${base}/titles.json`),
     json(`${base}/crystals.json`),
+    json(`${base}/images.json`),
   ]);
   return index({ questions: questionSets.flat(), figures, heroes, extensions,
-                 gemstones, advice, titles, crystals });
+                 gemstones, advice, titles, crystals, images });
 }
 
 function index(raw) {
@@ -33,6 +34,7 @@ function index(raw) {
   db.heroById = Object.fromEntries(db.heroes.map(h => [h.id, h]));
   db.gems = db.gemstones.gems;
   db.crystalById = Object.fromEntries((db.crystals?.crystals || []).map(c => [c.id, c]));
+  db.photos = db.images?.images || {};
   db.subjectToGem = db.gemstones.subjectToGem;
 
   // 知識カード名 → 教科（チャレンジのゲージ計算で使う）
@@ -53,6 +55,8 @@ export const assetPath = {
   icon: name => globalThis.__ASSETS__?.["i" + name] ?? `./public/icons/${name}.webp`,
   ext:  id => globalThis.__ASSETS__?.["e" + id] ?? `./public/extensions/${id}.webp`,
   crystal: id => globalThis.__ASSETS__?.["c" + id] ?? `./public/materials/crystals/${id}.webp`,
+  /* コモンズの写真。単一ファイル版には small/ の縮小コピーだけを畳む */
+  photo: file => globalThis.__ASSETS__?.["p" + file] ?? `./public/commons/${file}.webp`,
   /* 解放前の英雄を見せるための Rep.画像。原本は id + 10000 */
   rep:  id => assetPath.hero(String(Number(id) + 10000)),
 };

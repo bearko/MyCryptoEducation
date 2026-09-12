@@ -195,6 +195,44 @@ d.querySelectorAll(".choices > .choice")[(a + 1) % n].click();
 await wait(60);
 check("OFFでも不正解なら解説が出る", !!d.getElementById("next") && txt().includes("面白い単元"));
 
+/* ---- コモンズの写真とクレジット ---- */
+// 実体のバイト列が無くても描画は確かめられるので、台帳に仮の1件を差して戻す
+ev(`(() => {
+  window.__photoBackup = { photos: DB.photos, q: null };
+  DB.photos = Object.assign({}, DB.photos, { __t: {
+    file: "__t", alt: "テスト用の説明", title: "テスト写真",
+    author: "撮影者", license: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    source: "https://commons.wikimedia.org/wiki/File:Test.jpg" } });
+  const id = S.run.ids[S.run.i];
+  const q = DB.byId[id];
+  window.__photoBackup.q = id;
+  q.image = "__t"; q.imageAt = "prompt";
+  S.run.picked = null; render();
+})()`);
+check("問題文の下に写真を出せる", d.querySelectorAll(".qtext + .photo img").length === 1,
+  String(d.querySelectorAll(".photo").length));
+check("写真にaltが付く", d.querySelector(".photo img")?.getAttribute("alt") === "テスト用の説明",
+  d.querySelector(".photo img")?.getAttribute("alt"));
+check("クレジットに作者とライセンスと出典を出す", (() => {
+  const c = d.querySelector(".photo figcaption")?.textContent || "";
+  return c.includes("撮影者") && c.includes("CC BY 4.0") && c.includes("Wikimedia Commons");
+})(), d.querySelector(".photo figcaption")?.textContent);
+check("ライセンスと出典はリンクになる",
+  d.querySelectorAll(".photo figcaption a").length === 2,
+  String(d.querySelectorAll(".photo figcaption a").length));
+// クレジットの欄が欠けた画像は出さない（CC BY の条件を満たせないため）
+ev('DB.photos.__t.author = ""; DB.photos.__t.license = ""; render();');
+check("ライセンス不明の写真は出さない", d.querySelectorAll(".photo").length === 0,
+  String(d.querySelectorAll(".photo").length));
+ev(`(() => {
+  const q = DB.byId[window.__photoBackup.q];
+  delete q.image; delete q.imageAt;
+  DB.photos = window.__photoBackup.photos;
+  render();
+})()`);
+check("写真を外せば元に戻る", d.querySelectorAll(".photo").length === 0);
+
 /* ---- 報酬とチャレンジが壊れていないか ---- */
 ev(`(() => {
   const ids = DB.questions.filter(q => (q.format || "choice") === "choice").slice(0, 10).map(q => q.id);

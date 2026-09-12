@@ -542,3 +542,11 @@
   .chprog i.ng{background:var(--ai);border-color:var(--ai)}
   .chprog i.now{background:var(--card);border-color:var(--ink);box-shadow:0 0 0 2px rgba(23,36,63,.16)}
   .chprog span{margin-left:6px;font-size:11px;color:var(--ink-faint)}
+
+  /* コモンズの写真。クレジットは必ず添える（CC BY の条件） */
+  .photo{margin:10px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff}
+  .photo img{display:block;width:100%;height:auto;max-height:44vh;object-fit:contain;background:#F3F4F2}
+  .photo figcaption{padding:5px 8px;font-size:10px;line-height:1.5;color:var(--ink-faint);
+    border-top:1px solid var(--line);background:#FBFBF7}
+  .photo figcaption a{color:var(--ink-soft)}
+  .hint .photo{margin:8px 0 2px}
