@@ -6,8 +6,10 @@
      キーを省くと、台帳のうち file がまだ無いものだけを取りに行く。
 
    やること
-     1. images.json の search でコモンズを検索する
+     1. images.json の commons（File:名）を見る。無ければ search で検索する
      2. 候補のライセンスを見て、allow に載っているものだけを採る
+        どれも使えなければ、見えた候補を題名とライセンス付きで並べる。
+        その中から選んで台帳の commons に File:名を書けば、次は確実にそれを採る
      3. 640px の縮小版を public/commons/ に、360px を small/ に webp で書く
      4. 題名・作者・ライセンス・出典URLを台帳に書き戻す
 
@@ -65,23 +67,43 @@ const stripTags = s => String(s || "").replace(/<[^>]*>/g, "").replace(/\s+/g, "
 let ok = 0, ng = 0;
 for (const [key, entry] of wanted) {
   try {
-    if (!entry.search) { console.warn(`  ${key}: search がありません`); ng++; continue; }
-    const found = await api({
-      action: "query", generator: "search", gsrsearch: `filetype:bitmap ${entry.search}`,
-      gsrnamespace: "6", gsrlimit: "8",
-      prop: "imageinfo", iiprop: "url|extmetadata|size", iiurlwidth: String(WIDE),
-    });
-    const pages = Object.values(found?.query?.pages || {});
-    if (!pages.length) { console.warn(`  ${key}: 見つかりません（${entry.search}）`); ng++; continue; }
+    // commons に File:名が書いてあればそれを直接採る。無ければ search で探す
+    const found = entry.commons
+      ? await api({
+          action: "query", titles: entry.commons,
+          prop: "imageinfo", iiprop: "url|extmetadata|size", iiurlwidth: String(WIDE),
+        })
+      : entry.search
+        ? await api({
+            action: "query", generator: "search",
+            gsrsearch: `filetype:bitmap ${entry.category ? `incategory:"${entry.category}" ` : ""}${entry.search}`,
+            gsrnamespace: "6", gsrlimit: "50",
+            prop: "imageinfo", iiprop: "url|extmetadata|size", iiurlwidth: String(WIDE),
+          })
+        : null;
+    if (!found) { console.warn(`  ${key}: commons も search もありません`); ng++; continue; }
 
-    const hit = pages.map(p => {
+    const pages = Object.values(found?.query?.pages || {}).filter(p => p.imageinfo?.[0]);
+    if (!pages.length) {
+      console.warn(`  ${key}: 見つかりません（${entry.commons || entry.search}）`);
+      ng++; continue;
+    }
+
+    const cands = pages.map(p => {
       const info = p.imageinfo?.[0] || {};
       return { page: p, info, license: normalizeLicense(info.extmetadata) };
-    }).find(c => allow.includes(c.license.toLowerCase()));
+    });
+    const hit = cands.find(c => allow.includes(c.license.toLowerCase()));
 
     if (!hit) {
-      console.warn(`  ${key}: 使えるライセンスの候補がありません（${
-        pages.map(p => normalizeLicense(p.imageinfo?.[0]?.extmetadata)).join(" / ")}）`);
+      // どれも使えないときは、見えたものを並べる。ここから選んで
+      // 台帳の commons に File:名を書けば、次の実行で確実にそれを採る
+      const seen = [...new Set(cands.map(c => c.license))];
+      console.warn(`  ${key}: 使えるライセンスの候補がありません（見えたもの: ${seen.join(" / ")}）`);
+      cands.slice(0, 6).forEach(c =>
+        console.warn(`      ${c.license.padEnd(16)} ${c.page.title}`));
+      console.warn(`      → コモンズで探し直して、images.json の "${key}" に`);
+      console.warn(`        "commons": "File:〜.jpg" を足すと、それを直接採ります`);
       ng++; continue;
     }
 
