@@ -51,6 +51,11 @@ function index(raw) {
   db.crystalById = Object.fromEntries((db.crystals?.crystals || []).map(c => [c.id, c]));
   db.photos = db.images?.images || {};
   db.subjectToGem = db.gemstones.subjectToGem;
+  // 教科 ↔ 族。クラフトの要求先と、どの教科を解けばその族が貯まるかを結ぶ
+  db.families = db.crystals?.families || [];
+  db.subjectToFamily = db.crystals?.subjectToFamily || {};
+  db.familyToSubject = Object.fromEntries(
+    Object.entries(db.subjectToFamily).map(([s, f]) => [f, s]));
 
   // 知識カード名 → 教科（チャレンジのゲージ計算で使う）
   db.cardSubject = {};
