@@ -659,16 +659,55 @@ function grantAnswer(q, ok, bonusGem = 0) {
  * **1文字目のマークも出さない。** 探索コストは許容範囲だが、マークは読みの
  * 1文字目を漏らしてしまう（決定4）。
  */
+/**
+ * マスの形。**内側を向いた角だけを落とす。**
+ *
+ * 中は八角形、辺は六角形、四隅は五角形になり、角どうしが辺で向き合う。
+ * ななめのつながりが目で見えるうえ、`clip-path` は当たり判定も削るので、
+ * ななめにたどるときに隣のマスの角をかすめて拾ってしまうことがなくなる。
+ */
+function cellShape(i, n) {
+  const r = Math.floor(i / n), c = i % n, k = 30;
+  const tl = r > 0 && c > 0, tr = r > 0 && c < n - 1;
+  const br = r < n - 1 && c < n - 1, bl = r < n - 1 && c > 0;
+  const pt = [];
+  pt.push(tl ? `${k}% 0%` : "0% 0%");
+  if (tr) pt.push(`${100 - k}% 0%`, `100% ${k}%`); else pt.push("100% 0%");
+  if (br) pt.push(`100% ${100 - k}%`, `${100 - k}% 100%`); else pt.push("100% 100%");
+  if (bl) pt.push(`${k}% 100%`, `0% ${100 - k}%`); else pt.push("0% 100%");
+  if (tl) pt.push(`0% ${k}%`);
+  return `clip-path:polygon(${pt.join(",")})`;
+}
+
+/* 隣り合うマスを薄い線で結ぶ。**ななめにもたどれる**ことが、触る前に分かる */
+function latticeHTML(n) {
+  const seg = [];
+  for (let i = 0; i < n * n; i++) {
+    const r = Math.floor(i / n), c = i % n;
+    for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+      const nr = r + dr, nc = c + dc;
+      if (nr >= n || nc < 0 || nc >= n) continue;
+      seg.push(`<line x1="${(c + 0.5) / n * 100}" y1="${(r + 0.5) / n * 100}"` +
+        ` x2="${(nc + 0.5) / n * 100}" y2="${(nr + 0.5) / n * 100}"/>`);
+    }
+  }
+  return `<svg class="panellattice" viewBox="0 0 100 100" preserveAspectRatio="none"
+    aria-hidden="true">${seg.join("")}</svg>`;
+}
+
 function panelHTML(q) {
   const p = q.panel;
   const n = p.size;
   return `<div class="panelbox">
     <div class="panelword"><span id="pword" class="ph">なぞって読みを作る</span></div>
     <div class="panelwrap">
+      ${latticeHTML(n)}
       <svg class="panelline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <polyline id="pline" points=""/></svg>
       <div class="panelgrid" style="grid-template-columns:repeat(${n},1fr)">${
-        p.cells.map((c, i) => `<button class="pcell" data-i="${i}">${esc(c)}</button>`).join("")}</div>
+        p.cells.map((c, i) =>
+          `<button class="pcell" data-i="${i}" style="${cellShape(i, n)}">${esc(c)}</button>`
+        ).join("")}</div>
     </div>
     <button class="btn" id="psubmit" disabled>この読みで答える</button>
     <div class="elimbar"><button class="lnk" id="tochoice">4択に切り替える</button></div>
@@ -737,7 +776,8 @@ function wirePanel(q) {
      ただし**マスの中心の近くに来たときだけ**拾う。ななめにたどると指は隣のマスの
      角をかすめるので、枠に入っただけで拾うと、通り過ぎたマスが混ざったり、
      直前のマスに触れて取り消されたりする */
-  const HIT = 0.42;   // 進むときに拾う半径。マスの短いほうの辺に対する割合
+  const HIT = 0.46;    // 進むときに拾う半径。マスの短いほうの辺に対する割合。
+                      // 形のほうで角を落としてあるので、ここは広めでよい
   const BACK = 0.26;  // 取り消すときはもっと深く入る必要がある。ぶれで消えないように
   const wrap = app.querySelector(".panelwrap");
   if (wrap) wrap.onpointermove = e => {

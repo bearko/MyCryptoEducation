@@ -593,13 +593,31 @@
   .panelword span{font-family:var(--mincho);font-size:26px;color:var(--ink);letter-spacing:.08em}
   .panelword span.ph{font-family:var(--gothic);font-size:13px;color:var(--ink-faint);letter-spacing:0}
   .panelwrap{position:relative;margin:12px 0;touch-action:none}
-  .panelgrid{display:grid;gap:7px;touch-action:none}
-  .pcell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-    font-family:var(--mincho);font-size:23px;color:var(--ink);background:var(--card);
-    border:1px solid var(--line);border-radius:8px;cursor:pointer;touch-action:none;
+  /* すき間は狭く。八角形どうしの斜めの辺が向き合って、つながりが見える */
+  .panelgrid{display:grid;gap:4px;touch-action:none;position:relative;z-index:1}
+  /* 形は clip-path が作る（中は八角形・辺は六角形・隅は五角形）。
+     角丸を残すと八角形に見えないので付けない。枠線も clip-path に切られて
+     途切れるので、代わりに面の色と内側の影で境を出す */
+  /* 形は clip-path が作る（中は八角形・辺は六角形・隅は五角形）。
+     枠線と inset の影は clip-path に切られて途切れるので使えない。
+     drop-shadow は切り抜いた形に沿うので、こちらで輪郭を出す */
+  /* 形は clip-path が作る（中は八角形・辺は六角形・隅は五角形）。
+     枠線も inset の影も clip-path に切られて途切れるので使えない。
+     外側を縁の色で塗り、1px 内側にもう一度同じ形を切り抜いて面を置く。
+     擬似要素は clip-path を継いで、自分の箱（1px小さい）に合わせて切り抜く */
+  .pcell{aspect-ratio:1;position:relative;display:flex;align-items:center;
+    justify-content:center;font-family:var(--mincho);font-size:23px;color:var(--ink);
+    background:var(--ink-faint);border:none;padding:0;cursor:pointer;touch-action:none;
     user-select:none;-webkit-user-select:none}
-  .pcell.on{border-color:var(--pen);color:var(--pen);background:#FDF3F1}
-  .pcell:disabled{opacity:.5}
-  .panelline{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+  .pcell::before{content:"";position:absolute;inset:1px;background:var(--card);
+    clip-path:inherit;z-index:-1}
+  .pcell.on{color:var(--pen);background:var(--pen)}
+  .pcell.on::before{background:#FBEEEB}
+  .pcell:disabled{opacity:.45}
+  /* 隣り合うマスを結ぶ薄い線。マスの下に敷き、すき間から見える */
+  .panellattice{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+  .panellattice line{stroke:var(--ink-faint);stroke-width:.9;stroke-opacity:.22;
+    vector-effect:non-scaling-stroke}
+  .panelline{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
   .panelline polyline{fill:none;stroke:var(--pen);stroke-width:1.1;stroke-opacity:.55;
     stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}

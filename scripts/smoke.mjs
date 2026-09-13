@@ -313,6 +313,18 @@ check("1文字目のマークは出さない", d.querySelectorAll(".pcell.on").l
   String(d.querySelectorAll(".pcell.on").length));
 check("なぞる前は答えられない", d.getElementById("psubmit").disabled);
 
+// マスの形。内側を向いた角だけを落とすので、中は八角形・辺は六角形・隅は五角形になる。
+// 角を残すと、ななめにたどったとき隣のマスの角をかすめて拾ってしまう
+const corners = t => t.split(",").length;
+check("中のマスは八角形", corners(ev(`cellShape(4, 3)`)) === 8, ev(`cellShape(4, 3)`));
+check("辺のマスは六角形", corners(ev(`cellShape(1, 3)`)) === 6, ev(`cellShape(1, 3)`));
+check("隅のマスは五角形", corners(ev(`cellShape(0, 3)`)) === 5, ev(`cellShape(0, 3)`));
+check("4×4でも内は八角形・隅は五角形",
+  corners(ev(`cellShape(5, 4)`)) === 8 && corners(ev(`cellShape(15, 4)`)) === 5);
+check("隣り合うマスを結ぶ線が敷いてある",
+  d.querySelectorAll(".panellattice line").length > 0,
+  String(d.querySelectorAll(".panellattice line").length));
+
 // 隣り合っていないマスへは飛べない
 const far = ev(`(() => {
   const p = DB.byId["${pan.id}"].panel, n = p.size, a = p.path[0];
