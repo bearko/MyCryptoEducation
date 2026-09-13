@@ -373,15 +373,56 @@ const cap = ev(`(() => {
 })()`);
 check("押したマスのキャプチャを放す（放さないと1文字目しか反応しない）", cap === "true", cap);
 
+// jsdom には座標が無いので、マスの位置を自分で用意して指の動きを作る。
+// なぞりは座標で拾うようにしたので、ここを通さないと検査にならない
+ev(`(() => {
+  S.run.i = 0; S.run.picked = null; S.run.results = {}; render();
+  const n = DB.byId[S.run.ids[0]].panel.size, W = 100;
+  const cells = [...document.querySelectorAll('.pcell')];
+  cells.forEach((c, i) => {
+    const left = (i % n) * W, top = Math.floor(i / n) * W;
+    c.getBoundingClientRect = () => ({ left, top, width: W, height: W,
+      right: left + W, bottom: top + W });
+  });
+  document.elementFromPoint = (x, y) => cells.find(c => {
+    const r = c.getBoundingClientRect();
+    return x >= r.left && x < r.right && y >= r.top && y < r.bottom;
+  }) || null;
+  window.__center = i => ({ x: (i % n) * W + W / 2, y: Math.floor(i / n) * W + W / 2 });
+})()`);
+const drag = path => ev(`(() => {
+  const cells = [...document.querySelectorAll('.pcell')];
+  const wrap = document.querySelector('.panelwrap');
+  const p = ${JSON.stringify(path)};
+  cells[p[0]].onpointerdown({ preventDefault() {}, pointerId: 3 });
+  for (const i of p.slice(1)) {
+    const c = window.__center(i);
+    wrap.onpointermove({ preventDefault() {}, clientX: c.x, clientY: c.y });
+  }
+  return document.getElementById('pword').textContent;
+})()`);
+const p3 = JSON.parse(ev(`JSON.stringify(DB.byId[S.run.ids[0]].panel.path)`));
+check("座標でなぞると読みが組み上がる",
+  drag(p3) === ev(`DB.byId[S.run.ids[0]].reading`), drag(p3));
+
+// マスの角をかすめただけでは拾わない。ここを緩めると途中のマスが混ざる
+const brush = ev(`(() => {
+  S.run.picked = null; render();
+  const cells = [...document.querySelectorAll('.pcell')];
+  const wrap = document.querySelector('.panelwrap');
+  const n = DB.byId[S.run.ids[0]].panel.size, W = 100, a = ${p3[0]}, b = ${p3[1]};
+  cells[a].onpointerdown({ preventDefault() {}, pointerId: 4 });
+  // 隣のマスの「角」を通る。中心から遠いので拾ってはいけない
+  const c = window.__center(b);
+  wrap.onpointermove({ preventDefault() {}, clientX: c.x + W * 0.46, clientY: c.y + W * 0.46 });
+  return document.getElementById('pword').textContent;
+})()`);
+check("マスの角をかすめても拾わない", brush.length === 1, brush);
+
 // 指を離す監視を once にすると、最初のタップで外れて以降のなぞりが死ぬ
 ev(`(() => { S.run.picked = null; render(); })()`);
 d.dispatchEvent(new w.Event("pointerup"));
-const p2 = JSON.parse(ev(`JSON.stringify(DB.byId[S.run.ids[0]].panel.path)`));
-ev(`(() => {
-  const cells = [...document.querySelectorAll('.pcell')];
-  cells[${p2[0]}].onpointerdown({ preventDefault() {}, pointerId: 2 });
-  ${p2.slice(1).map(i => `cells[${i}].onpointerenter();`).join("")}
-})()`);
+drag(p3);
 d.dispatchEvent(new w.Event("pointerup"));
 await wait(40);
 check("タップのあとでも、なぞりが確定する", ev("S.run.picked") !== null,

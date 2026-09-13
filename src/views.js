@@ -729,13 +729,16 @@ function wirePanel(q) {
       dragging = true; dragged = false; seq = [];
       visit(i);
     };
-    // マウスやペンではこちらが効く。タッチでは下の pointermove が拾う
-    b.onpointerenter = () => { if (dragging) { dragged = true; visit(i); } };
     // なぞれない状況でも片手で操作できるよう、連続タップでも同じ入力が成立する
     b.onclick = () => { if (!dragging) visit(i); };
   });
 
-  /* 指の下にあるマスを座標から引く。キャプチャの有無に左右されない */
+  /* 指の下にあるマスを座標から引く。キャプチャの有無に左右されない。
+     ただし**マスの中心の近くに来たときだけ**拾う。ななめにたどると指は隣のマスの
+     角をかすめるので、枠に入っただけで拾うと、通り過ぎたマスが混ざったり、
+     直前のマスに触れて取り消されたりする */
+  const HIT = 0.42;   // 進むときに拾う半径。マスの短いほうの辺に対する割合
+  const BACK = 0.26;  // 取り消すときはもっと深く入る必要がある。ぶれで消えないように
   const wrap = app.querySelector(".panelwrap");
   if (wrap) wrap.onpointermove = e => {
     if (!dragging) return;
@@ -743,8 +746,14 @@ function wirePanel(q) {
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const cell = under && under.closest ? under.closest(".pcell") : null;
     if (!cell) return;
+    const r = cell.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2);
+    const dy = e.clientY - (r.top + r.height / 2);
     const i = Number(cell.dataset.i);
     if (i === seq[seq.length - 1]) return;
+    // 直前のマスへ戻るのは取り消しなので、はっきり中へ入ったときだけ受ける
+    const reach = Math.min(r.width, r.height) * (i === seq[seq.length - 2] ? BACK : HIT);
+    if (Math.hypot(dx, dy) > reach) return;
     dragged = true;
     visit(i);
   };
@@ -755,7 +764,10 @@ function wirePanel(q) {
     if (dragged) judge();   // 1マス押しただけの指離しでは確定しない
   };
   // once にすると、最初のタップで外れて以降のなぞりが確定しなくなる
-  if (panelUpHandler) document.removeEventListener("pointerup", panelUpHandler);
+  if (panelUpHandler) {
+    document.removeEventListener("pointerup", panelUpHandler);
+    document.removeEventListener("pointercancel", panelUpHandler);
+  }
   panelUpHandler = stop;
   document.addEventListener("pointerup", panelUpHandler);
   document.addEventListener("pointercancel", panelUpHandler);
