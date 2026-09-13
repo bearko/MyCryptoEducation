@@ -455,7 +455,8 @@ function vQuiz() {
     <div class="qtext">${esc(q.prompt)}</div>
     ${photoAt(q, "prompt")}
     ${q.figure ? `<div class="figure">${DB.figures[q.figure]}</div>` : ""}
-    ${mode === "numeric" ? `
+    ${mode === "panel" ? panelHTML(q)
+    : mode === "numeric" ? `
       <div class="numbox">
         <div class="numdisp"><span id="numval" class="ph">数を入れる</span>${(() => {
           const u = numericParts(q)?.unit; return u ? `<b>${esc(u)}</b>` : ""; })()}</div>
@@ -494,10 +495,11 @@ function vQuiz() {
 
   document.getElementById("hint").onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
   if (mode === "elimination") wireElimination(q);
+  else if (mode === "panel") wirePanel(q);
   else if (mode === "numeric") wireNumeric(q);
   else app.querySelectorAll(".choices > .choice").forEach(b =>
     b.onclick = () => onPick(Number(b.dataset.i)));
-  if (mode !== "numeric" && q.format === "range") wireRange(q);
+  if (mode !== "numeric" && mode !== "panel" && q.format === "range") wireRange(q);
   drawHints(q, h);
 }
 
@@ -566,7 +568,7 @@ function onRange(q) {
  * プレイヤーが4択へ降りたら `S.run.hard[id]` に "choice" が入り、
  * その問題のあいだだけ選択肢の側に固定される（決定2・不可逆は1問かぎり）。
  */
-const READY_MODES = new Set(["elimination", "numeric", "range", "choice"]);
+const READY_MODES = new Set(["elimination", "numeric", "panel", "range", "choice"]);
 
 function modeOf(q) {
   const dropped = S.run.hard?.[q.id];
@@ -648,6 +650,92 @@ function grantAnswer(q, ok, bonusGem = 0) {
 
 
 
+
+/**
+ * 文字パネル。3×3 か 4×4 の盤面をなぞって読みを作る。
+ *
+ * **文字数の枠は出さない。** グリッドしか見えないので、何文字なのかが事前に
+ * 分からない。ここが4択との決定的な差になる。
+ * **1文字目のマークも出さない。** 探索コストは許容範囲だが、マークは読みの
+ * 1文字目を漏らしてしまう（決定4）。
+ */
+function panelHTML(q) {
+  const p = q.panel;
+  const n = p.size;
+  return `<div class="panelbox">
+    <div class="panelword"><span id="pword" class="ph">なぞって読みを作る</span></div>
+    <div class="panelwrap">
+      <svg class="panelline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <polyline id="pline" points=""/></svg>
+      <div class="panelgrid" style="grid-template-columns:repeat(${n},1fr)">${
+        p.cells.map((c, i) => `<button class="pcell" data-i="${i}">${esc(c)}</button>`).join("")}</div>
+    </div>
+    <button class="btn" id="psubmit" disabled>この読みで答える</button>
+    <div class="elimbar"><button class="lnk" id="tochoice">4択に切り替える</button></div>
+  </div>`;
+}
+
+function wirePanel(q) {
+  const p = q.panel, n = p.size;
+  const word = document.getElementById("pword");
+  const line = document.getElementById("pline");
+  const submit = document.getElementById("psubmit");
+  const cells = [...app.querySelectorAll(".pcell")];
+  if (!word || !submit || !cells.length) return;
+  let seq = [], dragging = false, dragged = false;
+
+  const adjacent = (a, b) => {
+    const dr = Math.abs(Math.floor(a / n) - Math.floor(b / n));
+    const dc = Math.abs((a % n) - (b % n));
+    return dr <= 1 && dc <= 1 && (dr || dc);
+  };
+  const paint = () => {
+    const text = seq.map(i => p.cells[i]).join("");
+    word.textContent = text || "なぞって読みを作る";
+    word.classList.toggle("ph", !text);
+    submit.disabled = seq.length < 2;
+    cells.forEach((b, i) => b.classList.toggle("on", seq.includes(i)));
+    // セルの中心を結ぶ。盤面は正方のマス目なので割合で置ける
+    line.setAttribute("points", seq.map(i =>
+      `${((i % n) + 0.5) / n * 100},${(Math.floor(i / n) + 0.5) / n * 100}`).join(" "));
+  };
+  /* たどれるなら伸ばす。直前のセルに戻ったら1つ取り消す */
+  const visit = i => {
+    if (S.run.picked !== null) return;
+    if (seq.length >= 2 && i === seq[seq.length - 2]) { seq.pop(); return paint(); }
+    if (seq.includes(i)) return;
+    if (seq.length && !adjacent(seq[seq.length - 1], i)) return;
+    seq.push(i);
+    paint();
+  };
+  const judge = () => {
+    if (S.run.picked !== null || seq.length < 2) return;
+    const said = seq.map(i => p.cells[i]).join("");
+    if (said === q.reading) return onPick(q.answer, true);
+    drawRetry(q, `「${said}」ではない。`);
+    seq = []; paint();
+  };
+
+  cells.forEach(b => {
+    const i = Number(b.dataset.i);
+    // なぞる操作。指を離すまでは何度でもやり直せる
+    b.onpointerdown = e => { e.preventDefault(); dragging = true; dragged = false; seq = []; visit(i); };
+    b.onpointerenter = () => { if (dragging) { dragged = true; visit(i); } };
+    // なぞれない状況でも片手で操作できるよう、連続タップでも同じ入力が成立する
+    b.onclick = () => { if (!dragging) visit(i); };
+  });
+  const stop = () => {
+    if (!dragging) return;
+    dragging = false;
+    if (dragged) judge();   // 1マス押しただけの指離しでは確定しない
+  };
+  document.addEventListener("pointerup", stop, { once: true });
+  submit.onclick = judge;
+  const down = document.getElementById("tochoice");
+  if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
+  paint();
+}
+
 /**
  * 数値入力。テンキーで数だけを打ち、単位は固定で出す（[ 200 ] W）。
  *
@@ -706,7 +794,7 @@ function drawRetry(q, head) {
       ${more ? `<button class="lnk" id="rhint">ヒントを見る</button>` : ""}
       <button class="lnk" id="rdown">4択に切り替える</button>
     </div></div>`;
-  const bar = app.querySelector(".numbox .elimbar");
+  const bar = app.querySelector(".numbox .elimbar, .panelbox .elimbar");
   if (bar) bar.hidden = true;   // 同じ導線が2つ並ばないようにする
   const rh = document.getElementById("rhint");
   if (rh) rh.onclick = () => { S.run.hintsUsed++; drawHints(q, h); drawRetry(q, head); };
@@ -749,7 +837,8 @@ function onPick(idx, forcedOk = null) {
   S.run.picked = idx;
   if (!S.run.noReward) S.seen[q.id] = 1;
 
-  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice").forEach(b => b.disabled = true);
+  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit")
+    .forEach(b => b.disabled = true);
   app.querySelectorAll(".choices > .choice").forEach((b, i) => {
     b.disabled = true;
     if (i === idx) markChoice(b, ok);

@@ -524,3 +524,94 @@ export function crystalsValue(owned, byId) {
     return c ? sum + crystalValue(c.scarcity) * (n || 0) : sum;
   }, 0);
 }
+
+/* ---------- 文字パネル（難モード） ---------- */
+
+/* 問題ごとに同じ盤面が出るように、IDから種を作る。
+   毎回ちがう盤面だと、validate が通した生成結果と本番がずれる */
+function seedOf(text) {
+  let h = 2166136261;
+  for (const c of String(text)) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+const rngFrom = seed => {
+  let s = seed || 1;
+  return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+};
+
+const HIRA = [..."あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだでどばびぶべぼぱぴぷぺぽゃゅょっー"];
+const KATA = [..."アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポャュョッー"];
+
+/** パネルに乗る読みか。2〜12文字のかな・カナだけ */
+export const panelReady = r => typeof r === "string" && /^[ぁ-んァ-ヶー]{2,12}$/.test(r);
+
+/**
+ * 文字パネルの盤面を作る。
+ *
+ * 8方向に隣り合うセルをたどる自己回避経路を引き、その順に読みの文字を置く。
+ * 残りはダミーで埋め、**1〜2枚は答えの文字を重ねて偽の分岐を作る**。
+ * ここが難易度のつまみになる（experience-design-framework の決定4）。
+ *
+ * **1文字目のマークは出さない。** 探索コストは許容範囲だが、マークは読みの
+ * 1文字目を漏らしてしまう。半分知っている人には答えそのものになる。
+ *
+ * @returns {{size:number, cells:string[], path:number[]}|null}
+ *   100回の試行で経路を引けなければ null（呼ぶ側は消去法へ落とす）
+ */
+export function panelLayout(reading, key = reading, tries = 100) {
+  if (!panelReady(reading)) return null;
+  const chars = [...reading];
+  const L = chars.length;
+  const size = L <= 6 ? 3 : 4;
+  if (L > size * size) return null;
+
+  const rnd = rngFrom(seedOf(key));
+  const pick = n => Math.floor(rnd() * n);
+  const neighbors = i => {
+    const r = Math.floor(i / size), c = i % size, out = [];
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      if (!dr && !dc) continue;
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < size && nc >= 0 && nc < size) out.push(nr * size + nc);
+    }
+    return out;
+  };
+  const shuffled = a => {
+    const r = a.slice();
+    for (let i = r.length - 1; i > 0; i--) { const j = pick(i + 1); [r[i], r[j]] = [r[j], r[i]]; }
+    return r;
+  };
+
+  let path = null;
+  for (let t = 0; t < tries && !path; t++) {
+    const start = pick(size * size);
+    const walk = [start];
+    const used = new Set([start]);
+    // 深さ優先＋バックトラック。行き止まりに入ったら1つ戻ってやり直す
+    const step = () => {
+      if (walk.length === L) return true;
+      for (const n of shuffled(neighbors(walk[walk.length - 1]))) {
+        if (used.has(n)) continue;
+        walk.push(n); used.add(n);
+        if (step()) return true;
+        walk.pop(); used.delete(n);
+      }
+      return false;
+    };
+    if (step()) path = walk;
+  }
+  if (!path) return null;
+
+  const kata = /^[ァ-ヶー]+$/.test(reading);
+  const pool = (kata ? KATA : HIRA).filter(c => c !== "ー" || chars.includes("ー"));
+  const cells = new Array(size * size).fill("");
+  path.forEach((cell, i) => { cells[cell] = chars[i]; });
+
+  // 空きセル。まず答えの文字を1〜2枚まぜて偽の分岐を作る
+  const blanks = shuffled(cells.map((c, i) => (c ? -1 : i)).filter(i => i >= 0));
+  const fakes = Math.min(blanks.length, 1 + pick(2));
+  blanks.forEach((cell, i) => {
+    cells[cell] = i < fakes ? chars[pick(L)] : pool[pick(pool.length)];
+  });
+  return { size, cells, path };
+}

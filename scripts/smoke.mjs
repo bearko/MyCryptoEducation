@@ -162,14 +162,19 @@ check("20セッション連続で重複ゼロ", dup === 0, `${dup}件`);
 
 /* 難モードが既定になったので、答えるときは方式に合わせる。
    消去法なら違うものを潰し、4択ならそのまま押す（experience-design-framework の決定2・決定4） */
-const modeNow = () => ev(`(() => {
-  const q = DB.byId[S.run.ids[S.run.i]];
-  return S.run.hard[q.id] || (["elimination","range","choice"].includes(q.mode) ? q.mode : "choice");
-})()`);
+// 判定を写すとズレるので、アプリが使っている modeOf をそのまま呼ぶ
+const modeNow = () => ev(`modeOf(DB.byId[S.run.ids[S.run.i]])`);
 const answerNow = (correct = true) => {
   const a = ev("DB.byId[S.run.ids[S.run.i]].answer");
   const n = ev("(DB.byId[S.run.ids[S.run.i]].choices || []).length");
   const mode = modeNow();
+  if (mode === "panel") {
+    const path = JSON.parse(ev(`JSON.stringify(DB.byId[S.run.ids[S.run.i]].panel.path)`));
+    const order = correct ? path : path.slice(0, 2).reverse();
+    order.forEach(i => d.querySelector(`.pcell[data-i="${i}"]`)?.click());
+    d.getElementById("psubmit").click();
+    return true;
+  }
   if (mode === "numeric") {
     const want = ev(`JSON.stringify(numericParts(DB.byId[S.run.ids[S.run.i]]))`);
     const v = JSON.parse(want).value;
@@ -284,6 +289,80 @@ check("難モードでも4択でも報酬は同じ", ev(`(() => {
   const a = DB.questions.find(q => q.mode === "elimination");
   return String(gumFor(a));
 })()`));
+
+/* ---- 文字パネル（難モード） ---- */
+const pan = JSON.parse(ev(`(() => {
+  S.settings.showExplanationOnCorrect = true;
+  const ids = DB.questions.filter(q => q.mode === "panel").slice(0, 2).map(q => q.id);
+  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, gems: {},
+            right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
+            noReward: true, done: false, hard: {} };
+  S.view = "quiz"; render();
+  const q = DB.byId[ids[0]];
+  return JSON.stringify({ id: ids[0], reading: q.reading, size: q.panel.size, path: q.panel.path });
+})()`));
+check("文字パネルの問題がある", !!pan.reading, JSON.stringify(pan).slice(0, 90));
+check("盤面は読みの長さで決まる", pan.size === (pan.reading.length <= 6 ? 3 : 4),
+  `${pan.reading}(${pan.reading.length}) → ${pan.size}×${pan.size}`);
+check("マスは盤面のぶんだけ出る",
+  d.querySelectorAll(".pcell").length === pan.size * pan.size,
+  String(d.querySelectorAll(".pcell").length));
+check("選択肢は出さない", d.querySelectorAll(".choices > .choice").length === 0);
+check("文字数の枠は出さない", !/\d\s*文字/.test(txt()), txt().slice(0, 120));
+check("1文字目のマークは出さない", d.querySelectorAll(".pcell.on").length === 0,
+  String(d.querySelectorAll(".pcell.on").length));
+check("なぞる前は答えられない", d.getElementById("psubmit").disabled);
+
+// 隣り合っていないマスへは飛べない
+const far = ev(`(() => {
+  const p = DB.byId["${pan.id}"].panel, n = p.size, a = p.path[0];
+  for (let i = 0; i < n * n; i++) {
+    const dr = Math.abs(Math.floor(a / n) - Math.floor(i / n)), dc = Math.abs(a % n - i % n);
+    if (dr > 1 || dc > 1) return i;
+  }
+  return -1;
+})()`);
+d.querySelector(`.pcell[data-i="${pan.path[0]}"]`).click();
+if (far >= 0) {
+  d.querySelector(`.pcell[data-i="${far}"]`).click();
+  check("隣り合わないマスへは飛べない", d.querySelectorAll(".pcell.on").length === 1,
+    String(d.querySelectorAll(".pcell.on").length));
+}
+// 直前のマスに戻ると1つ取り消す
+d.querySelector(`.pcell[data-i="${pan.path[1]}"]`).click();
+check("たどると文字が並ぶ",
+  d.getElementById("pword").textContent === pan.reading.slice(0, 2),
+  d.getElementById("pword").textContent);
+d.querySelector(`.pcell[data-i="${pan.path[0]}"]`).click();
+check("直前のマスに戻ると取り消せる",
+  d.getElementById("pword").textContent === pan.reading.slice(0, 1),
+  d.getElementById("pword").textContent);
+
+// 違う読みを作っても問題は終わらない
+ev(`(() => { S.run.picked = null; render(); })()`);
+const rev = pan.path.slice(0, 2).reverse();
+rev.forEach(i => d.querySelector(`.pcell[data-i="${i}"]`).click());
+d.getElementById("psubmit").click();
+await wait(30);
+check("違う読みでも問題は終わらない", ev("S.run.picked") === null, String(ev("S.run.picked")));
+check("パネルは生きたまま3択になる",
+  txt().includes("まだ続けてもいい") && !d.querySelector(".pcell").disabled);
+
+// 連続タップでも正解にできる
+pan.path.forEach(i => d.querySelector(`.pcell[data-i="${i}"]`).click());
+d.getElementById("psubmit").click();
+await wait(40);
+check("連続タップでも読みを作れる", ev(`S.run.results["${pan.id}"]`) === "ok",
+  ev(`S.run.results["${pan.id}"]`));
+check("決着したらマスは止まる", d.querySelector(".pcell").disabled);
+
+// 盤面は問題ごとに決まっていて、描き直しても変わらない
+check("盤面は描き直しても変わらない", ev(`(() => {
+  const q = DB.byId["${pan.id}"];
+  return String(JSON.stringify(panelLayout(q.reading, q.id)) === JSON.stringify(q.panel));
+})()`) === "true");
+check("読みが長すぎるとパネルにしない",
+  ev(`String(panelLayout("じゅうしちじょうのけんぽう", "x") === null)`) === "true");
 
 /* ---- 数値入力（難モード） ---- */
 const numRun = JSON.parse(ev(`(() => {

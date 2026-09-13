@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 /* 回答方式の判定はここに集約する。アプリと2箇所に分けると必ずズレる */
 import { answerMode, hintGroup, hintsFor, normalizeHints, answerText, numericParts }
   from "../src/answer-mode.js";
+import { panelLayout } from "../src/engine.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const RUN_LENGTH = 10;
@@ -135,6 +136,27 @@ for (const q of questions) {
   }
   if (q.hardMode === "panel" && !q.reading)
     err(id, "文字パネルに振り分けていますが reading がありません");
+
+  /* 文字パネルは、実際に経路を引けるかまで確かめる。
+     100回で引けない問題をCIで落とす（experience-design-framework の決定4） */
+  if (mode === "panel") {
+    if (!panelLayout(q.reading, q.id))
+      err(id, `文字パネルの経路を100回で引けませんでした（読み「${q.reading}」）`);
+    // 読みの一部をヒントに書くと、知識ではなく探索の短縮を渡すことになる
+    const kana = [...q.reading];
+    for (const h of hintsFor(q.hints || [], "hidden")) {
+      const body = squash(h.text);
+      for (let n = 3; n <= kana.length; n++) {
+        const part = kana.slice(0, n).join("");
+        if (body.includes(part)) {
+          warn(`${id}: ヒントが読みの一部「${part}」を含んでいます: ${h.text}`);
+          break;
+        }
+      }
+      if (/^\s*\d+文字/.test(h.text) || /(\d+)文字(だ|です)/.test(h.text))
+        warn(`${id}: ヒントが文字数を明かしています: ${h.text}`);
+    }
+  }
 
   if (!Array.isArray(q.hints) || q.hints.length < 3) err(id, "ヒントは3つ以上必要です");
   else if (format === "range") {
