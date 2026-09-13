@@ -64,6 +64,45 @@ await p.evaluate(`document.dispatchEvent(new PointerEvent("pointerup", { pointer
 await p.waitForTimeout(60);
 ok.push(["タップのあとでも、なぞりが確定する", await p.evaluate("S.run.picked !== null"), ""]);
 
+
+/* 全問をなぞって、途中のマスが混ざらないか見る。
+   ななめにたどると指は隣のマスの角をかすめるので、枠に入っただけで拾う作りだと
+   通り過ぎたマスが混ざる。実際に137/160問で混ざっていた。
+   指のぶれを何段階か変えて試す。                                              */
+const sweep = async wobble => {
+  const ids = await p.evaluate(`DB.questions.filter(q => q.mode === "panel").map(q => q.id)`);
+  const bad = [];
+  for (const id of ids) {
+    const q = await p.evaluate(`(() => {
+      const x = DB.byId["${id}"];
+      S.run = { ids: [x.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+                gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
+                noReward: true, done: false, hard: {} };
+      S.view = "quiz"; render(); window.scrollTo(0, 0);
+      return { reading: x.reading, path: x.panel.path };
+    })()`);
+    const pts = await centers(q.path);
+    await p.dispatchEvent(`.pcell[data-i="${q.path[0]}"]`, "pointerdown", { pointerId: 9,
+      pointerType: "touch", isPrimary: true, clientX: pts[0].x, clientY: pts[0].y, buttons: 1 });
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], c = pts[k];
+      const len = Math.hypot(c.x - a.x, c.y - a.y);
+      const nx = -(c.y - a.y) / len, ny = (c.x - a.x) / len;
+      for (let t = 1; t <= 14; t++) {
+        const u = t / 14, w = Math.sin(u * Math.PI) * wobble;
+        await p.dispatchEvent(".panelwrap", "pointermove", { pointerId: 9, pointerType: "touch",
+          isPrimary: true, buttons: 1,
+          clientX: a.x + (c.x - a.x) * u + nx * w, clientY: a.y + (c.y - a.y) * u + ny * w });
+      }
+    }
+    const got = await p.evaluate("document.getElementById('pword').textContent");
+    if (got !== q.reading) bad.push(`${id} 正 ${q.reading} → ${got}`);
+    await p.evaluate(`document.dispatchEvent(new PointerEvent("pointerup", { pointerId: 9, pointerType: "touch" }))`);
+  }
+  ok.push([`ぶれ${wobble}pxでも全${ids.length}問をなぞれる`, bad.length === 0, bad.slice(0, 3).join(" / ")]);
+};
+for (const w of [3, 9, 14]) await sweep(w);
+
 ok.forEach(([n, v, x]) => console.log((v ? "✓ " : "✗ ") + n + (v ? "" : "  ← " + x)));
 await b.close();
 process.exit(ok.every(o => o[1]) ? 0 : 1);

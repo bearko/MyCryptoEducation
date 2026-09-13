@@ -582,24 +582,39 @@ export function panelLayout(reading, key = reading, tries = 100) {
     return r;
   };
 
-  let path = null;
-  for (let t = 0; t < tries && !path; t++) {
-    const start = pick(size * size);
-    const walk = [start];
-    const used = new Set([start]);
-    // 深さ優先＋バックトラック。行き止まりに入ったら1つ戻ってやり直す
-    const step = () => {
-      if (walk.length === L) return true;
-      for (const n of shuffled(neighbors(walk[walk.length - 1]))) {
-        if (used.has(n)) continue;
-        walk.push(n); used.add(n);
-        if (step()) return true;
-        walk.pop(); used.delete(n);
-      }
-      return false;
-    };
-    if (step()) path = walk;
-  }
+  /* 折り返しの鋭さ。180度に近い折り返しがあると、指でなぞったときに
+     はみ出して隣のマスを拾ってしまう。まずは鋭い角を避けて引く */
+  const turnOk = (a, b, c) => {
+    const v = (p, q) => [Math.floor(q / size) - Math.floor(p / size), (q % size) - (p % size)];
+    const [ar, ac] = v(a, b), [br, bc] = v(b, c);
+    const dot = ar * br + ac * bc;
+    return dot / (Math.hypot(ar, ac) * Math.hypot(br, bc)) > -0.5;   // 135度より鋭い折り返しは断る
+  };
+
+  const draw = smooth => {
+    for (let t = 0; t < tries; t++) {
+      const start = pick(size * size);
+      const walk = [start];
+      const used = new Set([start]);
+      // 深さ優先＋バックトラック。行き止まりに入ったら1つ戻ってやり直す
+      const step = () => {
+        if (walk.length === L) return true;
+        const last = walk[walk.length - 1];
+        for (const n of shuffled(neighbors(last))) {
+          if (used.has(n)) continue;
+          if (smooth && walk.length >= 2 && !turnOk(walk[walk.length - 2], last, n)) continue;
+          walk.push(n); used.add(n);
+          if (step()) return true;
+          walk.pop(); used.delete(n);
+        }
+        return false;
+      };
+      if (step()) return walk;
+    }
+    return null;
+  };
+  // なめらかに引けなければ、鋭い角も許して引く。問題を落とすよりはよい
+  const path = draw(true) || draw(false);
   if (!path) return null;
 
   const kata = /^[ァ-ヶー]+$/.test(reading);
