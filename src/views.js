@@ -18,6 +18,9 @@ import { saveState, capName, NAME_MAX } from "./state.js";
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+/* 到達度の内訳は「何ポイント押し上げたか」で出す。頭打ちのぶんだけ負になる */
+const signed = v => (v < 0 ? `−${-v}%` : `＋${v}%`);
+
 const STAGE_LABELS = [
   "この英雄の、最も深いところ", "少し輪郭が見えてきた",
   "かなり近づいた", "義務教育で答えられる",
@@ -1136,8 +1139,8 @@ function vResult() {
         所持 ${S.gum.toLocaleString("ja-JP")} GUM</p>
     </div>`}
     ${craftable ? `<p class="cue">クラフトできるエクステンションが ${craftable}種あります。</p>` : ""}
-    ${next ? `<p class="cue">次に挑めるのは ${esc(next.name)}（${next.rarity}）。いまの知識で難易度ゲージを ${
-      Math.round(nextGauge.damage / nextGauge.hp * 100)}% 削れます。</p>` : ""}
+    ${next ? `<p class="cue">次に挑めるのは ${esc(next.name)}（${next.rarity}）。いまの知識での到達度は ${
+      nextGauge.percent}% です。</p>` : ""}
     <div class="stack">
       <button class="btn" id="again">もう${RUN_LENGTH}問 ・ ${S.select.band === "auto" ? "おまかせ" : "同じ範囲"}</button>
       <button class="btn ghost" id="change">範囲を変えて解く</button>
@@ -1231,9 +1234,42 @@ function vCraft() {
   });
 }
 
+/**
+ * 「この装備をつけたら、誰への到達度がどれだけ動くか」を見る相手。
+ * 装備画面のあいだだけ覚えていればよいので、保存はしない。
+ */
+let gaugeTarget = null;
+
+/* 装備を差し替えたときの equip を作る。同じ品は他の英雄から外れる（付け替えと同じ挙動） */
+function equipWith(heroId, key) {
+  const eq = {};
+  Object.entries(S.equip).forEach(([id, k]) => {
+    if (k && k !== key && id !== heroId) eq[id] = k;   // 自分の枠は key で置き直す
+  });
+  if (key) eq[heroId] = key;
+  return eq;
+}
+
+/* その装備にしたときの、対象英雄への到達度（%） */
+function reachWith(target, heroId, key) {
+  if (!target || !target.rel) return null;
+  return gaugeBreakdown(DB, { ...S, equip: equipWith(heroId, key) }, target).percent;
+}
+
 function vHero() {
   const h = DB.heroById[S.heroView], eq = S.equip[h.id];
   const inv = Object.entries(S.exts).filter(([, n]) => n > 0);
+
+  /* 到達度を測る相手。まだ解放していない英雄がいればそちらを既定にする */
+  const targets = DB.heroes.filter(x => x.rel);
+  const locked = targets.filter(x => !S.owned[x.id]);
+  const pool = locked.length ? locked : targets;
+  if (!pool.some(x => x.id === gaugeTarget)) gaugeTarget = pool[0]?.id || null;
+  const target = gaugeTarget ? DB.heroById[gaugeTarget] : null;
+
+  const bare = reachWith(target, h.id, "");   // この英雄の枠を空にしたとき
+  const now  = reachWith(target, h.id, eq || "");
+
   app.innerHTML = `
   <header><div class="hbar"><div class="place">${esc(h.name)}</div>
     <button class="mapbtn" id="back">もどる</button></div></header>
@@ -1244,16 +1280,34 @@ function vHero() {
         <div class="fine" style="margin-top:6px">得意 ・ ${h.fit.join(" ")}</div></div></div>
     <p class="flavor">${esc(h.flavor)}</p>
     <div class="panel"><div class="phead"><h2>エクステンション</h2></div>
+      ${target ? `<div class="reach">
+        <select id="gtarget" aria-label="誰への到達度を見るか">
+          ${pool.map(x => `<option value="${x.id}" ${x.id === target.id ? "selected" : ""}
+            >${esc(x.name)}（${esc(x.rarity)}）</option>`).join("")}</select>
+        <div class="rnum"><span>${esc(target.name)}への到達度</span>
+          <b class="${now > bare ? "up" : ""}">${bare}%${now === bare ? "" : ` → ${now}%`}</b></div>
+        <div class="rbar"><i style="width:${bare}%"></i>
+          <u style="left:${Math.min(bare, now)}%;width:${Math.abs(now - bare)}%"></u></div>
+      </div>` : ""}
       ${inv.length ? `<div class="eqlist">
-        <button class="eqi ${!eq ? "on" : ""}" data-k="">外す</button>
-        ${inv.map(([k]) => `<button class="eqi ${eq === k ? "on" : ""}" data-k="${k}">
-          <img class="exticon sm" src="${assetPath.ext(k)}" alt="">${esc(DB.extensions[k].name)}</button>`).join("")}</div>
+        <button class="eqi ${!eq ? "on" : ""}" data-k="">外す${
+          target && bare !== null ? `<em>${bare}%</em>` : ""}</button>
+        ${inv.map(([k]) => {
+          const r = reachWith(target, h.id, k);
+          return `<button class="eqi ${eq === k ? "on" : ""}" data-k="${k}">
+          <img class="exticon sm" src="${assetPath.ext(k)}" alt="">${esc(DB.extensions[k].name)}${
+            r === null ? "" : `<em class="${r > bare ? "up" : ""}">${r}%</em>`}</button>`;
+        }).join("")}</div>
         ${eq ? `<p class="fine">${DB.extensions[eq].subs.some(s => h.fit.includes(s))
           ? "この英雄の得意分野と噛み合っています。効果が2倍になります。"
           : "得意分野とは噛み合っていません。効果は通常のままです。"}</p>` : ""}`
-        : `<p class="empty">まだ持っていません。魔石を集めてクラフトしてください。</p>`}</div>
+        : `<p class="empty">まだ持っていません。魔石を集めてクラフトしてください。</p>`}
+      <p class="fine">装備は到達度を<b>何倍にするか</b>だけを変えます（合計で最大2倍）。
+        知識がゼロなら、何をつけても0%のままです。</p></div>
   </div>`;
   document.getElementById("back").onclick = () => go("heroes");
+  const sel = document.getElementById("gtarget");
+  if (sel) sel.onchange = () => { gaugeTarget = sel.value; render(); };
   app.querySelectorAll(".eqi").forEach(b => b.onclick = () => {
     const k = b.dataset.k;
     if (k) {
@@ -1317,7 +1371,7 @@ function vHeroes() {
     <div class="cgrid">${DB.heroes.map(h => {
       const own = S.owned[h.id];
       const g = h.rel ? gaugeBreakdown(DB, S, h) : null;
-      const pct = g ? Math.round(g.damage / g.hp * 100) : 0;
+      const pct = g ? g.percent : 0;
       return `<div class="ccard ${own ? "" : "locked"}">
         <img src="${assetPath.hero(h.id)}" alt="">
         <div class="cn">${own ? esc(h.name) : "？？？"}</div>
@@ -1593,18 +1647,18 @@ function vTarget() {
   <header><div class="hbar"><div class="place">どの英雄に挑むか</div>
     <button class="mapbtn" id="back">もどる</button></div></header>
   <div class="pad">
-    <p class="fine" style="margin-top:16px">ゲージを削るのは知識カードです。エクステンションは、どの知識が関連としてカウントされるかを広げます。</p>
+    <p class="fine" style="margin-top:16px">到達度を上げるのは知識カードです。直結するカードの網羅率と、関連分野の網羅率で決まります。エクステンションはそれを何倍にするかだけを変えます。</p>
     ${locked.map(h => {
       const g = h.rel ? gaugeBreakdown(DB, S, h) : null;
-      const pct = g ? Math.round(g.damage / g.hp * 100) : 0;
-      const top = g && g.rows.length ? g.rows.map(r => `${r.label} −${r.value}`).join(" ・ ")
+      const pct = g ? g.percent : 0;
+      const top = g && g.rows.length ? g.rows.map(r => `${r.label} ${signed(r.value)}`).join(" ・ ")
                                      : "この英雄に関わる知識をまだ持っていません";
       return `<button class="trow ${h.id === here ? "on" : ""}" data-h="${h.id}">
         <img src="${assetPath.hero(h.id)}" alt="">
         <span class="ti">
           <span class="tn">${esc(h.name)}<span class="hr r${h.rarity}">${esc(h.rarity)}</span></span>
           <span class="tg"><i style="width:${pct}%"></i></span>
-          <span class="tp">いまの知識でゲージを ${pct}% 削れます</span>
+          <span class="tp">いまの知識での到達度 ${pct}%<span class="tf">難度係数 ${g ? g.factor : 1}</span></span>
           <span class="ts">${esc(top)}</span>
         </span></button>`;
     }).join("")}
@@ -1620,7 +1674,7 @@ function vTarget() {
 
 function startChallenge(id) {
   S.challenge = { heroId: id, phase: "intro", breakdown: gaugeBreakdown(DB, S, DB.heroById[id]),
-                  damage: 0, tries: 0, done: false, message: "",
+                  reach: 0, tries: 0, done: false, message: "",
                   qi: 0, results: [], gotCard: null };
   go("challenge");
 }
@@ -1646,7 +1700,7 @@ function finishChallenge() {
 
 function vChallenge() {
   const c = S.challenge, h = DB.heroById[c.heroId], b = c.breakdown;
-  const stage = challengeStage(c.damage, b.hp);
+  const stage = challengeStage(c.reach);
   const need = challengeNeed(h);
   const qs = h.ch.qs;
   const q = qs[Math.min(c.qi, qs.length - 1)];
@@ -1660,8 +1714,8 @@ function vChallenge() {
       <img class="bhero ${c.won ? "won" : ""}" src="${assetPath.hero(h.id)}" alt="">
       <div class="bmeta"><div class="bn">${esc(h.name)}</div>
         <div class="hr r${h.rarity}">${esc(h.rarity)}</div></div>
-      <div class="gauge"><i style="width:${Math.round((1 - c.damage / b.hp) * 100)}%"></i>
-        <span>難易度 ${b.hp - c.damage} / ${b.hp}</span></div>
+      <div class="gauge"><i style="width:${Math.round(c.reach * 100)}%"></i>
+        <span>到達度 ${Math.round(c.reach * 100)}%</span></div>
       <div class="glabel">${esc(STAGE_LABELS[stage])}</div>
       ${c.phase !== "intro" ? `<div class="chprog">${qs.map((_, i) => {
         const r = c.results[i];
@@ -1670,13 +1724,13 @@ function vChallenge() {
     </div>
 
     ${c.phase === "intro" ? `
-      <div class="panel"><div class="phead"><h2>持っている知識で削る</h2>
+      <div class="panel"><div class="phead"><h2>持っている知識で届く</h2>
         <span class="sub">${CHALLENGE_QUESTIONS}問中 ${need}問</span></div>
         ${b.rows.length ? b.rows.map(r => `<div class="brow"><div>
             <div class="bt">${esc(r.label)}</div><div class="bs">${esc(r.detail)}</div></div>
-          <div class="bv ${r.value < 0 ? "back" : ""}">${r.value < 0 ? `+${-r.value}` : `−${r.value}`}</div></div>`).join("")
+          <div class="bv ${r.value < 0 ? "back" : ""}">${signed(r.value)}</div></div>`).join("")
           : `<p class="empty">この英雄に関わる知識をまだ持っていません。まずは問題を解いてください。</p>`}
-        <div class="btotal">合計 −${b.damage} <span class="bhp">難易度 ${b.hp}</span></div></div>
+        <div class="btotal">到達度 ${b.percent}% <span class="bhp">${esc(h.rarity)}の難度係数 ${b.factor}</span></div></div>
       <p class="fine">ゲージが削れているほど、問い方がやさしくなります。<b>どれだけ削れても、
         その人物を知らないと答えられないことは変わりません。</b></p>
       <div class="stack"><button class="btn" id="fight">挑む</button></div>`
@@ -1740,7 +1794,7 @@ function vChallenge() {
 }
 
 function animateGauge() {
-  const c = S.challenge, target = c.breakdown.damage, hp = c.breakdown.hp;
+  const c = S.challenge, target = c.breakdown.reach;
   c.phase = "fight";
   const bar = document.querySelector(".gauge i");
   const text = document.querySelector(".gauge span");
@@ -1749,14 +1803,14 @@ function animateGauge() {
   if (stack) stack.innerHTML = "";
   let d = 0;
   const step = () => {
-    d = Math.min(target, d + Math.max(1, target / 26));
+    d = Math.min(target, d + Math.max(0.01, target / 26));
     if (bar) {
-      bar.style.width = Math.round((1 - d / hp) * 100) + "%";
-      text.textContent = `難易度 ${Math.round(hp - d)} / ${hp}`;
-      label.textContent = STAGE_LABELS[challengeStage(d, hp)];
+      bar.style.width = Math.round(d * 100) + "%";
+      text.textContent = `到達度 ${Math.round(d * 100)}%`;
+      label.textContent = STAGE_LABELS[challengeStage(d)];
     }
     if (d < target) requestAnimationFrame(step);
-    else { c.damage = target; setTimeout(render, 420); }
+    else { c.reach = target; setTimeout(render, 420); }
   };
   requestAnimationFrame(step);
 }

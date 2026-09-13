@@ -1,0 +1,1403 @@
+[
+  {
+    "id": "5006",
+    "name": "へし切長谷部",
+    "series": "カタナ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "織田信長が茶坊主を棚ごと圧し切ったという逸話から名がついた刀。のち黒田官兵衛へ渡った。",
+    "upgrade": null
+  },
+  {
+    "id": "5014",
+    "name": "蜻蛉切",
+    "series": "クロススピア",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "本多忠勝の槍。穂先に止まったトンボが切れたという伝承が名の由来。",
+    "upgrade": null
+  },
+  {
+    "id": "5506",
+    "name": "三日月宗近",
+    "series": "カタナ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "平安期の刀工三条宗近の作。刃文の打除が三日月に見えることから。天下五剣のひとつ。",
+    "upgrade": null
+  },
+  {
+    "id": "4006",
+    "name": "和泉守兼定",
+    "series": "カタナ",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "新選組副長・土方歳三の佩刀として知られる。",
+    "upgrade": null
+  },
+  {
+    "id": "4014",
+    "name": "人間無骨",
+    "series": "クロススピア",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "森長可の槍。人体を骨ごと貫くという意の銘。",
+    "upgrade": null
+  },
+  {
+    "id": "5013",
+    "name": "与一の弓",
+    "series": "ユミ",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "屋島の戦いで扇の的を射た那須与一。『平家物語』の名場面。",
+    "upgrade": null
+  },
+  {
+    "id": "4013",
+    "name": "雷上動",
+    "series": "ユミ",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "源頼政が鵺を射たとされる弓。『平家物語』に登場。",
+    "upgrade": null
+  },
+  {
+    "id": "4018",
+    "name": "諏訪法性兜",
+    "series": "カブト",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "武田信玄が用いたと伝わる兜。諏訪大社の信仰と結びつく。",
+    "upgrade": null
+  },
+  {
+    "id": "5081",
+    "name": "赤糸威大鎧",
+    "series": "ヨロイ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "平安末〜鎌倉期の大鎧。赤糸で威した国宝級の日本甲冑。",
+    "upgrade": {
+      "id": "5581",
+      "name": "真・赤糸威大鎧"
+    }
+  },
+  {
+    "id": "4047",
+    "name": "咸臨丸",
+    "series": "シップ",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "幕末に太平洋を横断した幕府軍艦。勝海舟・福沢諭吉が乗船。",
+    "upgrade": null
+  },
+  {
+    "id": "4074",
+    "name": "国崩し",
+    "series": "ハンドカノン",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "大友宗麟がポルトガルから得た大砲の異名。日本の火器伝来を示す。",
+    "upgrade": null
+  },
+  {
+    "id": "4030",
+    "name": "幸若舞の盃",
+    "series": "ゴブレット",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "織田信長が愛好した幸若舞『敦盛』にちなむ。人間五十年の一節で知られる。",
+    "upgrade": null
+  },
+  {
+    "id": "4049",
+    "name": "八咫烏",
+    "series": "アルケブス",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "日本神話で神武天皇を導いた三本足の烏。",
+    "upgrade": null
+  },
+  {
+    "id": "4073",
+    "name": "大黒の小槌",
+    "series": "マレット",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "七福神の大黒天が持つ打出の小槌。",
+    "upgrade": null
+  },
+  {
+    "id": "4037",
+    "name": "立行司の軍配",
+    "series": "グンバイ",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "大相撲の立行司が持つ軍配団扇。勝負の判定に使う。",
+    "upgrade": null
+  },
+  {
+    "id": "5127",
+    "name": "雛人形",
+    "series": "日本人形",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "上巳の節句に飾る人形。平安の流し雛に起源をもつ。",
+    "upgrade": {
+      "id": "5627",
+      "name": "真・雛人形"
+    }
+  },
+  {
+    "id": "4058",
+    "name": "神便鬼毒酒",
+    "series": "サケ",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "大江山の酒呑童子退治で源頼光が用いたとされる酒。",
+    "upgrade": null
+  },
+  {
+    "id": "5027",
+    "name": "しっぺい太郎",
+    "series": "ドッグ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "人身御供の怪物を退治したと伝わる犬の伝説。各地に類話がある。",
+    "upgrade": null
+  },
+  {
+    "id": "5015",
+    "name": "方天画戟",
+    "series": "ハルバード",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "『三国志演義』で呂布が用いる戟。",
+    "upgrade": {
+      "id": "5515",
+      "name": "真・方天画戟"
+    }
+  },
+  {
+    "id": "4005",
+    "name": "赤兎馬",
+    "series": "ホース",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "呂布、のち関羽が乗ったとされる名馬。一日千里を走ると伝わる。",
+    "upgrade": null
+  },
+  {
+    "id": "4015",
+    "name": "丈八蛇矛",
+    "series": "ハルバード",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "『三国志演義』で張飛が用いる蛇のようにうねる矛。",
+    "upgrade": null
+  },
+  {
+    "id": "4016",
+    "name": "兵法書",
+    "series": "スクロール",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "孫子。彼を知り己を知れば百戦殆うからず、で知られる中国最古の兵法書。",
+    "upgrade": null
+  },
+  {
+    "id": "5016",
+    "name": "大唐西域記",
+    "series": "スクロール",
+    "mchRarity": "Legendary",
+    "rank": "奥伝",
+    "subjects": [
+      "社会",
+      "国語",
+      "外国語"
+    ],
+    "origin": "玄奘三蔵がインドまでの旅を記した地誌。彼は梵語を漢語へ訳した大翻訳家でもある。",
+    "upgrade": {
+      "id": "5516",
+      "name": "真・大唐西域記"
+    }
+  },
+  {
+    "id": "5079",
+    "name": "如意金箍棒",
+    "series": "スタッフ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "『西遊記』で孫悟空が使う、自在に伸縮する棒。",
+    "upgrade": {
+      "id": "5579",
+      "name": "真・如意金箍棒"
+    }
+  },
+  {
+    "id": "5074",
+    "name": "宝貝火尖鎗",
+    "series": "ハンドカノン",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "『封神演義』の哪吒が用いる宝貝。",
+    "upgrade": {
+      "id": "5574",
+      "name": "真・宝貝火尖鎗"
+    }
+  },
+  {
+    "id": "4059",
+    "name": "綸巾",
+    "series": "ハット",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "諸葛亮が着けたと伝わる頭巾。文人の象徴でもある。",
+    "upgrade": null
+  },
+  {
+    "id": "5032",
+    "name": "白羽根太極",
+    "series": "センス",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "諸葛亮の羽扇と、そこに描かれる陰陽太極図。",
+    "upgrade": null
+  },
+  {
+    "id": "4082",
+    "name": "詠春八斬刀",
+    "series": "ツインブレード",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "中国南部の武術・詠春拳で用いる双刀。",
+    "upgrade": null
+  },
+  {
+    "id": "5036",
+    "name": "冕冠",
+    "series": "クラウン",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "中国の皇帝が儀礼で着けた冠。前後に垂らす玉が視界を遮る。",
+    "upgrade": {
+      "id": "5536",
+      "name": "真・冕冠"
+    }
+  },
+  {
+    "id": "5002",
+    "name": "グランダルメ",
+    "series": "マスケット",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "ナポレオンが率いた大陸軍。近代的な軍団編成の原型。",
+    "upgrade": {
+      "id": "5502",
+      "name": "真・グランダルメ"
+    }
+  },
+  {
+    "id": "5005",
+    "name": "ブケファロス",
+    "series": "ホース",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "アレクサンドロス大王の愛馬。少年期に彼だけが乗りこなした。",
+    "upgrade": null
+  },
+  {
+    "id": "5024",
+    "name": "ハンニバルの軍象",
+    "series": "エレファント",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "第二次ポエニ戦争でアルプスを越えたカルタゴ軍の戦象。",
+    "upgrade": null
+  },
+  {
+    "id": "5059",
+    "name": "提督のトリコーン",
+    "series": "ハット",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "18〜19世紀の海軍提督がかぶった三角帽。",
+    "upgrade": null
+  },
+  {
+    "id": "5041",
+    "name": "英国海軍のライム",
+    "series": "ライム",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "社会"
+    ],
+    "origin": "壊血病を防ぐため配給された柑橘。ビタミンC欠乏症への対処。",
+    "upgrade": null
+  },
+  {
+    "id": "4050",
+    "name": "ロゼッタ・ストーン",
+    "series": "リソグラフィ",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "外国語"
+    ],
+    "origin": "三種の文字で同一の勅令を記した石碑。ヒエログリフ解読の鍵となった。",
+    "upgrade": null
+  },
+  {
+    "id": "5050",
+    "name": "十戒の石版",
+    "series": "リソグラフィ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "モーセがシナイ山で授かったとされる律法の石版。",
+    "upgrade": {
+      "id": "5550",
+      "name": "真・十戒の石版"
+    }
+  },
+  {
+    "id": "5047",
+    "name": "ビクトリア号",
+    "series": "シップ",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "理科"
+    ],
+    "origin": "マゼラン艦隊で唯一世界周航を果たした船。地球が球体であることを実証した。",
+    "upgrade": null
+  },
+  {
+    "id": "4071",
+    "name": "ドレークの遺産",
+    "series": "ドラム",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "フランシス・ドレーク。英国人として初めて世界を周航した私掠船長。",
+    "upgrade": null
+  },
+  {
+    "id": "4011",
+    "name": "テカムセのトマホーク",
+    "series": "アックス",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "ショーニー族の指導者テカムセ。先住民連合を率いて合衆国と戦った。",
+    "upgrade": null
+  },
+  {
+    "id": "4048",
+    "name": "グルカナイフ",
+    "series": "ナイフ",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "ネパールのグルカ兵が用いるククリ刀。",
+    "upgrade": null
+  },
+  {
+    "id": "5011",
+    "name": "バイキングアックス",
+    "series": "アックス",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "ヴァイキングが用いた戦斧。北欧の海洋進出を象徴する。",
+    "upgrade": null
+  },
+  {
+    "id": "5028",
+    "name": "フランベルジェ",
+    "series": "レイピア",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "波状の刃を持つ剣。炎を意味する語に由来する。",
+    "upgrade": null
+  },
+  {
+    "id": "4028",
+    "name": "エスパダ・ロペラ",
+    "series": "レイピア",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "16世紀スペインの護身用細身剣。レイピアの前身。",
+    "upgrade": null
+  },
+  {
+    "id": "4090",
+    "name": "チャリオット",
+    "series": "トリケラトプス",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "古代オリエントで用いられた二輪戦車。戦術を一変させた。",
+    "upgrade": null
+  },
+  {
+    "id": "5035",
+    "name": "バリスタ",
+    "series": "ボウガン",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "理科"
+    ],
+    "origin": "古代ローマの攻城兵器。ねじりの弾性を利用した投射機。",
+    "upgrade": {
+      "id": "5535",
+      "name": "真・バリスタ"
+    }
+  },
+  {
+    "id": "4002",
+    "name": "三銃士のマスケット",
+    "series": "マスケット",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "国語",
+      "社会"
+    ],
+    "origin": "デュマ『三銃士』。17世紀フランスの銃士隊が舞台。",
+    "upgrade": null
+  },
+  {
+    "id": "4020",
+    "name": "ホットスパー",
+    "series": "ルースター",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "国語",
+      "社会"
+    ],
+    "origin": "シェイクスピア『ヘンリー四世』に登場するパーシーの異名。実在の人物。",
+    "upgrade": null
+  },
+  {
+    "id": "5111",
+    "name": "王妃の黄金時計",
+    "series": "懐中時計",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "マリー・アントワネットのために作られた懐中時計。完成は彼女の死後。",
+    "upgrade": {
+      "id": "5611",
+      "name": "真・王妃の黄金時計"
+    }
+  },
+  {
+    "id": "5509",
+    "name": "マリーアントワネット・ブルー",
+    "series": "リング",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "理科"
+    ],
+    "origin": "フランス王室が所有した青いダイヤ。のちのホープダイヤと結びつけられる。",
+    "upgrade": null
+  },
+  {
+    "id": "5010",
+    "name": "アイギス",
+    "series": "シールド",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "ゼウスとアテナが持つ盾。イージスの語源。",
+    "upgrade": null
+  },
+  {
+    "id": "5073",
+    "name": "ミョルニル",
+    "series": "マレット",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "北欧神話でトールが振るう鎚。投げれば必ず手に戻る。",
+    "upgrade": {
+      "id": "5573",
+      "name": "真・ミョルニル"
+    }
+  },
+  {
+    "id": "5187",
+    "name": "グングニル",
+    "series": "ジャベリン",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "北欧神話でオーディンが持つ槍。狙いを外さない。",
+    "upgrade": null
+  },
+  {
+    "id": "5067",
+    "name": "ギャラルホルン",
+    "series": "ホルン",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "北欧神話でヘイムダルが吹く角笛。ラグナロクの到来を告げる。",
+    "upgrade": null
+  },
+  {
+    "id": "5096",
+    "name": "メギンギョルズ",
+    "series": "ベルト",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "北欧神話でトールの力を倍にする帯。",
+    "upgrade": {
+      "id": "5596",
+      "name": "真・メギンギョルズ"
+    }
+  },
+  {
+    "id": "5099",
+    "name": "ヤールングレイプル",
+    "series": "ガントレット",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "北欧神話でトールが鎚を握るための鉄の手袋。",
+    "upgrade": {
+      "id": "5599",
+      "name": "真・ヤールングレイプル"
+    }
+  },
+  {
+    "id": "5039",
+    "name": "女神フリッグの果実",
+    "series": "ストロベリー",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "北欧神話の女神フリッグ。バルドルの死をめぐる物語で知られる。",
+    "upgrade": null
+  },
+  {
+    "id": "5159",
+    "name": "不和の女神授けし黄金の果実",
+    "series": "りんご",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "エリスが投げた黄金の林檎。トロイア戦争の発端となった。",
+    "upgrade": null
+  },
+  {
+    "id": "5179",
+    "name": "トロイの木馬",
+    "series": "トラップ",
+    "mchRarity": "Legendary",
+    "rank": "奥伝",
+    "subjects": [
+      "社会",
+      "国語",
+      "情報"
+    ],
+    "origin": "トロイア戦争でギリシャ軍が用いた計略。転じてマルウェアの名にもなった。",
+    "upgrade": null
+  },
+  {
+    "id": "5026",
+    "name": "ケツァルコアトル",
+    "series": "スネーク",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "アステカ・マヤの羽毛ある蛇の神。暦や農耕と結びつく。",
+    "upgrade": null
+  },
+  {
+    "id": "5030",
+    "name": "聖杯",
+    "series": "ゴブレット",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "最後の晩餐でキリストが用いたとされる杯。中世騎士道物語の探求対象。",
+    "upgrade": null
+  },
+  {
+    "id": "5057",
+    "name": "ケーリュケイオン",
+    "series": "ワンド",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "理科"
+    ],
+    "origin": "ヘルメスの杖。二匹の蛇が絡む。商業と伝令の象徴。",
+    "upgrade": null
+  },
+  {
+    "id": "5171",
+    "name": "アトロポスの鋏",
+    "series": "鋏",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "ギリシャ神話の運命の三女神モイライ。生命の糸を断つ役。",
+    "upgrade": null
+  },
+  {
+    "id": "5556",
+    "name": "クロノスの鎌",
+    "series": "シックル",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "国語",
+      "社会"
+    ],
+    "origin": "ギリシャ神話でクロノスが父ウラノスを討った鎌。時の神と混同されてきた。",
+    "upgrade": null
+  },
+  {
+    "id": "5058",
+    "name": "ネクタール",
+    "series": "サケ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "ギリシャ神話で神々が飲む不死の飲料。",
+    "upgrade": null
+  },
+  {
+    "id": "5558",
+    "name": "ソーマ",
+    "series": "サケ",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "古代インドの祭祀で用いられた神酒。『リグ・ヴェーダ』に讃歌がある。",
+    "upgrade": null
+  },
+  {
+    "id": "5192",
+    "name": "スダルシャナ",
+    "series": "チャクラム",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "ヴィシュヌ神が持つ円盤状の武器。",
+    "upgrade": null
+  },
+  {
+    "id": "5064",
+    "name": "クリシュナのバーンスリー",
+    "series": "フルート",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "クリシュナが吹く竹製の横笛。インドの叙事詩に登場。",
+    "upgrade": null
+  },
+  {
+    "id": "5072",
+    "name": "サラスワティ・ヴィーナ",
+    "series": "シタール",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "学問と芸術の女神サラスワティが持つ弦楽器。弁才天の原型。",
+    "upgrade": null
+  },
+  {
+    "id": "5066",
+    "name": "シストルム",
+    "series": "マラカス",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "古代エジプトの祭祀楽器。女神ハトホルの信仰と結びつく。",
+    "upgrade": null
+  },
+  {
+    "id": "4067",
+    "name": "ショファール",
+    "series": "ホルン",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "ユダヤ教で新年などに吹く角笛。旧約聖書に記述がある。",
+    "upgrade": null
+  },
+  {
+    "id": "4065",
+    "name": "ダビデのリラ",
+    "series": "ハープ",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "旧約聖書のダビデが奏でた竪琴。『詩篇』の伝承と結びつく。",
+    "upgrade": null
+  },
+  {
+    "id": "5017",
+    "name": "太陽神の首飾り",
+    "series": "ネックレス",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "社会"
+    ],
+    "origin": "古代エジプトの太陽神ラー。ファラオの権威と結びつく。",
+    "upgrade": {
+      "id": "5517",
+      "name": "真・太陽神の首飾り"
+    }
+  },
+  {
+    "id": "5086",
+    "name": "カリュブディス",
+    "series": "アンモナイト",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "『オデュッセイア』に登場する渦潮の怪物。スキュラと対をなす。",
+    "upgrade": null
+  },
+  {
+    "id": "4161",
+    "name": "ステュクス",
+    "series": "サイバーソード",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "ギリシャ神話の冥界を流れる川。誓いの神聖な水。",
+    "upgrade": null
+  },
+  {
+    "id": "5163",
+    "name": "ユグドラシル盆栽",
+    "series": "盆栽",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "北欧神話の世界樹。九つの世界を貫く。",
+    "upgrade": null
+  },
+  {
+    "id": "4010",
+    "name": "プリトウェン",
+    "series": "シールド",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "アーサー王が持つ盾。ウェールズの古伝承に見える。",
+    "upgrade": null
+  },
+  {
+    "id": "4091",
+    "name": "ミュルグレス・スクアマ",
+    "series": "ロンギスクアマ",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "『ローランの歌』でガヌロンが持つ剣。",
+    "upgrade": null
+  },
+  {
+    "id": "4063",
+    "name": "アルルカン",
+    "series": "ピエロ",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "国語",
+      "社会"
+    ],
+    "origin": "イタリアの即興喜劇コメディア・デラルテの道化。ハーレクインの原型。",
+    "upgrade": null
+  },
+  {
+    "id": "5112",
+    "name": "ティターニア",
+    "series": "妖精",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "シェイクスピア『真夏の夜の夢』の妖精の女王。",
+    "upgrade": {
+      "id": "5612",
+      "name": "真・ティターニア"
+    }
+  },
+  {
+    "id": "5162",
+    "name": "マンドラゴラキング",
+    "series": "マンドラゴラ",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "国語"
+    ],
+    "origin": "引き抜くと叫ぶとされた薬草。実在のマンドレイクは麻酔にも使われた。",
+    "upgrade": null
+  },
+  {
+    "id": "4094",
+    "name": "ウロボロス・スタールビー",
+    "series": "パキケファロサウルス",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "社会"
+    ],
+    "origin": "自らの尾を噛む蛇。循環と永遠の象徴。ベンゼン環の着想譚でも知られる。",
+    "upgrade": null
+  },
+  {
+    "id": "5008",
+    "name": "アトランティコ手稿",
+    "series": "ブック",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "理科"
+    ],
+    "origin": "レオナルド・ダ・ヴィンチの手稿を集成した最大の冊子。",
+    "upgrade": null
+  },
+  {
+    "id": "5508",
+    "name": "レスター手稿",
+    "series": "ブック",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "理科"
+    ],
+    "origin": "ダ・ヴィンチが水の運動と天体を論じた手稿。",
+    "upgrade": null
+  },
+  {
+    "id": "4008",
+    "name": "罪と罰",
+    "series": "ブック",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "ドストエフスキーの長編。ロシア文学を代表する作品。",
+    "upgrade": null
+  },
+  {
+    "id": "4043",
+    "name": "怒りの葡萄",
+    "series": "グレープ",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "国語",
+      "社会"
+    ],
+    "origin": "スタインベック。世界恐慌期の農民の西部移動を描いた。",
+    "upgrade": null
+  },
+  {
+    "id": "5003",
+    "name": "劇作家の羽ペン",
+    "series": "ペン",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "国語",
+      "外国語"
+    ],
+    "origin": "シェイクスピア。約2000語を英語にもたらしたとされる。",
+    "upgrade": {
+      "id": "5503",
+      "name": "真・劇作家の羽ペン"
+    }
+  },
+  {
+    "id": "4003",
+    "name": "楽聖の羽ペン",
+    "series": "ペン",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "ベートーヴェン。聴力を失いながら作曲を続けた。",
+    "upgrade": null
+  },
+  {
+    "id": "4017",
+    "name": "シベリア杉の首飾り",
+    "series": "ネックレス",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "ロシアの小説『アナスタシア 響きわたるシベリア杉』に登場する品。",
+    "upgrade": null
+  },
+  {
+    "id": "5048",
+    "name": "アゾット",
+    "series": "ナイフ",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "社会"
+    ],
+    "origin": "錬金術師パラケルススが常に携えたとされる剣。柄に霊薬を収めたという。",
+    "upgrade": {
+      "id": "5548",
+      "name": "真・アゾット"
+    }
+  },
+  {
+    "id": "5042",
+    "name": "球状黒鉛",
+    "series": "グラファイト",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "理科"
+    ],
+    "origin": "黒鉛を球状に晶出させた鋳鉄。もろい鋳鉄を強靭にした20世紀の発明。",
+    "upgrade": null
+  },
+  {
+    "id": "4042",
+    "name": "エアログラファイト",
+    "series": "グラファイト",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "理科"
+    ],
+    "origin": "炭素でできた極めて軽い多孔質材料。密度は空気の数倍程度。",
+    "upgrade": null
+  },
+  {
+    "id": "5107",
+    "name": "ホレリスの黄金像",
+    "series": "ノード・ドール",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "情報",
+      "社会"
+    ],
+    "origin": "ハーマン・ホレリス。パンチカード集計機で国勢調査を機械化した。",
+    "upgrade": null
+  },
+  {
+    "id": "4107",
+    "name": "アタナソフの頭足髑髏",
+    "series": "ノード・ドール",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "情報"
+    ],
+    "origin": "ジョン・アタナソフ。世界初の電子式デジタル計算機を設計した。",
+    "upgrade": null
+  },
+  {
+    "id": "4069",
+    "name": "イル・カノーネ",
+    "series": "ヴァイオリン",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "国語"
+    ],
+    "origin": "パガニーニが愛用したグァルネリ製のヴァイオリン。大砲の意。",
+    "upgrade": null
+  },
+  {
+    "id": "4143",
+    "name": "古代機工三球儀",
+    "series": "天体模型",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "理科"
+    ],
+    "origin": "太陽・地球・月の運動を再現する模型。オーラリー。",
+    "upgrade": null
+  },
+  {
+    "id": "5157",
+    "name": "バミューダトライアングル寿司",
+    "series": "お寿司",
+    "mchRarity": "Legendary",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "理科"
+    ],
+    "origin": "大西洋の海域。船舶や航空機の失踪伝説で知られる。",
+    "upgrade": null
+  },
+  {
+    "id": "4044",
+    "name": "ホワイトセージ",
+    "series": "セージ",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "社会"
+    ],
+    "origin": "北米先住民が浄化の儀式に用いた植物。",
+    "upgrade": null
+  },
+  {
+    "id": "4040",
+    "name": "ブッシュカン",
+    "series": "タンジェリン",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "理科"
+    ],
+    "origin": "仏手柑。指のように裂ける柑橘。東アジアで縁起物とされる。",
+    "upgrade": null
+  },
+  {
+    "id": "4046",
+    "name": "ピジョンブラッド",
+    "series": "ルビー",
+    "mchRarity": "Epic",
+    "rank": "初伝",
+    "subjects": [
+      "理科"
+    ],
+    "origin": "ルビーの最高級とされる色味。鳩の血の色に例えられる。",
+    "upgrade": null
+  },
+  {
+    "id": "5172",
+    "name": "ハードウェアウォレット",
+    "series": "財布",
+    "mchRarity": "Legendary",
+    "rank": "初伝",
+    "subjects": [
+      "情報"
+    ],
+    "origin": "暗号資産の秘密鍵をネットから隔離して保管する装置。",
+    "upgrade": null
+  },
+  {
+    "id": "2156",
+    "name": "コンパス",
+    "series": "コンパス",
+    "mchRarity": "Uncommon",
+    "rank": "初伝",
+    "subjects": [
+      "算数・数学"
+    ],
+    "origin": "円を描く器具。ユークリッド『原論』は定規とコンパスだけで幾何を組み立てた。",
+    "upgrade": null
+  },
+  {
+    "id": "3156",
+    "name": "アンティークコンパス",
+    "series": "コンパス",
+    "mchRarity": "Rare",
+    "rank": "中伝",
+    "subjects": [
+      "算数・数学",
+      "社会"
+    ],
+    "origin": "作図の三大難問。角の三角等分や立方体倍積は定規とコンパスでは不可能と証明された。",
+    "upgrade": null
+  },
+  {
+    "id": "2143",
+    "name": "アンティーク地球儀",
+    "series": "天体模型",
+    "mchRarity": "Uncommon",
+    "rank": "奥伝",
+    "subjects": [
+      "算数・数学",
+      "理科",
+      "社会"
+    ],
+    "origin": "エラトステネスは影の角度と二地点の距離から地球の周長を算出した。",
+    "upgrade": null
+  },
+  {
+    "id": "3143",
+    "name": "魔力で動く天球儀",
+    "series": "天体模型",
+    "mchRarity": "Rare",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "社会"
+    ],
+    "origin": "天球儀。プトレマイオスの『アルマゲスト』が体系化した天動説の器物。",
+    "upgrade": null
+  },
+  {
+    "id": "3111",
+    "name": "賢者の懐中時計",
+    "series": "懐中時計",
+    "mchRarity": "Rare",
+    "rank": "奥伝",
+    "subjects": [
+      "理科",
+      "算数・数学",
+      "社会"
+    ],
+    "origin": "海上で経度を知るには正確な時計が要る。ハリソンのクロノメーターがそれを解いた。",
+    "upgrade": null
+  },
+  {
+    "id": "4156",
+    "name": "終末の羅針盤",
+    "series": "コンパス",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "社会"
+    ],
+    "origin": "羅針盤。中国で発明され、大航海時代の遠洋航海を可能にした。",
+    "upgrade": null
+  },
+  {
+    "id": "1105",
+    "name": "鏡",
+    "series": "鏡",
+    "mchRarity": "Common",
+    "rank": "中伝",
+    "subjects": [
+      "理科",
+      "算数・数学"
+    ],
+    "origin": "光の反射。入射角と反射角が等しいという規則は古代から知られていた。",
+    "upgrade": null
+  },
+  {
+    "id": "4147",
+    "name": "天津神の石碑",
+    "series": "シールドシステム",
+    "mchRarity": "Epic",
+    "rank": "中伝",
+    "subjects": [
+      "社会",
+      "国語"
+    ],
+    "origin": "記紀神話の天津神。日本の建国神話を伝える。",
+    "upgrade": null
+  }
+]

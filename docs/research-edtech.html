@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>教育サービス5つの「ついやってしまう」構造</title>
+<style>
+  :root{
+    --paper:#EEF1F2;
+    --card:#FFFFFF;
+    --ink:#22303C;
+    --ink-mid:#5B6B78;
+    --ink-thin:#93A2AC;
+    --rule:#D3DBDF;
+    --c1:#2E6F5E;   /* 直感 */
+    --c2:#8C3A52;   /* 驚き */
+    --c3:#3B5A8C;   /* 物語 */
+    --warn:#A63A3A;
+    --mincho:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif;
+    --gothic:"Hiragino Sans","Yu Gothic",YuGothic,"Noto Sans JP",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--gothic);font-size:15px;line-height:1.85;
+    -webkit-font-smoothing:antialiased;
+    padding:0 18px calc(80px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:740px;margin:0 auto}
+  a{color:var(--c3)}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--c3);outline-offset:3px}
+
+  /* ---------- 冒頭 ---------- */
+  .masthead{padding:56px 0 30px;border-bottom:2px solid var(--ink)}
+  h1{
+    font-family:var(--mincho);font-weight:600;
+    font-size:clamp(27px,7.2vw,42px);line-height:1.35;letter-spacing:.04em;
+    margin:0 0 16px;
+  }
+  .standfirst{font-size:15.5px;color:var(--ink-mid);margin:0;max-width:34em}
+  .meta{margin-top:22px;font-size:12.5px;color:var(--ink-thin);line-height:1.9}
+
+  /* ---------- サイクルの帯（この資料の骨格） ---------- */
+  .cycle{display:flex;align-items:stretch;gap:0;margin:0 0 4px;flex-wrap:wrap}
+  .cycle .step{
+    font-family:var(--mincho);font-size:13px;letter-spacing:.1em;
+    padding:5px 13px;border:1px solid currentColor;background:var(--card);
+    white-space:nowrap;
+  }
+  .cycle .arw{align-self:center;padding:0 7px;font-size:11px;opacity:.5}
+  .c1{color:var(--c1)} .c2{color:var(--c2)} .c3{color:var(--c3)}
+
+  /* ---------- 一望のマトリクス ---------- */
+  .matrix{margin:38px 0 8px}
+  .matrix h2{margin-bottom:6px}
+  .mwrap{overflow-x:auto;margin:0 -18px;padding:0 18px;-webkit-overflow-scrolling:touch}
+  table.m{border-collapse:collapse;width:100%;min-width:520px;font-size:13.5px;background:var(--card)}
+  table.m th,table.m td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+  table.m thead th{
+    font-family:var(--mincho);font-weight:600;font-size:13px;letter-spacing:.06em;
+    border-bottom:1.5px solid var(--ink);white-space:nowrap;
+  }
+  table.m thead th:nth-child(2){color:var(--c1)}
+  table.m thead th:nth-child(3){color:var(--c2)}
+  table.m thead th:nth-child(4){color:var(--c3)}
+  table.m tbody th{font-weight:600;font-size:13.5px;white-space:nowrap}
+  .dots{font-size:15px;letter-spacing:.16em;line-height:1}
+  .d1{color:var(--c1)} .d2{color:var(--c2)} .d3{color:var(--c3)}
+  .verdict{font-size:12.5px;color:var(--ink-mid);line-height:1.7}
+  .legend{font-size:12px;color:var(--ink-thin);margin-top:10px}
+
+  /* ---------- 見出し ---------- */
+  h2{
+    font-family:var(--mincho);font-weight:600;
+    font-size:20px;letter-spacing:.05em;margin:0 0 14px;
+  }
+  h3{
+    font-family:var(--mincho);font-weight:600;font-size:15px;
+    letter-spacing:.06em;margin:26px 0 9px;
+  }
+  p{margin:0 0 14px}
+
+  /* ---------- サービス ---------- */
+  .svc{margin-top:54px;padding-top:30px;border-top:1px solid var(--rule)}
+  .svc:first-of-type{border-top:none}
+  .svc-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .svc-name{font-family:var(--mincho);font-size:26px;font-weight:600;letter-spacing:.03em}
+  .svc-kind{font-size:12px;color:var(--ink-thin)}
+  .svc-verdict{
+    font-size:15px;color:var(--ink);margin:6px 0 24px;
+    padding-left:14px;border-left:3px solid var(--ink);max-width:34em;
+  }
+  .svc.bad .svc-verdict{border-left-color:var(--warn)}
+
+  .band{margin:0 0 24px;padding:16px 0 0;border-top:1px dashed var(--rule)}
+  .band:first-of-type{border-top:none;padding-top:0}
+  .band p{margin:11px 0 0;font-size:14.5px}
+  .band p:first-of-type{margin-top:12px}
+
+  .taboo{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+  .taboo span{
+    font-size:12px;padding:2px 9px;border:1px solid var(--c2);color:var(--c2);
+    background:var(--card);
+  }
+  .taboo span.off{border-color:var(--rule);color:var(--ink-thin);text-decoration:line-through}
+
+  .takeaway{
+    background:var(--card);border:1px solid var(--rule);
+    border-left:3px solid var(--c1);padding:15px 17px;margin-top:22px;
+  }
+  .takeaway h4{
+    font-family:var(--mincho);font-size:13.5px;font-weight:600;letter-spacing:.06em;
+    margin:0 0 8px;color:var(--c1);
+  }
+  .takeaway p{margin:0;font-size:14px;line-height:1.8}
+  .takeaway p + p{margin-top:9px}
+  .svc.bad .takeaway{border-left-color:var(--warn)}
+  .svc.bad .takeaway h4{color:var(--warn)}
+
+  .unknown{font-size:13px;color:var(--ink-thin);margin-top:16px;line-height:1.75}
+  .unknown b{color:var(--ink-mid);font-weight:600}
+
+  /* ---------- 横断・示唆 ---------- */
+  .finding{margin:30px 0 0}
+  .finding h3{margin-top:0}
+  .finding .lead{
+    font-family:var(--mincho);font-size:17px;line-height:1.8;letter-spacing:.02em;
+    margin:0 0 12px;
+  }
+  ol.steps{margin:0;padding-left:1.4em}
+  ol.steps li{margin-bottom:16px;padding-left:4px}
+  ol.steps li::marker{font-family:var(--mincho);color:var(--ink-thin)}
+
+  .warnbox{
+    background:var(--card);border:1px solid var(--warn);padding:17px 19px;margin:28px 0;
+  }
+  .warnbox h3{margin-top:0;color:var(--warn)}
+  .warnbox p:last-child{margin-bottom:0}
+
+  /* ---------- 出典 ---------- */
+  .sources{margin-top:56px;padding-top:26px;border-top:2px solid var(--ink);font-size:12.5px;color:var(--ink-mid)}
+  .sources h2{font-size:16px}
+  .sources ul{list-style:none;margin:0;padding:0}
+  .sources li{padding:6px 0;border-bottom:1px solid var(--rule);line-height:1.65;word-break:break-word}
+  .sources li:last-child{border-bottom:none}
+
+  @media (max-width:560px){
+    .cycle .step{font-size:12px;padding:4px 9px}
+    .cycle .arw{padding:0 4px}
+    .svc-name{font-size:22px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <h1>教育サービス5つは<br>どこを回しているか</h1>
+  <p class="standfirst">
+    玉樹真一郎『「ついやってしまう」体験のつくりかた』の三層――直感・驚き・物語――を物差しに、
+    既存の教育ゲームが実際に何を回しているかを、公開情報の範囲で並べたもの。
+  </p>
+  <div class="meta">
+    調査日 2026年9月13日 ・ 対象 Prodigy Math / Eduten / DragonBox / ST Math / Duolingo<br>
+    出典は末尾。各社の非公開の設計意図までは確認できないため、外形と第三者評価から読み取れる範囲にとどめている。
+  </div>
+</header>
+
+<section class="matrix">
+  <h2>一望</h2>
+  <p style="font-size:14px;color:var(--ink-mid);max-width:34em;margin-bottom:16px">
+    三つのサイクルのうち、どれを強く回しているか。強い＝そのサイクルがサービスの中心にあり、
+    学習内容と切り離せない形で組まれている、という意味。
+  </p>
+
+  <div class="cycle" style="margin-bottom:18px">
+    <span class="step c1">仮説</span><span class="arw c1">▶</span>
+    <span class="step c1">試行</span><span class="arw c1">▶</span>
+    <span class="step c1">歓喜</span>
+    <span class="arw" style="opacity:.25;padding:0 12px">/</span>
+    <span class="step c2">誤解</span><span class="arw c2">▶</span>
+    <span class="step c2">試行</span><span class="arw c2">▶</span>
+    <span class="step c2">驚愕</span>
+  </div>
+  <div class="cycle" style="margin-bottom:20px">
+    <span class="step c3">翻弄</span><span class="arw c3">▶</span>
+    <span class="step c3">成長</span><span class="arw c3">▶</span>
+    <span class="step c3">意志</span>
+  </div>
+
+  <div class="mwrap">
+  <table class="m">
+    <thead>
+      <tr><th>サービス</th><th>直感</th><th>驚き</th><th>物語</th><th>要するに</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Prodigy Math</th>
+        <td class="dots d1">●●○</td><td class="dots d2">●○○</td><td class="dots d3">●●●</td>
+        <td class="verdict">物語だけが強い。しかもその物語は算数と無関係に走る</td>
+      </tr>
+      <tr>
+        <th>Eduten</th>
+        <td class="dots d1">●●●</td><td class="dots d2">●○○</td><td class="dots d3">●○○</td>
+        <td class="verdict">直感の連続に全振り。物語を意図的に持たない</td>
+      </tr>
+      <tr>
+        <th>DragonBox</th>
+        <td class="dots d1">●●●</td><td class="dots d2">●●●</td><td class="dots d3">●○○</td>
+        <td class="verdict">驚きが学習内容そのもの。記号が後から現れる</td>
+      </tr>
+      <tr>
+        <th>ST Math</th>
+        <td class="dots d1">●●●</td><td class="dots d2">●●○</td><td class="dots d3">●●○</td>
+        <td class="verdict">言葉を使わないことで仮説を強制する</td>
+      </tr>
+      <tr>
+        <th>Duolingo</th>
+        <td class="dots d1">●●○</td><td class="dots d2">●●○</td><td class="dots d3">●●●</td>
+        <td class="verdict">物語を習慣で代替した。ただし翻弄が外圧になっている</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="legend">●●● 中心にある ／ ●●○ 設計されている ／ ●○○ 弱い、または学習と切り離されている</p>
+</section>
+
+
+<!-- ============ Prodigy ============ -->
+<article class="svc bad">
+  <div class="svc-head">
+    <span class="svc-name">Prodigy Math</span>
+    <span class="svc-kind">カナダ ・ 小中学生向け ・ RPG型 ・ 学校無料＋家庭課金</span>
+  </div>
+  <p class="svc-verdict">
+    三層のうち物語だけを極端に太らせ、その物語を課金へつないだ結果、
+    学習内容とゲームが分離した。反面教師として最も学べる事例。
+  </p>
+
+  <div class="band">
+    <div class="cycle"><span class="step c1">仮説</span><span class="arw c1">▶</span><span class="step c1">試行</span><span class="arw c1">▶</span><span class="step c1">歓喜</span></div>
+    <p>
+      問題は学年カリキュラムに沿っており、そこは批判者も争っていない。
+      ただし解答は4択で、仮説の段階が設計されていない。歓喜は正解そのものではなく、
+      直後に手に入るペットや装備の側にある。<b>歓喜が学習の外に置かれている</b>のが構造的な問題。
+    </p>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c2">誤解</span><span class="arw c2">▶</span><span class="step c2">試行</span><span class="arw c2">▶</span><span class="step c2">驚愕</span></div>
+    <p>
+      驚きの弾はほぼタブーのモチーフに頼っている。しかも学習ではなく購買へ向いている。
+      Fairplay for Kids の調査では、19分のプレイ中に会員登録の広告が16回現れたのに対し、
+      算数のバトルは4回だった。<b>学習機会の4倍の広告</b>。
+    </p>
+    <div class="taboo">
+      <span>損得</span><span>承認</span><span>射幸心と偶然</span><span>混乱</span>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c3">翻弄</span><span class="arw c3">▶</span><span class="step c3">成長</span><span class="arw c3">▶</span><span class="step c3">意志</span></div>
+    <p>
+      ウィザードを作り、ペットを集め、島を巡る。物語装置は充実している。
+      しかし成長の実感は算数の上達ではなく収集物の量で測られ、
+      Prodigy自身が資金提供した研究でさえ、生徒が「さまよい歩く」傾向と、
+      買い物・キャラクター編集・広告といったゲーム内の気晴らしが欠点であることを認めている。
+      研究対象校の教師と管理職は、生徒の成績向上をProdigyに帰属させなかった。
+    </p>
+  </div>
+
+  <div class="takeaway">
+    <h4>本プロジェクトへの示唆</h4>
+    <p>
+      有料会員の子は同じ課題をこなしても高いスコアを得るため、会員でない子より算数ができるように見えてしまう。
+      研究では生徒自身がその不公平を認識し、会員の有無があることが最も嫌いな要素だと述べていた。
+    </p>
+    <p>
+      これは<b>原則3-2（報酬をプレイスタイルで差別化しない）が防ごうとしているものの実例</b>。
+      Prodigyは課金で差別化し、我々はプレイスタイルで差別化しないと決めた。同じ病理に別の名前がついているだけ。
+    </p>
+    <p>
+      Fairplayが引く一般則も記録に値する。報酬は、報酬を与えられた行為そのものへの興味を損なう傾向がある。
+    </p>
+  </div>
+
+  <p class="unknown">
+    <b>確認できていないこと</b>：社内のリテンション指標、報酬の内部設計値、
+    近年のAI生成アセット導入がプレイ体験に与えた影響。批判の多くは第三者調査とユーザーレビューによる。
+  </p>
+</article>
+
+
+<!-- ============ Eduten ============ -->
+<article class="svc">
+  <div class="svc-head">
+    <span class="svc-name">Eduten</span>
+    <span class="svc-kind">フィンランド ・ 6〜15歳 ・ 演習＋学習分析 ・ 学校導入型</span>
+  </div>
+  <p class="svc-verdict">
+    Prodigyが後から批判された点を、最初の問題設定に置いた。
+    ゲーミフィケーションを主役にせず、直感の連続だけを高速で回す。
+  </p>
+
+  <div class="band">
+    <div class="cycle"><span class="step c1">仮説</span><span class="arw c1">▶</span><span class="step c1">試行</span><span class="arw c1">▶</span><span class="step c1">歓喜</span></div>
+    <p>
+      1レッスンで20〜25の演習をこなす設計。紙と鉛筆に比べて最大8倍の計算量をこなすとされ、
+      UAEでの8週間の比較試験では、算術の流暢さと数学的スキルの両方で対照群を有意に上回った。
+      <b>歓喜は「解けた」そのものに置かれ、外側に報酬を作らない</b>。
+    </p>
+    <p>
+      出発点の言葉が本質を言い当てている。15年以上前、トゥルク大学の研究チームは、
+      デジタルツールを教育に応用する試みの多くが失敗するのを見てきた。
+      ツールは生徒を楽しませるが、より深い教育的意味や成果を欠いていることが多かった。
+    </p>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c2">誤解</span><span class="arw c2">▶</span><span class="step c2">試行</span><span class="arw c2">▶</span><span class="step c2">驚愕</span></div>
+    <p>
+      驚きの装置はほぼ持たない。飽きへの対処は教師が担う前提で、
+      プラットフォーム側は難易度の個別最適化で応じる。<b>教師という外部装置があるから成立する設計</b>で、
+      ここが単独アプリとの決定的な違い。
+    </p>
+    <div class="taboo"><span class="off">損得</span><span class="off">射幸心と偶然</span><span>承認</span></div>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c3">翻弄</span><span class="arw c3">▶</span><span class="step c3">成長</span><span class="arw c3">▶</span><span class="step c3">意志</span></div>
+    <p>
+      物語はない。代わりに<b>学習分析が成長の実感を担う</b>。
+      主な利用者は教師で、演習活動の調整と、フィードバックと採点という中核業務の支援に使われる。
+      フィンランドの全学校の70%以上で使われ、2020年にUNESCOのICT教育賞、2022年にUNICEFのBlue Unicorn賞を受けている。
+    </p>
+  </div>
+
+  <div class="takeaway">
+    <h4>本プロジェクトへの示唆</h4>
+    <p>
+      Edutenの中核はゲームではなく分析。ただし本プロジェクトには教師がいない。
+      <b>分析を教師向けではなく本人向けに翻訳する</b>のが筋で、知識マップはすでにその萌芽になっている。
+    </p>
+    <p>
+      ゲージを「知識の総量」ではなく「関連分野の網羅率」で測る案は、まさにこの方向。
+      総量は問題数が増えるほど飽和するが、網羅率は飽和しない。
+    </p>
+  </div>
+
+  <p class="unknown">
+    <b>確認できていないこと</b>：ゲーミフィケーション要素の具体（得点・バッジ・ランキングの有無と重み）。
+    「ツールのひとつとして利用する」以上の記述が公開情報から見つからなかった。
+    査読論文は多数あるので、掘れば設計値まで届く可能性が高い。
+  </p>
+</article>
+
+
+<!-- ============ DragonBox ============ -->
+<article class="svc">
+  <div class="svc-head">
+    <span class="svc-name">DragonBox</span>
+    <span class="svc-kind">ノルウェー ・ 5歳〜 ・ 代数パズル ・ 買い切り</span>
+  </div>
+  <p class="svc-verdict">
+    学習内容そのものをメカニクスにした唯一の例。
+    驚きのデザインが、そのまま代数の理解になっている。
+  </p>
+
+  <div class="band">
+    <div class="cycle"><span class="step c1">仮説</span><span class="arw c1">▶</span><span class="step c1">試行</span><span class="arw c1">▶</span><span class="step c1">歓喜</span></div>
+    <p>
+      カードを動かして箱を盤の片側に孤立させる。それだけ。
+      説明はなく、実験と発見で進む。すべての操作は成立するかしないかが即座に分かり、
+      フィードバックがゲームメカニクスに直接組み込まれている。
+      <b>満足は外的報酬ではなくパズルを解いたことから来る</b>。
+    </p>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c2">誤解</span><span class="arw c2">▶</span><span class="step c2">試行</span><span class="arw c2">▶</span><span class="step c2">驚愕</span></div>
+    <p>
+      ここが白眉。進めるうちにカードが少しずつ数字と変数に置き換わり、
+      自分がずっと学んできた加減乗除の演算子が姿を現す。
+      <b>「自分がやっていたのは代数だった」という驚愕が、体験の頂点に置かれている。</b>
+      前提への思い込み――代数は難しい、自分にはできない――を真正面から外す設計。
+    </p>
+    <div class="taboo"><span class="off">損得</span><span class="off">射幸心と偶然</span><span>混乱</span></div>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c3">翻弄</span><span class="arw c3">▶</span><span class="step c3">成長</span><span class="arw c3">▶</span><span class="step c3">意志</span></div>
+    <p>
+      物語は意図的に希薄。アバターを選べ、章ごとにドラゴンがいる程度で、
+      舞台も筋立ても最小限にとどめられている。
+      成長は「難易度が理解の速度に合わせて上がる」ことで感じさせ、各面は自分の理解そのものによって開く。
+    </p>
+  </div>
+
+  <div class="takeaway">
+    <h4>本プロジェクトへの示唆</h4>
+    <p>
+      DragonBoxの構造は本プロジェクトには直接移植できない。
+      代数は操作に翻訳できるが、<b>「世界のカリキュラムの差」は操作に翻訳できない</b>から。
+    </p>
+    <p>
+      移植できるのは<b>驚愕の置き場所</b>のほう。DragonBoxは「自分は代数を解いていた」を最後に明かす。
+      本プロジェクトの等価物は「自分が習わなかった単元を、いま解いている」だと思う。
+      第3章の壁はすでにこれをやっているので、<b>そこを頂点として演出する価値がある</b>。
+    </p>
+  </div>
+
+  <p class="unknown">
+    <b>確認できていないこと</b>：紙の代数への転移がどの程度起きるか。
+    レビューでは、ゲームの操作と形式的な代数の接続には大人の足場かけが必要だと指摘されている。
+    <b>本プロジェクトでも同じ問いが立つ</b>――ゲーム内で解けることと、教室で解けることは同じか。
+  </p>
+</article>
+
+
+<!-- ============ ST Math ============ -->
+<article class="svc">
+  <div class="svc-head">
+    <span class="svc-name">ST Math</span>
+    <span class="svc-kind">米国 ・ 就学前〜中2 ・ 視覚パズル ・ 学校導入型</span>
+  </div>
+  <p class="svc-verdict">
+    言葉を消すことで仮説を強制した。
+    そして「ゲーム性を足す」と「ゲーム性で教える」の違いを、自ら図解して否定している。
+  </p>
+
+  <div class="band">
+    <div class="cycle"><span class="step c1">仮説</span><span class="arw c1">▶</span><span class="step c1">試行</span><span class="arw c1">▶</span><span class="step c1">歓喜</span></div>
+    <p>
+      画面にはペンギンのJiJiがいて、向こう側へ渡らせることだけが目的。
+      文字の指示も音声の説明もなく、学習経路の始めはほぼすべて視覚。
+      だから<b>学習に入る障壁がなく、生徒は自分の考えを試してフィードバックから学ぶ</b>。
+      理解を示すたびにJiJiが画面を横切る――報酬が理解の証明そのものになっている。
+    </p>
+    <p>
+      提示するものを絞ることで注意を課題に留める、という設計思想が明言されている。
+      踊るモンスターも鳴り響く音楽もなく、数学概念の視覚モデルと明確な課題だけがある。
+      認知負荷を下げるという定石を、教育ゲームで実際にやり切っている数少ない例。
+    </p>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c2">誤解</span><span class="arw c2">▶</span><span class="step c2">試行</span><span class="arw c2">▶</span><span class="step c2">驚愕</span></div>
+    <p>
+      誤解を歓迎する設計になっている。<b>生産的なつまずき</b>という概念を前面に置き、
+      間違えてフィードバックを得ることをゲームの楽しさの一部として扱う。
+      JiJiは何度試しても助けになるフィードバックを返し、解けると信じ続ける。
+    </p>
+    <div class="taboo"><span class="off">損得</span><span class="off">射幸心と偶然</span><span>混乱</span></div>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c3">翻弄</span><span class="arw c3">▶</span><span class="step c3">成長</span><span class="arw c3">▶</span><span class="step c3">意志</span></div>
+    <p>
+      物語は極小だが、JiJiという同行者が成長の器になっている。
+      粘り強く問題を解くうちに自分への信頼が育つ、という設計意図が明示されており、
+      教室単位でそれが波及する現象に<b>JiJi文化</b>という名前まで付いている。
+      これは玉樹の言う「翻意と共感」に近い位置にある装置。
+    </p>
+  </div>
+
+  <div class="takeaway">
+    <h4>本プロジェクトへの示唆</h4>
+    <p>
+      ST Mathの資料には決定的な図がある。
+      <b>数学の問題の上にゲーム性の層を乗せただけの仮想例</b>――足し算を解くとカエルが次の蓮の葉に進む――を挙げ、
+      そこにはゲームメカニクスと数学内容の間に本質的な関係がないと指摘している。
+    </p>
+    <p>
+      これは<b>Prodigyの正確な記述であり、同時に本プロジェクトのチャレンジバトルへの警告</b>でもある。
+      いまのチャレンジは「その人物にまつわる知識を問う」のでガワと中身が一致しているが、
+      報酬系を作り込むほどカエルと蓮の葉に近づく力が働く。ここは測って守るべき境界。
+    </p>
+    <p>
+      もうひとつ。<b>JiJiは説明せず、ただ渡る。</b>
+      本プロジェクトの英雄は解説を語る役だが、無説明の初回起動（決定1）と組み合わせるなら、
+      最初の数問だけは英雄を黙らせる選択もありうる。
+    </p>
+  </div>
+
+  <p class="unknown">
+    <b>確認できていないこと</b>：報酬らしい報酬（点・コイン・収集物）を持たないまま、
+    家庭での自発的な継続率がどうなるか。学校導入が前提のため、
+    自発性のデータは公開情報からは分離できなかった。
+  </p>
+</article>
+
+
+<!-- ============ Duolingo ============ -->
+<article class="svc">
+  <div class="svc-head">
+    <span class="svc-name">Duolingo</span>
+    <span class="svc-kind">米国 ・ 全年齢 ・ 語学 ・ 無料＋課金</span>
+  </div>
+  <p class="svc-verdict">
+    物語を持たない代わりに、習慣そのものを物語にした。
+    ただし翻弄が内側からでなく外圧から来ているため、副作用が観測されている。
+  </p>
+
+  <div class="band">
+    <div class="cycle"><span class="step c1">仮説</span><span class="arw c1">▶</span><span class="step c1">試行</span><span class="arw c1">▶</span><span class="step c1">歓喜</span></div>
+    <p>
+      摩擦をほぼゼロにする設計。1タップで開始でき、1レッスンが3分に収まる。
+      正解と完了の瞬間に音とアニメーションを厚く投資し、微小な勝利を大きく感じさせる。
+      新規利用者が数分以内に最初の「できた」に到達することを設計目標に置いている。
+    </p>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c2">誤解</span><span class="arw c2">▶</span><span class="step c2">試行</span><span class="arw c2">▶</span><span class="step c2">驚愕</span></div>
+    <p>
+      驚きは<b>報酬の変動性</b>で作っている。ボーナスXP、宝箱、コンボ。
+      次に何が来るか分からないことが継続を生む、という設計が公然と語られている。
+      これは玉樹の分類でいえば「射幸心と偶然」のモチーフそのもの。
+    </p>
+    <div class="taboo"><span>射幸心と偶然</span><span>損得</span><span>承認</span><span>プライベート</span></div>
+  </div>
+
+  <div class="band">
+    <div class="cycle"><span class="step c3">翻弄</span><span class="arw c3">▶</span><span class="step c3">成長</span><span class="arw c3">▶</span><span class="step c3">意志</span></div>
+    <p>
+      ストリークは損失回避を利用する。積み上げたものを失う痛みが毎日の起動を駆動し、
+      日数が伸びるほど失う怖さも増える。リーグは週ごとの競争で、上位は昇格し下位は降格する。
+    </p>
+    <p>
+      ただしここに歪みが出ている。arXivの質的研究は、
+      <b>日々の学習目標をすべて達成した利用者ですらリーグの設計によって罰されうる</b>と指摘し、
+      これをダークナッジと呼ぶ利用者の声を報告している。
+      別の事例研究でも、ライフ制が学習を途中で断ち切り、
+      リーグの競争が本来の学習目標から注意を逸らすと観察されている。
+    </p>
+  </div>
+
+  <div class="takeaway">
+    <h4>本プロジェクトへの示唆</h4>
+    <p>
+      Duolingoは<b>翻弄を外圧で作った</b>。締切、順位、失う恐怖。
+      本プロジェクトは翻弄を内容で作っている――習っていない単元、同い年の海外の問題。
+      <b>どちらも翻弄だが、後者は途切れても罪悪感を生まない。</b>
+      カレンダーを記録装置に留めた判断は、ここに照らして正しい。
+    </p>
+    <p>
+      一方で学ぶべき点もある。<b>失敗への寛容を最初から組み込む</b>という設計原則。
+      ストリークにフリーズや修復を用意し、悪い一日が数か月を吹き飛ばさないようにする。
+      本プロジェクトなら、チャレンジに負けても知識カードが残る仕組みが同じ役割を果たす。
+    </p>
+  </div>
+
+  <p class="unknown">
+    <b>確認できていないこと</b>：ゲーミフィケーションが<b>学習成果</b>に与える影響。
+    公開されている数字はリテンションと継続率にほぼ集中しており、
+    習熟度との関係を検証した独立研究は今回の調査範囲では見つからなかった。
+  </p>
+</article>
+
+
+<!-- ============ 横断 ============ -->
+<section class="finding" style="margin-top:60px;padding-top:32px;border-top:2px solid var(--ink)">
+  <h2>横断して見えたこと</h2>
+
+  <div class="finding">
+    <h3>1. 分かれ目は「歓喜がどこにあるか」</h3>
+    <p class="lead">解けたこと自体が歓喜か、解いた後にもらえるものが歓喜か。</p>
+    <p>
+      Eduten・DragonBox・ST Mathは前者、Prodigyは後者、Duolingoはその中間に立って
+      両方から引っ張っている。三層のどれを回すかより、この一点のほうが結果を分けている。
+    </p>
+    <p>
+      本プロジェクトの魔石・GUM・クリスタルは、放っておくと後者に寄る。
+      <b>正解した瞬間に何が画面の主役になっているか</b>で判定できる。
+    </p>
+  </div>
+
+  <div class="finding">
+    <h3>2. 物語が強いサービスほど、学習から離れている</h3>
+    <p>
+      一望の表で、物語が●●●なのはProdigyとDuolingoの2つ。
+      どちらも学習成果への疑義が出ている側でもある。相関であって因果ではないが、
+      <b>物語を太らせる作業は、学習から離れる方向への引力を持つ</b>と考えて設計したほうがいい。
+    </p>
+    <p>
+      本プロジェクトは英雄という強い物語装置を最初から持っている。
+      だからこそ、英雄が「解説する役」であり続けること――
+      つまり物語装置が学習内容の運び手であること――が生命線になる。
+    </p>
+  </div>
+
+  <div class="finding">
+    <h3>3. 「意志」を実装できているサービスは無かった</h3>
+    <p>
+      翻弄と成長はどのサービスにもあるが、
+      <b>プレイヤー自身の意志で運命を切り開く段は、5つのいずれにも見当たらない。</b>
+      Duolingoの言語選択とリーグ参加の可否が最も近いが、これは設定であって意志ではない。
+    </p>
+    <p>
+      裏を返せば、ここは既存サービスが手をつけていない空白でもある。
+      本プロジェクトの未設計領域と一致している。
+    </p>
+  </div>
+</section>
+
+<div class="warnbox">
+  <h3>報酬系の設計に入る前に決めるべき一線</h3>
+  <p>
+    ST Mathの資料が挙げた仮想例――足し算を解くとカエルが次の蓮の葉に進む――は、
+    ゲームメカニクスと学習内容に本質的な関係がない設計の名前である。
+  </p>
+  <p>
+    魔石をクリスタルに一本化する案が有効なのは、単に要素が減るからではない。
+    <b>魔石は中身のないトークンだが、クリスタルには鉱物の知識が入っている。</b>
+    素材を得ることが知識を得ることになる。カエルと蓮の葉から一歩離れる。
+  </p>
+  <p style="margin-bottom:0">
+    エクステンションのクラフトと装備には、まだこの回路がない。
+    ここを通すか、通せないなら削るか。<b>それが次の判断だと思う。</b>
+  </p>
+</div>
+
+
+<!-- ============ 出典 ============ -->
+<section class="sources">
+  <h2>出典</h2>
+  <ul>
+    <li>Fairplay for Kids「7 reasons to say no to Prodigy」 fairplayforkids.org/pf/prodigy/</li>
+    <li>NBC News「Child protection nonprofit alleges 'manipulative' upselling with math game Prodigy」 2021</li>
+    <li>Trustpilot / Change.org 上のProdigy利用者レビューおよび署名</li>
+    <li>University of Turku 各リリース、Eduten「About Eduten」 eduten.com/about.html</li>
+    <li>Teach Middle East「Digital Math Study by University of Turku, GEMS Education, and Eduten」</li>
+    <li>HundrED「Eduten Playground」 hundred.org/en/innovations/eduten-playground</li>
+    <li>WeWantToKnow / DragonBox 公式解説、Google Play「Kahoot! Algebra by DragonBox」</li>
+    <li>ICLS 2023「An Analysis of the Design and Pedagogy of DragonBox」 repository.isls.org</li>
+    <li>MIND Education「Spatial-Temporal Math: Underlying Scientific Concepts and Mechanisms」（カエルと蓮の葉の図はここ）</li>
+    <li>MIND Education「The Neuroscience of Deeper Learning with ST Math」、ST Math Academy「JiJi, The Penguin」</li>
+    <li>arXiv:2203.16175「When Gamification Spoils Your Learning: A Qualitative Case」（Duolingoのダークナッジ）</li>
+    <li>Duolingo のゲーミフィケーション設計に関する複数の事例研究記事</li>
+  </ul>
+  <p style="margin-top:18px;color:var(--ink-thin)">
+    各社の内部設計値・非公開の指標は含まない。三層への割り当ては、
+    公開情報から読み取れる外形にもとづくこの資料の解釈であり、各社の主張ではない。
+  </p>
+</section>
+
+</div>
+</body>
+</html>

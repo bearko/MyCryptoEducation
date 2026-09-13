@@ -146,35 +146,92 @@ export const RANGE_BONUS_SCORE = 800;
 
 /* ---- チャレンジバトル ---- */
 
+/**
+ * **難度係数。** レアリティは体力ではなく「関連分野を何割埋めれば届くか」を表す。
+ * Legendary は関連分野をまるごと、Common はその4割で届く。
+ */
+export const DIFFICULTY = { Common: 0.4, Uncommon: 0.55, Rare: 0.7, Epic: 0.85, Legendary: 1 };
+export const difficultyFactor = hero => DIFFICULTY[hero?.rarity] ?? 0.7;
+
+/* 基礎の内訳。直結カードのほうを重く見る */
+export const W_DIRECT = 0.6;
+export const W_RELATED = 0.4;
+
+/**
+ * 装備は「基礎を何倍にするか」でしか効かない。
+ * Common(gauge 10) で +2.5%、Legendary(gauge 60) で +15%。得意分野と噛み合えば2倍。
+ * 合計は ×2 で頭打ち——**装備は持っている知識を最大で倍にするところまで**（原則1）。
+ */
+export const GEAR_UNIT = 400;
+export const GEAR_MAX = 2;
+
+/* 知識カード名の総当たり表。応用は同じカードの別形なので数えない */
+function basePool(db) {
+  if (db.__basePool) return db.__basePool;
+  const bySubject = {};
+  const all = [];
+  Object.entries(db.cardSubject).forEach(([card, subject]) => {
+    if (card.endsWith("（応用）")) return;
+    all.push(card);
+    (bySubject[subject] = bySubject[subject] || []).push(card);
+  });
+  return (db.__basePool = { all, bySubject });
+}
+
+/* 応用ぶんを剥がして、素の知識カード名の集合にする */
+function ownedBase(state) {
+  const set = new Set();
+  Object.keys(state.cards).forEach(c => set.add(c.replace("（応用）", "")));
+  return set;
+}
+
+/**
+ * 難易度ゲージ＝その英雄への**到達度**。
+ *
+ * ```
+ * 基礎   = 直結カードの網羅率 × 0.6 ＋ 関連分野の網羅率 × 0.4
+ * 到達度 = min(1, 基礎 × 装備倍率 ÷ 難度係数)
+ * ```
+ *
+ * **総量ではなく網羅率で測る。** 総量は問題数に比例して青天井に増えるので、
+ * DBを育てるほど飽和が早まる——480問の時点で全英雄が100%に張り付いていた。
+ * 割合なら4800問でも壊れない。
+ *
+ * この形なら `gearCap`（装備は知識を超えないという後付けの上限）も要らない。
+ * **知識がゼロなら基礎が0で、装備を何個積んでも0のまま。** 原則1が構造として保証される。
+ * 詳しくは docs/reward-economy.md。
+ */
 export function gaugeBreakdown(db, state, hero) {
-  const rows = [];
-  let damage = 0;
-  if (!hero.rel) return { damage: 0, hp: hero.hp || 60, rows };
+  const factor = difficultyFactor(hero);
+  const empty = {
+    reach: 0, percent: 0, base: 0, gear: 1, factor,
+    direct: { have: 0, total: 0, rate: 0 }, related: { have: 0, total: 0, rate: 0 }, rows: [],
+  };
+  if (!hero.rel) return empty;
 
-  const stripApplied = c => c.replace("（応用）", "");
-  const owned = Object.keys(state.cards);
+  const pool = basePool(db);
+  const owned = ownedBase(state);
+  const rel = new Set(hero.rel.cards);
 
-  const direct = owned.filter(c => hero.rel.cards.includes(stripApplied(c)));
-  if (direct.length) {
-    const v = direct.length * 8;
-    damage += v;
-    rows.push({ label: `直結する知識カード ${direct.length}枚`, value: v, detail: direct.join(" / ") });
-  }
+  const directList = hero.rel.cards.filter(c => owned.has(c));
+  const direct = {
+    have: directList.length, total: hero.rel.cards.length,
+    rate: hero.rel.cards.length ? directList.length / hero.rel.cards.length : 0,
+  };
 
-  const related = owned.filter(c =>
-    !hero.rel.cards.includes(stripApplied(c)) &&
-    db.cardSubject[c] && hero.rel.subjects.includes(db.cardSubject[c]));
-  if (related.length) {
-    const v = related.length * 4;
-    damage += v;
-    rows.push({ label: `関連分野の知識カード ${related.length}枚`, value: v, detail: hero.rel.subjects.join("・") });
-  }
+  const relatedPool = hero.rel.subjects
+    .flatMap(s => pool.bySubject[s] || []).filter(c => !rel.has(c));
+  const relatedHave = relatedPool.filter(c => owned.has(c)).length;
+  const related = {
+    have: relatedHave, total: relatedPool.length,
+    rate: relatedPool.length ? relatedHave / relatedPool.length : 0,
+  };
 
-  // ここまでが知識カードぶん。装備はこれを超えられない（原則1）
-  const fromCards = damage;
+  const base = direct.rate * W_DIRECT + related.rate * W_RELATED;
 
-  let fromGear = 0;
+  /* 装備は倍率として効く。噛み合っていれば2倍 */
   const gearRows = [];
+  let weight = 0;
   Object.entries(state.equip).forEach(([heroId, extKey]) => {
     if (!extKey || !state.owned[heroId]) return;
     const ext = db.extensions[extKey];
@@ -182,41 +239,47 @@ export function gaugeBreakdown(db, state, hero) {
     if (!ext || !owner) return;
     if (!ext.subs.some(s => hero.rel.subjects.includes(s))) return;
     const aligned = ext.subs.some(s => owner.fit.includes(s));
-    const v = (ext.gauge || 10) * (aligned ? 2 : 1);
-    fromGear += v;
-    gearRows.push({
-      label: `${ext.name}（${owner.name}）`, value: v,
-      detail: aligned ? "得意分野と噛み合っている" : "装備効果",
-    });
+    const w = (ext.gauge || 10) / GEAR_UNIT * (aligned ? 2 : 1);
+    weight += w;
+    gearRows.push({ ext, owner, aligned, w });
+  });
+  /* ×2 が頭打ち。超えたぶんは各装備に比例して薄める */
+  const scale = weight > GEAR_MAX - 1 ? (GEAR_MAX - 1) / weight : 1;
+  const gear = 1 + weight * scale;
+
+  const uncapped = factor ? base * gear / factor : 0;
+  const reach = Math.min(1, uncapped);
+
+  /* 内訳は「到達度を何ポイント押し上げたか」で出す（原則1） */
+  const pts = x => Math.round(x / factor * 100);
+  const rows = [];
+  if (direct.have) rows.push({
+    label: `直結する知識カード ${direct.have}/${direct.total}枚`,
+    value: pts(direct.rate * W_DIRECT * gear),
+    detail: directList.join(" / "),
+  });
+  if (related.have) rows.push({
+    label: `関連分野の知識カード ${related.have}/${related.total}枚`,
+    value: pts(related.rate * W_RELATED * gear),
+    detail: hero.rel.subjects.join("・"),
+  });
+  gearRows.forEach(g => rows.push({
+    label: `${g.ext.name}（${g.owner.name}）`,
+    value: pts(base * g.w * scale),
+    detail: g.aligned ? "得意分野と噛み合っている ・ 効果2倍" : "関連分野を広げる",
+  }));
+  if (uncapped > 1) rows.push({
+    label: "ここから先は挑めば分かる",
+    value: -Math.round((uncapped - 1) * 100),
+    detail: "到達度は100%で止まります",
   });
 
-  /**
-   * **装備の合計は、知識カードの合計を超えない。**
-   *
-   * 装備は「どの知識が関連としてカウントされるか」を広げる触媒であって、
-   * それ自体が強さの源ではない（原則1）。上限を置かないと、装備を増やすほど
-   * ゲージが削れる状態になり、成長実感が知識から素材へ移ってしまう。
-   * 知識が0なら装備も0。持っている知識を、装備は最大で倍にするところまで。
-   */
-  const gearCap = Math.min(fromGear, fromCards);
-  rows.push(...gearRows);
-  if (fromGear > gearCap) {
-    rows.push({
-      label: "装備は知識を超えない",
-      value: -(fromGear - gearCap),
-      detail: `装備の合計は知識カードの合計（${fromCards}）までです`,
-    });
-  }
-  damage += gearCap;
-
-  const hp = hero.hp || 60;
-  return { damage: Math.min(hp, damage), hp, raw: damage, rows };
+  return { reach, percent: Math.round(reach * 100), base, gear, factor, direct, related, rows };
 }
 
-/* 削れた割合から出題段階を決める。0 = 最も深い、3 = 義務教育レベル */
-export function challengeStage(damage, hp) {
-  const r = damage / (hp || 100);
-  return r >= 1 ? 3 : r >= 0.67 ? 2 : r >= 0.34 ? 1 : 0;
+/* 到達度から出題段階を決める。0 = 最も深い、3 = 義務教育レベル */
+export function challengeStage(reach) {
+  return reach >= 1 ? 3 : reach >= 0.67 ? 2 : reach >= 0.34 ? 1 : 0;
 }
 
 /**
@@ -357,7 +420,7 @@ export function adviceFor(db, state) {
 
   const next = nextHero(db, state);
   const gauge = next && next.rel ? gaugeBreakdown(db, state, next) : null;
-  const percent = gauge ? Math.round(gauge.damage / gauge.hp * 100) : 0;
+  const percent = gauge ? gauge.percent : 0;
   const craftable = craftableKeys(db, state);
   const blanks = blankSubjects(db, state);
   const extCount = Object.values(state.exts).reduce((a, b) => a + b, 0);

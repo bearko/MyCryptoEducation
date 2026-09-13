@@ -183,6 +183,22 @@
   .eqi{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);
     font:inherit;font-size:13.5px;padding:9px 12px;border-radius:3px;cursor:pointer;text-align:left;color:var(--ink-soft)}
   .eqi.on{border-color:var(--moss);color:var(--moss);background:#F0F5F1}
+  /* 装備を選ぶそばで、対象英雄への到達度が動くのが見える（docs/reward-economy.md §2）*/
+  .eqi em{margin-left:auto;font-style:normal;font-size:12px;color:var(--ink-faint);
+    font-variant-numeric:tabular-nums}
+  .eqi em.up{color:var(--moss);font-weight:600}
+  .reach{border:1px solid var(--line);border-radius:3px;padding:10px 12px;margin-bottom:12px;
+    background:var(--paper)}
+  .reach select{font:inherit;font-size:12.5px;color:var(--ink-soft);background:transparent;
+    border:0;border-bottom:1px solid var(--line);padding:2px 0;max-width:100%}
+  .rnum{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:8px}
+  .rnum span{font-size:12px;color:var(--ink-faint)}
+  .rnum b{font-size:16px;font-variant-numeric:tabular-nums}
+  .rnum b.up{color:var(--moss)}
+  .rbar{position:relative;height:6px;margin-top:6px;background:var(--line);border-radius:3px;
+    overflow:hidden}
+  .rbar i{position:absolute;inset:0 auto 0 0;background:var(--ink-soft)}
+  .rbar u{position:absolute;top:0;bottom:0;background:var(--moss)}
 
   .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:14px}
   .ccard{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:10px 6px;
@@ -436,6 +452,7 @@
   .trow .tg{display:block;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
   .trow .tg i{display:block;height:100%;background:linear-gradient(90deg,var(--pen),#E08A5F)}
   .trow .tp{font-size:12px;color:var(--ink-soft)}
+  .trow .tf{margin-left:7px;font-size:11px;color:var(--ink-faint)}
   .trow .ts{font-size:11px;color:var(--ink-faint);line-height:1.5}
 
   /* --- カレンダー。記録装置なので、連続日数の演出は一切置かない --- */
