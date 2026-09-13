@@ -361,6 +361,32 @@ check("盤面は描き直しても変わらない", ev(`(() => {
   const q = DB.byId["${pan.id}"];
   return String(JSON.stringify(panelLayout(q.reading, q.id)) === JSON.stringify(q.panel));
 })()`) === "true");
+// 実機でつまずいた2点。タッチのポインタは押したマスに暗黙でキャプチャされる
+ev(`(() => { S.run.i = 0; S.run.picked = null; S.run.results = {}; render(); })()`);
+const cap = ev(`(() => {
+  const b = document.querySelector('.pcell');
+  let released = false;
+  b.hasPointerCapture = () => true;
+  b.releasePointerCapture = () => { released = true; };
+  b.onpointerdown({ preventDefault() {}, pointerId: 1 });
+  return String(released);
+})()`);
+check("押したマスのキャプチャを放す（放さないと1文字目しか反応しない）", cap === "true", cap);
+
+// 指を離す監視を once にすると、最初のタップで外れて以降のなぞりが死ぬ
+ev(`(() => { S.run.picked = null; render(); })()`);
+d.dispatchEvent(new w.Event("pointerup"));
+const p2 = JSON.parse(ev(`JSON.stringify(DB.byId[S.run.ids[0]].panel.path)`));
+ev(`(() => {
+  const cells = [...document.querySelectorAll('.pcell')];
+  cells[${p2[0]}].onpointerdown({ preventDefault() {}, pointerId: 2 });
+  ${p2.slice(1).map(i => `cells[${i}].onpointerenter();`).join("")}
+})()`);
+d.dispatchEvent(new w.Event("pointerup"));
+await wait(40);
+check("タップのあとでも、なぞりが確定する", ev("S.run.picked") !== null,
+  String(ev("S.run.picked")));
+
 check("読みが長すぎるとパネルにしない",
   ev(`String(panelLayout("じゅうしちじょうのけんぽう", "x") === null)`) === "true");
 
