@@ -585,3 +585,21 @@
     background:#FDF7F5}
   .retry .rhead{font-family:var(--mincho);font-size:15px;color:var(--ink)}
   .retry .racts{display:flex;gap:16px;margin-top:8px;font-size:13px}
+
+  /* 文字パネル。なぞって読みを作る。文字数の枠も1文字目のマークも出さない（決定4） */
+  .panelbox{margin-top:14px}
+  .panelword{min-height:50px;display:flex;align-items:center;justify-content:center;
+    padding:8px 14px;border:1.5px solid var(--ink);border-radius:8px;background:var(--card)}
+  .panelword span{font-family:var(--mincho);font-size:26px;color:var(--ink);letter-spacing:.08em}
+  .panelword span.ph{font-family:var(--gothic);font-size:13px;color:var(--ink-faint);letter-spacing:0}
+  .panelwrap{position:relative;margin:12px 0}
+  .panelgrid{display:grid;gap:7px}
+  .pcell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mincho);font-size:23px;color:var(--ink);background:var(--card);
+    border:1px solid var(--line);border-radius:8px;cursor:pointer;touch-action:none;
+    user-select:none;-webkit-user-select:none}
+  .pcell.on{border-color:var(--pen);color:var(--pen);background:#FDF3F1}
+  .pcell:disabled{opacity:.5}
+  .panelline{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+  .panelline polyline{fill:none;stroke:var(--pen);stroke-width:1.1;stroke-opacity:.55;
+    stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}

@@ -1,6 +1,7 @@
 /* data/ 以下のJSONを読み込んで、参照しやすい形に組み立てる */
 
 import { answerMode, normalizeHints } from "./answer-mode.js";
+import { panelLayout } from "./engine.js";
 
 const SUBJECT_FILES = ["kokugo", "sansu", "rika", "shakai", "gaikokugo", "joho"];
 
@@ -38,6 +39,11 @@ function index(raw) {
   db.questions.forEach(q => {
     q.hints = normalizeHints(q.hints || []);
     q.mode = answerMode(q);
+    // 盤面もここで1度だけ作る。引けなければ消去法へ落とす（決定4のフォールバック）
+    if (q.mode === "panel") {
+      q.panel = panelLayout(q.reading, q.id);
+      if (!q.panel) q.mode = "elimination";
+    }
   });
   db.byId = Object.fromEntries(db.questions.map(q => [q.id, q]));
   db.heroById = Object.fromEntries(db.heroes.map(h => [h.id, h]));
