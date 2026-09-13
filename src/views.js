@@ -391,7 +391,7 @@ function startRun(opts = {}) {
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             gems: {}, right: 0, wrong: 0, appliedRight: 0,
             shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
-            gum: 0, results: {}, noReward: !!opts.noReward, done: false };
+            gum: 0, results: {}, noReward: !!opts.noReward, done: false, hard: {} };
   go("quiz");
 }
 
@@ -441,6 +441,7 @@ const photoAt = (q, where) => (q.image && (q.imageAt || "lesson") === where)
 function vQuiz() {
   if (S.run.i >= S.run.ids.length) return go("result");
   const q = currentQ(), h = heroFor(q), fit = fitOf(q, h);
+  const mode = modeOf(q);
   const place = q.country ? `<b>${esc(q.country)}</b>` : `日本 <b>${esc(q.gradeLabel)}</b>`;
 
   app.innerHTML = `
@@ -466,8 +467,12 @@ function vQuiz() {
         <button class="btn" id="rsubmit" disabled>この幅で答える</button>
         <p class="fine">狭く答えるほど高い点になります。紀元前はマイナスで書いてください（例 −221）。</p>
       </div>`
-    : `<div class="choices">${q.choices.map((t, i) =>
-      `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>`}
+    : `${mode === "elimination"
+        ? `<div class="elimtop" id="elimleft">違うものを${q.choices.length - 1}つ消す</div>` : ""}
+      <div class="choices${mode === "elimination" ? " elim" : ""}">${q.choices.map((t, i) =>
+      `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
+      ${mode === "elimination" ? `<div class="elimbar">
+        <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
     <div class="hero-row">
       <img class="ava" src="${assetPath.hero(h.id)}" alt="">
       <div><div class="hero-name">${esc(h.name)}</div>
@@ -478,7 +483,8 @@ function vQuiz() {
   </div>`;
 
   document.getElementById("hint").onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
-  app.querySelectorAll(".choices > .choice").forEach(b =>
+  if (mode === "elimination") wireElimination(q);
+  else app.querySelectorAll(".choices > .choice").forEach(b =>
     b.onclick = () => onPick(Number(b.dataset.i)));
   if (q.format === "range") wireRange(q);
   drawHints(q, h);
@@ -549,8 +555,12 @@ function onRange(q) {
  * プレイヤーが4択へ降りたら `S.run.hard[id]` に "choice" が入り、
  * その問題のあいだだけ選択肢の側に固定される（決定2・不可逆は1問かぎり）。
  */
+const READY_MODES = new Set(["elimination", "range", "choice"]);
+
 function modeOf(q) {
-  return S.run.hard?.[q.id] || (q.format === "range" ? "range" : "choice");
+  const dropped = S.run.hard?.[q.id];
+  if (dropped) return dropped;
+  return READY_MODES.has(q.mode) ? q.mode : "choice";
 }
 
 function drawHints(q, h) {
@@ -625,9 +635,40 @@ function grantAnswer(q, ok, bonusGem = 0) {
   return { gained, gum };
 }
 
-function onPick(idx) {
+
+/**
+ * 消去法。正解を選ぶのではなく、違うものを潰していく。
+ *
+ * 誤って正解を消したらそこで終わり（不正解）。ダミー選択肢が初めて働く。
+ * 4択へ降りるかどうかは常にプレイヤーの手にあり、システムは勝手に降ろさない
+ * （原則3・決定2）。降りてもその問題かぎりで、次の問題ではまた難モードから始まる。
+ */
+function wireElimination(q) {
+  const gone = new Set();
+  const left = document.getElementById("elimleft");
+  app.querySelectorAll(".choices > .choice").forEach(b => {
+    b.onclick = () => {
+      if (S.run.picked !== null) return;
+      const i = Number(b.dataset.i);
+      if (gone.has(i)) return;
+      if (i === q.answer) return onPick(i, false);   // 正解を消してしまった
+      gone.add(i);
+      b.classList.add("gone");
+      b.disabled = true;
+      const rest = q.choices.length - 1 - gone.size;
+      if (rest === 0) return onPick(q.answer, true);  // 残った1つが答え
+      if (left) left.textContent = `あと${rest}つ`;
+    };
+  });
+  const down = document.getElementById("tochoice");
+  if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
+}
+
+function onPick(idx, forcedOk = null) {
   if (S.run.picked !== null) return;
-  const q = currentQ(), h = heroFor(q), ok = idx === q.answer;
+  const q = currentQ(), h = heroFor(q);
+  // 消去法は「正解を選んだか」では決まらないので、呼ぶ側が結果を渡す
+  const ok = forcedOk === null ? idx === q.answer : forcedOk;
   S.run.picked = idx;
   if (!S.run.noReward) S.seen[q.id] = 1;
 
