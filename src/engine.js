@@ -141,7 +141,7 @@ export function scoreRange(a, b, year, width) {
   return Math.max(50, Math.round(1000 * (1 - (hi - lo) / width)));
 }
 
-/* 高い精度で当てたときだけ、魔石がもう1つ落ちる。運の要素は無い */
+/* 幅を狭く言い切って当てたときだけ、クリスタルの抽選がもう1回 */
 export const RANGE_BONUS_SCORE = 800;
 
 /* ---- チャレンジバトル ---- */
@@ -413,11 +413,7 @@ export const familyPoints = (state, family) =>
  */
 export function craftCheck(db, state, id) {
   const e = db.extensions?.[id];
-  if (!e) return { ok: false, gems: [], crystals: [], below: null, cards: null };
-
-  const gems = Object.entries(e.cost || {}).map(([g, need]) => ({
-    gem: g, need, have: state.gems[g] || 0, ok: (state.gems[g] || 0) >= need,
-  }));
+  if (!e) return { ok: false, crystals: [], below: null, cards: null };
 
   /**
    * **クリスタルは族ごとのポイントで要求する。**（「石英120pt」のように）
@@ -443,9 +439,9 @@ export function craftCheck(db, state, id) {
         ok: Object.keys(state.cards || {}).length >= e.cards }
     : null;
 
-  const ok = gems.every(g => g.ok) && crystals.every(c => c.enough)
+  const ok = crystals.every(c => c.enough)
           && (!below || below.ok) && (!cards || cards.ok);
-  return { ok, gems, crystals, below, cards };
+  return { ok, crystals, below, cards };
 }
 
 /* いま作れるエクステンションのキー。
@@ -495,9 +491,9 @@ export function adviceFor(db, state) {
   const blanks = blankSubjects(db, state);
   const extCount = Object.values(state.exts).reduce((a, b) => a + b, 0);
   const equipped = Object.values(state.equip).filter(Boolean).length;
-  const emptyGem = Object.keys(db.gems).find(g => !state.gems[g]);
-  const gemSubject = emptyGem
-    ? Object.entries(db.subjectToGem).find(([, g]) => g === emptyGem)?.[0] : null;
+  // まだ1ptも貯まっていない族があれば、その教科を勧める
+  const emptyFamily = (db.families || []).find(f => !(state.points || {})[f]);
+  const thinSubject = emptyFamily ? db.familyToSubject?.[emptyFamily] : null;
 
   const test = {
     firstVisit:     () => state.runs === 0,
@@ -506,14 +502,15 @@ export function adviceFor(db, state) {
     craftable:      () => craftable.length > 0,
     blankSubject:   () => blanks.length > 0,
     unequipped:     () => extCount > 0 && equipped === 0,
-    gemShortage:    () => state.runs > 0 && !!gemSubject,
+    thinFamily:     () => state.runs > 0 && !!thinSubject,
   };
 
   const fill = t => t
     .replace("{hero}", next ? next.name : "")
     .replace("{percent}", String(percent))
     .replace("{count}", String(craftable.length))
-    .replace("{subject}", blanks[0] || gemSubject || "");
+    .replace("{subject}", blanks[0] || thinSubject || "")
+    .replace("{family}", emptyFamily || "");
 
   for (const rule of advice.rules || []) {
     if (test[rule.when]?.()) return fill(rule.text);

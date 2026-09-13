@@ -21,7 +21,7 @@ await p.waitForTimeout(500);
 
 const setup = async () => p.evaluate(`(() => {
   const q = DB.questions.find(x => x.mode === "panel" && x.panel.size === 3);
-  S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, gems: {},
+  S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, found: [],
             right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
             noReward: true, done: false, hard: {} };
   S.view = "quiz"; render();
@@ -76,7 +76,7 @@ const sweep = async wobble => {
     const q = await p.evaluate(`(() => {
       const x = DB.byId["${id}"];
       S.run = { ids: [x.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-                gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
+                right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
                 noReward: true, done: false, hard: {} };
       S.view = "quiz"; render(); window.scrollTo(0, 0);
       return { reading: x.reading, path: x.panel.path };

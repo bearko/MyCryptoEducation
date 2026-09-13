@@ -15,20 +15,19 @@ export async function loadDatabase(base = "./data") {
   // ビルド済み単一ファイルの場合は、あらかじめ埋め込まれたものを使う
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
-  const [questionSets, figures, heroes, extensions, gemstones,
+  const [questionSets, figures, heroes, extensions,
          advice, titles, crystals, images] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
     json(`${base}/extensions.json`),
-    json(`${base}/gemstones.json`),
     json(`${base}/advice.json`),
     json(`${base}/titles.json`),
     json(`${base}/crystals.json`),
     json(`${base}/images.json`),
   ]);
   return index({ questions: questionSets.flat(), figures, heroes, extensions,
-                 gemstones, advice, titles, crystals, images });
+                 advice, titles, crystals, images });
 }
 
 function index(raw) {
@@ -47,10 +46,8 @@ function index(raw) {
   });
   db.byId = Object.fromEntries(db.questions.map(q => [q.id, q]));
   db.heroById = Object.fromEntries(db.heroes.map(h => [h.id, h]));
-  db.gems = db.gemstones.gems;
   db.crystalById = Object.fromEntries((db.crystals?.crystals || []).map(c => [c.id, c]));
   db.photos = db.images?.images || {};
-  db.subjectToGem = db.gemstones.subjectToGem;
   // 教科 ↔ 族。クラフトの要求先と、どの教科を解けばその族が貯まるかを結ぶ
   db.families = db.crystals?.families || [];
   db.subjectToFamily = db.crystals?.subjectToFamily || {};
@@ -70,7 +67,6 @@ function index(raw) {
    背景だけは埋め込み用に縮小したコピー（public/backgrounds/small）が入る */
 export const assetPath = {
   hero: id => globalThis.__ASSETS__?.["h" + id] ?? `./public/heroes/${id}.webp`,
-  gem:  id => globalThis.__ASSETS__?.["g" + id] ?? `./public/materials/gemstones/${id}.webp`,
   bg:   id => globalThis.__ASSETS__?.["b" + id] ?? `./public/backgrounds/${id}.webp`,
   icon: name => globalThis.__ASSETS__?.["i" + name] ?? `./public/icons/${name}.webp`,
   ext:  id => globalThis.__ASSETS__?.["e" + id] ?? `./public/extensions/${id}.webp`,

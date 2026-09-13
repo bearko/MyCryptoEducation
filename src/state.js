@@ -10,7 +10,7 @@ export function capName(name) {
 }
 
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
-const PERSISTED = ["settings", "profile", "gum", "gems", "exts", "equip",
+const PERSISTED = ["settings", "profile", "gum", "points", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score", "days",
                    "totalRight", "crossRight", "countries", "crystals"];
 
@@ -29,7 +29,6 @@ function defaults() {
     profile: { name: "旅人", title: null, icon: "10001" },
     gum: 0,
 
-    gems: { ifrit: 0, levia: 0, tiamat: 0, garuda: 0 },
     exts: {},
     equip: {},
     owned: { "10001": 1, "10002": 1, "10003": 1 },
@@ -55,7 +54,7 @@ function defaults() {
     // hard は問題IDごとの難モードの状態。4択に降りたら "choice" が入る。
     // 降りるかどうかは毎問プレイヤーが決める（決定2）。前の問題を引き継がない
     run: { ids: [], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-           gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [],
+           right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [],
            results: {}, noReward: false, done: false, hard: {} },
 
     // チャレンジ。3問構成で、qi が何問目か、results が各問の正誤

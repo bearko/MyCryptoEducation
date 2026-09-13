@@ -32,12 +32,11 @@ const EXTENSIONS = [
   "1032", "2032", "3032", "4032", "5032",   // センス
   "1008", "2008", "3008", "4008", "5008",   // ブック
 ];
-const GEMSTONES = ["315", "325", "335", "345"];
 
 /* 上限サイズ。withoutEnlargement なので、これより小さい原本はそのまま通る。
    MCH の英雄・エクステンション画像は原本が 64x64 なので、実際には拡大されない。
    ホームの主役層で Rep. を出すときは、この解像度を前提に表示サイズを決めること */
-const SIZE = { hero: 128, ext: 128, icon: 128, bg: 1080, gem: 72 };
+const SIZE = { hero: 128, ext: 128, icon: 128, bg: 1080 };
 
 /* 単一ファイル版（dist/index.html）に data URI で畳む用の縮小コピー。
    1080px のまま base64 にすると1枚で数百KBになり、配布ファイルが実用外の大きさになる */
@@ -81,9 +80,5 @@ for (const id of BACKGROUNDS) {
 await mkdir(join(ROOT, "public/icons"), { recursive: true });
 for (const name of ICONS)
   await count(`${RAW}/Image/Icons/${name}.png`, `public/icons/${name}.webp`, SIZE.icon);
-
-await mkdir(join(ROOT, "public/materials/gemstones"), { recursive: true });
-for (const id of GEMSTONES)
-  await count(`${RAW}/Image/Materials/Gemstones/${id}.webp`, `public/materials/gemstones/${id}.webp`, SIZE.gem);
 
 console.log(`${n}点を取得しました`);

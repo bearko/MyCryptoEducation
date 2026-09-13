@@ -51,12 +51,10 @@
   .phead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
   .phead .sub{font-size:11.5px;color:var(--ink-faint)}
 
-  .gemrow{display:flex;gap:14px;flex-wrap:wrap}
-  .gem{display:flex;align-items:center;gap:5px;font-size:13px}
-  .gem img{width:26px;height:26px}
-  .gemrow.big .gem img{width:38px;height:38px}
-  .gemrow.big .gem{font-size:15px;font-family:var(--mincho)}
-  .gem b{font-weight:600;color:var(--ink)}
+  .gumbig{display:flex;align-items:center;gap:7px}
+  .gumbig img{width:34px;height:34px}
+  .gumbig b{font-family:var(--mincho);font-size:22px;font-weight:600;color:var(--ink);
+    font-variant-numeric:tabular-nums}
 
   .hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
   .hcard{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:9px 6px;
@@ -132,8 +130,8 @@
   .gain{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;
     border-top:1px dashed var(--line);font-size:13px;color:var(--brass)}
   .gain em{font-style:normal;font-weight:600;color:var(--ink)}
-  .gain.gem2 img{width:24px;height:24px}
-  .gain.gem2{color:var(--ink-soft)}
+  .gain.alt img{width:24px;height:24px}
+  .gain.alt{color:var(--ink-soft)}
   .seal{width:16px;height:16px;flex:none;border:1.5px solid var(--brass);border-radius:50%;
     display:grid;place-items:center;font-size:9px;color:var(--brass)}
   .tip{margin-top:12px;background:#F3F7F4;border:1px solid #DCE7DF;border-radius:3px;padding:14px 15px;animation:rise .28s}
@@ -197,6 +195,8 @@
   .fam b{font-weight:600;font-size:11.5px;color:var(--ink-soft)}
   .fam.zero{color:var(--ink-faint)}
   .fam.zero b{color:var(--ink-faint)}
+  .fams.big .fam{font-size:13.5px;padding:4px 10px}
+  .fams.big .fam b{font-size:12.5px}
 
   .eqlist{display:flex;flex-direction:column;gap:7px}
   .eqi{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);

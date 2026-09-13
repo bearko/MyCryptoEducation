@@ -94,15 +94,15 @@ check("巡回インデックスは端で回り込む",
 check("ナビのアイコンはラベルと分けて重ねる",
   d.querySelectorAll(".nav3 .tile .lab b").length === 3,
   `${d.querySelectorAll(".nav3 .tile .lab b").length}件`);
-check("ホームから魔石・カード枚数・英雄一覧を外した",
-  !txt().includes("手持ちの英雄") && !d.querySelector(".gemrow"), txt().slice(0, 120));
+check("ホームから素材・カード枚数・英雄一覧を外した",
+  !txt().includes("手持ちの英雄") && !d.querySelector(".fams"), txt().slice(0, 120));
 
 // クラフトの通知ドットは、素材が足りているときだけ出す
 check("素材0なら通知ドットなし", !d.querySelector("#tocraft .dot"));
-const keptGems = ev("JSON.stringify(S.gems)");
-ev("S.gems={ifrit:99,levia:99,tiamat:99,garuda:99};render()");
+const keptPoints = ev("JSON.stringify(S.points)");
+ev(`S.points=Object.fromEntries(DB.families.map(f => [f, 9999]));render()`);
 check("クラフトできると通知ドット", !!d.querySelector("#tocraft .dot"));
-ev(`S.gems=${keptGems};render()`);
+ev(`S.points=${keptPoints};render()`);
 
 // 英雄詳細と図鑑への入口は、ホームからヒーロー画面へ移した
 d.getElementById("toheroes").click();
@@ -245,7 +245,7 @@ const elimRun = `(() => {
   S.settings.showExplanationOnCorrect = true;
   const ids = DB.questions.filter(q => q.mode === "elimination").slice(0, 3).map(q => q.id);
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0,
+            right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [],
             results: {}, noReward: true, done: false, hard: {} };
   S.view = "quiz"; render();
   return JSON.stringify({ id: ids[0], answer: DB.byId[ids[0]].answer, n: ids.length });
@@ -327,7 +327,7 @@ check("難モードでも4択でも報酬は同じ", ev(`(() => {
 const pan = JSON.parse(ev(`(() => {
   S.settings.showExplanationOnCorrect = true;
   const ids = DB.questions.filter(q => q.mode === "panel").slice(0, 2).map(q => q.id);
-  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, gems: {},
+  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, found: [],
             right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
             noReward: true, done: false, hard: {} };
   S.view = "quiz"; render();
@@ -480,7 +480,7 @@ check("読みが長すぎるとパネルにしない",
 const numRun = JSON.parse(ev(`(() => {
   S.settings.showExplanationOnCorrect = true;
   const ids = DB.questions.filter(q => q.mode === "numeric").slice(0, 2).map(q => q.id);
-  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, gems: {},
+  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, found: [],
             right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
             noReward: true, done: false, hard: {} };
   S.view = "quiz"; render();
@@ -566,6 +566,9 @@ ev(`(() => {
 check("写真を外せば元に戻る", d.querySelectorAll(".photo").length === 0);
 
 /* ---- 報酬とチャレンジが壊れていないか ---- */
+// クリスタルは確率で落ちるので、ここだけ乱数を止めて必ず当たるようにする。
+// 止めないと、外国語なら1セッションで出ない確率のほうが高く、検査が気まぐれになる
+ev("window.__rnd = Math.random; Math.random = () => 0");
 ev(`(() => {
   const ids = DB.questions.filter(q => (q.format || "choice") === "choice").slice(0, 10).map(q => q.id);
   S.settings.showExplanationOnCorrect = true;
@@ -579,8 +582,15 @@ for (let k = 0; k < 10; k++) {
     if (ex.length) ex[ev("DB.byId[S.run.ids[S.run.i]].applied.answer")].click(); }
   d.getElementById("next").click();
 }
-check("魔石が貯まる", ev("Object.values(S.gems).reduce((x,y)=>x+y,0)") > 0,
-  ev("JSON.stringify(S.gems)"));
+check("族ポイントが貯まる", ev("Object.values(S.points).reduce((x,y)=>x+y,0)") > 0,
+  ev("JSON.stringify(S.points)"));
+check("出会った鉱物は図鑑に残る", ev("crystalKinds(S)") > 0, `${ev("crystalKinds(S)")}種`);
+check("解いた教科に対応する族に入る", ev(`(() => {
+  const subs = new Set(S.run.ids.map(id => DB.byId[id].subject));
+  const want = new Set([...subs].map(s => DB.subjectToFamily[s]));
+  return Object.keys(S.points).every(f => want.has(f));
+})()`) === true, ev("JSON.stringify(S.points)"));
+ev("Math.random = window.__rnd");
 
 /* ---- GUM は難易度なり（1〜10） ---- */
 check("易しい問題は1GUM", ev('gumFor({grade:"e1"})') === 1);
@@ -607,17 +617,21 @@ check("系統ごとのタブは8つ", d.querySelectorAll("#linetab button").leng
 check("1つの系統は5段階", d.querySelectorAll(".ext").length === 5,
   `${d.querySelectorAll(".ext").length}件`);
 
-// Common は魔石だけで作れる
-ev('S.gems={ifrit:0,levia:3,tiamat:0,garuda:0};S.exts={};S.crystals={};render()');
+// Common も少しだけクリスタルが要る（魔石を廃止したので、ここが入口の関門になる）
+ev('S.points={};S.exts={};S.crystals={};render()');
+check("素材が無ければCommonも作れない",
+  [...d.querySelectorAll(".mini[data-k]")].every(b => b.disabled));
+ev('S.points={"生物起源":10,"宝石":10};render()');   // ノービスペンは 生物起源10 ＋ 宝石10
 const common = [...d.querySelectorAll(".mini[data-k]")].filter(b => !b.disabled);
-check("Commonは魔石だけで作れる", common.length === 1 && common[0].dataset.k === "1003",
+check("Commonは少しのクリスタルで作れる", common.length === 1 && common[0].dataset.k === "1003",
   common.map(b => b.dataset.k).join(","));
 common[0].click();
-check("作ると魔石が減る", ev("S.gems.levia") === 0, `${ev("S.gems.levia")}`);
+check("作るとポイントが減る", ev('familyPoints(S, "生物起源")') === 0,
+  `${ev('familyPoints(S, "生物起源")')}pt`);
 check("作ったものが手元に入る", ev(`S.exts["1003"]`) === 1);
 
-// Uncommon はクリスタルが要る
-ev('S.gems={ifrit:0,levia:5,tiamat:0,garuda:0};render()');
+// Uncommon はもっと要る
+ev('S.points={};render()');
 check("クリスタルが無いとUncommonは作れない",
   d.querySelector('.mini[data-k="2003"]').disabled);
 // エリートペン（国語・外国語）は 生物起源30pt ＋ 宝石20pt。
@@ -629,8 +643,13 @@ check("別の族のポイントでは作れない",
 ev('S.points={"生物起源":102,"宝石":57};S.crystals={"046":1,"036":3};render()');
 check("要求された族があれば作れる", !d.querySelector('.mini[data-k="2003"]').disabled,
   `生物起源 ${ev('familyPoints(S, "生物起源")')}pt / 宝石 ${ev('familyPoints(S, "宝石")')}pt`);
-check("族ごとの持ち高と要求を並べて見せる",
-  /生物起源 \d+\/30pt/.test(txt()) && /宝石 \d+\/20pt/.test(txt()), txt().slice(0, 60));
+// 足りているときは要求だけ、足りないときは「持ち高/要求」を出す
+check("足りない族は、持ち高と要求を並べて見せる", (() => {
+  ev('S.points={"生物起源":5,"宝石":5};render()');
+  const short = /生物起源 5\/30pt/.test(txt()) && /宝石 5\/20pt/.test(txt());
+  ev('S.points={"生物起源":102,"宝石":57};render()');
+  return short && /生物起源 30pt/.test(txt()) && !/生物起源 \d+\/30pt/.test(txt());
+})(), txt().slice(0, 60));
 d.querySelector('.mini[data-k="2003"]').click();
 check("要求ぶんだけポイントが減る",
   ev('familyPoints(S, "生物起源")') === 72 && ev('familyPoints(S, "宝石")') === 37,
@@ -641,7 +660,7 @@ check("クラフトしても図鑑は欠けない",
   `琥珀 ${ev(`S.crystals["046"] || 0`)} / ジルコニア ${ev(`S.crystals["036"] || 0`)}`);
 
 // Rare は下位を1つ食う
-ev('S.gems={ifrit:0,levia:8,tiamat:0,garuda:0};S.points={"生物起源":90,"宝石":60};S.exts={};render()');
+ev('S.points={"生物起源":90,"宝石":60};S.exts={};render()');
 check("下位が無いとRareは作れない", d.querySelector('.mini[data-k="3003"]').disabled,
   `2003の所持 ${ev(`S.exts["2003"] || 0`)}`);
 ev(`S.exts["2003"]=1;render()`);
@@ -650,13 +669,13 @@ d.querySelector('.mini[data-k="3003"]').click();
 check("Rareを作ると下位が消える", !ev(`S.exts["2003"]`), `残り ${ev(`S.exts["2003"] || 0`)}`);
 
 // Legendary は知識カードの所持も条件
-ev('S.gems={ifrit:0,levia:12,tiamat:0,garuda:0};S.points={"生物起源":240,"宝石":160};S.exts={"4003":1};render()');
+ev('S.points={"生物起源":240,"宝石":160};S.exts={"4003":1};render()');
 const cardCount0 = ev("Object.keys(S.cards).length");
 check("知識カードが足りないとLegendaryは作れない",
   cardCount0 >= 30 || d.querySelector('.mini[data-k="5003"]').disabled,
   `カード ${cardCount0}枚`);
 
-ev('S.view="craft";S.craftTab="ペン";S.gems={ifrit:0,levia:0,tiamat:0,garuda:0};S.exts={};S.crystals={};S.points={};render()');
+ev('S.view="craft";S.craftTab="ペン";S.exts={};S.crystals={};S.points={};render()');
 d.querySelector(".mapbtn").click();
 
 ev('S.view="home";render()');
@@ -771,7 +790,7 @@ check("解説を読み返せる", d.querySelectorAll(".panel .extt").length > 0,
 // 再挑戦は報酬なし
 const had = {
   gum: ev("S.gum"),
-  gems: ev("Object.values(S.gems).reduce((a,b)=>a+b,0)"),
+  points: ev("Object.values(S.points).reduce((a,b)=>a+b,0)"),
   cards: ev("Object.keys(S.cards).length"),
   runs: ev("S.runs"),
   score: ev("S.score"),
@@ -785,12 +804,13 @@ for (let i = 0; i < 40 && ev('S.view==="quiz"'); i++) {
 }
 const now = {
   gum: ev("S.gum"),
-  gems: ev("Object.values(S.gems).reduce((a,b)=>a+b,0)"),
+  points: ev("Object.values(S.points).reduce((a,b)=>a+b,0)"),
   cards: ev("Object.keys(S.cards).length"),
   runs: ev("S.runs"),
   score: ev("S.score"),
 };
-check("再挑戦では魔石が増えない", now.gems === had.gems, `${had.gems} -> ${now.gems}`);
+check("再挑戦ではクリスタルが増えない", now.points === had.points,
+  `${had.points} -> ${now.points}`);
 check("再挑戦では知識カードが増えない", now.cards === had.cards, `${had.cards} -> ${now.cards}`);
 check("再挑戦は回数に入らない", now.runs === had.runs, `${had.runs} -> ${now.runs}`);
 check("再挑戦では点が入らない", now.score === had.score, `${had.score} -> ${now.score}`);
@@ -1083,7 +1103,7 @@ check("順序を逆に入れても同じ",
 ev(`(() => {
   const q = DB.questions.find(x => x.format === "range");
   S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
+            right: 0, wrong: 0, appliedRight: 0, shortage: 0, found: [],
             gum: 0, results: {}, noReward: false, done: false };
   S.view = "quiz"; render();
 })()`);
@@ -1094,7 +1114,7 @@ check("点数の見込みは出さない", !/点/.test(d.getElementById("rlive")
   d.getElementById("rlive").textContent);
 
 const ry = ev(`DB.byId[S.run.ids[0]].year`);
-const gemsBefore = ev("Object.values(S.gems).reduce((a,b)=>a+b,0)");
+const rollsBefore = ev("S.run.found.length");
 d.getElementById("ra").value = String(ry);
 d.getElementById("rb").value = String(ry);
 d.getElementById("ra").dispatchEvent(new w.Event("input", { bubbles: true }));
@@ -1107,9 +1127,10 @@ check("採点される", ev("S.run.picked && S.run.picked.score") === 1000,
 check("答えたあとに許容幅を明かす", d.getElementById("rlive").textContent.includes("許容幅"),
   d.getElementById("rlive").textContent);
 check("正解として数える", ev("S.run.right") === 1);
-check("精度が高いと魔石がもう1つ落ちる",
-  ev("Object.values(S.gems).reduce((a,b)=>a+b,0)") - gemsBefore >= 2,
-  `+${ev("Object.values(S.gems).reduce((a,b)=>a+b,0)") - gemsBefore}`);
+// 幅を狭く言い切って当てたら、抽選がもう1回。確率なので「出た」ことは保証されない
+check("精度が高いと抽選がもう1回",
+  txt().includes("抽選がもう1回") && ev("S.run.found.length") >= rollsBefore,
+  txt().slice(0, 80));
 check("解説は出る", !!d.getElementById("next") && txt().includes("知識カード"));
 check("二重に答えられない", (() => {
   const before = ev("S.run.right");
@@ -1121,7 +1142,7 @@ check("二重に答えられない", (() => {
 ev(`(() => {
   const q = DB.questions.filter(x => x.format === "range")[1];
   S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
+            right: 0, wrong: 0, appliedRight: 0, shortage: 0, found: [],
             gum: 0, results: {}, noReward: false, done: false };
   S.view = "quiz"; render();
 })()`);
