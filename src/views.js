@@ -235,9 +235,10 @@ function heroFor(q) {
 }
 const fitOf = (q, h) => h.fit.includes(q.subject);
 
-function gemStrip(obj, cls = "") {
-  return `<div class="gemrow ${cls}">` + Object.entries(DB.gems).map(([k, g]) =>
-    `<span class="gem"><img src="${assetPath.gem(g.id)}" alt="${esc(g.name)}"><b>${obj[k] || 0}</b></span>`
+function famStrip(cls = "") {
+  return `<div class="fams ${cls}">` + DB.families.map(f =>
+    `<span class="fam ${familyPoints(S, f) ? "" : "zero"}" title="${esc(DB.familyToSubject[f] || "")}"
+      ><b>${esc(f)}</b>${familyPoints(S, f)}pt</span>`
   ).join("") + `</div>`;
 }
 
@@ -414,7 +415,7 @@ function vSelect() {
 function startRun(opts = {}) {
   const ids = opts.ids || buildRun(DB, S);
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-            gems: {}, right: 0, wrong: 0, appliedRight: 0,
+            right: 0, wrong: 0, appliedRight: 0,
             shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {} };
   go("quiz");
@@ -573,7 +574,7 @@ function onRange(q) {
   const ok = score > 0;
 
   S.run.picked = { lo: Math.min(lo, hi), hi: Math.max(lo, hi), score, width };
-  const { gained, gum, found } = grantAnswer(q, ok, score >= RANGE_BONUS_SCORE ? 1 : 0);
+  const { gum, found } = grantAnswer(q, ok, score >= RANGE_BONUS_SCORE ? 1 : 0);
 
   document.getElementById("ra").disabled = true;
   document.getElementById("rb").disabled = true;
@@ -584,7 +585,7 @@ function onRange(q) {
 
   drawHints(q, h);
   S.run.tipOpen = false; S.run.applied = null;
-  drawVerdict(q, h, ok, gained, gum, score, found);
+  drawVerdict(q, h, ok, gum, score, found);
 }
 
 /**
@@ -638,7 +639,7 @@ function markChoice(btn, ok) {
 
 /**
  * 解答1問ぶんの記録と報酬。4択もレンジ回答もここに合流する。
- * bonusGem はレンジ回答で高い精度を出したときの上乗せ（1個）。
+ * bonusRoll はレンジ回答で高い精度を出したときの上乗せ（抽選をもう1回）。
  *
  * GUM は上乗せしない。1問の上限は10GUMで、難易度は学年だけで決めると
  * 決めてあるため（CLAUDE.md 原則6）。
@@ -676,10 +677,9 @@ function crystalGainHTML(id) {
       ・ ${esc(c.family)} ${crystalPoints(c.scarcity)}pt</span></div>`;
 }
 
-function grantAnswer(q, ok, bonusGem = 0) {
-  const gemKey = DB.subjectToGem[q.subject];
+function grantAnswer(q, ok, bonusRoll = 0) {
   const reward = !S.run.noReward;
-  let gained = 0, gum = 0, found = null;
+  let gum = 0, found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
   if (!reward) S.seen[q.id] = S.seen[q.id];   // 再挑戦では出題履歴も動かさない
 
@@ -687,13 +687,12 @@ function grantAnswer(q, ok, bonusGem = 0) {
     S.run.right++;
     if (reward) {
       S.score += Math.max(4, 10 - S.run.hintsUsed * 2);
-      gained = 1 + (q.chapter >= 2 ? 1 : 0) + bonusGem;
-      S.gems[gemKey] += gained;
-      S.run.gems[gemKey] = (S.run.gems[gemKey] || 0) + gained;
       gum = gumFor(q);
       S.gum += gum;
       S.run.gum += gum;
       found = rollCrystal(q, gum);
+      // 幅を狭く言い切って当てたときだけ、抽選がもう1回
+      for (let i = 0; i < bonusRoll; i++) found = rollCrystal(q, gum) || found;
       S.totalRight++;
       if (q.chapter >= 2) S.crossRight++;
       const country = countryOf(q);
@@ -705,7 +704,7 @@ function grantAnswer(q, ok, bonusGem = 0) {
     if (reward && !S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
   }
   if (reward) S.cards[q.card] = true;
-  return { gained, gum, found };
+  return { gum, found };
 }
 
 
@@ -1018,18 +1017,14 @@ function onPick(idx, forcedOk = null) {
     else b.classList.add("dim");
   });
 
-  const gemKey = DB.subjectToGem[q.subject];
   const reward = !S.run.noReward;
-  let gained = 0, found = null;
+  let found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
   let gum = 0;
   if (ok) {
     S.run.right++;
     if (reward) {
       S.score += Math.max(4, 10 - S.run.hintsUsed * 2);
-      gained = 1 + (q.chapter >= 2 ? 1 : 0);
-      S.gems[gemKey] += gained;
-      S.run.gems[gemKey] = (S.run.gems[gemKey] || 0) + gained;
       gum = gumFor(q);
       S.gum += gum;
       S.run.gum += gum;
@@ -1050,24 +1045,23 @@ function onPick(idx, forcedOk = null) {
   // テンポ優先モード：正解なら演出だけ見せて次へ
   if (ok && !S.settings.showExplanationOnCorrect) {
     S.toast = `<span class="seal">✓</span><em>${esc(q.card)}</em>` +
-      (gained ? `<img src="${assetPath.gem(DB.gems[gemKey].id)}" alt=""> ×${gained}` : "") +
-      (gum ? `<img src="${assetPath.icon("gum")}" alt="GUM"> ${gum}` : "");
+      (gum ? `<img src="${assetPath.icon("gum")}" alt="GUM"> ${gum}` : "") +
+      (found ? `<img src="${assetPath.crystal(found)}" alt="">` : "");
     drawToast();
     setTimeout(() => { S.toast = null; advance(); }, 750);
     return;
   }
 
   S.run.tipOpen = false; S.run.applied = null;
-  drawVerdict(q, h, ok, gained, gum, null, found);
+  drawVerdict(q, h, ok, gum, null, found);
 }
 
-function drawVerdict(q, h, ok, gained, gum = 0, rangeScore = null, found = null) {
+function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null) {
   const head = ok
     ? (rangeScore !== null
         ? (rangeScore === 1000 ? "言い切って、当てた。" : "その幅の中にある。")
         : S.run.hintsUsed ? "正解。ヒントを使っても、解けたことに変わりはない。" : "正解。")
     : "面白い単元に当たった。ここは聞いていこう。";
-  const gemKey = DB.subjectToGem[q.subject];
   document.getElementById("verdict").innerHTML = `
   <div class="verdict"><div class="vhead ${ok ? "ok" : "ng"}">${esc(head)}</div>
     <div class="lesson">
@@ -1076,13 +1070,11 @@ function drawVerdict(q, h, ok, gained, gum = 0, rangeScore = null, found = null)
       <p>${esc(q.lesson)}</p>
       ${photoAt(q, "lesson")}
       <div class="gain"><span class="seal">✓</span><span>知識カード ・ <em>${esc(q.card)}</em></span></div>
-      ${gained ? `<div class="gain gem2"><img src="${assetPath.gem(DB.gems[gemKey].id)}" alt="">
-        <span>${esc(DB.gems[gemKey].name)} × ${gained}</span></div>` : ""}
-      ${gum ? `<div class="gain gem2"><img src="${assetPath.icon("gum")}" alt="GUM">
+      ${gum ? `<div class="gain alt"><img src="${assetPath.icon("gum")}" alt="GUM">
         <span>GUM × ${gum} ・ ${esc(q.gradeLabel)}の問題</span></div>` : ""}
       ${found ? crystalGainHTML(found) : ""}
       ${rangeScore !== null && rangeScore >= RANGE_BONUS_SCORE ? `<div class="gain">
-        <span class="seal">＋</span><span>精度 ${rangeScore}点 ・ 魔石がもう1つ</span></div>` : ""}
+        <span class="seal">＋</span><span>精度 ${rangeScore}点 ・ 抽選がもう1回</span></div>` : ""}
     </div>
     <div id="tipslot"></div><div id="exslot"></div><div class="stack" id="acts"></div></div>`;
   drawTip(q); drawApplied(q, ok); drawActions(q, ok);
@@ -1111,7 +1103,7 @@ function drawApplied(q, ok) {
     ${!answered ? (S.run.applied.hint
       ? `<div class="hint" style="margin-top:10px"><b>ヒント</b>${esc(a.hint)}</div>`
       : `<button class="shint" id="exhint">ヒントをもらう</button>`) : ""}
-    ${answered ? `<div class="snote"><b>${S.run.applied.ok ? "正解。魔石をもう1つ" : "惜しい。"}</b> ${esc(a.note)}</div>` : ""}</div>`;
+    ${answered ? `<div class="snote"><b>${S.run.applied.ok ? "正解。抽選をもう1回" : "惜しい。"}</b> ${esc(a.note)}</div>` : ""}</div>`;
 
   if (!answered) {
     const hb = document.getElementById("exhint");
@@ -1136,10 +1128,8 @@ function onAppliedPick(q, ok, idx) {
   if (right) {
     S.run.appliedRight++; S.score += 15;
     S.cells[cellKey(q)] = "st";
-    const gemKey = DB.subjectToGem[q.subject];
-    S.gems[gemKey] += 1;
-    S.run.gems[gemKey] = (S.run.gems[gemKey] || 0) + 1;
     S.cards[q.card + "（応用）"] = true;
+    if (!S.run.noReward) rollCrystal(q, gumFor(q));   // 応用を抜けたら抽選がもう1回
   }
   drawApplied(q, ok); drawActions(q, ok);
 }
@@ -1149,7 +1139,7 @@ function drawActions(q, ok) {
   const last = S.run.i + 1 >= S.run.ids.length;
   acts.innerHTML = `
     ${ok && q.applied && !S.run.applied
-      ? `<button class="btn stretch" id="tostretch">応用編にも挑戦する ・ 魔石+1</button>` : ""}
+      ? `<button class="btn stretch" id="tostretch">応用編にも挑戦する ・ 抽選+1</button>` : ""}
     ${!S.run.tipOpen ? `<button class="btn ghost" id="totip">もう少しだけ知りたい</button>` : ""}
     <button class="btn" id="next">${last ? "結果へ" : "つぎへ"}</button>`;
   const st = document.getElementById("tostretch");
@@ -1189,9 +1179,9 @@ function vResult() {
       <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
       ${S.run.noReward ? "" : `<div><b>${S.run.gum}</b><span>GUM</span></div>`}</div>
     ${S.run.shortage ? `<p class="cue">この範囲は在庫が ${S.run.ids.length}問だったので、${S.run.ids.length}問で終わりました。</p>` : ""}
-    ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、魔石も知識カードも増えていません。</p>`
+    ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、クリスタルも知識カードも増えていません。</p>`
     : `<div class="panel">
-      <div class="phead"><h2>今回出会ったもの</h2></div>${gemStrip(S.run.gems, "big")}
+      <div class="phead"><h2>今回出会ったもの</h2></div>
       ${(S.run.found || []).length ? `<div class="foundrow">${
         [...new Set(S.run.found)].map(id => {
           const c = DB.crystalById[id], n = S.run.found.filter(x => x === id).length;
@@ -1200,7 +1190,7 @@ function vResult() {
             <i>${esc(c.family)} ${crystalPoints(c.scarcity)}pt</i></span>`;
         }).join("")}</div>`
         : `<p class="fine">今回はクリスタルに出会いませんでした。次の1問で出るかもしれません。</p>`}
-      <p class="fine">所持: ${Object.entries(DB.gems).map(([k, g]) => `${g.el} ${S.gems[k]}`).join(" ・ ")}</p>
+      ${famStrip("big")}
       <p class="fine">GUM は難しい問題ほど多く貯まります（小1で1、世界の問題で10）。
         いくつ持っているかはショップで見られます。</p>
     </div>`}
@@ -1238,7 +1228,7 @@ function vCraft() {
   <header><div class="hbar"><div class="place">クラフト</div>
     <button class="mapbtn" id="back">もどる</button></div></header>
   <div class="pad">
-    ${gemStrip(S.gems, "big")}
+
     <p class="fine">エクステンションは攻撃力ではありません。持っている知識が、どこまで遠くの問いに届くかを広げます。
       <b>到達度を上げるのは知識カードで、装備はそれを最大で2倍にするところまでです。</b></p>
     <div class="fams">${DB.families.map(f => {
@@ -1264,12 +1254,11 @@ function vCraft() {
               ${e.subs.join(" ・ ")} ・ ゲージ +${e.gauge}</div></div></div>
         <p class="extt">${esc(e.text)}</p>
         <div class="cost">
-          ${c.gems.map(g => `<span class="${g.ok ? "" : "short"}">
-            <img src="${assetPath.gem(DB.gems[g.gem].id)}" alt="">${g.need}</span>`).join("")}
           ${c.crystals.map(x => `<span class="${x.enough ? "" : "short"}"
             title="${x.family === ANY_FAMILY ? "どの族のクリスタルでも払えます"
               : `${esc(x.family)}は${esc(DB.familyToSubject[x.family] || "")}を解くと貯まります`}"
-            >${x.family === ANY_FAMILY ? "クリスタル" : esc(x.family)} ${x.have}/${x.need}pt</span>`).join("")}
+            >${x.family === ANY_FAMILY ? "どの族でも" : esc(x.family)} ${
+              x.enough ? `${x.need}pt` : `${x.have}/${x.need}pt`}</span>`).join("")}
           ${c.below ? `<span class="${c.below.ok ? "" : "short"}">${esc(c.below.name)} ×1</span>` : ""}
           ${c.cards ? `<span class="${c.cards.ok ? "" : "short"}">知識カード ${c.cards.have}/${c.cards.need}</span>` : ""}
           <button class="mini" data-k="${e.id}" ${c.ok ? "" : "disabled"}>クラフト</button></div>
@@ -1287,7 +1276,6 @@ function vCraft() {
     const id = b.dataset.k, e = DB.extensions[id];
     const c = craftCheck(DB, S, id);
     if (!c.ok) return;
-    c.gems.forEach(g => { S.gems[g.gem] -= g.need; });
     c.crystals.forEach(x => { S.points[x.family] = (S.points[x.family] || 0) - x.need; });
     if (c.below) {
       S.exts[c.below.id] -= 1;
@@ -1370,7 +1358,7 @@ function vHero() {
         ${eq ? `<p class="fine">${DB.extensions[eq].subs.some(s => h.fit.includes(s))
           ? "この英雄の得意分野と噛み合っています。効果が2倍になります。"
           : "得意分野とは噛み合っていません。効果は通常のままです。"}</p>` : ""}`
-        : `<p class="empty">まだ持っていません。魔石を集めてクラフトしてください。</p>`}
+        : `<p class="empty">まだ持っていません。クリスタルを集めてクラフトしてください。</p>`}
       <p class="fine">装備は到達度を<b>何倍にするか</b>だけを変えます（合計で最大2倍）。
         知識がゼロなら、何をつけても0%のままです。</p></div>
   </div>`;
@@ -1430,9 +1418,11 @@ function vHeroes() {
       <p class="fine">カードは英雄を解放するための鍵になります。集めた分野が、そのまま挑める相手を決めます。</p>
     </div>
     <div class="panel">
-      <div class="phead"><h2>魔石</h2><span class="sub">${Object.values(S.gems).reduce((a, b) => a + b, 0)}個</span></div>
-      ${gemStrip(S.gems)}
-      <p class="fine">魔石は正解した単元の分野から確定で落ちます。運の要素はありません。</p>
+      <div class="phead"><h2>クリスタル</h2>
+        <span class="sub">${crystalKinds(S)} / ${(DB.crystals.crystals || []).length}種</span></div>
+      ${famStrip()}
+      <p class="fine">解いた教科の族から、たまに出会います。出会った鉱物は図鑑に残り、
+        族のポイントに変わります。クラフトで払うのはポイントのほうです。</p>
     </div>`;
 
   const codexPanel = `
@@ -1489,9 +1479,9 @@ function vShop() {
   <div class="pad">
     <div class="panel">
       <div class="phead"><h2>手持ち</h2><span class="sub">${kinds} / ${list.length}種</span></div>
-      <div class="gemrow big"><span class="gem"><img src="${assetPath.icon("gum")}" alt="GUM">
-        <b>${(S.gum || 0).toLocaleString("ja-JP")}</b></span></div>
-      <p class="fine">GUM は解いた問題の難しさに応じて貯まります。魔石は買えません。</p>
+      <div class="gumbig"><img src="${assetPath.icon("gum")}" alt="GUM">
+        <b>${(S.gum || 0).toLocaleString("ja-JP")}</b></div>
+      <p class="fine">GUM は解いた問題の難しさに応じて貯まります。</p>
       <div class="fams">${DB.families.map(f => {
         const pt = familyPoints(S, f);
         return `<span class="fam ${pt ? "" : "zero"}" title="${esc(DB.familyToSubject[f] || "")}"
@@ -1695,7 +1685,7 @@ function vDay() {
     </div>
     ${ids.length ? `<div class="stack" style="margin-top:18px">
       <button class="btn ghost" id="replay">この日の${ids.length}問をもう一度解く</button></div>
-      <p class="fine">再挑戦では魔石も知識カードも増えません。記録も変わりません。読み返すためのものです。</p>` : ""}
+      <p class="fine">再挑戦ではクリスタルも知識カードも増えません。記録も変わりません。読み返すためのものです。</p>` : ""}
     ${ids.map(id => {
       const q = DB.byId[id], ok = rec.results[id] === "ok";
       return `<div class="panel">
@@ -1851,9 +1841,9 @@ function vChallenge() {
           <span>${CHALLENGE_QUESTIONS}問中 <em>${right}問</em> 正解 ・ 解放には${need}問</span></div>
         ${c.won ? `<div class="gain"><span class="seal">✓</span>
           <span>解放 ・ <em>${esc(h.name)}</em></span></div>` : ""}
-        ${c.won && h.unlocks != null ? `<div class="gain gem2"><span class="seal">＋</span>
+        ${c.won && h.unlocks != null ? `<div class="gain alt"><span class="seal">＋</span>
           <span>新しい出題範囲が開きました</span></div>` : ""}
-        ${c.gotCard ? `<div class="gain gem2"><span class="seal">＋</span>
+        ${c.gotCard ? `<div class="gain alt"><span class="seal">＋</span>
           <span>知識カード ・ <em>${esc(c.gotCard)}</em></span></div>` : ""}</div>
       ${c.won ? "" : `<p class="cue">負けても、いま受け取った知識カードのぶんだけ次はゲージが削れた状態から始まります。</p>`}
       <div class="stack">

@@ -21,7 +21,6 @@ const db = {
   figures:    await json("data/figures.json"),
   heroes:     await json("data/heroes.json"),
   extensions: await json("data/extensions.json"),
-  gemstones:  await json("data/gemstones.json"),
   advice:     await json("data/advice.json"),
   titles:     await json("data/titles.json"),
   crystals:   await json("data/crystals.json"),
@@ -42,7 +41,6 @@ async function embed(dir, prefix) {
   }
 }
 await embed("public/heroes", "h");
-await embed("public/materials/gemstones", "g");
 await embed("public/materials/crystals", "c");
 await embed("public/icons", "i");
 await embed("public/extensions", "e");

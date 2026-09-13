@@ -44,7 +44,6 @@ for (const file of await readdir(join(ROOT, "data/questions"))) {
 const figures    = await json("data/figures.json");
 const heroes     = await json("data/heroes.json");
 const extensions = await json("data/extensions.json");
-const gemstones  = await json("data/gemstones.json");
 const crystals   = await json("data/crystals.json");
 const curriculum = await json("data/curriculum.json");
 const imageBook  = await json("data/images.json");
@@ -80,7 +79,7 @@ for (const q of questions) {
   const shape = curriculum.exists[q.subject];
   if (shape && !shape.includes(q.grade))
     err(id, `${q.subject} は ${q.grade} に存在しません（data/curriculum.json）`);
-  if (!gemstones.subjectToGem[q.subject]) err(id, `教科 "${q.subject}" に対応する魔石がありません`);
+  if (!crystals.subjectToFamily?.[q.subject]) err(id, `教科 "${q.subject}" に対応する族がありません`);
 
   if (format === "range") {
     if (!Number.isInteger(q.year)) err(id, `year は整数で書いてください（紀元前は負の数）`);
@@ -272,13 +271,11 @@ for (const h of heroes) {
 /* ---- エクステンション ---- */
 const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
 for (const [k, e] of Object.entries(extensions)) {
-  for (const f of ["name", "line", "rarity", "subs", "gauge", "cost", "text"]) {
+  for (const f of ["name", "line", "rarity", "subs", "gauge", "crystals", "text"]) {
     if (e[f] === undefined || e[f] === null || e[f] === "") err(k, `必須項目 ${f} がありません`);
   }
   if (!RARITIES.includes(e.rarity)) err(k, `未知のレアリティ "${e.rarity}"`);
-  Object.keys(e.cost).forEach(g => {
-    if (!gemstones.gems[g]) err(k, `未知の魔石 "${g}"`);
-  });
+  if (e.cost) err(k, "魔石は廃止しました。cost を消して crystals に族ごとのポイントで書いてください");
   e.subs.forEach(s => { if (!SUBJECTS.includes(s)) err(k, `未知の分野 "${s}"`); });
   // 下位は実在して、1段だけ下であること
   if (e.below) {
@@ -290,7 +287,7 @@ for (const [k, e] of Object.entries(extensions)) {
   }
   if (e.crystal !== undefined)
     err(k, "crystal（族を問わない合計）は廃止しました。crystals に族ごとのポイントで書いてください");
-  if (e.rarity === "Common" && e.crystals) err(k, "Commonにクリスタルを要求しないでください");
+
   // クラフトは族ごとのポイントで要求する。個別の鉱物を名指ししない
   if (e.crystals) {
     const fams = crystals.families || [];
