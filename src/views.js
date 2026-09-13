@@ -12,7 +12,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          CHALLENGE_QUESTIONS } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
-import { answerText, hintGroup, hintsFor } from "./answer-mode.js";
+import { answerText, hintGroup, hintsFor, numericParts, sameNumber } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
@@ -455,7 +455,17 @@ function vQuiz() {
     <div class="qtext">${esc(q.prompt)}</div>
     ${photoAt(q, "prompt")}
     ${q.figure ? `<div class="figure">${DB.figures[q.figure]}</div>` : ""}
-    ${q.format === "range" ? `
+    ${mode === "numeric" ? `
+      <div class="numbox">
+        <div class="numdisp"><span id="numval" class="ph">数を入れる</span>${(() => {
+          const u = numericParts(q)?.unit; return u ? `<b>${esc(u)}</b>` : ""; })()}</div>
+        <div class="keypad">${
+          ["7","8","9","4","5","6","1","2","3",".","0","←"].map(k =>
+            `<button class="key" data-k="${k}">${k}</button>`).join("")}</div>
+        <button class="btn" id="nsubmit" disabled>この数で答える</button>
+        <div class="elimbar"><button class="lnk" id="tochoice">4択に切り替える</button></div>
+      </div>`
+    : q.format === "range" ? `
       <div class="rangebox">
         <div class="rio">
           <input id="ra" type="number" inputmode="numeric" step="1" placeholder="から" aria-label="範囲の始まりの年">
@@ -484,9 +494,10 @@ function vQuiz() {
 
   document.getElementById("hint").onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
   if (mode === "elimination") wireElimination(q);
+  else if (mode === "numeric") wireNumeric(q);
   else app.querySelectorAll(".choices > .choice").forEach(b =>
     b.onclick = () => onPick(Number(b.dataset.i)));
-  if (q.format === "range") wireRange(q);
+  if (mode !== "numeric" && q.format === "range") wireRange(q);
   drawHints(q, h);
 }
 
@@ -555,7 +566,7 @@ function onRange(q) {
  * プレイヤーが4択へ降りたら `S.run.hard[id]` に "choice" が入り、
  * その問題のあいだだけ選択肢の側に固定される（決定2・不可逆は1問かぎり）。
  */
-const READY_MODES = new Set(["elimination", "range", "choice"]);
+const READY_MODES = new Set(["elimination", "numeric", "range", "choice"]);
 
 function modeOf(q) {
   const dropped = S.run.hard?.[q.id];
@@ -636,6 +647,72 @@ function grantAnswer(q, ok, bonusGem = 0) {
 }
 
 
+
+/**
+ * 数値入力。テンキーで数だけを打ち、単位は固定で出す（[ 200 ] W）。
+ *
+ * 打ち間違いを判定の対象にしないので、判定は完全に機械的になる。
+ * 外しても問題は終わらない。入力欄は生きたままで、続けるか・ヒントを見るか・
+ * 4択に降りるかをプレイヤーが選ぶ。**システムは勝手に降ろさない**（決定4）。
+ */
+function wireNumeric(q) {
+  const want = numericParts(q);
+  const disp = document.getElementById("numval");
+  const submit = document.getElementById("nsubmit");
+  if (!want || !disp || !submit) return;
+  let buf = "";
+
+  const paint = () => {
+    disp.textContent = buf || "数を入れる";
+    disp.classList.toggle("ph", !buf);
+    submit.disabled = !buf || buf === ".";
+  };
+  app.querySelectorAll(".keypad .key").forEach(b => {
+    b.onclick = () => {
+      if (S.run.picked !== null) return;
+      const k = b.dataset.k;
+      if (k === "←") buf = buf.slice(0, -1);
+      else if (k === "." ) { if (buf && !buf.includes(".")) buf += "."; }
+      else if (buf.length < 9) buf = (buf === "0" ? "" : buf) + k;
+      paint();
+    };
+  });
+  submit.onclick = () => {
+    if (S.run.picked !== null || !buf) return;
+    if (sameNumber(buf, want.value)) return onPick(q.answer, true);
+    drawRetry(q, `「${buf}${want.unit}」ではない。`);
+    buf = ""; paint();
+  };
+  const down = document.getElementById("tochoice");
+  if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
+  paint();
+}
+
+/**
+ * 外したあとの3択。**このまま挑み直す／ヒントを見る／4択に切り替える。**
+ *
+ * 1つ目は「何もしない」なので専用ボタンを置かない。押しても何も起きない
+ * ボタンは選択肢の重みを下げるだけなので、文言のほうで3択だと示す。
+ */
+function drawRetry(q, head) {
+  const slot = document.getElementById("verdict");
+  if (!slot) return;
+  const h = heroFor(q);
+  const max = fitOf(q, h) ? 3 : 2;
+  const more = S.run.hintsUsed < max;
+  slot.innerHTML = `<div class="retry">
+    <div class="rhead">${esc(head)} まだ続けてもいい。</div>
+    <div class="racts">
+      ${more ? `<button class="lnk" id="rhint">ヒントを見る</button>` : ""}
+      <button class="lnk" id="rdown">4択に切り替える</button>
+    </div></div>`;
+  const bar = app.querySelector(".numbox .elimbar");
+  if (bar) bar.hidden = true;   // 同じ導線が2つ並ばないようにする
+  const rh = document.getElementById("rhint");
+  if (rh) rh.onclick = () => { S.run.hintsUsed++; drawHints(q, h); drawRetry(q, head); };
+  document.getElementById("rdown").onclick = () => { S.run.hard[q.id] = "choice"; render(); };
+}
+
 /**
  * 消去法。正解を選ぶのではなく、違うものを潰していく。
  *
@@ -672,6 +749,7 @@ function onPick(idx, forcedOk = null) {
   S.run.picked = idx;
   if (!S.run.noReward) S.seen[q.id] = 1;
 
+  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice").forEach(b => b.disabled = true);
   app.querySelectorAll(".choices > .choice").forEach((b, i) => {
     b.disabled = true;
     if (i === idx) markChoice(b, ok);

@@ -7,7 +7,7 @@ import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 /* 回答方式の判定はここに集約する。アプリと2箇所に分けると必ずズレる */
-import { answerMode, hintGroup, hintsFor, normalizeHints, answerText }
+import { answerMode, hintGroup, hintsFor, normalizeHints, answerText, numericParts }
   from "../src/answer-mode.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -123,6 +123,10 @@ for (const q of questions) {
         warn(`${id}: ${mode} のヒントが誤答「${touched.join("・")}」に触れています: ${h.text}`);
     }
   }
+
+  /* 数値入力は、答えを「数」と「単位」に分けられることが前提 */
+  if (mode === "numeric" && !numericParts(q))
+    err(id, `数値入力に振り分けましたが、答え「${answerText(q)}」を数と単位に分けられません`);
 
   /* 文字パネルに要る読み */
   if (q.reading !== undefined) {
