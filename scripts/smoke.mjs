@@ -832,8 +832,18 @@ check("正解した国が記録される", ev("Object.keys(S.countries).length")
 ev('S.profile.title=null;render()');
 
 /* ---- クリスタル10種 ---- */
-check("クリスタルは10種", ev("DB.crystals.crystals.length") === 10,
+check("クリスタルは100種", ev("DB.crystals.crystals.length") === 100,
   `${ev("DB.crystals.crystals.length")}種`);
+check("6族すべてに1種以上ある", ev(`(() => {
+  const fam = ["貴金属", "宝石", "元素", "鉱石", "生物起源", "石英"];
+  const have = new Set(DB.crystals.crystals.map(c => c.family));
+  return fam.every(f => have.has(f)) && have.size === fam.length;
+})()`) === true, ev(`JSON.stringify([...new Set(DB.crystals.crystals.map(c => c.family))])`));
+check("希少度は Amount から出したものと合う", ev(`(() => {
+  const cs = DB.crystals.crystals;
+  const tot = cs.reduce((a, c) => a + c.amount, 0);
+  return cs.every(c => Math.abs(c.scarcity - Math.round(c.amount / tot * 1e5) / 1e3) < 1e-9);
+})()`) === true, "図鑑の Amount と希少度が噛み合っていない");
 check("和名と英名が両方ある",
   ev(`DB.crystals.crystals.every(c => c.name && c.en)`),
   ev(`JSON.stringify(DB.crystals.crystals.filter(c => !c.name || !c.en).map(c => c.id))`));
@@ -847,10 +857,15 @@ check("希少なものほど高い", ev(`(() => {
 check("下限は5GUM", ev("crystalPrice(100)") === 5 && ev("crystalPrice(0)") === 5);
 // 族は図鑑の見出しだけ。教科には結び付けない
 check("族を教科に結び付けていない", ev("typeof CRYSTAL_FAMILIES") === "undefined");
+// 希少度 × 価格 は常に 50。ずれるのは価格を整数に丸めたぶんだけで、
+// その幅は 希少度 × 0.5 を超えない。100種に増えても偏りは生まれない
 check("どの鉱物も GUM あたりの重みが同じ", ev(`(() => {
-  const es = DB.crystals.crystals.map(c => c.scarcity * crystalPrice(c.scarcity));
-  return Math.max(...es) / Math.min(...es) < 1.05;   // ずれは整数への丸めぶんだけ
-})()`), ev(`JSON.stringify(DB.crystals.crystals.map(c => +(c.scarcity * crystalPrice(c.scarcity)).toFixed(2)))`));
+  return DB.crystals.crystals.every(c =>
+    Math.abs(c.scarcity * crystalPrice(c.scarcity) - 50) <= c.scarcity * 0.5 + 1e-9);
+})()`) === true,
+  ev(`JSON.stringify(DB.crystals.crystals
+    .filter(c => Math.abs(c.scarcity * crystalPrice(c.scarcity) - 50) > c.scarcity * 0.5 + 1e-9)
+    .map(c => c.name))`));
 check("クラフトの重みは払ったGUMそのもの",
   ev(`DB.crystals.crystals.every(c => crystalValue(c.scarcity) === crystalPrice(c.scarcity))`));
 check("同じGUMなら鉱物を変えても重みは同じ", ev(`(() => {
@@ -865,7 +880,7 @@ check("1個ぶんの目安は50GUM", ev("CRYSTAL_UNIT") === 50);
 ev('S.view="home";render()');
 d.getElementById("toshop").click();
 check("ショップが開く", txt().includes("ショップ"), txt().slice(0, 60));
-check("10種すべて並ぶ", d.querySelectorAll(".shopitem").length === 10,
+check("100種すべて並ぶ", d.querySelectorAll(".shopitem").length === 100,
   `${d.querySelectorAll(".shopitem").length}件`);
 check("品揃えは安い順で固定", (() => {
   const read = () => [...d.querySelectorAll(".shopitem .sn")].map(e => e.textContent.trim());
@@ -875,7 +890,8 @@ check("品揃えは安い順で固定", (() => {
   return a.join("|") === b.join("|") && p.every((v, i) => i === 0 || v >= p[i - 1]);
 })(), "並びが変わる、または安い順でない");
 check("持っていない鉱物の豆知識は伏せる",
-  d.querySelectorAll(".sfact.hide").length === 10);
+  d.querySelectorAll(".sfact.hide").length === 100,
+  `${d.querySelectorAll(".sfact.hide").length}件`);
 
 // 買えないときは押せない
 ev("S.gum=0;render()");
@@ -890,7 +906,7 @@ const cheapPrice = ev(`shopList(DB).find(c => c.id === "${cheapId}").price`);
 cheap.click();
 check("買うとGUMが減る", ev("S.gum") === 300 - cheapPrice, `${ev("S.gum")} / 価格 ${cheapPrice}`);
 check("買ったぶんが手持ちに入る", ev(`S.crystals["${cheapId}"]`) === 1);
-check("買うと豆知識が読める", d.querySelectorAll(".sfact.hide").length === 9,
+check("買うと豆知識が読める", d.querySelectorAll(".sfact.hide").length === 99,
   `伏せたまま ${d.querySelectorAll(".sfact.hide").length}件`);
 check("高いものは買えないままにする",
   ev(`(() => { const d0 = shopList(DB).find(c => c.price > S.gum); return !!d0; })()`));
