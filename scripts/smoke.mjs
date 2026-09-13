@@ -620,15 +620,26 @@ check("作ったものが手元に入る", ev(`S.exts["1003"]`) === 1);
 ev('S.gems={ifrit:0,levia:5,tiamat:0,garuda:0};render()');
 check("クリスタルが無いとUncommonは作れない",
   d.querySelector('.mini[data-k="2003"]').disabled);
-ev('S.crystals={"003":7};render()');   // 銅8GUM ×7 = 56相当 ≧ 50
-check("クリスタルがあれば作れる", !d.querySelector('.mini[data-k="2003"]').disabled);
+// エリートペン（国語・外国語）は 生物起源30pt ＋ 宝石20pt。
+// **別の族をいくら積んでも作れない。** ここが族ごとの要求の要
+ev('S.crystals={"003":30};render()');   // 銅（貴金属）を240pt ぶん持っていても
+check("別の族のクリスタルでは作れない",
+  d.querySelector('.mini[data-k="2003"]').disabled,
+  `貴金属 ${ev('familyPoints(S.crystals, DB.crystalById, "貴金属")')}pt`);
+ev('S.crystals={"046":1,"036":3};render()');   // 琥珀102pt（生物起源）＋ ジルコニア19pt×3（宝石）
+check("要求された族があれば作れる", !d.querySelector('.mini[data-k="2003"]').disabled,
+  `生物起源 ${ev('familyPoints(S.crystals, DB.crystalById, "生物起源")')}pt / 宝石 ${
+    ev('familyPoints(S.crystals, DB.crystalById, "宝石")')}pt`);
+check("族ごとの持ち高と要求を並べて見せる",
+  /生物起源 \d+\/30pt/.test(txt()) && /宝石 \d+\/20pt/.test(txt()), txt().slice(0, 60));
 check("使うクリスタルを前もって見せる", txt().includes("使うクリスタル"), txt().slice(0, 40));
 d.querySelector('.mini[data-k="2003"]').click();
-check("クリスタルは安いものから減る", ev(`S.crystals["003"] || 0`) === 0,
-  `残り ${ev(`S.crystals["003"] || 0`)}`);
+check("要求ぶんだけ、安いものから減る",
+  !ev(`S.crystals["046"]`) && ev(`S.crystals["036"]`) === 1,
+  `琥珀 ${ev(`S.crystals["046"] || 0`)} / ジルコニア ${ev(`S.crystals["036"] || 0`)}`);
 
 // Rare は下位を1つ食う
-ev('S.gems={ifrit:0,levia:8,tiamat:0,garuda:0};S.crystals={"003":20};S.exts={};render()');
+ev('S.gems={ifrit:0,levia:8,tiamat:0,garuda:0};S.crystals={"046":1,"036":4};S.exts={};render()');
 check("下位が無いとRareは作れない", d.querySelector('.mini[data-k="3003"]').disabled,
   `2003の所持 ${ev(`S.exts["2003"] || 0`)}`);
 ev(`S.exts["2003"]=1;render()`);
@@ -637,7 +648,7 @@ d.querySelector('.mini[data-k="3003"]').click();
 check("Rareを作ると下位が消える", !ev(`S.exts["2003"]`), `残り ${ev(`S.exts["2003"] || 0`)}`);
 
 // Legendary は知識カードの所持も条件
-ev('S.gems={ifrit:0,levia:12,tiamat:0,garuda:0};S.crystals={"003":60};S.exts={"4003":1};render()');
+ev('S.gems={ifrit:0,levia:12,tiamat:0,garuda:0};S.crystals={"046":3,"036":9};S.exts={"4003":1};render()');
 const cardCount0 = ev("Object.keys(S.cards).length");
 check("知識カードが足りないとLegendaryは作れない",
   cardCount0 >= 30 || d.querySelector('.mini[data-k="5003"]').disabled,
@@ -867,7 +878,31 @@ check("どの鉱物も GUM あたりの重みが同じ", ev(`(() => {
     .filter(c => Math.abs(c.scarcity * crystalPrice(c.scarcity) - 50) > c.scarcity * 0.5 + 1e-9)
     .map(c => c.name))`));
 check("クラフトの重みは払ったGUMそのもの",
-  ev(`DB.crystals.crystals.every(c => crystalValue(c.scarcity) === crystalPrice(c.scarcity))`));
+  ev(`DB.crystals.crystals.every(c => crystalPoints(c.scarcity) === crystalPrice(c.scarcity))`));
+check("教科と族は1対1", ev(`(() => {
+  const map = DB.subjectToFamily, fam = DB.families;
+  const used = SUBJECTS.map(s => map[s]);
+  return used.every(f => fam.includes(f)) && new Set(used).size === 6 && fam.length === 6;
+})()`) === true, ev("JSON.stringify(DB.subjectToFamily)"));
+check("どの族にも鉱物がある", ev(`(() => {
+  return DB.families.every(f => DB.crystals.crystals.some(c => c.family === f));
+})()`) === true);
+check("レシピは族ごとのポイントで要求する", ev(`(() => {
+  return Object.values(DB.extensions).every(e => {
+    if (!e.crystals) return e.rarity === "Common";
+    const keys = Object.keys(e.crystals);
+    if (keys.includes("*")) return keys.length === 1;
+    const want = new Set(e.subs.map(s => DB.subjectToFamily[s]));
+    return keys.every(f => DB.families.includes(f) && want.has(f));
+  });
+})()`) === true, "族と分野が噛み合わないレシピがある");
+check("族をまたいでも 1GUM あたりの重みは同じ", ev(`(() => {
+  // どの族の鉱物を買っても、払った GUM がそのままポイントになる
+  return DB.families.every(f => {
+    const cs = DB.crystals.crystals.filter(c => c.family === f);
+    return cs.every(c => crystalPoints(c.scarcity) === crystalPrice(c.scarcity));
+  });
+})()`) === true);
 check("同じGUMなら鉱物を変えても重みは同じ", ev(`(() => {
   const byId = DB.crystalById;
   const spend = id => { const p = crystalPrice(byId[id].scarcity);

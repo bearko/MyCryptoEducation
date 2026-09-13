@@ -6,6 +6,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
          titleProgress, earnedTitles, countryOf,
          shopList, canBuy, crystalPrice, crystalsValue, crystalKinds,
+         familyPoints, ANY_FAMILY,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
@@ -1195,7 +1196,13 @@ function vCraft() {
   <div class="pad">
     ${gemStrip(S.gems, "big")}
     <p class="fine">エクステンションは攻撃力ではありません。持っている知識が、どこまで遠くの問いに届くかを広げます。
-      <b>難易度ゲージを削るのは知識カードで、装備の合計はその範囲を超えません。</b></p>
+      <b>到達度を上げるのは知識カードで、装備はそれを最大で2倍にするところまでです。</b></p>
+    <div class="fams">${DB.families.map(f => {
+      const pt = familyPoints(S.crystals, DB.crystalById, f);
+      return `<span class="fam ${pt ? "" : "zero"}"><b>${esc(f)}</b>${pt}pt</span>`;
+    }).join("")}</div>
+    <p class="fine">クラフトは個別の鉱物ではなく<b>族ごとのポイント</b>で要求します。
+      ポイントは希少度から決まる価格そのものなので、同じポイントならどの鉱物で払っても同じです。</p>
     <div class="seg wrap" id="linetab">${lines.map(l => {
       const n = l.items.filter(i => S.exts[i.id]).length;
       return `<button data-l="${esc(l.line)}" class="${l.line === tab ? "on" : ""}">${esc(l.line)}<i>${n}/5</i></button>`;
@@ -1214,15 +1221,17 @@ function vCraft() {
         <div class="cost">
           ${c.gems.map(g => `<span class="${g.ok ? "" : "short"}">
             <img src="${assetPath.gem(DB.gems[g.gem].id)}" alt="">${g.need}</span>`).join("")}
-          ${c.crystals ? `<span class="${c.crystals.enough ? "" : "short"}" title="安いものから使います">
-            <img src="${assetPath.icon("gum")}" alt="">クリスタル ${c.crystals.need}相当</span>` : ""}
+          ${c.crystals.map(x => `<span class="${x.enough ? "" : "short"}"
+            title="${x.family === ANY_FAMILY ? "どの族のクリスタルでも払えます"
+              : `${esc(x.family)}は${esc(DB.familyToSubject[x.family] || "")}を解くと貯まります`}"
+            >${x.family === ANY_FAMILY ? "クリスタル" : esc(x.family)} ${x.have}/${x.need}pt</span>`).join("")}
           ${c.below ? `<span class="${c.below.ok ? "" : "short"}">${esc(c.below.name)} ×1</span>` : ""}
           ${c.cards ? `<span class="${c.cards.ok ? "" : "short"}">知識カード ${c.cards.have}/${c.cards.need}</span>` : ""}
           <button class="mini" data-k="${e.id}" ${c.ok ? "" : "disabled"}>クラフト</button></div>
-        ${c.crystals && c.crystals.enough && Object.keys(c.crystals.picks).length ? `
-          <p class="fine">使うクリスタル: ${Object.entries(c.crystals.picks)
+        ${c.ok && c.crystals.some(x => Object.keys(x.picks).length) ? `
+          <p class="fine">使うクリスタル: ${c.crystals.flatMap(x => Object.entries(x.picks))
             .map(([id, n]) => `${esc(DB.crystalById[id].name)} ×${n}`).join(" ・ ")}
-            （合計 ${c.crystals.value}相当）</p>` : ""}
+            （安いものから使います）</p>` : ""}
       </div>`;
     }).join("")}
     <p class="fine">作った数 ${made} ・ 最上位だけは知識カードの所持も条件です。素材だけで最上位が手に入ると、
@@ -1237,10 +1246,10 @@ function vCraft() {
     const c = craftCheck(DB, S, id);
     if (!c.ok) return;
     c.gems.forEach(g => { S.gems[g.gem] -= g.need; });
-    if (c.crystals) Object.entries(c.crystals.picks).forEach(([cid, n]) => {
+    c.crystals.forEach(x => Object.entries(x.picks).forEach(([cid, n]) => {
       S.crystals[cid] -= n;
       if (S.crystals[cid] <= 0) delete S.crystals[cid];
-    });
+    }));
     if (c.below) {
       S.exts[c.below.id] -= 1;
       if (S.exts[c.below.id] <= 0) {
@@ -1444,8 +1453,13 @@ function vShop() {
       <div class="gemrow big"><span class="gem"><img src="${assetPath.icon("gum")}" alt="GUM">
         <b>${(S.gum || 0).toLocaleString("ja-JP")}</b></span></div>
       <p class="fine">GUM は解いた問題の難しさに応じて貯まります。魔石は買えません。</p>
-      ${value ? `<p class="fine">集めたクリスタルはクラフトに ${value.toLocaleString("ja-JP")} 相当ぶん効きます
-        （1個ぶんの目安は ${CRYSTAL_UNIT}）。</p>` : ""}
+      <div class="fams">${DB.families.map(f => {
+        const pt = familyPoints(S.crystals, DB.crystalById, f);
+        return `<span class="fam ${pt ? "" : "zero"}" title="${esc(DB.familyToSubject[f] || "")}"
+          ><b>${esc(f)}</b>${pt}pt</span>`;
+      }).join("")}</div>
+      ${value ? `<p class="fine">クラフトは族ごとのポイントで要求します
+        （合計 ${value.toLocaleString("ja-JP")}pt ・ 1個ぶんの目安は ${CRYSTAL_UNIT}pt）。</p>` : ""}
     </div>
     <p class="fine">値段は希少度から決まります。<b>どれを買っても、同じ GUM ならクラフトの進み方は同じです。</b>
       選ぶ基準は損得ではなく、どの鉱物を知りたいかです。</p>

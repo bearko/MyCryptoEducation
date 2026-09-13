@@ -314,24 +314,30 @@ export function challengeCard(hero, state) {
 
 /* ---- クラフト ---- */
 
+/** 族を問わないことを表す。汎用のエクステンションだけがこれを使う */
+export const ANY_FAMILY = "*";
+
 /**
  * レシピが要求するぶんのクリスタルを、**安いものから**選ぶ。
  *
- * クリスタルは個数ではなく合計いくらぶんで数える（族の縛りを外した以上、
- * 個数で数えると安い鉱物を並べるだけで済んでしまうため）。安い順に取るのは、
- * 使いすぎを最小にするため。それでも1個で足りてしまう高価な鉱物しか
- * 持っていない場合は、その1個を丸ごと使うことになる。
+ * クリスタルは個数ではなく**ポイント**で数える。個数で数えると、安い鉱物を
+ * 並べるだけで済んでしまうため。ポイントは希少度から出た価格そのものなので、
+ * 同じポイントならどの鉱物で払っても進み方は変わらない。
  *
- * 返り値の picks は { "001": 個数 }、value は実際に使う合計。
+ * `family` を渡すと、その族のものだけから選ぶ。`"*"`（ANY_FAMILY）と
+ * 省略時は族を問わない。安い順に取るのは、使いすぎを最小にするため。
+ *
+ * 返り値の picks は { "001": 個数 }、value は実際に使う合計ポイント。
  */
-export function pickCrystals(owned, byId, need) {
+export function pickCrystals(owned, byId, need, family = ANY_FAMILY) {
   const picks = {};
   let value = 0;
   if (need <= 0) return { picks, value, enough: true };
 
   const stock = Object.entries(owned || {})
-    .filter(([id, n]) => n > 0 && byId?.[id])
-    .map(([id, n]) => ({ id, n, price: crystalPrice(byId[id].scarcity) }))
+    .filter(([id, n]) => n > 0 && byId?.[id] &&
+      (family === ANY_FAMILY || byId[id].family === family))
+    .map(([id, n]) => ({ id, n, price: crystalPoints(byId[id].scarcity) }))
     .sort((a, b) => a.price - b.price);
 
   for (const c of stock) {
@@ -351,15 +357,24 @@ export function pickCrystals(owned, byId, need) {
  */
 export function craftCheck(db, state, id) {
   const e = db.extensions?.[id];
-  if (!e) return { ok: false, gems: [], crystals: null, below: null, cards: null };
+  if (!e) return { ok: false, gems: [], crystals: [], below: null, cards: null };
 
   const gems = Object.entries(e.cost || {}).map(([g, need]) => ({
     gem: g, need, have: state.gems[g] || 0, ok: (state.gems[g] || 0) >= need,
   }));
 
-  const crystals = e.crystal
-    ? { need: e.crystal, ...pickCrystals(state.crystals, db.crystalById, e.crystal) }
-    : null;
+  /**
+   * **クリスタルは族ごとのポイントで要求する。**（「石英120pt」のように）
+   * 個別の鉱物を名指ししないので、要求は族の数だけに収まり、
+   * どの鉱物で払うかはプレイヤーが決められる。
+   */
+  const crystals = e.crystals
+    ? Object.entries(e.crystals).map(([family, need]) => ({
+        family, need,
+        have: familyPoints(state.crystals, db.crystalById, family),
+        ...pickCrystals(state.crystals, db.crystalById, need, family),
+      }))
+    : [];
 
   const below = e.below
     ? { id: e.below, name: db.extensions[e.below]?.name || e.below,
@@ -373,7 +388,7 @@ export function craftCheck(db, state, id) {
         ok: Object.keys(state.cards || {}).length >= e.cards }
     : null;
 
-  const ok = gems.every(g => g.ok) && (!crystals || crystals.enough)
+  const ok = gems.every(g => g.ok) && crystals.every(c => c.enough)
           && (!below || below.ok) && (!cards || cards.ok);
   return { ok, gems, crystals, below, cards };
 }
@@ -550,18 +565,32 @@ export function crystalPrice(scarcity) {
 export const CRYSTAL_UNIT = 50;
 
 /**
- * クリスタルがクラフトに寄せる重み。**払った GUM そのもの。**
+ * **クリスタル1個ぶんのポイント。払った GUM そのもの。**
  *
- * こうしておくと、同じ GUM を使うかぎり、どの鉱物を買っても
- * クラフトの進み方が変わらない。安い鉱物を回し続けるのが得、
- * という抜け道が生まれない。
+ * クラフトは個別の鉱物ではなく「石英120pt」のように**族ごとのポイント**で要求する。
+ * 個別の鉱物を名指しすると、種類が増えるほどレシピが読めなくなり、
+ * たまたま持っていない1種で詰まる。族ごとなら、要求は族の数だけに収まる。
  *
- * **族を教科に結び付けるのはやめた。** 貴金属は希少度が低く価格が高いので、
- * 族と教科を結ぶと、教科ごとに手に入る価値が大きく偏る。鉱物ごとの違いは
- * 豆知識（`fact`）が担い、仕組みの上では差を付けない。
- * `family` は図鑑の見出しとして残してあるだけで、効果には使わない。
+ * 希少度 × 価格 は常に 50 なので、ポイントを価格と同じにしておけば、
+ * 同じ GUM で得られるポイントはどの鉱物でも変わらない。**族を教科に結び付けても、
+ * 族の中でも族の間でも、有利不利は生まれない。** 120ptを水晶で払っても
+ * 紫水晶で払っても同じだけ進む。
+ *
+ * 安い鉱物を回し続けるのが得、という抜け道も生まれない。
  */
-export const crystalValue = scarcity => crystalPrice(scarcity);
+export const crystalPoints = scarcity => crystalPrice(scarcity);
+
+/** 持っているクリスタルのうち、ある族のぶんの合計ポイント */
+export function familyPoints(owned, byId, family = ANY_FAMILY) {
+  return Object.entries(owned || {}).reduce((sum, [id, n]) => {
+    const c = byId?.[id];
+    if (!c || (family !== ANY_FAMILY && c.family !== family)) return sum;
+    return sum + crystalPoints(c.scarcity) * (n || 0);
+  }, 0);
+}
+
+/** 旧名。中身は crystalPoints と同じ */
+export const crystalValue = crystalPoints;
 
 /**
  * ショップの品揃え。**固定で、安い順。**

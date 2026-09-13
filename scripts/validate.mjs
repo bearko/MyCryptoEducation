@@ -288,7 +288,29 @@ for (const [k, e] of Object.entries(extensions)) {
       err(k, `下位 "${e.below}" のレアリティが1段下ではありません（${b.rarity}）`);
     else if (b.line !== e.line) err(k, `下位 "${e.below}" が別の系統です（${b.line}）`);
   }
-  if (e.rarity === "Common" && e.crystal) err(k, "Commonにクリスタルを要求しないでください");
+  if (e.crystal !== undefined)
+    err(k, "crystal（族を問わない合計）は廃止しました。crystals に族ごとのポイントで書いてください");
+  if (e.rarity === "Common" && e.crystals) err(k, "Commonにクリスタルを要求しないでください");
+  // クラフトは族ごとのポイントで要求する。個別の鉱物を名指ししない
+  if (e.crystals) {
+    const fams = crystals.families || [];
+    const keys = Object.keys(e.crystals);
+    if (!keys.length) err(k, "crystals が空です");
+    keys.forEach(f => {
+      if (f !== "*" && !fams.includes(f)) err(k, `未知の族 "${f}"`);
+      const v = e.crystals[f];
+      if (!Number.isInteger(v) || v <= 0) err(k, `${f} のポイントが正の整数ではありません (${v})`);
+    });
+    if (keys.includes("*") && keys.length > 1)
+      err(k, "族を問わない要求（*）は、ほかの族と混ぜられません");
+    // 要求する族は、その品が広げる教科の族であること（どの教科を解くかの誘導になる）
+    if (!keys.includes("*")) {
+      const want = new Set(e.subs.map(x => crystals.subjectToFamily?.[x]));
+      keys.forEach(f => {
+        if (!want.has(f)) err(k, `族 "${f}" は、この品の分野（${e.subs.join("・")}）と噛み合いません`);
+      });
+    }
+  }
   if (e.rarity === "Legendary" && !e.cards)
     err(k, "Legendaryには知識カードの所持を条件に入れてください（素材だけで最上位が手に入らないように）");
   if (!existsSync(join(ROOT, `public/extensions/${k}.webp`)))
@@ -304,7 +326,21 @@ for (const [line, rs] of Object.entries(byLine)) {
 }
 
 /* ---- クリスタル ---- */
-const FAMILIES = ["貴金属", "宝石", "元素", "鉱石", "生物起源", "石英"];
+const FAMILIES = crystals.families || [];
+if (FAMILIES.length !== 6) err("crystals.json", `families は6族にしてください（いまは${FAMILIES.length}）`);
+// 教科 ↔ 族 は1対1。どちらかが欠けると、その教科を解いても貯まらない族ができる
+{
+  const map = crystals.subjectToFamily || {};
+  SUBJECTS.forEach(s => {
+    if (!map[s]) err("crystals.json", `教科 "${s}" に対応する族がありません`);
+    else if (!FAMILIES.includes(map[s])) err("crystals.json", `未知の族 "${map[s]}"（${s}）`);
+  });
+  const used = Object.values(map);
+  if (new Set(used).size !== used.length)
+    err("crystals.json", "教科と族が1対1になっていません（同じ族が2教科に付いています）");
+  FAMILIES.filter(f => !used.includes(f))
+    .forEach(f => err("crystals.json", `族 "${f}" に対応する教科がありません`));
+}
 const crystalIds = new Set();
 for (const c of crystals.crystals || []) {
   const id = c.id || "(id未設定)";
@@ -320,6 +356,16 @@ for (const c of crystals.crystals || []) {
   // 図鑑のアートが取れているか
   if (!existsSync(join(ROOT, `public/materials/crystals/${c.id}.webp`)))
     err(id, "アートが public/materials/crystals にありません");
+}
+
+// 族が空だと、その族を要求するレシピが永久に満たせなくなる
+{
+  const n = {};
+  (crystals.crystals || []).forEach(c => { n[c.family] = (n[c.family] || 0) + 1; });
+  FAMILIES.forEach(f => { if (!n[f]) err("crystals.json", `族 "${f}" に鉱物が1つもありません`); });
+  console.log("\n族ごとの鉱物 ・ " + FAMILIES.map(f =>
+    `${f} ${n[f] || 0}種（${crystals.subjectToFamily
+      ? Object.entries(crystals.subjectToFamily).find(([, v]) => v === f)?.[0] ?? "-" : "-"}）`).join(" / "));
 }
 
 /* ---- 在庫（同じ問題が繰り返し出る原因になる） ---- */
