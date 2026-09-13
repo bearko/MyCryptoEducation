@@ -51,9 +51,11 @@ function defaults() {
     days: {},
 
     // 現在のセッション。noReward は記録からの再挑戦（報酬なし）
+    // hard は問題IDごとの難モードの状態。4択に降りたら "choice" が入る。
+    // 降りるかどうかは毎問プレイヤーが決める（決定2）。前の問題を引き継がない
     run: { ids: [], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
-           results: {}, noReward: false, done: false },
+           results: {}, noReward: false, done: false, hard: {} },
 
     // チャレンジ。3問構成で、qi が何問目か、results が各問の正誤
     challenge: { heroId: null, phase: "intro", breakdown: null, damage: 0,

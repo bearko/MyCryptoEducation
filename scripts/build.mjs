@@ -52,7 +52,9 @@ await embed("public/backgrounds/small", "b");
 await embed("public/commons/small", "p");
 
 /* --- スクリプト（import/export を剥がして結合） --- */
-const ORDER = ["normalize.js", "engine.js", "data.js", "state.js", "views.js", "main.js"];
+/* answer-mode.js は engine / data / views が使うので先頭に置く */
+const ORDER = ["answer-mode.js", "normalize.js", "engine.js", "data.js",
+               "state.js", "views.js", "main.js"];
 const sources = [];
 for (const f of ORDER) {
   let src = await read(`src/${f}`);
