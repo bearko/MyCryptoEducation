@@ -622,24 +622,26 @@ check("クリスタルが無いとUncommonは作れない",
   d.querySelector('.mini[data-k="2003"]').disabled);
 // エリートペン（国語・外国語）は 生物起源30pt ＋ 宝石20pt。
 // **別の族をいくら積んでも作れない。** ここが族ごとの要求の要
-ev('S.crystals={"003":30};render()');   // 銅（貴金属）を240pt ぶん持っていても
-check("別の族のクリスタルでは作れない",
+ev('S.points={"貴金属":240};render()');   // 貴金属を240pt 持っていても
+check("別の族のポイントでは作れない",
   d.querySelector('.mini[data-k="2003"]').disabled,
-  `貴金属 ${ev('familyPoints(S.crystals, DB.crystalById, "貴金属")')}pt`);
-ev('S.crystals={"046":1,"036":3};render()');   // 琥珀102pt（生物起源）＋ ジルコニア19pt×3（宝石）
+  `貴金属 ${ev('familyPoints(S, "貴金属")')}pt`);
+ev('S.points={"生物起源":102,"宝石":57};S.crystals={"046":1,"036":3};render()');
 check("要求された族があれば作れる", !d.querySelector('.mini[data-k="2003"]').disabled,
-  `生物起源 ${ev('familyPoints(S.crystals, DB.crystalById, "生物起源")')}pt / 宝石 ${
-    ev('familyPoints(S.crystals, DB.crystalById, "宝石")')}pt`);
+  `生物起源 ${ev('familyPoints(S, "生物起源")')}pt / 宝石 ${ev('familyPoints(S, "宝石")')}pt`);
 check("族ごとの持ち高と要求を並べて見せる",
   /生物起源 \d+\/30pt/.test(txt()) && /宝石 \d+\/20pt/.test(txt()), txt().slice(0, 60));
-check("使うクリスタルを前もって見せる", txt().includes("使うクリスタル"), txt().slice(0, 40));
 d.querySelector('.mini[data-k="2003"]').click();
-check("要求ぶんだけ、安いものから減る",
-  !ev(`S.crystals["046"]`) && ev(`S.crystals["036"]`) === 1,
+check("要求ぶんだけポイントが減る",
+  ev('familyPoints(S, "生物起源")') === 72 && ev('familyPoints(S, "宝石")') === 37,
+  `生物起源 ${ev('familyPoints(S, "生物起源")')}pt / 宝石 ${ev('familyPoints(S, "宝石")')}pt`);
+// **鉱物そのものは減らない。** 減らすと豆知識が読めなくなり、図鑑が欠ける
+check("クラフトしても図鑑は欠けない",
+  ev(`S.crystals["046"]`) === 1 && ev(`S.crystals["036"]`) === 3,
   `琥珀 ${ev(`S.crystals["046"] || 0`)} / ジルコニア ${ev(`S.crystals["036"] || 0`)}`);
 
 // Rare は下位を1つ食う
-ev('S.gems={ifrit:0,levia:8,tiamat:0,garuda:0};S.crystals={"046":1,"036":4};S.exts={};render()');
+ev('S.gems={ifrit:0,levia:8,tiamat:0,garuda:0};S.points={"生物起源":90,"宝石":60};S.exts={};render()');
 check("下位が無いとRareは作れない", d.querySelector('.mini[data-k="3003"]').disabled,
   `2003の所持 ${ev(`S.exts["2003"] || 0`)}`);
 ev(`S.exts["2003"]=1;render()`);
@@ -648,13 +650,13 @@ d.querySelector('.mini[data-k="3003"]').click();
 check("Rareを作ると下位が消える", !ev(`S.exts["2003"]`), `残り ${ev(`S.exts["2003"] || 0`)}`);
 
 // Legendary は知識カードの所持も条件
-ev('S.gems={ifrit:0,levia:12,tiamat:0,garuda:0};S.crystals={"046":3,"036":9};S.exts={"4003":1};render()');
+ev('S.gems={ifrit:0,levia:12,tiamat:0,garuda:0};S.points={"生物起源":240,"宝石":160};S.exts={"4003":1};render()');
 const cardCount0 = ev("Object.keys(S.cards).length");
 check("知識カードが足りないとLegendaryは作れない",
   cardCount0 >= 30 || d.querySelector('.mini[data-k="5003"]').disabled,
   `カード ${cardCount0}枚`);
 
-ev('S.view="craft";S.craftTab="ペン";S.gems={ifrit:0,levia:0,tiamat:0,garuda:0};S.exts={};S.crystals={};render()');
+ev('S.view="craft";S.craftTab="ペン";S.gems={ifrit:0,levia:0,tiamat:0,garuda:0};S.exts={};S.crystals={};S.points={};render()');
 d.querySelector(".mapbtn").click();
 
 ev('S.view="home";render()');
@@ -879,6 +881,93 @@ check("どの鉱物も GUM あたりの重みが同じ", ev(`(() => {
     .map(c => c.name))`));
 check("クラフトの重みは払ったGUMそのもの",
   ev(`DB.crystals.crystals.every(c => crystalPoints(c.scarcity) === crystalPrice(c.scarcity))`));
+/* ---- クリスタルの抽選（原則2の唯一の例外）---- */
+// rng を渡せるので結果を再現できる。0 を返せば必ず当たり、1 なら必ず外れ
+check("確率で落ちる。rng を渡せば結果は決まる", ev(`(() => {
+  const always = drawCrystal(DB, "理科", 5, () => 0);
+  const never  = drawCrystal(DB, "理科", 5, () => 0.999999);
+  return !!always && DB.crystalById[always].family === "元素" && never === null;
+})()`) === true, ev(`String(drawCrystal(DB, "理科", 5, () => 0))`));
+
+check("外れても失うものはない", ev(`(() => {
+  // 抽選は state を触らない純粋関数。外れは null を返すだけ
+  const before = JSON.stringify(S.points);
+  drawCrystal(DB, "国語", 5, () => 0.999999);
+  return JSON.stringify(S.points) === before;
+})()`) === true);
+
+// **どの族を貯めても、規定ポイントに届くまでの時間は変わらない。**
+// 出にくい族は1回の当たりが大きく、出やすい族は小刻みに入る
+check("どの族でも1問あたりの期待ポイントは揃う", ev(`(() => {
+  const e = SUBJECTS.map(sub => {
+    const f = DB.subjectToFamily[sub];
+    return dropRate(DB, f, 5) * familyExpect(DB, f);
+  });
+  return Math.max(...e) / Math.min(...e) <= 1 + RARE_BONUS + 1e-9;
+})()`) === true, ev(`JSON.stringify(SUBJECTS.map(sub => {
+  const f = DB.subjectToFamily[sub];
+  return +(dropRate(DB, f, 5) * familyExpect(DB, f)).toFixed(2);
+}))`));
+
+check("レア寄りの族のほうが、わずかに期待値が高い", ev(`(() => {
+  const v = f => dropRate(DB, f, 5) * familyExpect(DB, f);
+  // 宝石（当たりが最も重い）> 元素（最も軽い）。差は RARE_BONUS のぶんだけ
+  return v("宝石") > v("元素") && v("宝石") / v("元素") <= 1 + RARE_BONUS + 1e-9;
+})()`) === true,
+  ev(`"宝石 " + (dropRate(DB,"宝石",5)*familyExpect(DB,"宝石")).toFixed(2) +
+      " / 元素 " + (dropRate(DB,"元素",5)*familyExpect(DB,"元素")).toFixed(2)`));
+
+check("出にくい族ほど1回の当たりが大きい", ev(`(() => {
+  const fam = SUBJECTS.map(s => DB.subjectToFamily[s])
+    .map(f => ({ f, h: dropRate(DB, f, 5), e: familyExpect(DB, f) }))
+    .sort((a, b) => a.h - b.h);
+  return fam.every((x, i) => i === 0 || x.e <= fam[i - 1].e);
+})()`) === true);
+
+// 族の中の出やすさは図鑑の希少度そのもの。こちらで盛っていない
+check("族の中は希少度そのままの重み", ev(`(() => {
+  // 種を固定した乱数で2万回引き、出た割合が希少度の割合と合うか見る
+  let x = 123456789;
+  const rnd = () => (x = (x * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const hit = {};
+  const N = 20000;
+  for (let i = 0; i < N; i++) {
+    // drawCrystal は rng を2回呼ぶ。1回目は当たり判定、2回目がどれを引くか。
+    // 1回目を必ず当たりにして、2回目だけを乱数にする
+    let call = 0;
+    const id = drawCrystal(DB, "理科", 10, () => (++call === 1 ? 0 : rnd()));
+    if (id) hit[id] = (hit[id] || 0) + 1;
+  }
+  const list = DB.crystals.crystals.filter(c => c.family === "元素");
+  const sum = list.reduce((a, c) => a + c.scarcity, 0);
+  const total = Object.values(hit).reduce((a, b) => a + b, 0);
+  // いちばんありふれた鉄と、いちばん稀なセシウムで、期待割合とのずれを見る
+  return list.every(c => {
+    const want = c.scarcity / sum, got = (hit[c.id] || 0) / total;
+    return Math.abs(got - want) < 0.03;
+  });
+})()`) === true, "出やすさが希少度とずれている");
+
+check("いちばんありふれた鉱物がいちばん出る", ev(`(() => {
+  const list = DB.crystals.crystals.filter(c => c.family === "元素")
+    .sort((a, b) => b.scarcity - a.scarcity);
+  return list[0].name === "鉄" && crystalPoints(list[0].scarcity) <
+         crystalPoints(list[list.length - 1].scarcity);
+})()`) === true);
+
+check("いちばん難しい問題でも、期待ポイントは揃ったまま", ev(`(() => {
+  const e = SUBJECTS.map(sub => {
+    const f = DB.subjectToFamily[sub];
+    return dropRate(DB, f, 10) * familyExpect(DB, f);   // 確率が1で頭打ちになると崩れる
+  });
+  return Math.max(...e) / Math.min(...e) <= 1 + RARE_BONUS + 1e-9;
+})()`) === true, "どこかの族で確率が頭打ちになっている");
+
+check("難しい問題ほど当たりやすい",
+  ev('dropRate(DB, "元素", 10)') > ev('dropRate(DB, "元素", 1)'));
+
+check("確率は1を超えない", ev(`SUBJECTS.every(s => dropRate(DB, DB.subjectToFamily[s], 10) <= 1)`) === true);
+
 check("教科と族は1対1", ev(`(() => {
   const map = DB.subjectToFamily, fam = DB.families;
   const used = SUBJECTS.map(s => map[s]);

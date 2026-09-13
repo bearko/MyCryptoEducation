@@ -39,7 +39,8 @@ function defaults() {
     runs: 0,
     score: 0,
 
-    crystals: {},         // 買ったクリスタル { "001": 個数, ... }
+    crystals: {},         // 出会ったクリスタル { "001": 個数, ... }。図鑑。減らない
+    points: {},           // 族ごとのポイント { "石英": 120, ... }。クラフトが払うのはこちら
 
     // 称号の判定に使う積み上げ
     totalRight: 0,        // 累計の正解数
@@ -54,7 +55,7 @@ function defaults() {
     // hard は問題IDごとの難モードの状態。4択に降りたら "choice" が入る。
     // 降りるかどうかは毎問プレイヤーが決める（決定2）。前の問題を引き継がない
     run: { ids: [], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-           gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0,
+           gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [],
            results: {}, noReward: false, done: false, hard: {} },
 
     // チャレンジ。3問構成で、qi が何問目か、results が各問の正誤
