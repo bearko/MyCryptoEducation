@@ -186,8 +186,11 @@ const answerNow = (correct = true) => {
   const btns = [...d.querySelectorAll(".choices > .choice")];
   if (!btns.length) return false;
   if (mode === "elimination") {
-    if (!correct) btns[a].click();
+    // 誤っているものを3つ選んでから決める。正解を選んでいたら不正解になる
+    if (!correct) { btns[a].click(); for (let i = 0, k = 1; i < n && k < n - 1; i++)
+      if (i !== a) { btns[i].click(); k++; } }
     else for (let i = 0; i < n; i++) if (i !== a) btns[i].click();
+    d.getElementById("esubmit").click();
   } else {
     btns[correct ? a : (a + 1) % n].click();
   }
@@ -235,33 +238,47 @@ const e1 = JSON.parse(ev(elimRun));
 check("消去法の問題がある", e1.n === 3, JSON.stringify(e1));
 check("消去法では選択肢が出る", d.querySelectorAll(".choices.elim > .choice").length === 4,
   String(d.querySelectorAll(".choices > .choice").length));
-check("何を求められているかが出る", (d.getElementById("elimleft")?.textContent || "").includes("3つ消す"),
-  d.getElementById("elimleft")?.textContent);
+// 4択と消去法は選択肢が並ぶ見た目が同じで、押す意味は正反対。読まずに分かる必要がある
+check("何をするかを帯で出す", (d.querySelector(".band.cut .bmain")?.textContent || "")
+  .includes("誤っているものを 3つ 選ぶ"), d.querySelector(".band")?.textContent);
+check("4択とは色で分ける", !!d.querySelector(".band.cut") && !d.querySelector(".band.pick"));
+check("いくつ選んだかが出る", d.getElementById("ecnt").textContent === "0 / 3",
+  d.getElementById("ecnt")?.textContent);
 check("4択へ降りる道が常にある", !!d.getElementById("tochoice"));
+check("選ぶ前は答えられない", d.getElementById("esubmit").disabled);
 
-// 違うものを3つ潰すと正解になる
+// 3つそろうまで答えられない。1手目で終わらないので、取りちがえても取り返せる
 const wrong = [0, 1, 2, 3].filter(i => i !== e1.answer);
 [...d.querySelectorAll(".choices > .choice")][wrong[0]].click();
-check("潰した選択肢に印がつく",
-  d.querySelectorAll(".choice.gone").length === 1, String(d.querySelectorAll(".choice.gone").length));
-check("残りの数が減る", (d.getElementById("elimleft")?.textContent || "").includes("あと2"),
-  d.getElementById("elimleft")?.textContent);
-[...d.querySelectorAll(".choices > .choice")][wrong[1]].click();
-[...d.querySelectorAll(".choices > .choice")][wrong[2]].click();
+check("選んだ選択肢に印がつく",
+  d.querySelectorAll(".choice.x").length === 1, String(d.querySelectorAll(".choice.x").length));
+check("数が増える", d.getElementById("ecnt").textContent === "1 / 3",
+  d.getElementById("ecnt").textContent);
+check("1つでは答えられない", d.getElementById("esubmit").disabled);
+[...d.querySelectorAll(".choices > .choice")][wrong[0]].click();
+check("押し直すと戻せる", d.querySelectorAll(".choice.x").length === 0 &&
+  d.getElementById("ecnt").textContent === "0 / 3");
+check("選んだだけでは決まらない", ev("S.run.picked") === null);
+
+wrong.forEach(i => [...d.querySelectorAll(".choices > .choice")][i].click());
+check("3つそろうと答えられる", !d.getElementById("esubmit").disabled);
+d.getElementById("esubmit").click();
 await wait(60);
-check("3つ潰せば正解になる", ev("S.run.results['" + e1.id + "']") === "ok",
+check("誤りを3つ消せば正解になる", ev("S.run.results['" + e1.id + "']") === "ok",
   ev("S.run.results['" + e1.id + "']"));
 check("正解でも解説は出る", txt().includes("知識カード"));
 
-// 正解を潰したらそこで終わり
+// 正解を混ぜて消したら不正解
 const e2 = JSON.parse(ev(`(() => {
   S.run.i = 1; S.run.picked = null; S.run.hintsUsed = 0; render();
   const id = S.run.ids[1];
   return JSON.stringify({ id, answer: DB.byId[id].answer });
 })()`));
-[...d.querySelectorAll(".choices > .choice")][e2.answer].click();
+const mix = [e2.answer, ...[0, 1, 2, 3].filter(i => i !== e2.answer).slice(0, 2)];
+mix.forEach(i => [...d.querySelectorAll(".choices > .choice")][i].click());
+d.getElementById("esubmit").click();
 await wait(60);
-check("正解を潰したら終わる", ev("S.run.results['" + e2.id + "']") === "ng",
+check("正解を消したら外れる", ev("S.run.results['" + e2.id + "']") === "ng",
   ev("S.run.results['" + e2.id + "']"));
 check("外しても解説と知識カードは出る（原則3）",
   txt().includes("面白い単元") && txt().includes("知識カード"));
