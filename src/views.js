@@ -478,12 +478,13 @@ function vQuiz() {
         <button class="btn" id="rsubmit" disabled>この幅で答える</button>
         <p class="fine">狭く答えるほど高い点になります。紀元前はマイナスで書いてください（例 −221）。</p>
       </div>`
-    : `${mode === "elimination"
-        ? `<div class="elimtop" id="elimleft">違うものを${q.choices.length - 1}つ消す</div>` : ""}
+    : `${modeBand(q, mode)}
       <div class="choices${mode === "elimination" ? " elim" : ""}">${q.choices.map((t, i) =>
       `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
-      ${mode === "elimination" ? `<div class="elimbar">
-        <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
+      ${mode === "elimination" ? `
+        <button class="btn" id="esubmit" disabled>選んだ${q.choices.length - 1}つを消す</button>
+        <div class="elimbar">
+          <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
     <div class="hero-row">
       <img class="ava" src="${assetPath.hero(h.id)}" alt="">
       <div><div class="hero-name">${esc(h.name)}</div>
@@ -883,31 +884,62 @@ function drawRetry(q, head) {
 }
 
 /**
- * 消去法。正解を選ぶのではなく、違うものを潰していく。
+ * 何をする画面かを、読まなくても分かるように出す帯。
  *
- * 誤って正解を消したらそこで終わり（不正解）。ダミー選択肢が初めて働く。
+ * 4択と消去法は選択肢が並ぶ見た目が同じなのに、押す意味は正反対になる。
+ * 見分けがつかないと、選んだつもりで消してしまう。**色で区別する。**
+ */
+function modeBand(q, mode) {
+  if (mode === "elimination") {
+    const n = q.choices.length - 1;
+    return `<div class="band cut"><span class="bmain">誤っているものを ${n}つ 選ぶ</span>
+      <span class="bcnt" id="ecnt">0 / ${n}</span></div>`;
+  }
+  if (mode === "choice") {
+    return `<div class="band pick"><span class="bmain">正しいものを 1つ 選ぶ</span></div>`;
+  }
+  return "";
+}
+
+/**
+ * 消去法。正解を選ぶのではなく、違うものを選んで消す。
+ *
+ * **3つそろうまで答えられない。** 1手目で決まると、押す意味を取りちがえた人が
+ * そこで終わってしまう。選び直せるようにして、決めるのは決定ボタンに寄せた。
+ * 文字パネルや数値入力と同じで、確定するまではやり直せる。
+ *
+ * 正解を選んでいたら、そこで不正解になる。ダミー選択肢が初めて働く。
  * 4択へ降りるかどうかは常にプレイヤーの手にあり、システムは勝手に降ろさない
  * （原則3・決定2）。降りてもその問題かぎりで、次の問題ではまた難モードから始まる。
  */
 function wireElimination(q) {
-  const gone = new Set();
-  const left = document.getElementById("elimleft");
+  const need = q.choices.length - 1;
+  const cnt = document.getElementById("ecnt");
+  const submit = document.getElementById("esubmit");
+  const marked = new Set();
+
+  const paint = () => {
+    if (cnt) cnt.textContent = `${marked.size} / ${need}`;
+    if (submit) submit.disabled = marked.size !== need;
+    app.querySelectorAll(".choices > .choice").forEach((b, i) =>
+      b.classList.toggle("x", marked.has(i)));
+  };
   app.querySelectorAll(".choices > .choice").forEach(b => {
     b.onclick = () => {
       if (S.run.picked !== null) return;
       const i = Number(b.dataset.i);
-      if (gone.has(i)) return;
-      if (i === q.answer) return onPick(i, false);   // 正解を消してしまった
-      gone.add(i);
-      b.classList.add("gone");
-      b.disabled = true;
-      const rest = q.choices.length - 1 - gone.size;
-      if (rest === 0) return onPick(q.answer, true);  // 残った1つが答え
-      if (left) left.textContent = `あと${rest}つ`;
+      if (marked.has(i)) marked.delete(i);          // 押し直しで戻せる
+      else if (marked.size < need) marked.add(i);
+      paint();
     };
   });
+  if (submit) submit.onclick = () => {
+    if (S.run.picked !== null || marked.size !== need) return;
+    onPick(q.answer, !marked.has(q.answer));        // 正解を消していたら不正解
+  };
   const down = document.getElementById("tochoice");
   if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
+  paint();
 }
 
 function onPick(idx, forcedOk = null) {
@@ -918,7 +950,7 @@ function onPick(idx, forcedOk = null) {
   S.run.picked = idx;
   if (!S.run.noReward) S.seen[q.id] = 1;
 
-  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit")
+  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, #esubmit")
     .forEach(b => b.disabled = true);
   app.querySelectorAll(".choices > .choice").forEach((b, i) => {
     b.disabled = true;

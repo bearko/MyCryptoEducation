@@ -551,14 +551,29 @@
   .photo figcaption a{color:var(--ink-soft)}
   .hint .photo{margin:8px 0 2px}
 
-  /* 消去法。違うものを潰していく（experience-design-framework の決定4）。
-     何を求められているかは選択肢の「上」に出す。下に置くと、読む前に押してしまう */
-  .elimtop{margin:14px 0 8px;font-size:13px;color:var(--ink-soft);
-    display:flex;align-items:center;gap:7px}
-  .elimtop::before{content:"";width:14px;height:2px;background:var(--pen);flex:none}
-  .choices.elim .choice{border-style:dashed}
-  .choice.gone{opacity:.55;color:var(--ink-faint);border-style:solid;border-color:var(--line);
+  /* 何をする画面かを示す帯。4択と消去法は見た目が同じで意味が正反対なので、
+     読まなくても分かるように色で分ける。選択肢の「上」に置く。
+     下に置くと、読む前に押してしまう */
+  .band{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin:14px 0 9px;padding:8px 12px;border-radius:6px;
+    font-family:var(--gothic);font-size:13.5px;font-weight:600;color:#fff;letter-spacing:.02em}
+  .band .bmain{display:flex;align-items:center;gap:7px}
+  .band .bmain::before{content:"";width:16px;height:16px;flex:none;border-radius:3px;
+    background:rgba(255,255,255,.85)}
+  .band.pick{background:var(--ai)}
+  .band.pick .bmain::before{clip-path:polygon(14% 46%,40% 72%,88% 16%,98% 28%,40% 94%,4% 58%)}
+  .band.cut{background:var(--pen)}
+  .band.cut .bmain::before{clip-path:polygon(16% 0,50% 34%,84% 0,100% 16%,66% 50%,100% 84%,
+    84% 100%,50% 66%,16% 100%,0 84%,34% 50%,0 16%)}
+  .band .bcnt{flex:none;font-family:var(--mincho);font-size:15px;
+    background:rgba(255,255,255,.18);padding:2px 9px;border-radius:4px}
+
+  /* 消去法の選択肢。破線にして、選んだものに×をつける */
+  .choices.elim .choice{border-style:dashed;background:#FCFAF8}
+  .choice.x{opacity:.6;color:var(--ink-faint);border-style:solid;border-color:var(--pen);
     text-decoration:line-through;text-decoration-color:var(--pen);text-decoration-thickness:2px}
+  .choice.x::after{content:"×";position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    font-family:var(--gothic);font-size:17px;font-weight:700;color:var(--pen);opacity:.9}
   .elimbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;
     margin-top:10px;font-size:12.5px;color:var(--ink-soft)}
   .lnk{background:none;border:none;padding:4px 2px;font:inherit;color:var(--ai);
