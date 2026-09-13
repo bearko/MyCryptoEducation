@@ -179,6 +179,16 @@
   .hh-name{font-family:var(--mincho);font-size:20px;font-weight:600;margin-bottom:4px}
   .flavor{font-size:14px;color:var(--ink-soft);line-height:1.8;margin-top:14px;
     padding-left:12px;border-left:2px solid var(--line)}
+  /* 出会ったクリスタル。外れたときは何も出さない（外れを罰に見せないため） */
+  .foundrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .fnd{display:flex;align-items:center;gap:6px;background:var(--paper);
+    border:1px solid var(--line);border-radius:3px;padding:4px 9px;font-size:12.5px}
+  .fnd img{width:26px;height:26px}
+  .fnd b{font-weight:600;color:var(--ink)}
+  .fnd i{font-style:normal;font-size:11px;color:var(--ink-faint)}
+  .gain.found img{width:26px;height:26px;flex:none}
+  .gain.found{align-items:center}
+
   /* クラフト画面の族ごとの持ち高。要求も表示も族ポイントで揃える */
   .fams{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
   .fam{display:flex;align-items:baseline;gap:5px;font-size:12px;color:var(--ink);

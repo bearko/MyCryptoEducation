@@ -5,8 +5,8 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          cellKey, craftableKeys, nextHero, lockedHeroes, nextIndex,
          adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
          titleProgress, earnedTitles, countryOf,
-         shopList, canBuy, crystalPrice, crystalsValue, crystalKinds,
-         familyPoints, ANY_FAMILY,
+         shopList, canBuy, crystalPrice, crystalKinds,
+         familyPoints, ANY_FAMILY, drawCrystal, crystalPoints, dropRate, familyExpect,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
@@ -416,7 +416,7 @@ function startRun(opts = {}) {
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             gems: {}, right: 0, wrong: 0, appliedRight: 0,
             shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
-            gum: 0, results: {}, noReward: !!opts.noReward, done: false, hard: {} };
+            gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {} };
   go("quiz");
 }
 
@@ -573,7 +573,7 @@ function onRange(q) {
   const ok = score > 0;
 
   S.run.picked = { lo: Math.min(lo, hi), hi: Math.max(lo, hi), score, width };
-  const { gained, gum } = grantAnswer(q, ok, score >= RANGE_BONUS_SCORE ? 1 : 0);
+  const { gained, gum, found } = grantAnswer(q, ok, score >= RANGE_BONUS_SCORE ? 1 : 0);
 
   document.getElementById("ra").disabled = true;
   document.getElementById("rb").disabled = true;
@@ -584,7 +584,7 @@ function onRange(q) {
 
   drawHints(q, h);
   S.run.tipOpen = false; S.run.applied = null;
-  drawVerdict(q, h, ok, gained, gum, score);
+  drawVerdict(q, h, ok, gained, gum, score, found);
 }
 
 /**
@@ -643,10 +643,43 @@ function markChoice(btn, ok) {
  * GUM は上乗せしない。1問の上限は10GUMで、難易度は学年だけで決めると
  * 決めてあるため（CLAUDE.md 原則6）。
  */
+/**
+ * クリスタルを1個手に入れる。**図鑑に残し、ポイントに変える。**
+ * 鉱物そのものはクラフトで減りません（減らすと豆知識が読めなくなりますし、
+ * たまに出た高い鉱物が安いレシピに丸ごと食われます）。
+ */
+function takeCrystal(id) {
+  const c = id && DB.crystalById[id];
+  if (!c) return null;
+  S.crystals[c.id] = (S.crystals[c.id] || 0) + 1;
+  S.points[c.family] = (S.points[c.family] || 0) + crystalPoints(c.scarcity);
+  return c.id;
+}
+
+/* 正解1問ぶんの抽選。出会えたら幸運、外れても失うものはない（原則2の唯一の例外） */
+function rollCrystal(q, gum) {
+  const id = takeCrystal(drawCrystal(DB, q.subject, gum));
+  if (id) (S.run.found ||= []).push(id);
+  return id;
+}
+
+/**
+ * 出会ったクリスタルの一行。**外れたときは何も出しません。**
+ * 「出なかった」を画面に出すと、外れが罰のように見えます。
+ */
+function crystalGainHTML(id) {
+  const c = DB.crystalById[id];
+  if (!c) return "";
+  const first = (S.crystals[c.id] || 0) <= 1;
+  return `<div class="gain found"><img src="${assetPath.crystal(c.id)}" alt="">
+    <span>${first ? "はじめて出会った ・ " : ""}<em>${esc(c.name)}</em>
+      ・ ${esc(c.family)} ${crystalPoints(c.scarcity)}pt</span></div>`;
+}
+
 function grantAnswer(q, ok, bonusGem = 0) {
   const gemKey = DB.subjectToGem[q.subject];
   const reward = !S.run.noReward;
-  let gained = 0, gum = 0;
+  let gained = 0, gum = 0, found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
   if (!reward) S.seen[q.id] = S.seen[q.id];   // 再挑戦では出題履歴も動かさない
 
@@ -660,6 +693,7 @@ function grantAnswer(q, ok, bonusGem = 0) {
       gum = gumFor(q);
       S.gum += gum;
       S.run.gum += gum;
+      found = rollCrystal(q, gum);
       S.totalRight++;
       if (q.chapter >= 2) S.crossRight++;
       const country = countryOf(q);
@@ -671,7 +705,7 @@ function grantAnswer(q, ok, bonusGem = 0) {
     if (reward && !S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
   }
   if (reward) S.cards[q.card] = true;
-  return { gained, gum };
+  return { gained, gum, found };
 }
 
 
@@ -986,7 +1020,7 @@ function onPick(idx, forcedOk = null) {
 
   const gemKey = DB.subjectToGem[q.subject];
   const reward = !S.run.noReward;
-  let gained = 0;
+  let gained = 0, found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
   let gum = 0;
   if (ok) {
@@ -999,6 +1033,7 @@ function onPick(idx, forcedOk = null) {
       gum = gumFor(q);
       S.gum += gum;
       S.run.gum += gum;
+      found = rollCrystal(q, gum);
       S.totalRight++;
       if (q.chapter >= 2) S.crossRight++;
       const country = countryOf(q);
@@ -1023,10 +1058,10 @@ function onPick(idx, forcedOk = null) {
   }
 
   S.run.tipOpen = false; S.run.applied = null;
-  drawVerdict(q, h, ok, gained, gum);
+  drawVerdict(q, h, ok, gained, gum, null, found);
 }
 
-function drawVerdict(q, h, ok, gained, gum = 0, rangeScore = null) {
+function drawVerdict(q, h, ok, gained, gum = 0, rangeScore = null, found = null) {
   const head = ok
     ? (rangeScore !== null
         ? (rangeScore === 1000 ? "言い切って、当てた。" : "その幅の中にある。")
@@ -1045,6 +1080,7 @@ function drawVerdict(q, h, ok, gained, gum = 0, rangeScore = null) {
         <span>${esc(DB.gems[gemKey].name)} × ${gained}</span></div>` : ""}
       ${gum ? `<div class="gain gem2"><img src="${assetPath.icon("gum")}" alt="GUM">
         <span>GUM × ${gum} ・ ${esc(q.gradeLabel)}の問題</span></div>` : ""}
+      ${found ? crystalGainHTML(found) : ""}
       ${rangeScore !== null && rangeScore >= RANGE_BONUS_SCORE ? `<div class="gain">
         <span class="seal">＋</span><span>精度 ${rangeScore}点 ・ 魔石がもう1つ</span></div>` : ""}
     </div>
@@ -1155,7 +1191,15 @@ function vResult() {
     ${S.run.shortage ? `<p class="cue">この範囲は在庫が ${S.run.ids.length}問だったので、${S.run.ids.length}問で終わりました。</p>` : ""}
     ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、魔石も知識カードも増えていません。</p>`
     : `<div class="panel">
-      <div class="phead"><h2>獲得した魔石</h2></div>${gemStrip(S.run.gems, "big")}
+      <div class="phead"><h2>今回出会ったもの</h2></div>${gemStrip(S.run.gems, "big")}
+      ${(S.run.found || []).length ? `<div class="foundrow">${
+        [...new Set(S.run.found)].map(id => {
+          const c = DB.crystalById[id], n = S.run.found.filter(x => x === id).length;
+          return `<span class="fnd"><img src="${assetPath.crystal(id)}" alt="">
+            <b>${esc(c.name)}</b>${n > 1 ? `×${n}` : ""}
+            <i>${esc(c.family)} ${crystalPoints(c.scarcity)}pt</i></span>`;
+        }).join("")}</div>`
+        : `<p class="fine">今回はクリスタルに出会いませんでした。次の1問で出るかもしれません。</p>`}
       <p class="fine">所持: ${Object.entries(DB.gems).map(([k, g]) => `${g.el} ${S.gems[k]}`).join(" ・ ")}</p>
       <p class="fine">GUM は難しい問題ほど多く貯まります（小1で1、世界の問題で10）。
         いくつ持っているかはショップで見られます。</p>
@@ -1198,11 +1242,12 @@ function vCraft() {
     <p class="fine">エクステンションは攻撃力ではありません。持っている知識が、どこまで遠くの問いに届くかを広げます。
       <b>到達度を上げるのは知識カードで、装備はそれを最大で2倍にするところまでです。</b></p>
     <div class="fams">${DB.families.map(f => {
-      const pt = familyPoints(S.crystals, DB.crystalById, f);
-      return `<span class="fam ${pt ? "" : "zero"}"><b>${esc(f)}</b>${pt}pt</span>`;
+      const pt = familyPoints(S, f);
+      return `<span class="fam ${pt ? "" : "zero"}" title="${esc(DB.familyToSubject[f] || "")}"
+        ><b>${esc(f)}</b>${pt}pt</span>`;
     }).join("")}</div>
-    <p class="fine">クラフトは個別の鉱物ではなく<b>族ごとのポイント</b>で要求します。
-      ポイントは希少度から決まる価格そのものなので、同じポイントならどの鉱物で払っても同じです。</p>
+    <p class="fine">クラフトは<b>族ごとのポイント</b>で払います。ポイントは鉱物に出会ったときに入り、
+      <b>鉱物そのものは図鑑に残ります</b>（クラフトでは減りません）。</p>
     <div class="seg wrap" id="linetab">${lines.map(l => {
       const n = l.items.filter(i => S.exts[i.id]).length;
       return `<button data-l="${esc(l.line)}" class="${l.line === tab ? "on" : ""}">${esc(l.line)}<i>${n}/5</i></button>`;
@@ -1228,10 +1273,7 @@ function vCraft() {
           ${c.below ? `<span class="${c.below.ok ? "" : "short"}">${esc(c.below.name)} ×1</span>` : ""}
           ${c.cards ? `<span class="${c.cards.ok ? "" : "short"}">知識カード ${c.cards.have}/${c.cards.need}</span>` : ""}
           <button class="mini" data-k="${e.id}" ${c.ok ? "" : "disabled"}>クラフト</button></div>
-        ${c.ok && c.crystals.some(x => Object.keys(x.picks).length) ? `
-          <p class="fine">使うクリスタル: ${c.crystals.flatMap(x => Object.entries(x.picks))
-            .map(([id, n]) => `${esc(DB.crystalById[id].name)} ×${n}`).join(" ・ ")}
-            （安いものから使います）</p>` : ""}
+
       </div>`;
     }).join("")}
     <p class="fine">作った数 ${made} ・ 最上位だけは知識カードの所持も条件です。素材だけで最上位が手に入ると、
@@ -1246,10 +1288,7 @@ function vCraft() {
     const c = craftCheck(DB, S, id);
     if (!c.ok) return;
     c.gems.forEach(g => { S.gems[g.gem] -= g.need; });
-    c.crystals.forEach(x => Object.entries(x.picks).forEach(([cid, n]) => {
-      S.crystals[cid] -= n;
-      if (S.crystals[cid] <= 0) delete S.crystals[cid];
-    }));
+    c.crystals.forEach(x => { S.points[x.family] = (S.points[x.family] || 0) - x.need; });
     if (c.below) {
       S.exts[c.below.id] -= 1;
       if (S.exts[c.below.id] <= 0) {
@@ -1442,7 +1481,7 @@ function vHeroes() {
 function vShop() {
   const list = shopList(DB);
   const kinds = crystalKinds(S);
-  const value = crystalsValue(S.crystals, DB.crystalById);
+  const value = familyPoints(S, ANY_FAMILY);
 
   app.innerHTML = `
   <header><div class="hbar"><div class="place">ショップ</div>
@@ -1454,12 +1493,13 @@ function vShop() {
         <b>${(S.gum || 0).toLocaleString("ja-JP")}</b></span></div>
       <p class="fine">GUM は解いた問題の難しさに応じて貯まります。魔石は買えません。</p>
       <div class="fams">${DB.families.map(f => {
-        const pt = familyPoints(S.crystals, DB.crystalById, f);
+        const pt = familyPoints(S, f);
         return `<span class="fam ${pt ? "" : "zero"}" title="${esc(DB.familyToSubject[f] || "")}"
           ><b>${esc(f)}</b>${pt}pt</span>`;
       }).join("")}</div>
-      ${value ? `<p class="fine">クラフトは族ごとのポイントで要求します
-        （合計 ${value.toLocaleString("ja-JP")}pt ・ 1個ぶんの目安は ${CRYSTAL_UNIT}pt）。</p>` : ""}
+      <p class="fine">クラフトは族ごとのポイントで払います（合計 ${value.toLocaleString("ja-JP")}pt
+        ・ 1個ぶんの目安は ${CRYSTAL_UNIT}pt）。<b>買った鉱物は図鑑に残り、クラフトでは減りません。</b>
+        解いた教科からも、たまに出会います。</p>
     </div>
     <p class="fine">値段は希少度から決まります。<b>どれを買っても、同じ GUM ならクラフトの進み方は同じです。</b>
       選ぶ基準は損得ではなく、どの鉱物を知りたいかです。</p>
@@ -1486,7 +1526,7 @@ function vShop() {
     const c = list.find(x => x.id === b.dataset.c);
     if (!c || !canBuy(S, c.price)) return;
     S.gum -= c.price;
-    S.crystals[c.id] = (S.crystals[c.id] || 0) + 1;
+    takeCrystal(c.id);   // 図鑑に残り、族ポイントに変わる（買っても落ちても同じ扱い）
     S.toast = `<img src="${assetPath.crystal(c.id)}" alt=""><em>${esc(c.name)}</em>`;
     render();
     setTimeout(() => { S.toast = null; drawToast(); }, 1600);

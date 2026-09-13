@@ -318,38 +318,94 @@ export function challengeCard(hero, state) {
 export const ANY_FAMILY = "*";
 
 /**
- * レシピが要求するぶんのクリスタルを、**安いものから**選ぶ。
+ * **クリスタルは確率で落ちます。原則2（ランダム報酬を入れない）の唯一の例外です。**
  *
- * クリスタルは個数ではなく**ポイント**で数える。個数で数えると、安い鉱物を
- * 並べるだけで済んでしまうため。ポイントは希少度から出た価格そのものなので、
- * 同じポイントならどの鉱物で払っても進み方は変わらない。
+ * 一定量が確定で入る形も検討しましたが、報酬が毎回同じだと周回が作業になります。
+ * 「出会えたら幸運」な一撃を混ぜたほうが、地道に集める道を否定せずに変化が出ます。
+ * ただし**射幸心の側に倒さないための縛りを3つ置いています。**
  *
- * `family` を渡すと、その族のものだけから選ぶ。`"*"`（ANY_FAMILY）と
- * 省略時は族を問わない。安い順に取るのは、使いすぎを最小にするため。
+ * 1. **どの族を貯めても、規定ポイントに届くまでの時間は変わりません。**
+ *    出にくい族は1回の当たりが大きく、出やすい族は小刻みに入ります。
+ *    「良い物が出るまで待つ」ほうが得、という構造を作らないためです
+ * 2. 外れても失うものはありません。GUM も知識カードも解説も、正解した時点で確定です
+ * 3. 確率は図鑑の希少度そのもの。こちらで盛ったり削ったりしていません
  *
- * 返り値の picks は { "001": 個数 }、value は実際に使う合計ポイント。
+ * レア寄りの族だけ、待たされるぶんの対価として期待値を最大10%上乗せします（`RARE_BONUS`）。
  */
-export function pickCrystals(owned, byId, need, family = ANY_FAMILY) {
-  const picks = {};
-  let value = 0;
-  if (need <= 0) return { picks, value, enough: true };
+export const RARE_BONUS = 0.10;
 
-  const stock = Object.entries(owned || {})
-    .filter(([id, n]) => n > 0 && byId?.[id] &&
-      (family === ANY_FAMILY || byId[id].family === family))
-    .map(([id, n]) => ({ id, n, price: crystalPoints(byId[id].scarcity) }))
-    .sort((a, b) => a.price - b.price);
-
-  for (const c of stock) {
-    while (c.n > 0 && value < need) {
-      picks[c.id] = (picks[c.id] || 0) + 1;
-      value += c.price;
-      c.n--;
-    }
-    if (value >= need) break;
-  }
-  return { picks, value, enough: value >= need };
+/**
+ * 族の中で1回引いたときの期待ポイント。
+ * 族の中では**希少度がそのまま確率**で、価格は 50 ÷ 希少度 なので、
+ * 期待値は 50 × 種類数 ÷ 族内の希少度合計 になる。
+ */
+function familyStats(db) {
+  if (db.__famStats) return db.__famStats;
+  const st = {};
+  (db.crystals?.crystals || []).forEach(c => {
+    const f = (st[c.family] ||= { list: [], sum: 0 });
+    f.list.push(c);
+    f.sum += c.scarcity;
+  });
+  Object.values(st).forEach(f => {
+    f.expect = f.sum ? f.list.reduce((a, c) =>
+      a + (c.scarcity / f.sum) * crystalPoints(c.scarcity), 0) : 0;
+  });
+  // レア寄りほど当たりが重い。上乗せは対数で測る（宝石が外れ値なので線形だと潰れる）
+  const es = Object.values(st).map(f => f.expect).filter(e => e > 0);
+  const lo = Math.log(Math.min(...es)), hi = Math.log(Math.max(...es));
+  Object.values(st).forEach(f => {
+    f.bonus = f.expect > 0 && hi > lo
+      ? 1 + RARE_BONUS * (Math.log(f.expect) - lo) / (hi - lo) : 1;
+  });
+  return (db.__famStats = st);
 }
+
+/** 族の「1回引いたときの期待ポイント」 */
+export const familyExpect = (db, family) => familyStats(db)[family]?.expect || 0;
+/** レア寄りの族への上乗せ（1.00〜1.10） */
+export const familyBonus = (db, family) => familyStats(db)[family]?.bonus || 1;
+
+/**
+ * 1問正解あたりの当たり確率。
+ *
+ * `当たり確率 × 当たりの期待ポイント` が族によらず `gum × 上乗せ` になるように決める。
+ * **これが「どの族でも所要時間が変わらない」の中身です。**
+ * 難しい問題ほど gum が大きいので、当たりやすくもなる。
+ */
+export function dropRate(db, family, gum) {
+  const e = familyExpect(db, family);
+  if (!e) return 0;
+  return Math.min(1, gum * familyBonus(db, family) / e);
+}
+
+/**
+ * 1問ぶんの抽選。当たれば鉱物のid、外れれば null。
+ * **族の中は希少度そのままの重み**なので、安い鉱物ほどよく出る。
+ * `rng` を渡せる形にしてあるのは、テストで同じ結果を再現するため。
+ */
+export function drawCrystal(db, subject, gum, rng = Math.random) {
+  const family = db.subjectToFamily?.[subject];
+  const f = family && familyStats(db)[family];
+  if (!f || !f.list.length) return null;
+  if (rng() >= dropRate(db, family, gum)) return null;
+
+  let r = rng() * f.sum;
+  for (const c of f.list) { r -= c.scarcity; if (r <= 0) return c.id; }
+  return f.list[f.list.length - 1].id;
+}
+
+/**
+ * 持っている族ポイント。**クラフトが払うのはこれで、鉱物そのものは減りません。**
+ *
+ * 鉱物は手に入れた時点でポイントに変わり、図鑑には残り続けます。こうしないと、
+ * たまに出た高いレア鉱物が安いレシピに丸ごと食われますし、クラフトのたびに
+ * 図鑑が欠けて豆知識が読めなくなります（「手に入れると読める」と決めてあるため）。
+ */
+export const familyPoints = (state, family) =>
+  family === ANY_FAMILY
+    ? Object.values(state.points || {}).reduce((a, b) => a + b, 0)
+    : (state.points || {})[family] || 0;
 
 /**
  * クラフトの可否と、その内訳。画面もホームの通知ドットもこれを見る。
@@ -369,11 +425,10 @@ export function craftCheck(db, state, id) {
    * どの鉱物で払うかはプレイヤーが決められる。
    */
   const crystals = e.crystals
-    ? Object.entries(e.crystals).map(([family, need]) => ({
-        family, need,
-        have: familyPoints(state.crystals, db.crystalById, family),
-        ...pickCrystals(state.crystals, db.crystalById, need, family),
-      }))
+    ? Object.entries(e.crystals).map(([family, need]) => {
+        const have = familyPoints(state, family);
+        return { family, need, have, enough: have >= need };
+      })
     : [];
 
   const below = e.below
@@ -580,18 +635,6 @@ export const CRYSTAL_UNIT = 50;
  */
 export const crystalPoints = scarcity => crystalPrice(scarcity);
 
-/** 持っているクリスタルのうち、ある族のぶんの合計ポイント */
-export function familyPoints(owned, byId, family = ANY_FAMILY) {
-  return Object.entries(owned || {}).reduce((sum, [id, n]) => {
-    const c = byId?.[id];
-    if (!c || (family !== ANY_FAMILY && c.family !== family)) return sum;
-    return sum + crystalPoints(c.scarcity) * (n || 0);
-  }, 0);
-}
-
-/** 旧名。中身は crystalPoints と同じ */
-export const crystalValue = crystalPoints;
-
 /**
  * ショップの品揃え。**固定で、安い順。**
  * 日替わりでランダムに並べ替えると「良い品が出るまで待つ」待機が生まれるので入れない。
@@ -609,11 +652,11 @@ export const canBuy = (state, price) => (state.gum || 0) >= price;
 export const crystalKinds = state =>
   Object.values(state.crystals || {}).filter(n => n > 0).length;
 
-/* 持っているクリスタルの合計の重み。owned は { "001": 個数, ... } */
+/* 図鑑に並んだ鉱物の合計ポイント。**払うのは state.points のほうで、これは記録用** */
 export function crystalsValue(owned, byId) {
   return Object.entries(owned || {}).reduce((sum, [id, n]) => {
     const c = byId?.[id];
-    return c ? sum + crystalValue(c.scarcity) * (n || 0) : sum;
+    return c ? sum + crystalPoints(c.scarcity) * (n || 0) : sum;
   }, 0);
 }
 
