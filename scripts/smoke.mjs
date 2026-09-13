@@ -633,12 +633,12 @@ d.querySelector(".mapbtn").click();
 ev('S.view="home";render()');
 d.getElementById("tochal").click();
 check("挑戦先を選ぶ画面を挟む", txt().includes("どの英雄に挑むか"), txt().slice(0, 80));
-check("削れ具合はここで見せる", /ゲージを \d+% 削れます/.test(txt()), txt().slice(0, 200));
+check("到達度はここで見せる", /到達度 \d+%/.test(txt()), txt().slice(0, 200));
 check("未解放の英雄がすべて並ぶ",
   d.querySelectorAll(".trow").length === ev("lockedHeroes(DB,S).length"),
   `${d.querySelectorAll(".trow").length}件`);
 d.querySelector(".trow").click();
-check("チャレンジ画面", txt().includes("持っている知識で削る"));
+check("チャレンジ画面", txt().includes("持っている知識で届く"));
 d.getElementById("fight").click();
 await wait(1500);
 const hero = ev("DB.heroById[S.challenge.heroId].name");
@@ -682,8 +682,11 @@ check("ゲージが削れているほど問いはやさしくなる", ev(`(() =>
   const q = DB.heroById["4007"].ch.qs[0];
   return challengePrompt(q, 0) === q.v[0] && challengePrompt(q, 3) === q.v[3];
 })()`), "段階と問い方の対応が逆");
-check("Legendaryのゲージ上限は140", ev('DB.heroById["5016"].hp') === 140,
-  String(ev('DB.heroById["5016"].hp')));
+check("レアリティは体力ではなく難度係数になった",
+  ev('DB.heroById["5016"].hp') === undefined &&
+  ev('difficultyFactor(DB.heroById["5016"])') === 1 &&
+  ev('difficultyFactor({rarity:"Common"})') === 0.4,
+  String(ev('difficultyFactor(DB.heroById["5016"])')));
 check("持ち帰るカードはその英雄の関連カードだけ", ev(`(() => {
   const h = DB.heroById["5016"];
   const st = JSON.parse(JSON.stringify(S));
@@ -976,44 +979,104 @@ check("外したら正解の年を明かす", d.getElementById("rlive").textCont
   d.getElementById("rlive").textContent);
 check("外したぶんは記録に残る", ev("S.run.wrong") === 1);
 
-/* ---- 原則1: 装備はゲージで知識を超えない ---- */
-check("知識が0なら装備も効かない", ev(`(() => {
-  const st = JSON.parse(JSON.stringify(S));
-  st.cards = {}; st.owned = { "10001": 1, "10002": 1, "10003": 1 };
-  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };
-  return gaugeBreakdown(DB, st, DB.heroById["3030"]).damage;
-})()`) === 0);
-
-check("装備の合計は知識カードの合計を超えない", ev(`(() => {
-  const st = JSON.parse(JSON.stringify(S));
-  st.cards = {}; st.owned = { "10001": 1, "10002": 1, "10003": 1 };
-  const hero = DB.heroById["3030"];
-  st.cards[hero.rel.cards[0]] = true;                 // 直結1枚 = 8
-  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };   // Legendary +60（噛み合えば120）
-  const g = gaugeBreakdown(DB, st, hero);
-  return g.damage;
-})()`) === 16, "知識8 + 装備は同額まで = 16 のはず");
-
-check("上限が効いたことを内訳に出す", ev(`(() => {
-  const st = JSON.parse(JSON.stringify(S));
-  st.cards = {}; st.owned = { "10001": 1, "10002": 1, "10003": 1 };
-  const hero = DB.heroById["3030"];
-  st.cards[hero.rel.cards[0]] = true;
-  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };
-  return gaugeBreakdown(DB, st, hero).rows.some(r => r.label === "装備は知識を超えない");
-})()`) === true);
-
-check("知識が増えれば装備も効くようになる", ev(`(() => {
+/* ---- 原則1: 到達度を上げるのは知識であって装備ではない ---- */
+const gaugeEnv = `(() => {
   const st = JSON.parse(JSON.stringify(S));
   st.owned = { "10001": 1, "10002": 1, "10003": 1 };
+  st.exts = { "5003": 1 };
+  st.equip = {};
+  st.cards = {};
+  return st;
+})()`;
+
+check("知識が0なら装備も効かない", ev(`(() => {
+  const st = ${gaugeEnv};
+  st.equip = { "10001": "5003" };                       // Legendary を装備
+  const g = gaugeBreakdown(DB, st, DB.heroById["3030"]);
+  return g.percent === 0 && g.gear > 1;                 // 倍率は立つが、かける元が0
+})()`) === true, "知識0でも到達度が出てしまう");
+
+check("装備は到達度を最大で倍までしか上げない", ev(`(() => {
+  const st = ${gaugeEnv};
   const hero = DB.heroById["3030"];
-  st.cards = {}; hero.rel.cards.forEach(c => st.cards[c] = true);   // 直結4枚 = 32
-  // damage は英雄のHPで頭打ちになるので、頭打ち前の raw で見る
-  const bare = gaugeBreakdown(DB, st, hero).raw;
-  st.exts = { "5003": 1 }; st.equip = { "10001": "5003" };
-  const geared = gaugeBreakdown(DB, st, hero).raw;
-  return geared === bare * 2;                                       // 装備は最大で倍まで
+  hero.rel.cards.forEach(c => st.cards[c] = true);
+  const bare = gaugeBreakdown(DB, st, hero);
+  // 英雄をすべて解放し、全員に Legendary を装備しても、倍率は2倍で頭打ち
+  DB.heroes.forEach(x => { st.owned[x.id] = 1; st.equip[x.id] = "5003"; });
+  const geared = gaugeBreakdown(DB, st, hero);
+  return bare.gear === 1 && geared.gear === 2 &&
+         Math.abs(geared.reach - Math.min(1, bare.base * 2 / bare.factor)) < 1e-9;
+})()`) === true, "装備の倍率が2倍を超えている");
+
+check("装備をつければ到達度は動く", ev(`(() => {
+  const st = ${gaugeEnv};
+  const hero = DB.heroById["3030"];
+  st.cards[hero.rel.cards[0]] = true;
+  const bare = gaugeBreakdown(DB, st, hero).percent;
+  st.equip = { "10001": "5003" };
+  return gaugeBreakdown(DB, st, hero).percent > bare;
 })()`) === true);
+
+check("内訳は直結と関連に分かれて出る", ev(`(() => {
+  const st = ${gaugeEnv};
+  const hero = DB.heroById["3030"];
+  st.cards[hero.rel.cards[0]] = true;
+  const other = Object.keys(DB.cardSubject).find(c =>
+    !c.endsWith("（応用）") && hero.rel.subjects.includes(DB.cardSubject[c]) &&
+    !hero.rel.cards.includes(c));
+  st.cards[other] = true;
+  const rows = gaugeBreakdown(DB, st, hero).rows.map(r => r.label);
+  return rows.some(l => l.startsWith("直結する知識カード")) &&
+         rows.some(l => l.startsWith("関連分野の知識カード"));
+})()`) === true);
+
+check("総量ではなく網羅率で測る", ev(`(() => {
+  const st = ${gaugeEnv};
+  const hero = DB.heroById["3030"];
+  hero.rel.cards.forEach(c => st.cards[c] = true);      // 直結を全部＝網羅率1
+  const g = gaugeBreakdown(DB, st, hero);
+  // 直結を埋めきっても、関連分野が空なら基礎は 0.6 のまま。問題が増えても飽和しない
+  return Math.abs(g.base - 0.6) < 1e-9 && g.direct.rate === 1 && g.related.rate === 0;
+})()`) === true);
+
+check("難度係数が低いほど早く届く", ev(`(() => {
+  const st = ${gaugeEnv};
+  Object.keys(DB.cardSubject).forEach(c => st.cards[c] = true);
+  const pct = r => {
+    const h = DB.heroes.find(x => x.rarity === r && x.rel);
+    return h ? gaugeBreakdown(DB, st, h).percent : null;
+  };
+  return pct("Common") >= pct("Legendary");
+})()`) === true);
+
+/* ---- 装備画面の before/after（docs/reward-economy.md §2）---- */
+ev(`window.__cards = JSON.stringify(S.cards);
+    Object.keys(DB.cardSubject).filter(c => !c.endsWith("（応用）"))
+      .forEach((c, i) => { if (i % 5 === 0) S.cards[c] = true; });
+    S.exts={"5003":1,"1001":1}; S.owned["10001"]=1; delete S.equip["10001"];
+    S.heroView="10001"; go("hero")`);
+check("装備画面に到達度が出る", /への到達度/.test(txt()), txt().slice(0, 120));
+check("誰への到達度を見るか選べる", !!d.getElementById("gtarget"),
+  d.querySelector(".reach")?.textContent);
+check("装備の候補に、つけたときの到達度が並ぶ",
+  [...d.querySelectorAll(".eqi em")].length >= 3,
+  `${d.querySelectorAll(".eqi em").length}件`);
+check("装備を切り替えると数字が動く", (() => {
+  const before = d.querySelector(".rnum b").textContent;
+  [...d.querySelectorAll(".eqi")].find(b => b.dataset.k === "1001").click();
+  const after = d.querySelector(".rnum b").textContent;
+  return after !== before && after.includes("→");
+})(), d.querySelector(".rnum b")?.textContent);
+check("分野が噛み合わない装備では動かない", (() => {
+  // 劇作家の羽ペンは国語・外国語。算数・数学のピタゴラスへは効かない
+  [...d.querySelectorAll(".eqi")].find(b => b.dataset.k === "5003").click();
+  return !d.querySelector(".rnum b").textContent.includes("→");
+})(), d.querySelector(".rnum b")?.textContent);
+check("外せば元に戻る", (() => {
+  [...d.querySelectorAll(".eqi")].find(b => b.dataset.k === "").click();
+  return !d.querySelector(".rnum b").textContent.includes("→");
+})(), d.querySelector(".rnum b")?.textContent);
+ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
 
 check("レアリティが上がるほどゲージ寄与も上がる", ev(`(() => {
   const ids = ["1003", "2003", "3003", "4003", "5003"];

@@ -58,7 +58,7 @@ function defaults() {
            results: {}, noReward: false, done: false, hard: {} },
 
     // チャレンジ。3問構成で、qi が何問目か、results が各問の正誤
-    challenge: { heroId: null, phase: "intro", breakdown: null, damage: 0,
+    challenge: { heroId: null, phase: "intro", breakdown: null, reach: 0,
                  tries: 0, done: false, message: "",
                  qi: 0, results: [], gotCard: null },
 
