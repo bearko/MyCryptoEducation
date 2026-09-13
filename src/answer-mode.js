@@ -15,6 +15,25 @@ export function answerText(q) {
   return "";
 }
 
+/* 全角の数字と小数点を半角に寄せる。入力と正解を同じ土俵に乗せるため */
+const HANKAKU = t => String(t).replace(/[０-９．]/g,
+  c => "0123456789.".charAt("０１２３４５６７８９．".indexOf(c)));
+
+/**
+ * 数値の答えを「数」と「単位」に分ける。
+ * 単位は入力させず固定で出す（[ 200 ] W）。打ち間違いを判定の対象にしないため。
+ */
+export function numericParts(q) {
+  const m = answerText(q).trim().match(/^([0-9０-９]+(?:[.．][0-9]+)?)\s*(.*)$/);
+  return m ? { value: HANKAKU(m[1]), unit: m[2] || "" } : null;
+}
+
+/** 数値入力の判定。数として比べるので "07" も "7.0" も通る */
+export function sameNumber(input, expected) {
+  const a = Number(HANKAKU(input)), b = Number(HANKAKU(expected));
+  return Number.isFinite(a) && Number.isFinite(b) && a === b;
+}
+
 /** 難モードでどの方式を使うか */
 export function answerMode(q) {
   if (q.hardMode) return q.hardMode;

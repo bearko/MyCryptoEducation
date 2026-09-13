@@ -169,9 +169,18 @@ const modeNow = () => ev(`(() => {
 const answerNow = (correct = true) => {
   const a = ev("DB.byId[S.run.ids[S.run.i]].answer");
   const n = ev("(DB.byId[S.run.ids[S.run.i]].choices || []).length");
+  const mode = modeNow();
+  if (mode === "numeric") {
+    const want = ev(`JSON.stringify(numericParts(DB.byId[S.run.ids[S.run.i]]))`);
+    const v = JSON.parse(want).value;
+    const typed = correct ? v : String(Number(v) + 1);
+    [...typed].forEach(c => d.querySelector(`.keypad .key[data-k="${c}"]`)?.click());
+    d.getElementById("nsubmit").click();
+    return true;
+  }
   const btns = [...d.querySelectorAll(".choices > .choice")];
   if (!btns.length) return false;
-  if (modeNow() === "elimination") {
+  if (mode === "elimination") {
     if (!correct) btns[a].click();
     else for (let i = 0; i < n; i++) if (i !== a) btns[i].click();
   } else {
@@ -275,6 +284,57 @@ check("難モードでも4択でも報酬は同じ", ev(`(() => {
   const a = DB.questions.find(q => q.mode === "elimination");
   return String(gumFor(a));
 })()`));
+
+/* ---- 数値入力（難モード） ---- */
+const numRun = JSON.parse(ev(`(() => {
+  S.settings.showExplanationOnCorrect = true;
+  const ids = DB.questions.filter(q => q.mode === "numeric").slice(0, 2).map(q => q.id);
+  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null, gems: {},
+            right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
+            noReward: true, done: false, hard: {} };
+  S.view = "quiz"; render();
+  return JSON.stringify({ id: ids[0], want: numericParts(DB.byId[ids[0]]) });
+})()`));
+check("数値入力の問題がある", !!numRun.want, JSON.stringify(numRun));
+check("選択肢は出さない", d.querySelectorAll(".choices > .choice").length === 0);
+check("テンキーが出る", d.querySelectorAll(".keypad .key").length === 12,
+  String(d.querySelectorAll(".keypad .key").length));
+check("単位は固定表示で、打たせない",
+  (d.querySelector(".numdisp b")?.textContent || "") === (numRun.want.unit || ""),
+  `表示 ${d.querySelector(".numdisp b")?.textContent} / 正解の単位 ${numRun.want.unit}`);
+check("入れる前は答えられない", d.getElementById("nsubmit").disabled);
+
+// わざと外す。問題は終わらず、入力欄は生きたまま
+const numWrong = String(Number(numRun.want.value) + 7);
+[...numWrong].forEach(c => d.querySelector(`.keypad .key[data-k="${c}"]`).click());
+d.getElementById("nsubmit").click();
+await wait(30);
+check("外しても問題は終わらない", ev("S.run.picked") === null, String(ev("S.run.picked")));
+check("3択を文言で示す", txt().includes("まだ続けてもいい"), txt().slice(-120));
+check("ヒントと4択への道が並ぶ", !!d.getElementById("rhint") && !!d.getElementById("rdown"));
+check("「このまま挑み直す」に専用ボタンは置かない",
+  d.querySelectorAll(".retry .racts .lnk").length === 2,
+  String(d.querySelectorAll(".retry .racts .lnk").length));
+check("テンキーは生きている", !d.querySelector(".keypad .key").disabled);
+
+// 続ければ正解にできる
+[...numRun.want.value].forEach(c => d.querySelector(`.keypad .key[data-k="${c}"]`).click());
+d.getElementById("nsubmit").click();
+await wait(40);
+check("続けて正解にできる", ev(`S.run.results["${numRun.id}"]`) === "ok",
+  ev(`S.run.results["${numRun.id}"]`));
+check("決着したらテンキーは止まる", d.querySelector(".keypad .key").disabled);
+check("全角でも同じ数として通る", ev(`String(sameNumber("１２", "12"))`) === "true");
+
+// 降りるのはプレイヤーの判断。システムは勝手に降ろさない
+const n2 = ev(`(() => { S.run.i = 1; S.run.picked = null; S.run.hintsUsed = 0; render();
+  return S.run.ids[1]; })()`);
+check("2問目も難モードから始まる", !!d.getElementById("nsubmit"));
+d.getElementById("tochoice").click();
+check("数値入力からも4択に降りられる",
+  d.querySelectorAll(".choices > .choice").length === 4 && !d.getElementById("nsubmit"));
+check("降りたのはその問題だけ", ev(`JSON.stringify(S.run.hard)`) === `{"${n2}":"choice"}`,
+  ev("JSON.stringify(S.run.hard)"));
 
 /* ---- コモンズの写真とクレジット ---- */
 // 実体のバイト列が無くても描画は確かめられるので、台帳に仮の1件を差して戻す
