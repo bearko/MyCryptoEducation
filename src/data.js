@@ -1,5 +1,7 @@
 /* data/ 以下のJSONを読み込んで、参照しやすい形に組み立てる */
 
+import { answerMode, normalizeHints } from "./answer-mode.js";
+
 const SUBJECT_FILES = ["kokugo", "sansu", "rika", "shakai", "gaikokugo", "joho"];
 
 async function json(path) {
@@ -30,6 +32,13 @@ export async function loadDatabase(base = "./data") {
 
 function index(raw) {
   const db = { ...raw };
+  /* ヒントは読み込み時に {text, only} へ揃える。文字列のままのものは
+     only を持たないので、choice でも hidden でも使われる（後方互換）。
+     回答方式もここで1度だけ決めて焼き込む。判定を画面側でやり直さない */
+  db.questions.forEach(q => {
+    q.hints = normalizeHints(q.hints || []);
+    q.mode = answerMode(q);
+  });
   db.byId = Object.fromEntries(db.questions.map(q => [q.id, q]));
   db.heroById = Object.fromEntries(db.heroes.map(h => [h.id, h]));
   db.gems = db.gemstones.gems;

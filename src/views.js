@@ -12,6 +12,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          CHALLENGE_QUESTIONS } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath } from "./data.js";
+import { answerText, hintGroup, hintsFor } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
@@ -541,13 +542,27 @@ function onRange(q) {
   drawVerdict(q, h, ok, gained, gum, score);
 }
 
+/**
+ * いまその問題を、どの回答方式で解いているか。
+ *
+ * 難モードに入るまでは、選択肢が出ない `range` だけが hidden になる。
+ * プレイヤーが4択へ降りたら `S.run.hard[id]` に "choice" が入り、
+ * その問題のあいだだけ選択肢の側に固定される（決定2・不可逆は1問かぎり）。
+ */
+function modeOf(q) {
+  return S.run.hard?.[q.id] || (q.format === "range" ? "range" : "choice");
+}
+
 function drawHints(q, h) {
   const max = fitOf(q, h) ? 3 : 2;
+  // 選択肢が見えているかでヒントの系統が変わる。選択肢を潰す型のヒントは、
+  // 文字パネルや数値入力では意味をなさない（experience-design-framework の決定4）
+  const list = hintsFor(q.hints, hintGroup(modeOf(q)));
   // 画像つきのヒントは最後の一段に添える。ヒントは答えの直前で止めるので、
   // ここに置く画像もそれだけで答えが割れないものに限る（原則5・validate が形だけ見る）
-  const withPhoto = q.imageAt === "hint" ? q.hints.length : -1;
-  document.getElementById("hints").innerHTML = q.hints.slice(0, S.run.hintsUsed)
-    .map((t, i) => `<div class="hint"><b>ヒント ${i + 1}</b>${esc(t)}` +
+  const withPhoto = q.imageAt === "hint" ? Math.min(list.length, max) : -1;
+  document.getElementById("hints").innerHTML = list.slice(0, S.run.hintsUsed)
+    .map((t, i) => `<div class="hint"><b>ヒント ${i + 1}</b>${esc(t.text)}` +
       (i + 1 === withPhoto ? photoHTML(q.image, "hint") : "") + `</div>`).join("");
   const b = document.getElementById("hint");
   if (!b) return;
@@ -1236,7 +1251,7 @@ function vDay() {
         <div class="phead"><h2>${esc(q.subject)} ・ ${esc(q.gradeLabel)}</h2>
           <span class="sub ${ok ? "ok" : "ng"}">${ok ? "解けた" : "面白い単元"}</span></div>
         <p class="dq">${esc(q.prompt)}</p>
-        <p class="da">答え ・ <b>${esc(q.choices[q.answer])}</b></p>
+        <p class="da">答え ・ <b>${esc(answerText(q))}${q.format === "range" ? "年" : ""}</b></p>
         <p class="extt">${esc(q.lesson)}</p>
       </div>`;
     }).join("")}

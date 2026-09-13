@@ -6,6 +6,9 @@ import { readFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+/* 回答方式の判定はここに集約する。アプリと2箇所に分けると必ずズレる */
+import { answerMode, hintGroup, hintsFor, normalizeHints, answerText }
+  from "../src/answer-mode.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const RUN_LENGTH = 10;
@@ -15,6 +18,13 @@ const BANDS = { e: ["e1","e2","e3","e4","e5","e6"], j: ["j1","j2","j3"], w: ["w"
 
 /* 写真に使えるライセンス。CC BY-SA は改変物に波及するので入れない */
 const ALLOWED_LICENSES = [];
+
+/* 難モードで選択肢が見えないとき、ヒントは別系統が要る */
+const HINT_GROUPS = ["choice", "hidden"];
+const HINT_MIN = 3;
+/* 数値の答えから単位を落とした形。ヒントが素の数値を漏らしていないか見る */
+const bareNumber = t => String(t).replace(/[^\d０-９.．]/g, "");
+const squash = t => String(t).replace(/[\s。、，,]/g, "");
 
 const errors = [];
 const warnings = [];
@@ -84,17 +94,55 @@ for (const q of questions) {
     if (new Set(q.choices).size !== q.choices.length) err(id, "選択肢に重複があります");
   }
 
-  if (!Array.isArray(q.hints) || q.hints.length !== 3) err(id, "ヒントは3つ必要です");
+  /* ---- ヒントのグループ ---- */
+  const mode = answerMode(q);
+  const hints = Array.isArray(q.hints) ? normalizeHints(q.hints) : [];
+  for (const h of hints) {
+    if (!h.text || typeof h.text !== "string") err(id, "ヒントに text がありません");
+    if (h.only !== undefined && !HINT_GROUPS.includes(h.only))
+      err(id, `ヒントの only は "choice" か "hidden" です（いま ${JSON.stringify(h.only)}）`);
+  }
+  for (const g of HINT_GROUPS) {
+    const n = hintsFor(q.hints || [], g).length;
+    if (n < HINT_MIN)
+      err(id, `${g} で使えるヒントが ${n}本しかありません（${HINT_MIN}本必要）`);
+  }
+
+  /* 選択肢が見えないモードでは、ヒントが答えや誤答を漏らしていないか見る */
+  if (hintGroup(mode) === "hidden") {
+    const ans = answerText(q).trim();
+    const bare = bareNumber(ans);
+    const wrongs = (q.choices || []).filter((_, i) => i !== q.answer).map(squash);
+    for (const h of hintsFor(q.hints || [], "hidden")) {
+      const body = squash(h.text);
+      const leaks = (ans.length >= 2 && body.includes(squash(ans)))
+        || (bare.length >= 2 && body.includes(bare));
+      if (leaks) err(id, `${mode} のヒントが答え「${ans}」を含んでいます: ${h.text}`);
+      const touched = wrongs.filter(w => w.length >= 2 && body.includes(w));
+      if (touched.length)
+        warn(`${id}: ${mode} のヒントが誤答「${touched.join("・")}」に触れています: ${h.text}`);
+    }
+  }
+
+  /* 文字パネルに要る読み */
+  if (q.reading !== undefined) {
+    if (!/^[ぁ-んァ-ヶー]{2,12}$/.test(q.reading))
+      err(id, `reading は2〜12文字のかな・カナで書いてください（いま ${JSON.stringify(q.reading)}）`);
+  }
+  if (q.hardMode === "panel" && !q.reading)
+    err(id, "文字パネルに振り分けていますが reading がありません");
+
+  if (!Array.isArray(q.hints) || q.hints.length < 3) err(id, "ヒントは3つ以上必要です");
   else if (format === "range") {
     // 第3ヒントが年をそのまま書いていないか
-    if (q.hints[2] && String(q.hints[2]).includes(String(q.year)))
+    if (hints[2]?.text && hints[2].text.includes(String(q.year)))
       warn(`${id}: 第3ヒントに正解の年「${q.year}」がそのまま書かれています`);
   } else {
     // 第3ヒントが正解をそのまま書いていないか
-    const answerText = q.choices?.[q.answer] ?? "";
-    const bare = String(answerText).replace(/[\s。、]/g, "");
-    if (bare.length >= 2 && q.hints[2] && q.hints[2].replace(/[\s。、]/g, "").includes(bare))
-      warn(`${id}: 第3ヒントに正解「${answerText}」がそのまま含まれています`);
+    const correct = q.choices?.[q.answer] ?? "";
+    const bare = squash(correct);
+    if (bare.length >= 2 && hints[2]?.text && squash(hints[2].text).includes(bare))
+      warn(`${id}: 第3ヒントに正解「${correct}」がそのまま含まれています`);
   }
 
   if (q.figure && !figures[q.figure]) err(id, `図版 "${q.figure}" が figures.json にありません`);
@@ -295,6 +343,19 @@ console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エ�
 console.table(table);
 console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ ${RUN_LENGTH}問未満 ${thinCells}` +
   `　（「−」はカリキュラムに無い組み合わせ）`);
+
+/* 難モードの内訳。reading を足すほど消去法から文字パネルへ移る */
+const MODE_LABEL = { elimination: "消去法", numeric: "数値入力", range: "レンジ",
+                     panel: "文字パネル", multi: "複数選択", choice: "4択" };
+const modeTally = {};
+questions.forEach(q => { const m = answerMode(q); modeTally[m] = (modeTally[m] || 0) + 1; });
+const JA_ANSWER = /^[ぁ-んァ-ヶ一-龥ー]{2,12}$/;
+const panelReady = questions.filter(q =>
+  answerMode(q) === "elimination" && JA_ANSWER.test(answerText(q).trim())).length;
+console.log("難モードの内訳 ・ " +
+  Object.entries(modeTally).sort((a, b) => b[1] - a[1])
+    .map(([m, n]) => `${MODE_LABEL[m] || m} ${n}`).join(" / ") +
+  `　（reading を足せば文字パネルに回せる候補 ${panelReady}問）`);
 
 if (warnings.length) {
   console.log(`\n⚠ 警告 ${warnings.length}件`);
