@@ -592,8 +592,8 @@
     padding:8px 14px;border:1.5px solid var(--ink);border-radius:8px;background:var(--card)}
   .panelword span{font-family:var(--mincho);font-size:26px;color:var(--ink);letter-spacing:.08em}
   .panelword span.ph{font-family:var(--gothic);font-size:13px;color:var(--ink-faint);letter-spacing:0}
-  .panelwrap{position:relative;margin:12px 0}
-  .panelgrid{display:grid;gap:7px}
+  .panelwrap{position:relative;margin:12px 0;touch-action:none}
+  .panelgrid{display:grid;gap:7px;touch-action:none}
   .pcell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
     font-family:var(--mincho);font-size:23px;color:var(--ink);background:var(--card);
     border:1px solid var(--line);border-radius:8px;cursor:pointer;touch-action:none;

@@ -675,6 +675,8 @@ function panelHTML(q) {
   </div>`;
 }
 
+let panelUpHandler = null;   // 画面を描き直すたびに張り替える
+
 function wirePanel(q) {
   const p = q.panel, n = p.size;
   const word = document.getElementById("pword");
@@ -718,18 +720,45 @@ function wirePanel(q) {
 
   cells.forEach(b => {
     const i = Number(b.dataset.i);
-    // なぞる操作。指を離すまでは何度でもやり直せる
-    b.onpointerdown = e => { e.preventDefault(); dragging = true; dragged = false; seq = []; visit(i); };
+    b.onpointerdown = e => {
+      e.preventDefault();
+      /* タッチでは pointerdown したマスにポインタが暗黙にキャプチャされる。
+         そのままだと他のマスに pointerenter が飛ばず、1文字目しか反応しない。
+         キャプチャを放して、指の下のマスを自分で拾いにいく */
+      if (b.hasPointerCapture?.(e.pointerId)) b.releasePointerCapture(e.pointerId);
+      dragging = true; dragged = false; seq = [];
+      visit(i);
+    };
+    // マウスやペンではこちらが効く。タッチでは下の pointermove が拾う
     b.onpointerenter = () => { if (dragging) { dragged = true; visit(i); } };
     // なぞれない状況でも片手で操作できるよう、連続タップでも同じ入力が成立する
     b.onclick = () => { if (!dragging) visit(i); };
   });
+
+  /* 指の下にあるマスを座標から引く。キャプチャの有無に左右されない */
+  const wrap = app.querySelector(".panelwrap");
+  if (wrap) wrap.onpointermove = e => {
+    if (!dragging) return;
+    e.preventDefault();
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const cell = under && under.closest ? under.closest(".pcell") : null;
+    if (!cell) return;
+    const i = Number(cell.dataset.i);
+    if (i === seq[seq.length - 1]) return;
+    dragged = true;
+    visit(i);
+  };
+
   const stop = () => {
     if (!dragging) return;
     dragging = false;
     if (dragged) judge();   // 1マス押しただけの指離しでは確定しない
   };
-  document.addEventListener("pointerup", stop, { once: true });
+  // once にすると、最初のタップで外れて以降のなぞりが確定しなくなる
+  if (panelUpHandler) document.removeEventListener("pointerup", panelUpHandler);
+  panelUpHandler = stop;
+  document.addEventListener("pointerup", panelUpHandler);
+  document.addEventListener("pointercancel", panelUpHandler);
   submit.onclick = judge;
   const down = document.getElementById("tochoice");
   if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
