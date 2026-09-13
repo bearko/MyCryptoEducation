@@ -30,12 +30,28 @@ check("ユーザーアイコンが出る", !!d.querySelector(".st-ava"));
 check("称号の枠がある", !!d.querySelector(".st-title"), txt().slice(0, 60));
 check("ユーザー名の枠がある", d.querySelector(".st-name").textContent.trim() === "旅人",
   d.querySelector(".st-name")?.textContent);
-check("GUMは桁区切りで出す", (() => {
+check("GUMの所持数はホームに出さない", (() => {
   ev("S.gum=999999;render()");
-  const ok = d.querySelector(".st-gum").textContent.includes("999,999");
+  const ok = !d.querySelector(".st-gum") && !/999,999/.test(txt());
   ev("S.gum=0;render()");
   return ok;
+})(), txt().slice(0, 120));
+check("一等地は知識マップに渡した", (() => {
+  const el = d.getElementById("tomap");
+  return !!el && /知識 \d+\/\d+/.test(el.textContent) && !!el.querySelector(".mp-bar i");
+})(), d.getElementById("tomap")?.textContent);
+check("GUMはショップ画面で桁区切りで出す", (() => {
+  ev("S.gum=999999;go('shop')");
+  const ok = txt().includes("999,999");
+  ev("S.gum=0;go('home')");
+  return ok;
 })());
+check("知識マップはホームから1タップで開く", (() => {
+  d.getElementById("tomap").click();
+  const ok = txt().includes("どこまで来たか") && !!d.querySelector("table.map");
+  ev('go("home")');
+  return ok;
+})(), txt().slice(0, 80));
 check("電池はAPIが無い環境では隠す", d.getElementById("batt").hidden);
 check("ユーザー名は255文字まで", ev('capName("あ".repeat(400)).length') === 255,
   String(ev('capName("あ".repeat(400)).length')));

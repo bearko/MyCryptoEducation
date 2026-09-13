@@ -344,9 +344,17 @@
     border:1px solid var(--brass);border-radius:3px;padding:2px 10px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .st-title.none{background:rgba(255,255,255,.78);border-color:var(--line);color:var(--ink-faint)}
-  .st-gum{flex:none;display:flex;align-items:center;gap:4px;font-size:clamp(11px,3.2vw,13px);
-    font-weight:600;color:var(--ink)}
-  .st-gum img{width:16px;height:16px}
+  /* GUMの所持数はショップ画面だけに置き、ホームの一等地は知識マップに渡した。
+     査読研究で、プログレスバーとコンセプトマップは学習者の選好が高く、仮想通貨は下位
+     （docs/research-edtech.md §2）。時計と同じ行に置くので、上段の高さは変わらない */
+  .st-map{margin-right:auto;display:flex;align-items:center;gap:6px;font:inherit;cursor:pointer;
+    background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:3px;padding:1px 7px;
+    color:var(--ink-soft)}
+  .st-map b{font-weight:600;color:var(--ink);font-size:clamp(10.5px,3vw,12px);
+    font-variant-numeric:tabular-nums}
+  .st-map .mp-bar{width:clamp(28px,9vw,44px);height:4px;border-radius:2px;background:var(--line);
+    overflow:hidden;flex:none}
+  .st-map .mp-bar i{display:block;height:100%;background:var(--moss)}
   .st-name{background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:11px;
     padding:2px 12px;text-align:center;font-size:clamp(11.5px,3.2vw,13px);font-weight:600;
     color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

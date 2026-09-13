@@ -49,7 +49,7 @@ function render() {
 
   ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
-     calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop }[S.view])();
+     calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop, map: vMap }[S.view])();
   drawToast();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
@@ -209,6 +209,23 @@ function startClock() {
 
 const heroesOwned = () => DB.heroes.filter(h => S.owned[h.id]);
 const cardCount = () => Object.keys(S.cards).length;
+
+/**
+ * 知識マップの埋まり具合。**カードの枚数ではなくマスで数えます。**
+ * 査読研究では、学習者が動機づけられると答えたゲーム要素の1位がプログレスバー、
+ * 次いでコンセプトマップで、仮想通貨は下位でした（docs/research-edtech.md）。
+ * 知識マップはコンセプトマップそのものなので、ここをホームの一等地に出します。
+ */
+function mapProgress() {
+  let done = 0, total = 0;
+  SUBJECTS.forEach(sub => GRADES.forEach(g => {
+    if (!DB.questions.some(q => q.subject === sub && q.grade === g.k)) return;
+    total++;
+    const st = S.cells[sub + "|" + g.k];
+    if (st === "ok" || st === "st") done++;
+  }));
+  return { done, total, rate: total ? done / total : 0 };
+}
 const currentQ = () => DB.byId[S.run.ids[S.run.i]];
 
 function heroFor(q) {
@@ -246,12 +263,16 @@ function vHome() {
   const slides = locked.length > 1 ? [...locked, locked[0]] : locked;
   const craftable = craftableKeys(DB, S);
   const p = S.profile || {};
+  const mp = mapProgress();
 
   app.innerHTML = `
   <div class="home-bg" style="background-image:url('${assetPath.bg("1006")}')"></div>
 
   <div class="layer layer-status">
     <div class="st-top">
+      <button class="st-map" id="tomap" title="知識マップ">
+        <span class="mp-bar"><i style="width:${Math.round(mp.rate * 100)}%"></i></span>
+        <b>知識 ${mp.done}/${mp.total}</b></button>
       <span class="st-batt" id="batt" hidden>${batteryIcon()}<b></b></span>
       <span class="st-clock" id="clock">${clockText()}</span>
     </div>
@@ -260,8 +281,7 @@ function vHome() {
       <span class="st-fields">
         <span class="st-line">
           <span class="st-title ${p.title ? "" : "none"}">${p.title ? esc(p.title) : "称号なし"}</span>
-          <span class="st-gum"><img src="${assetPath.icon("gum")}" alt="GUM">${(S.gum || 0).toLocaleString("ja-JP")}</span>
-        </span>
+          </span>
         <span class="st-name">${esc(p.name || "旅人")}</span>
       </span>
     </button>
@@ -321,6 +341,7 @@ function vHome() {
   document.getElementById("tocal").onclick = openCalendar;
   document.getElementById("tomypage").onclick = () => go("mypage");
   document.getElementById("toshop").onclick = () => go("shop");
+  document.getElementById("tomap").onclick = () => go("map");
   const c = document.getElementById("tochal");
   if (c) c.onclick = () => go("target");
 
@@ -1136,7 +1157,7 @@ function vResult() {
       <div class="phead"><h2>獲得した魔石</h2></div>${gemStrip(S.run.gems, "big")}
       <p class="fine">所持: ${Object.entries(DB.gems).map(([k, g]) => `${g.el} ${S.gems[k]}`).join(" ・ ")}</p>
       <p class="fine">GUM は難しい問題ほど多く貯まります（小1で1、世界の問題で10）。
-        所持 ${S.gum.toLocaleString("ja-JP")} GUM</p>
+        いくつ持っているかはショップで見られます。</p>
     </div>`}
     ${craftable ? `<p class="cue">クラフトできるエクステンションが ${craftable}種あります。</p>` : ""}
     ${next ? `<p class="cue">次に挑めるのは ${esc(next.name)}（${next.rarity}）。いまの知識での到達度は ${
@@ -1376,7 +1397,8 @@ function vHeroes() {
         <img src="${assetPath.hero(h.id)}" alt="">
         <div class="cn">${own ? esc(h.name) : "？？？"}</div>
         <div class="hr r${h.rarity}">${esc(h.rarity)}</div>
-        ${own ? "" : `<div class="cg"><i style="width:${pct}%"></i></div><div class="cgt">${pct}%</div>`}</div>`;
+        ${g ? `<div class="cg"><i style="width:${pct}%"></i></div>
+          <div class="cgt">${own ? "到達" : ""}${pct}%</div>` : ""}</div>`;
     }).join("")}</div>
     <div class="panel" style="margin-top:20px"><div class="phead"><h2>知識マップ</h2>
       <span class="sub">${cardCount()}枚</span></div>${mapHTML()}${LEGEND}</div>`;
@@ -1635,6 +1657,38 @@ function vDay() {
   document.getElementById("back").onclick = () => go("calendar");
   const r = document.getElementById("replay");
   if (r) r.onclick = () => startRun({ ids, noReward: true });
+}
+
+/* ---------- 知識マップ ---------- */
+
+/**
+ * 知識マップだけの画面。ホームのチップから1タップで開く。
+ * **ここに報酬の数字は出しません。** 出すのは、どこが埋まっていてどこが空いているかだけ。
+ */
+function vMap() {
+  const mp = mapProgress();
+  const blanks = SUBJECTS.filter(sub => GRADES.some(g =>
+    DB.questions.some(q => q.subject === sub && q.grade === g.k) &&
+    !S.cells[sub + "|" + g.k]));
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">知識マップ</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="title-wrap"><h1>どこまで来たか</h1><div class="rule"></div>
+      <p class="fine">解いたマスが埋まります。<b>${mp.done} / ${mp.total}マス</b>
+        ・ 知識カード ${cardCount()}枚</p></div>
+    <div class="panel">${mapHTML()}${LEGEND}</div>
+    ${blanks.length ? `<p class="cue">まだ空いているマスが残っているのは
+      ${blanks.map(esc).join("・")}です。</p>`
+      : `<p class="cue">すべてのマスに一度は手が届きました。</p>`}
+    <div class="stack">
+      <button class="btn" id="toquiz2">${RUN_LENGTH}問を解く</button>
+      <button class="btn ghost" id="home3">ホームへ</button></div>
+  </div>`;
+  document.getElementById("back").onclick = () => go("home");
+  document.getElementById("home3").onclick = () => go("home");
+  document.getElementById("toquiz2").onclick = () => go("select");
 }
 
 /* ---------- 挑戦先を選ぶ ---------- */
