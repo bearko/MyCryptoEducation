@@ -550,3 +550,16 @@
     border-top:1px solid var(--line);background:#FBFBF7}
   .photo figcaption a{color:var(--ink-soft)}
   .hint .photo{margin:8px 0 2px}
+
+  /* 消去法。違うものを潰していく（experience-design-framework の決定4）。
+     何を求められているかは選択肢の「上」に出す。下に置くと、読む前に押してしまう */
+  .elimtop{margin:14px 0 8px;font-size:13px;color:var(--ink-soft);
+    display:flex;align-items:center;gap:7px}
+  .elimtop::before{content:"";width:14px;height:2px;background:var(--pen);flex:none}
+  .choices.elim .choice{border-style:dashed}
+  .choice.gone{opacity:.55;color:var(--ink-faint);border-style:solid;border-color:var(--line);
+    text-decoration:line-through;text-decoration-color:var(--pen);text-decoration-thickness:2px}
+  .elimbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;
+    margin-top:10px;font-size:12.5px;color:var(--ink-soft)}
+  .lnk{background:none;border:none;padding:4px 2px;font:inherit;color:var(--ai);
+    text-decoration:underline;cursor:pointer}

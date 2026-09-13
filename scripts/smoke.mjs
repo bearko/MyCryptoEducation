@@ -160,28 +160,41 @@ for (let i = 0; i < 20; i++) {
 }
 check("20セッション連続で重複ゼロ", dup === 0, `${dup}件`);
 
+/* 難モードが既定になったので、答えるときは方式に合わせる。
+   消去法なら違うものを潰し、4択ならそのまま押す（experience-design-framework の決定2・決定4） */
+const modeNow = () => ev(`(() => {
+  const q = DB.byId[S.run.ids[S.run.i]];
+  return S.run.hard[q.id] || (["elimination","range","choice"].includes(q.mode) ? q.mode : "choice");
+})()`);
+const answerNow = (correct = true) => {
+  const a = ev("DB.byId[S.run.ids[S.run.i]].answer");
+  const n = ev("(DB.byId[S.run.ids[S.run.i]].choices || []).length");
+  const btns = [...d.querySelectorAll(".choices > .choice")];
+  if (!btns.length) return false;
+  if (modeNow() === "elimination") {
+    if (!correct) btns[a].click();
+    else for (let i = 0; i < n; i++) if (i !== a) btns[i].click();
+  } else {
+    btns[correct ? a : (a + 1) % n].click();
+  }
+  return true;
+};
+
 /* ---- 修正2: 解説スキップ ---- */
 // レンジ回答が混ざるようになったので、この節は4択だけで組む
-const answerChoice = () => {
-  const i = ev("DB.byId[S.run.ids[S.run.i]].answer");
-  const btns = d.querySelectorAll(".choices > .choice");
-  btns[i].click();
-};
 ev(`(() => {
   const ids = DB.questions.filter(q => (q.format || "choice") === "choice").slice(0, 6).map(q => q.id);
   S.settings.showExplanationOnCorrect = true;
   startRun({ ids });
 })()`);
-let ai = ev("DB.byId[S.run.ids[S.run.i]].answer");
-d.querySelectorAll(".choices > .choice")[ai].click();
+answerNow();
 check("ONなら解説が出る", !!d.getElementById("next") && txt().includes("知識カード"));
 check("ONなら応用編ボタンが出る", !!d.getElementById("tostretch"));
 
 ev('S.settings.showExplanationOnCorrect=false');
 const before = ev("S.run.i");
 d.getElementById("next").click();
-ai = ev("DB.byId[S.run.ids[S.run.i]].answer");
-d.querySelectorAll(".choices > .choice")[ai].click();
+answerNow();
 check("OFFなら解説パネルを出さない", !d.getElementById("next"));
 check("OFFならトーストが出る", !!d.querySelector(".toast"), "toast なし");
 await wait(950);
@@ -189,11 +202,79 @@ check("OFFなら自動で次へ進む", ev("S.run.i") === before + 2, `i=${ev("S
 check("トーストが消えている", !d.querySelector(".toast"));
 
 // 不正解のときは設定に関わらず解説を出す
-const q = ev("JSON.stringify({a:DB.byId[S.run.ids[S.run.i]].answer, n:DB.byId[S.run.ids[S.run.i]].choices.length})");
-const { a, n } = JSON.parse(q);
-d.querySelectorAll(".choices > .choice")[(a + 1) % n].click();
+answerNow(false);
 await wait(60);
 check("OFFでも不正解なら解説が出る", !!d.getElementById("next") && txt().includes("面白い単元"));
+
+/* ---- 消去法（難モード） ---- */
+// 消去法の問題だけを並べたセッションを作って、3つ潰す／正解を潰す／4択へ降りるを見る
+const elimRun = `(() => {
+  S.settings.showExplanationOnCorrect = true;
+  const ids = DB.questions.filter(q => q.mode === "elimination").slice(0, 3).map(q => q.id);
+  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+            gems: {}, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0,
+            results: {}, noReward: true, done: false, hard: {} };
+  S.view = "quiz"; render();
+  return JSON.stringify({ id: ids[0], answer: DB.byId[ids[0]].answer, n: ids.length });
+})()`;
+const e1 = JSON.parse(ev(elimRun));
+check("消去法の問題がある", e1.n === 3, JSON.stringify(e1));
+check("消去法では選択肢が出る", d.querySelectorAll(".choices.elim > .choice").length === 4,
+  String(d.querySelectorAll(".choices > .choice").length));
+check("何を求められているかが出る", (d.getElementById("elimleft")?.textContent || "").includes("3つ消す"),
+  d.getElementById("elimleft")?.textContent);
+check("4択へ降りる道が常にある", !!d.getElementById("tochoice"));
+
+// 違うものを3つ潰すと正解になる
+const wrong = [0, 1, 2, 3].filter(i => i !== e1.answer);
+[...d.querySelectorAll(".choices > .choice")][wrong[0]].click();
+check("潰した選択肢に印がつく",
+  d.querySelectorAll(".choice.gone").length === 1, String(d.querySelectorAll(".choice.gone").length));
+check("残りの数が減る", (d.getElementById("elimleft")?.textContent || "").includes("あと2"),
+  d.getElementById("elimleft")?.textContent);
+[...d.querySelectorAll(".choices > .choice")][wrong[1]].click();
+[...d.querySelectorAll(".choices > .choice")][wrong[2]].click();
+await wait(60);
+check("3つ潰せば正解になる", ev("S.run.results['" + e1.id + "']") === "ok",
+  ev("S.run.results['" + e1.id + "']"));
+check("正解でも解説は出る", txt().includes("知識カード"));
+
+// 正解を潰したらそこで終わり
+const e2 = JSON.parse(ev(`(() => {
+  S.run.i = 1; S.run.picked = null; S.run.hintsUsed = 0; render();
+  const id = S.run.ids[1];
+  return JSON.stringify({ id, answer: DB.byId[id].answer });
+})()`));
+[...d.querySelectorAll(".choices > .choice")][e2.answer].click();
+await wait(60);
+check("正解を潰したら終わる", ev("S.run.results['" + e2.id + "']") === "ng",
+  ev("S.run.results['" + e2.id + "']"));
+check("外しても解説と知識カードは出る（原則3）",
+  txt().includes("面白い単元") && txt().includes("知識カード"));
+
+// 4択へは自分で降りる。システムは勝手に降ろさない
+const e3 = JSON.parse(ev(`(() => {
+  S.run.i = 2; S.run.picked = null; S.run.hintsUsed = 0; render();
+  return JSON.stringify({ id: S.run.ids[2] });
+})()`));
+check("降りる前は消去法のまま", !!d.querySelector(".choices.elim"));
+d.getElementById("tochoice").click();
+check("4択に降りられる", !d.querySelector(".choices.elim") && !d.getElementById("tochoice"),
+  txt().slice(0, 80));
+check("降りたのはその問題だけ", ev(`JSON.stringify(S.run.hard)`) === `{"${e3.id}":"choice"}`,
+  ev("JSON.stringify(S.run.hard)"));
+const e3a = ev(`DB.byId["${e3.id}"].answer`);
+[...d.querySelectorAll(".choices > .choice")][e3a].click();
+await wait(60);
+check("降りた先でもふつうに答えられる", ev("S.run.results['" + e3.id + "']") === "ok");
+// 報酬は答え方で変えない（原則3-2）
+check("難モードでも4択でも報酬は同じ", ev(`(() => {
+  const a = DB.questions.find(q => q.mode === "elimination");
+  return String(gumFor(a));
+})()`) === ev(`(() => {
+  const a = DB.questions.find(q => q.mode === "elimination");
+  return String(gumFor(a));
+})()`));
 
 /* ---- コモンズの写真とクレジット ---- */
 // 実体のバイト列が無くても描画は確かめられるので、台帳に仮の1件を差して戻す
@@ -241,10 +322,7 @@ ev(`(() => {
 })()`);
 for (let k = 0; k < 10; k++) {
 
-  const idx = ev("DB.byId[S.run.ids[S.run.i]].answer");
-  const btns = d.querySelectorAll(".choices > .choice");
-  if (!btns.length) break;
-  btns[idx].click();
+  if (!answerNow()) break;
   const st = d.getElementById("tostretch");
   if (st) { st.click(); const ex = d.querySelectorAll("#exch > .choice");
     if (ex.length) ex[ev("DB.byId[S.run.ids[S.run.i]].applied.answer")].click(); }
@@ -434,9 +512,7 @@ const had = {
 d.getElementById("replay").click();
 check("再挑戦が始まる", ev("S.run.noReward") === true && ev("S.run.ids.length") > 0);
 for (let i = 0; i < 40 && ev('S.view==="quiz"'); i++) {
-  const btns = d.querySelectorAll(".choices > .choice");
-  if (!btns.length) break;
-  btns[ev(`DB.byId[S.run.ids[S.run.i]].answer`)].click();
+  if (!answerNow()) break;
   const n = d.getElementById("next");
   if (n) n.click(); else await wait(900);
 }
