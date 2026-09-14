@@ -12,9 +12,9 @@
     "format": "choice",
     "prompt": "I have lived here ___ ten years. に入る語は?",
     "choices": [
-      "since",
-      "for",
       "during",
+      "for",
+      "since",
       "from"
     ],
     "answer": 1,
@@ -29,12 +29,12 @@
     "applied": {
       "prompt": "I have ___ to Kyoto twice. に入る語は?",
       "choices": [
-        "gone",
         "been",
+        "being",
         "went",
-        "being"
+        "gone"
       ],
-      "answer": 1,
+      "answer": 0,
       "hint": "「行ったことがある」——今は戻ってきている。",
       "note": "have been は経験、have gone は「行ってしまって今ここにいない」。同じ完了形でも、話し手が今どこにいるかが変わる。"
     }
@@ -52,12 +52,12 @@
     "format": "choice",
     "prompt": "日本の小学校で外国語（英語）が正式な「教科」となったのは何年生からか?",
     "choices": [
-      "1・2年生",
-      "3・4年生",
       "5・6年生",
+      "3・4年生",
+      "1・2年生",
       "中学1年から"
     ],
-    "answer": 2,
+    "answer": 0,
     "hints": [
       "低学年では扱わない。",
       "3・4年生では「外国語活動」という別の位置づけだ。",
@@ -69,12 +69,12 @@
     "applied": {
       "prompt": "では、3・4年生で行われているものは?",
       "choices": [
-        "外国語活動",
         "国際理解",
+        "英語表現",
         "総合英語",
-        "英語表現"
+        "外国語活動"
       ],
-      "answer": 0,
+      "answer": 3,
       "hint": "教科ではなく「活動」という扱いだ。",
       "note": "外国語活動は聞く・話すが中心で、数値による評定がつかない。同じ英語でも、学年によって扱いも評価も別物になっている。"
     }
@@ -92,10 +92,10 @@
     "format": "choice",
     "prompt": "フランスの中学生が第二外国語として最も多く選ぶ言語は?",
     "choices": [
-      "ドイツ語",
-      "スペイン語",
       "イタリア語",
-      "中国語"
+      "スペイン語",
+      "中国語",
+      "ドイツ語"
     ],
     "answer": 1,
     "hints": [
@@ -109,12 +109,12 @@
     "applied": {
       "prompt": "世界で最も母語話者が多い言語は?",
       "choices": [
-        "英語",
-        "スペイン語",
+        "ヒンディー語",
         "中国語",
-        "ヒンディー語"
+        "スペイン語",
+        "英語"
       ],
-      "answer": 2,
+      "answer": 1,
       "hint": "第二言語まで含めると英語が最多だが、母語話者だけで数えると別だ。",
       "note": "母語話者では中国語が最多。英語は第二言語話者を含めて世界最大になる。どう数えるかで順位が変わるのだ。"
     }
@@ -132,12 +132,12 @@
     "format": "choice",
     "prompt": "\"Where are you from?\" と聞かれた。自然な答えはどれ?",
     "choices": [
-      "I'm from Japan.",
-      "I'm fine, thank you.",
       "I'm twelve years old.",
-      "I like Japan."
+      "I'm fine, thank you.",
+      "I like Japan.",
+      "I'm from Japan."
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "「どこから」を聞かれている。",
       "出身地を答える。",
@@ -160,12 +160,12 @@
     "format": "choice",
     "prompt": "He ___ soccer every day. に入るのは?",
     "choices": [
-      "plays",
-      "play",
       "playing",
-      "played"
+      "plays",
+      "played",
+      "play"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "主語は He だ。",
       "every day とあるので、いつものことを述べている。",
@@ -188,12 +188,12 @@
     "format": "choice",
     "prompt": "This box is ___ than that one. big を正しい形にすると?",
     "choices": [
-      "bigger",
-      "big",
+      "more big",
       "biggest",
-      "more big"
+      "bigger",
+      "big"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "than があるので、二つを比べている。",
       "短い語は語尾を変えて比べる形にする。",
@@ -217,9 +217,9 @@
     "prompt": "この本は多くの人に読まれている。This book ___ by many people. に入るのは?",
     "choices": [
       "is read",
+      "read",
       "reads",
-      "is reading",
-      "read"
+      "is reading"
     ],
     "answer": 0,
     "hints": [
@@ -244,12 +244,12 @@
     "format": "choice",
     "prompt": "I know the boy ___ is running over there. に入るのは?",
     "choices": [
-      "who",
-      "which",
       "what",
-      "whose"
+      "whose",
+      "who",
+      "which"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "前にある語を説明するために、後ろの文をつないでいる。",
       "説明されているのは「人」だ。",
@@ -272,12 +272,12 @@
     "format": "choice",
     "prompt": "公用語として定めている国や地域の数が、世界で最も多い言語は?",
     "choices": [
-      "英語",
-      "中国語",
       "スペイン語",
-      "アラビア語"
+      "中国語",
+      "アラビア語",
+      "英語"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "話者の数がいちばん多い言語とは限らない。",
       "かつて広い範囲を統治した国の言葉が、独立後も行政に残った。",
@@ -301,12 +301,12 @@
     "format": "choice",
     "prompt": "15世紀に朝鮮で作られ、いまも韓国で使われている文字を何という?",
     "choices": [
+      "キリル文字",
       "ハングル",
       "かな",
-      "注音符号",
-      "キリル文字"
+      "注音符号"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "作った人物と作った年が分かっている、珍しい文字だ。",
       "発音のしくみをかたどって作られている。",
@@ -331,8 +331,8 @@
     "prompt": "朝、友だちに会ったときのあいさつはどれですか?",
     "choices": [
       "Good morning.",
-      "Good night.",
       "Good bye.",
+      "Good night.",
       "Good luck."
     ],
     "answer": 0,
@@ -359,9 +359,9 @@
     "prompt": "英語で 12 を表す語はどれですか?",
     "choices": [
       "twelve",
+      "ten",
       "twenty",
-      "two",
-      "ten"
+      "two"
     ],
     "answer": 0,
     "hints": [
@@ -387,9 +387,9 @@
     "prompt": "英語で「紫」を表す語はどれですか?",
     "choices": [
       "purple",
+      "grey",
       "orange",
-      "brown",
-      "grey"
+      "brown"
     ],
     "answer": 0,
     "hints": [
@@ -414,12 +414,12 @@
     "format": "choice",
     "prompt": "英語で「水曜日」はどれですか?",
     "choices": [
-      "Wednesday",
-      "Thursday",
       "Tuesday",
-      "Saturday"
+      "Wednesday",
+      "Saturday",
+      "Thursday"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "月曜から順に Monday, Tuesday と続く。",
       "火曜の次に来る曜日だ。",
@@ -442,12 +442,12 @@
     "format": "choice",
     "prompt": "先生が \"Open your textbook.\" と言いました。何をすればよいですか?",
     "choices": [
-      "教科書を開く",
-      "教科書を閉じる",
       "立ち上がる",
-      "手をあげる"
+      "教科書を開く",
+      "手をあげる",
+      "教科書を閉じる"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "open は「開ける」という意味の動詞だ。",
       "your textbook は「あなたの教科書」。",
@@ -470,12 +470,12 @@
     "format": "choice",
     "prompt": "\"How old are you?\" と聞かれました。自然な答えはどれですか?",
     "choices": [
-      "I'm ten years old.",
-      "I'm fine, thank you.",
+      "It's Tuesday.",
       "My name is Ken.",
-      "It's Tuesday."
+      "I'm fine, thank you.",
+      "I'm ten years old."
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "old は「年をとった」という意味の語だ。",
       "How old は「どのくらいの年齢か」を聞いている。",
@@ -498,12 +498,12 @@
     "format": "choice",
     "prompt": "She ___ to school every day. に入るのはどれですか?",
     "choices": [
-      "walks",
-      "walk",
       "walking",
-      "walked"
+      "walk",
+      "walked",
+      "walks"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "every day は毎日くり返すことを表すので、現在形を使う。",
       "主語は She で、I でも you でも複数でもない。",
@@ -526,12 +526,12 @@
     "format": "choice",
     "prompt": "\"___ is your birthday?\" と日付をたずねるとき、空所に入るのはどれですか?",
     "choices": [
+      "Who",
       "When",
       "Where",
-      "Who",
       "Why"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "Where は場所、Who は人、Why は理由をたずねる語だ。",
       "たずねているのは「いつ」にあたる。",
@@ -554,12 +554,12 @@
     "format": "choice",
     "prompt": "I ___ to Kyoto last summer. に入るのはどれですか?",
     "choices": [
-      "went",
-      "go",
       "going",
+      "go",
+      "went",
       "goes"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "last summer は、過ぎた時を表す言葉だ。",
       "だから動詞は過去形にする。",
@@ -582,12 +582,12 @@
     "format": "choice",
     "prompt": "\"Can you play the piano?\" への答えとして適切なのはどれですか?",
     "choices": [
-      "Yes, I can.",
       "Yes, I do.",
-      "Yes, I am.",
-      "Yes, I play."
+      "Yes, I can.",
+      "Yes, I play.",
+      "Yes, I am."
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "答えるときは、問いに使われた語をそのまま返すのが原則だ。",
       "この問いは Do でも Are でもなく、別の語で始まっている。",
@@ -610,12 +610,12 @@
     "format": "choice",
     "prompt": "child の複数形はどれですか?",
     "choices": [
-      "children",
       "childs",
-      "childes",
-      "child"
+      "children",
+      "child",
+      "childes"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "ふつうは -s や -es をつけて複数形を作る。",
       "しかしこの語は古い形の複数を残している。",
@@ -638,12 +638,12 @@
     "format": "choice",
     "prompt": "I was born ___ May 3rd. に入る前置詞はどれですか?",
     "choices": [
-      "on",
-      "in",
       "at",
-      "to"
+      "to",
+      "on",
+      "in"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "時を表す前置詞は、指す範囲の広さで使い分ける。",
       "年や月には in、時刻には at を使う。",
@@ -666,12 +666,12 @@
     "format": "choice",
     "prompt": "I want ___ English every day. に入るのはどれですか?",
     "choices": [
-      "to study",
+      "studying",
       "study",
-      "studied",
-      "studying"
+      "to study",
+      "studied"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "want のあとには、これからしたいことが続く。",
       "動詞を名詞のように使う形が必要だ。",
@@ -694,12 +694,12 @@
     "format": "choice",
     "prompt": "If I ___ a bird, I would fly to you. に入るのはどれですか?",
     "choices": [
-      "were",
-      "am",
       "is",
-      "will be"
+      "am",
+      "will be",
+      "were"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "実際には鳥ではない、というありえない仮定の文だ。",
       "この形では、主語が I でも he でも be 動詞は同じ形になる。",
@@ -722,12 +722,12 @@
     "format": "choice",
     "prompt": "\"How's the weather?\" と聞かれました。晴れているときの答えはどれですか?",
     "choices": [
-      "It's sunny.",
-      "It's rainy.",
       "It's cloudy.",
-      "It's snowy."
+      "It's snowy.",
+      "It's sunny.",
+      "It's rainy."
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "rainy は雨、cloudy はくもり、snowy は雪だ。",
       "残る一つが晴れを表す。",
@@ -750,12 +750,12 @@
     "format": "choice",
     "prompt": "英語で「うさぎ」はどれですか?",
     "choices": [
-      "rabbit",
-      "rat",
       "robot",
+      "rat",
+      "rabbit",
       "rainbow"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "rat はねずみ、robot はロボット、rainbow は虹だ。",
       "長い耳と短いしっぽを持つ動物だ。",
@@ -778,12 +778,12 @@
     "format": "choice",
     "prompt": "\"Do you like apples?\" に「はい」と答えるとき、自然なのはどれですか?",
     "choices": [
-      "Yes, I do.",
-      "Yes, I am.",
       "Yes, I like.",
-      "Yes, you do."
+      "Yes, I am.",
+      "Yes, you do.",
+      "Yes, I do."
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "問いの先頭にある語をそのまま使って答える。",
       "この問いは Do で始まっている。",
@@ -806,12 +806,12 @@
     "format": "choice",
     "prompt": "りんごの数をたずねるとき、自然な言い方はどれですか?",
     "choices": [
-      "How many apples?",
-      "How much apples?",
       "How old apples?",
+      "How much apples?",
+      "How many apples?",
       "How long apples?"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "数えられるものの数をたずねる言い方だ。",
       "How much は水やお金のように、数えられないものや値段に使う。",
@@ -834,12 +834,12 @@
     "format": "choice",
     "prompt": "英語のアルファベットは全部で何文字ですか?",
     "choices": [
-      "26文字",
       "24文字",
-      "28文字",
-      "30文字"
+      "30文字",
+      "26文字",
+      "28文字"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "大文字と小文字で同じ数だけある。",
       "A から Z まで順に並んでいる。",
@@ -862,12 +862,12 @@
     "format": "choice",
     "prompt": "英語で「いちご」はどれですか?",
     "choices": [
-      "strawberry",
-      "blueberry",
+      "peach",
       "cherry",
-      "peach"
+      "blueberry",
+      "strawberry"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "blueberry はブルーベリー、cherry はさくらんぼ、peach はももだ。",
       "berry がつく語のうち、blue がつかないほうだ。",
@@ -890,12 +890,12 @@
     "format": "choice",
     "prompt": "自分の名前を伝えるとき、自然な言い方はどれですか?",
     "choices": [
-      "My name is Ken.",
       "I name Ken.",
+      "My name is Ken.",
       "Me is Ken.",
       "My Ken is name."
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "「私の名前」は My name と言う。",
       "「〜です」にあたる be 動詞が必要だ。",
@@ -918,12 +918,12 @@
     "format": "choice",
     "prompt": "\"What time is it?\" と聞かれました。7時のときの答えはどれですか?",
     "choices": [
-      "It's seven o'clock.",
       "It's seven years old.",
+      "It's seven o'clock.",
       "It's Monday.",
       "It's sunny."
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "What time は時刻をたずねている。",
       "答えは It's で始める。",
@@ -946,12 +946,12 @@
     "format": "choice",
     "prompt": "英語で「理科」はどれですか?",
     "choices": [
-      "science",
       "social studies",
+      "science",
       "math",
       "music"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "math は算数・数学、music は音楽だ。",
       "social studies は社会科にあたる。",
@@ -974,12 +974,12 @@
     "format": "choice",
     "prompt": "「私は7時に起きます。」を英語で言うとどれですか?",
     "choices": [
-      "I get up at seven.",
       "I get up in seven.",
-      "I get up on seven.",
-      "I get seven up."
+      "I get up at seven.",
+      "I get seven up.",
+      "I get up on seven."
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "時刻を表す前置詞を選ぶ問題でもある。",
       "in は年や月、on は日付や曜日に使う。",
@@ -1004,8 +1004,8 @@
     "choices": [
       "It's on the desk.",
       "It's seven o'clock.",
-      "Yes, it is.",
-      "I'm fine."
+      "I'm fine.",
+      "Yes, it is."
     ],
     "answer": 0,
     "hints": [
@@ -1030,12 +1030,12 @@
     "format": "choice",
     "prompt": "英語で「9月」はどれですか?",
     "choices": [
-      "September",
-      "November",
       "December",
-      "October"
+      "September",
+      "October",
+      "November"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "October は10月、November は11月、December は12月だ。",
       "その三つより前に来る月だ。",
@@ -1059,9 +1059,9 @@
     "prompt": "\"Go straight and turn right.\" はどんな指示ですか?",
     "choices": [
       "まっすぐ行って右に曲がる",
-      "まっすぐ行って左に曲がる",
+      "その場で止まる",
       "右に行ってから戻る",
-      "その場で止まる"
+      "まっすぐ行って左に曲がる"
     ],
     "answer": 0,
     "hints": [
@@ -1142,12 +1142,12 @@
     "format": "choice",
     "prompt": "「私は泳げません。」を英語で言うとどれですか?",
     "choices": [
+      "I not can swim.",
       "I can't swim.",
       "I don't can swim.",
-      "I can swim not.",
-      "I not can swim."
+      "I can swim not."
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "can の否定は、can に直接 not をつける。",
       "don't は一般動詞の否定に使うもので、can とは重ねない。",
@@ -1170,12 +1170,12 @@
     "format": "choice",
     "prompt": "店で値段をたずねるとき、自然な言い方はどれですか?",
     "choices": [
+      "How long is it?",
       "How much is it?",
       "How many is it?",
-      "How long is it?",
       "How old is it?"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "値段は数えられない量として扱う。",
       "How many は数えられるものの数をたずねる。",
@@ -1199,8 +1199,8 @@
     "prompt": "\"I ___ play tennis on Sundays.\" に「いつも」を表す語を入れるなら、どれですか?",
     "choices": [
       "always",
-      "never",
       "sometimes",
+      "never",
       "seldom"
     ],
     "answer": 0,
@@ -1226,12 +1226,12 @@
     "format": "choice",
     "prompt": "\"They ___ my friends.\" に入る be 動詞はどれですか?",
     "choices": [
-      "are",
       "is",
+      "be",
       "am",
-      "be"
+      "are"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "be 動詞は主語によって形が変わる。",
       "I なら am、he / she / it なら is を使う。",
@@ -1254,12 +1254,12 @@
     "format": "choice",
     "prompt": "\"This is ___ book.\" に「私の」を表す語を入れるなら、どれですか?",
     "choices": [
-      "my",
-      "I",
+      "mine",
       "me",
-      "mine"
+      "I",
+      "my"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "名詞の前に置いて「〜の」を表す形だ。",
       "I は主語、me は目的語に使う形だ。",
@@ -1283,9 +1283,9 @@
     "prompt": "外国の人に日本の行事を紹介するとき、\"We have a festival in summer.\" の have はどんな意味ですか?",
     "choices": [
       "行事がある",
-      "持っている",
+      "招待する",
       "食べる",
-      "招待する"
+      "持っている"
     ],
     "answer": 0,
     "hints": [
@@ -1310,12 +1310,12 @@
     "format": "choice",
     "prompt": "\"___ you go to the park yesterday?\" に入るのはどれですか?",
     "choices": [
-      "Did",
-      "Do",
       "Are",
-      "Was"
+      "Did",
+      "Was",
+      "Do"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "yesterday があるので、過去の文だ。",
       "一般動詞 go の疑問文なので、be 動詞は使わない。",
@@ -1339,9 +1339,9 @@
     "prompt": "\"___ two cats under the table.\" に入るのはどれですか?",
     "choices": [
       "There are",
+      "They are",
       "There is",
-      "It is",
-      "They are"
+      "It is"
     ],
     "answer": 0,
     "hints": [
@@ -1366,12 +1366,12 @@
     "format": "choice",
     "prompt": "\"I ___ tired yesterday.\" に入るのはどれですか?",
     "choices": [
-      "was",
+      "is",
       "were",
-      "am",
-      "is"
+      "was",
+      "am"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "yesterday があるので過去の文だ。",
       "be 動詞の過去形は was と were の二つしかない。",
@@ -1395,8 +1395,8 @@
     "prompt": "\"She ___ a book now.\" に「読んでいるところだ」を表す形を入れるなら、どれですか?",
     "choices": [
       "is reading",
-      "reads",
       "read",
+      "reads",
       "is read"
     ],
     "answer": 0,
@@ -1422,12 +1422,12 @@
     "format": "choice",
     "prompt": "\"I like summer ___ I can swim.\" に理由をつなぐ語を入れるなら、どれですか?",
     "choices": [
-      "because",
-      "but",
       "or",
-      "if"
+      "but",
+      "if",
+      "because"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "前半が「好き」、後半がその理由になっている。",
       "but は逆のことをつなぎ、or は選択を表す。",
@@ -1450,12 +1450,12 @@
     "format": "choice",
     "prompt": "\"I ___ visit my grandmother next week.\" に予定を表す語を入れるなら、どれですか?",
     "choices": [
-      "will",
-      "did",
       "was",
-      "am"
+      "did",
+      "am",
+      "will"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "next week があるので、これからのことを述べる文だ。",
       "did と was は過去に使う語だ。",
@@ -1478,12 +1478,12 @@
     "format": "choice",
     "prompt": "\"I know ___.\" に「彼を」を表す語を入れるなら、どれですか?",
     "choices": [
-      "him",
-      "he",
       "his",
-      "he's"
+      "he's",
+      "him",
+      "he"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "動詞のあとに来るので、目的語の形が必要だ。",
       "he は主語に使う形、his は「彼の」を表す。",
@@ -1506,12 +1506,12 @@
     "format": "choice",
     "prompt": "\"I have ___ orange.\" に入る冠詞はどれですか?",
     "choices": [
-      "an",
-      "a",
       "the",
-      "不要"
+      "不要",
+      "an",
+      "a"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "数えられる名詞の単数形には冠詞がつく。",
       "初めて話題に出すものには a / an を使う。",
@@ -1536,8 +1536,8 @@
     "choices": [
       "water",
       "apple",
-      "book",
-      "student"
+      "student",
+      "book"
     ],
     "answer": 0,
     "hints": [
@@ -1562,12 +1562,12 @@
     "format": "choice",
     "prompt": "study の過去形はどれですか?",
     "choices": [
-      "studied",
+      "study",
       "studyed",
-      "studed",
-      "study"
+      "studied",
+      "studed"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "規則動詞は -ed をつけて過去形を作る。",
       "ただし、子音字 + y で終わる語は綴りが変わる。",
@@ -1590,12 +1590,12 @@
     "format": "choice",
     "prompt": "\"___ bag is this?\" と持ち主をたずねるとき、空所に入るのはどれですか?",
     "choices": [
+      "Which",
       "Whose",
       "Who",
-      "Which",
       "What"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "Who は「誰が」と人そのものをたずねる。",
       "この問いは「誰の」と所有をたずねている。",
@@ -1619,8 +1619,8 @@
     "prompt": "「ここで走ってはいけません。」を英語で言うとどれですか?",
     "choices": [
       "Don't run here.",
-      "Not run here.",
       "You don't run here.",
+      "Not run here.",
       "No run here."
     ],
     "answer": 0,
@@ -1646,12 +1646,12 @@
     "format": "choice",
     "prompt": "\"I am like soccer.\" が誤りである理由はどれですか?",
     "choices": [
-      "be 動詞と一般動詞を同時に使っているから",
-      "like は過去形にすべきだから",
+      "主語が間違っているから",
       "soccer に a が必要だから",
-      "主語が間違っているから"
+      "be 動詞と一般動詞を同時に使っているから",
+      "like は過去形にすべきだから"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "like は一般動詞だ。",
       "am は be 動詞にあたる。",
@@ -1674,12 +1674,12 @@
     "format": "choice",
     "prompt": "city の複数形はどれですか?",
     "choices": [
-      "cities",
-      "citys",
+      "city",
       "cityes",
-      "city"
+      "cities",
+      "citys"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "子音字 + y で終わる名詞の複数形には決まりがある。",
       "y をそのまま残さない。",
@@ -1702,12 +1702,12 @@
     "format": "choice",
     "prompt": "\"I ___ going to visit Kyoto next month.\" に入るのはどれですか?",
     "choices": [
-      "am",
       "will",
-      "do",
-      "was"
+      "was",
+      "am",
+      "do"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "be going to の be は、主語に合わせて形を変える。",
       "主語は I だ。",
@@ -1758,12 +1758,12 @@
     "format": "choice",
     "prompt": "\"Mt. Fuji is the ___ mountain in Japan.\" に「最も高い」を表す語を入れるなら、どれですか?",
     "choices": [
+      "most high",
       "highest",
-      "higher",
       "high",
-      "most high"
+      "higher"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "三つ以上を比べて一番だと述べる文だ。",
       "短い語の最上級は -est をつけて作る。",
@@ -1787,9 +1787,9 @@
     "prompt": "\"I think ___ he is right.\" に入る語はどれですか?",
     "choices": [
       "that",
+      "if",
       "what",
-      "who",
-      "if"
+      "who"
     ],
     "answer": 0,
     "hints": [
@@ -1814,12 +1814,12 @@
     "format": "choice",
     "prompt": "\"I went to the library to study.\" の to study はどんな意味を表しますか?",
     "choices": [
-      "目的",
       "理由",
       "結果",
-      "時"
+      "時",
+      "目的"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "なぜ図書館へ行ったのかを述べている。",
       "「勉強するために」と訳せる。",
@@ -1844,9 +1844,9 @@
     "prompt": "\"My father gave me a watch.\" の me と a watch の関係はどれですか?",
     "choices": [
       "me が「誰に」、a watch が「何を」",
-      "me が「何を」、a watch が「誰に」",
+      "どちらも主語",
       "どちらも「何を」",
-      "どちらも主語"
+      "me が「何を」、a watch が「誰に」"
     ],
     "answer": 0,
     "hints": [
@@ -1871,12 +1871,12 @@
     "format": "choice",
     "prompt": "\"There ___ many people in the park yesterday.\" に入るのはどれですか?",
     "choices": [
-      "were",
       "was",
       "are",
+      "were",
       "is"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "yesterday があるので過去の文だ。",
       "be 動詞の形は、あとに続く名詞の数で決まる。",
@@ -1899,12 +1899,12 @@
     "format": "choice",
     "prompt": "\"I have ___ finished my homework.\" に「すでに」を表す語を入れるなら、どれですか?",
     "choices": [
-      "already",
-      "yet",
+      "never",
       "ever",
-      "never"
+      "yet",
+      "already"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "肯定文で「もう終わった」と述べている。",
       "yet は否定文や疑問文で使う。",
@@ -1927,12 +1927,12 @@
     "format": "choice",
     "prompt": "\"The boy ___ under the tree is my brother.\" に「立っている」を表す語を入れるなら、どれですか?",
     "choices": [
-      "standing",
       "stands",
       "stood",
+      "standing",
       "to stand"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "the boy を後ろから説明している。",
       "「立っている少年」と、進行の意味で修飾する。",
@@ -1957,8 +1957,8 @@
     "choices": [
       "where he lives",
       "where does he live",
-      "where lives he",
-      "where he live"
+      "where he live",
+      "where lives he"
     ],
     "answer": 0,
     "hints": [
@@ -1984,9 +1984,9 @@
     "prompt": "\"He is as tall ___ his father.\" に入るのはどれですか?",
     "choices": [
       "as",
+      "to",
       "than",
-      "that",
-      "to"
+      "that"
     ],
     "answer": 0,
     "hints": [
@@ -2011,12 +2011,12 @@
     "format": "choice",
     "prompt": "\"___ this book written by Soseki?\" に入るのはどれですか?",
     "choices": [
-      "Was",
+      "Does",
       "Did",
-      "Has",
-      "Does"
+      "Was",
+      "Has"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "受け身は be 動詞 + 過去分詞で作る。",
       "疑問文にするときは、その be 動詞を文頭に出す。",
@@ -2040,9 +2040,9 @@
     "prompt": "\"I know how ___ this machine.\" に「使い方」を表す形を入れるなら、どれですか?",
     "choices": [
       "to use",
+      "used",
       "using",
-      "use",
-      "used"
+      "use"
     ],
     "answer": 0,
     "hints": [
@@ -2067,12 +2067,12 @@
     "format": "choice",
     "prompt": "\"This is the book ___ I bought yesterday.\" に入る関係代名詞はどれですか?",
     "choices": [
-      "which",
       "who",
-      "whose",
-      "what"
+      "which",
+      "what",
+      "whose"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "先行詞は the book で、人ではなく物だ。",
       "関係詞のあとが I bought と続き、目的語が欠けている。",
@@ -2095,12 +2095,12 @@
     "format": "choice",
     "prompt": "母語として話す人の数が世界で最も多い言語はどれですか?",
     "choices": [
-      "中国語",
-      "英語",
       "スペイン語",
-      "ヒンディー語"
+      "ヒンディー語",
+      "英語",
+      "中国語"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "公用語として採用する国の数で数えると、答えは変わる。",
       "この問いは、母語とする人の数だ。",
@@ -2124,12 +2124,12 @@
     "format": "choice",
     "prompt": "イギリス英語で「エレベーター」を表す語はどれですか?",
     "choices": [
-      "lift",
       "elevator",
       "escalator",
-      "stairs"
+      "stairs",
+      "lift"
     ],
-    "answer": 0,
+    "answer": 3,
     "hints": [
       "アメリカ英語では elevator という。",
       "イギリスでは別の短い語が使われる。",
@@ -2152,12 +2152,12 @@
     "format": "choice",
     "prompt": "中国語で、同じ音でも意味が変わる音の上げ下げを何といいますか?",
     "choices": [
+      "子音",
       "声調",
       "母音",
-      "子音",
       "抑揚記号"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "標準中国語には4種類ある。",
       "同じ ma でも、言い方によって母・麻・馬・罵と意味が変わる。",
@@ -2181,12 +2181,12 @@
     "format": "choice",
     "prompt": "スイスが4つの言語を公用語としているのは、何を反映していますか?",
     "choices": [
-      "地域ごとに話される言語が異なること",
-      "観光客が多いこと",
       "4つの国に分かれていること",
+      "観光客が多いこと",
+      "地域ごとに話される言語が異なること",
       "学校が4種類あること"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "ドイツ語、フランス語、イタリア語、ロマンシュ語が公用語だ。",
       "州ごとに主に使われる言語が異なる。",
@@ -2209,12 +2209,12 @@
     "format": "choice",
     "prompt": "英語が母語話者以外どうしの会話でも使われる状況を指す考え方はどれですか?",
     "choices": [
-      "リンガフランカ（共通語）",
       "方言",
-      "母語",
-      "第二公用語"
+      "第二公用語",
+      "リンガフランカ（共通語）",
+      "母語"
     ],
-    "answer": 0,
+    "answer": 2,
     "hints": [
       "日本人とタイ人が英語で話す場面を思い浮かべよう。",
       "どちらの母語でもない言語が、意思疎通の手段になっている。",
@@ -2237,12 +2237,12 @@
     "format": "choice",
     "prompt": "各国の手話について、正しいのはどれですか?",
     "choices": [
-      "国や地域ごとに異なる独自の言語である",
       "世界共通で一つしかない",
-      "音声言語を指で表したものにすぎない",
-      "文法を持たない"
+      "国や地域ごとに異なる独自の言語である",
+      "文法を持たない",
+      "音声言語を指で表したものにすぎない"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "日本手話とアメリカ手話は通じない。",
       "それぞれ独自の語彙と文法を持っている。",
@@ -2265,12 +2265,12 @@
     "format": "choice",
     "prompt": "世界の言語のうち、話者が減って消滅の危機にあるものについて正しいのはどれですか?",
     "choices": [
+      "すべて記録が残されている",
       "全体のおよそ4割が危機にあるとされる",
       "ほとんど存在しない",
-      "すべて記録が残されている",
       "増え続けている"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "世界には約7000の言語があるとされる。",
       "そのうち多くは話者が数千人以下だ。",
@@ -2294,12 +2294,12 @@
     "needs": "玄奘三蔵",
     "prompt": "ある言語の音を、意味ではなく音のまま別の文字で写すことを英語で何という?",
     "choices": [
+      "conversation",
       "transliteration",
       "translation",
-      "interpretation",
-      "conversation"
+      "interpretation"
     ],
-    "answer": 0,
+    "answer": 1,
     "hints": [
       "trans- は「越えて」、後半は「文字」に関わる語だ。",
       "意味ではなく、音と文字のほうを移しかえる。",

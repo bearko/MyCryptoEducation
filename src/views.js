@@ -820,7 +820,8 @@ function wirePanel(q) {
   const judge = () => {
     if (S.run.picked !== null || seq.length < 2) return;
     const said = seq.map(i => p.cells[i]).join("");
-    if (said === q.reading) return onPick(q.answer, true);
+    // accept は「どちらの書き方でも正しい」ときの別表記（サーバ／サーバー など）
+    if (said === q.reading || (q.accept || []).includes(said)) return onPick(q.answer, true);
     drawRetry(q, `「${said}」ではない。`);
     seq = []; paint();
   };
@@ -1053,7 +1054,16 @@ function onPick(idx, forcedOk = null) {
   if (reward) S.cards[q.card] = true;
   drawHints(q, h);
 
-  // テンポ優先モード：正解なら演出だけ見せて次へ
+  /**
+   * テンポ優先モード：正解なら演出だけ見せて次へ。
+   * **ただし注釈（`note`）は飛ばしません。** 表記のゆれのように、
+   * 知らないと次にぶつかったとき迷うものを置く欄なので、解説を省く設定でも出します。
+   */
+  if (ok && !S.settings.showExplanationOnCorrect && q.note) {
+    S.run.tipOpen = false; S.run.applied = null;
+    drawNoteOnly(q, h);
+    return;
+  }
   if (ok && !S.settings.showExplanationOnCorrect) {
     S.toast = `<span class="seal">✓</span><em>${esc(q.card)}</em>` +
       (gum ? `<img src="${assetPath.icon("gum")}" alt="GUM"> ${gum}` : "") +
@@ -1065,6 +1075,23 @@ function onPick(idx, forcedOk = null) {
 
   S.run.tipOpen = false; S.run.applied = null;
   drawVerdict(q, h, ok, gum, null, found, opened);
+}
+
+/**
+ * 解説を省く設定のときに、注釈だけを出す小さい判定。
+ * 解説（`lesson`）は出さず、注釈と知識カードだけを見せます。
+ */
+function drawNoteOnly(q, h) {
+  document.getElementById("verdict").innerHTML = `
+  <div class="verdict"><div class="vhead ok">正解。</div>
+    <div class="lesson">
+      <div class="speaker"><img class="ava sm" src="${assetPath.hero(h.id)}" alt="">
+        <span>${esc(h.name)}</span></div>
+      <p class="qnote">${esc(q.note)}</p>
+      <div class="gain"><span class="seal">✓</span><span>知識カード ・ <em>${esc(q.card)}</em></span></div>
+    </div>
+    <div id="tipslot"></div><div id="exslot"></div><div class="stack" id="acts"></div></div>`;
+  drawActions(q, true);
 }
 
 function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null, opened = []) {
@@ -1079,6 +1106,7 @@ function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null, opened 
       <div class="speaker"><img class="ava sm" src="${assetPath.hero(h.id)}" alt="">
         <span>${esc(h.name)}</span></div>
       <p>${esc(q.lesson)}</p>
+      ${q.note ? `<p class="qnote">${esc(q.note)}</p>` : ""}
       ${photoAt(q, "lesson")}
       <div class="gain"><span class="seal">✓</span><span>知識カード ・ <em>${esc(q.card)}</em></span></div>
       ${gum ? `<div class="gain alt"><img src="${assetPath.icon("gum")}" alt="GUM">

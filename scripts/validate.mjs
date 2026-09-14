@@ -359,6 +359,61 @@ const byRank = {};
 for (const e of curated) (byRank[e.rank] ??= []).push(e);
 RANKS.forEach(r => { if (!byRank[r]?.length) err("extensions", `ランク "${r}" の品がありません`); });
 
+/* ---- 別表記（accept）と注釈（note）---- */
+for (const q of questions) {
+  if (q.accept !== undefined) {
+    if (!Array.isArray(q.accept) || !q.accept.length) err(q.id, "accept は空でない配列にしてください");
+    else {
+      if (!q.reading) err(q.id, "accept は文字パネル（reading のある問題）でだけ効きます");
+      q.accept.forEach(a => {
+        if (typeof a !== "string" || !a) err(q.id, "accept の中身が文字列ではありません");
+        else if (a === q.reading) err(q.id, `accept "${a}" が reading と同じです`);
+        else if ([...a].some(c => ![...(q.reading || "")].includes(c)))
+          err(q.id, `accept "${a}" に、盤面（reading）に無い文字が入っています`);
+      });
+    }
+    // **別表記を受けるなら、なぜ両方正しいかを注釈で言う。** 黙って通すと、
+    // 片方が誤りだと思ったまま終わる
+    if (!q.note) err(q.id, "accept を置くなら note で理由を書いてください");
+  }
+  if (q.note !== undefined && (typeof q.note !== "string" || !q.note.trim()))
+    err(q.id, "note が空です");
+}
+
+/* ---- 正解の位置 ---- */
+/**
+ * **正解がいつも同じ位置にあると、読まずに当てられます。**
+ * 一度、4択482問のうち92.7%が先頭でした。書いていると自然に「正解を先に書いて、
+ * あとから誤答を足す」形になるので、放っておくと必ずこうなります。
+ * 選択肢の並べ替えは問題IDから決まる（scripts のワンショット）ので、
+ * 足した問題もここで引っかかります。
+ */
+{
+  const tally = (list, pick) => {
+    const d = [0, 0, 0, 0];
+    list.forEach(x => { const i = pick(x); if (i >= 0 && i < 4) d[i]++; });
+    return d;
+  };
+  const report = (label, d, total, limit) => {
+    const top = Math.max(...d);
+    const line = d.map((n, i) => `${i + 1}番目 ${n}`).join(" / ");
+    if (total >= 40 && top / total > limit)
+      err("選択肢", `${label}の正解が ${(top / total * 100).toFixed(1)}% 同じ位置に寄っています（${line}）`);
+    return line;
+  };
+  const ch = questions.filter(q => (q.format || "choice") === "choice" && q.choices);
+  const ap = questions.filter(q => q.applied?.choices);
+  const dAll = tally(ch, q => q.answer);
+  report("4択", dAll, ch.length, 0.35);
+  report("応用編", tally(ap, q => q.applied.answer), ap.length, 0.45);
+  SUBJECTS.forEach(sub => {
+    const list = ch.filter(q => q.subject === sub);
+    report(`4択（${sub}）`, tally(list, q => q.answer), list.length, 0.45);
+  });
+  console.log("\n4択の正解の位置 ・ " + dAll.map((n, i) =>
+    `${i + 1}番目 ${n}(${(n / ch.length * 100).toFixed(0)}%)`).join(" / "));
+}
+
 /* ---- 報酬が開く問い（needs）---- */
 {
   const cards = new Set(questions.map(q => q.card));

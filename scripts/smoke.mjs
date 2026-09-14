@@ -823,6 +823,53 @@ check("章を全部開いても、needs の問題はまだ出てこない",
   new RegExp(`おまかせ\\s*${ev("DB.questions.length") - gatedCount}`).test(txt()),
   `全 ${ev("DB.questions.length")}問 / 閉じ ${gatedCount}問 / ${txt().slice(0, 120)}`);
 
+/* ---- 正解の位置と、別表記・注釈 ---- */
+// 正解がいつも同じ位置にあると、読まずに当てられる
+check("正解の位置が偏っていない", ev(`(() => {
+  const ch = DB.questions.filter(q => (q.format || "choice") === "choice" && q.choices);
+  const d = [0, 0, 0, 0];
+  ch.forEach(q => d[q.answer]++);
+  return Math.max(...d) / ch.length <= 0.35;
+})()`) === true, ev(`(() => {
+  const ch = DB.questions.filter(q => (q.format || "choice") === "choice" && q.choices);
+  const d = [0, 0, 0, 0]; ch.forEach(q => d[q.answer]++);
+  return d.map((n, i) => (i + 1) + "番目 " + n).join(" / ");
+})()`));
+check("並べ替えても、正解の中身は変わっていない",
+  ev(`DB.byId["joho-022"].choices[DB.byId["joho-022"].answer]`) === "サーバー",
+  ev(`JSON.stringify(DB.byId["joho-022"].choices)`));
+
+// どちらの書き方でも正しいときは、両方受けて理由を注釈で言う
+check("別表記でも正解になる", ev(`(() => {
+  const q = DB.byId["joho-022"];
+  return q.accept.includes("サーバ") && q.reading === "サーバー";
+})()`) === true);
+check("別表記の文字は盤面にある", ev(`(() => {
+  const q = DB.byId["joho-022"];
+  return q.accept.every(a => [...a].every(c => [...q.reading].includes(c)));
+})()`) === true);
+check("注釈はJISの改正に触れている",
+  /JIS Z 8301/.test(ev(`DB.byId["joho-022"].note`)),
+  ev(`DB.byId["joho-022"].note`)?.slice(0, 40));
+
+// **解説を省く設定でも、注釈だけは出す**
+check("解説を省いても注釈は出る", (() => {
+  ev(`(() => {
+    S.settings.showExplanationOnCorrect = false;
+    // 報酬なしで回す。ここでクリスタルを引くと、あとの図鑑の検査がずれる
+    startRun({ ids: ["joho-022"], noReward: true });
+  })()`);
+  const mode = ev(`modeOf(DB.byId["joho-022"])`);
+  if (mode !== "choice") ev(`S.run.hard["joho-022"]="choice";render()`);
+  d.querySelectorAll(".choices > .choice")[ev(`DB.byId["joho-022"].answer`)].click();
+  const shown = !!d.querySelector(".qnote") && txt().includes("JIS Z 8301");
+  ev("S.settings.showExplanationOnCorrect = true");
+  return shown;
+})(), txt().slice(0, 120));
+check("そのとき解説そのものは出さない",
+  !txt().includes("ルータはネットワーク同士をつなぎ"), txt().slice(0, 160));
+ev('S.view="select";S.select.subject="auto";render()');   // 次の検査は出題選択の画面を見る
+
 /* ---- 報酬が開く問い（docs/reward-economy.md §7）---- */
 check("鍵になるカードは needs で閉じていない", ev(`(() => {
   const keys = new Set(DB.questions.filter(q => q.needs).map(q => q.needs));
