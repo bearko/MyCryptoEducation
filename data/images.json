@@ -437,7 +437,15 @@
       "search": "white bread loaf",
       "alt": "白い食パンが切り分けられて並んでいる写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-pan",
+      "title": "No-Knead Bread - Finished Loaf (294068096)",
+      "author": "daisybush",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3ANo-Knead%20Bread%20-%20Finished%20Loaf%20(294068096).jpg",
+      "width": 640,
+      "height": 480
     },
     "obj-tamago": {
       "search": "chicken eggs",
