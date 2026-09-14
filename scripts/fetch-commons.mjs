@@ -89,7 +89,16 @@ const dedupe = s => {
 let ok = 0, ng = 0, listed = 0;
 for (const [key, entry] of wanted) {
   try {
-    // commons に File:名が書いてあればそれを直接採る。無ければ search で探す
+    /* commons に File:名が書いてあればそれを直接採る。無ければ search で探す。
+       **投げた検索文はそのまま控えておく。** 台帳が古いまま走らせていたのか、
+       条件が厳しすぎたのかを、出力だけで見分けられるようにするため              */
+    const query = [
+      "filetype:bitmap",
+      entry.category ? `incategory:"${entry.category}"` : "",
+      entry.insource ? `insource:"${entry.insource}"` : "",
+      entry.search,
+    ].filter(Boolean).join(" ");
+    const asked = entry.commons ? entry.commons : query;
     const found = entry.commons
       ? await api({
           action: "query", titles: entry.commons,
@@ -98,12 +107,7 @@ for (const [key, entry] of wanted) {
       : entry.search
         ? await api({
             action: "query", generator: "search",
-            gsrsearch: [
-              "filetype:bitmap",
-              entry.category ? `incategory:"${entry.category}"` : "",
-              entry.insource ? `insource:"${entry.insource}"` : "",
-              entry.search,
-            ].filter(Boolean).join(" "),
+            gsrsearch: query,
             gsrnamespace: "6", gsrlimit: "50",
             prop: "imageinfo", iiprop: "url|extmetadata|size", iiurlwidth: String(WIDE),
           })
@@ -112,7 +116,8 @@ for (const [key, entry] of wanted) {
 
     const pages = Object.values(found?.query?.pages || {}).filter(p => p.imageinfo?.[0]);
     if (!pages.length) {
-      console.warn(`  ${key}: 見つかりません（${entry.commons || entry.search}）`);
+      console.warn(`  ${key}: 見つかりません`);
+      console.warn(`      投げた検索文: ${asked}`);
       ng++; continue;
     }
 
@@ -123,7 +128,7 @@ for (const [key, entry] of wanted) {
     /* --list: 候補を並べて終わり。**選ぶのは人**。
        ○ が使えるライセンス、× は allow に無いもの                              */
     if (LIST) {
-      console.log(`\n  ${key}  「${entry.commons || entry.search}」`);
+      console.log(`\n  ${key}  ${asked}`);
       cands.slice(0, 12).forEach((c, i) => {
         const mark = allow.includes(c.license.toLowerCase()) ? "○" : "×";
         const w = c.info.width, h = c.info.height;
