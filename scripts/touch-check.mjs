@@ -170,8 +170,8 @@ const swipeSetup = async () => p.evaluate(`(() => {
   S.run = { ids: list.slice(0, 2).map(q => q.id), i: 0, picked: null, hintsUsed: 0,
             tipOpen: false, applied: null, found: [], cut: null, right: 0, wrong: 0,
             appliedRight: 0, shortage: 0, gum: 0, results: {}, noReward: true,
-            done: false, hard: {}, swipe: true };
-  S.view = "swipe"; render(); window.scrollTo(0, 0);
+            done: false, hard: {}, swipe: true, plan: [{ mode: "swipe", n: 2 }] };
+  S.view = "quiz"; render(); window.scrollTo(0, 0);
   const q = DB.byId[S.run.ids[0]];
   return { id: q.id, answer: q.answer };
 })()`);
@@ -250,6 +250,39 @@ const swOver = await p.evaluate(`(() => {
     .slice(0, 3).map(e => e.className || e.tagName);
 })()`);
 ok.push(["スワイプの画面も横にはみ出さない", swOver.length === 0, swOver.join(" / ")]);
+
+/* ---- 形式の束の帯（ヘッダ）----------------------------------------------
+   3つの束が、問題数に比例した幅で並ぶ。狭い端末で名前がつぶれていないか見る  */
+await p.evaluate(`(() => {
+  const r = planRun(DB, S, { subject: "auto" });
+  S.run = { ids: r.ids, i: r.plan[0].n, picked: null, hintsUsed: 0, tipOpen: false,
+            applied: null, found: [], cut: null, right: 0, wrong: 0, appliedRight: 0,
+            shortage: 0, gum: 0, results: {}, noReward: true, done: false, hard: {},
+            plan: r.plan };
+  S.view = "quiz"; render(); window.scrollTo(0, 0);
+})()`);
+const segs = await p.evaluate(`[...document.querySelectorAll(".pseg")].map(e => {
+  const r = e.getBoundingClientRect();
+  return { w: r.width, h: r.height, x: r.left, on: e.classList.contains("on"),
+           done: e.classList.contains("done"), label: e.querySelector("b").textContent.trim(),
+           lw: e.querySelector("b").getBoundingClientRect().width };
+})`);
+ok.push(["形式の束が3つ、横に並ぶ",
+  segs.length === 3 && segs.every((s, i) => i === 0 || s.x > segs[i - 1].x) &&
+  segs.every(s => s.w > 24 && s.h >= 12),
+  JSON.stringify(segs.map(s => `${s.label}${Math.round(s.w)}`))]);
+ok.push(["いま解いている束だけが光る",
+  segs.filter(s => s.on).length === 1 && segs[0].done && segs[1].on,
+  JSON.stringify(segs.map(s => (s.done ? "done" : s.on ? "on" : "-")))]);
+// 幅は問題数に比例する。重い形式の束が長く見えないように
+ok.push(["束の幅は問題数なり", await p.evaluate(`(() => {
+  const plan = S.run.plan;
+  const w = [...document.querySelectorAll(".pseg")].map(e => e.getBoundingClientRect().width);
+  const unit = w.map((x, i) => x / plan[i].n);
+  return Math.max(...unit) - Math.min(...unit) < 2.5;
+})()`), JSON.stringify(segs.map(s => Math.round(s.w)))]);
+ok.push(["束の名前がつぶれていない", segs.every(s => s.lw >= 20 && s.label.length >= 2),
+  JSON.stringify(segs.map(s => `${s.label}:${Math.round(s.lw)}`))]);
 
 ok.forEach(([n, v, x]) => console.log((v ? "✓ " : "✗ ") + n + (v ? "" : "  ← " + x)));
 await b.close();
