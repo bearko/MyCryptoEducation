@@ -423,25 +423,57 @@
       "search": "Mount Fuji",
       "alt": "雪をかぶった円すい形の山が、青空を背にそびえている写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-yama",
+      "title": "Japanese: 『凱風快晴』 - Gaifū kaiseiSouth Wind, Clear Sky",
+      "author": "Katsushika Hokusai",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ARed%20Fuji%20southern%20wind%20clear%20morning.jpg",
+      "width": 640,
+      "height": 427
     },
     "obj-pan": {
       "search": "sliced bread",
       "alt": "白い食パンが切り分けられて並んでいる写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-pan",
+      "title": "Sliced bread bag2",
+      "author": "Cadifusexpert",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ASliced%20bread%20bag2.jpg",
+      "width": 288,
+      "height": 188
     },
     "obj-tamago": {
       "search": "chicken eggs",
       "alt": "白い殻のたまごが並んでいる写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-tamago",
+      "title": "Chicken eggs 20101113",
+      "author": "Batholith (talk)",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChicken%20eggs%2020101113.jpg",
+      "width": 640,
+      "height": 480
     },
     "obj-inu": {
       "search": "Labrador Retriever",
       "alt": "犬が草の上にすわって正面を向いている写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-inu",
+      "title": "Labrador Retriever snow",
+      "author": "Original author Hand, edit by Pharaoh Hound",
+      "license": "CC BY 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+      "source": "https://commons.wikimedia.org/wiki/File%3ALabrador%20Retriever%20snow.jpg",
+      "width": 640,
+      "height": 548
     }
   }
 }
