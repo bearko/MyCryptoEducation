@@ -103,6 +103,53 @@ const sweep = async wobble => {
 };
 for (const w of [3, 9, 14]) await sweep(w);
 
+/* ---- 画面が崩れていないか（実寸で見る）----------------------------------
+   jsdom には寸法が無いので、通しテストではレイアウトの崩れを捕まえられない。
+   実際に、消去法の ✕ ボタンに `.cut` と付けたら、帯の `class="band cut"` と
+   ぶつかって帯が幅46pxの縦長の塊になった。クラス名の衝突は見た目にしか出ない。   */
+const box = sel => p.evaluate(`(() => {
+  const e = document.querySelector(${JSON.stringify(sel)});
+  if (!e) return null;
+  const r = e.getBoundingClientRect();
+  return { x: r.left, y: r.top, w: r.width, h: r.height };
+})()`);
+
+await p.evaluate(`(() => {
+  const q = DB.questions.find(x => x.mode === "elimination");
+  S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+            found: [], cut: null, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0,
+            results: {}, noReward: true, done: false, hard: {} };
+  S.view = "quiz"; render();
+})()`);
+
+const view = await p.evaluate("({ w: innerWidth, h: innerHeight })");
+const band = await box(".band");
+ok.push(["帯は横いっぱいの細い帯", !!band && band.w > view.w * 0.7 && band.h < 60,
+  band ? `幅${Math.round(band.w)} 高さ${Math.round(band.h)}（画面幅${view.w}）` : "帯が無い"]);
+
+const xbtn = await box(".xcut");
+const row0 = await box('.row[data-r="0"] .choice');
+ok.push(["✕ は文字の左に、指で押せる大きさで並ぶ",
+  !!xbtn && !!row0 && xbtn.w >= 40 && xbtn.h >= 40 && xbtn.x + xbtn.w <= row0.x + 1,
+  xbtn ? `✕ ${Math.round(xbtn.w)}x${Math.round(xbtn.h)} / 文字の左端 ${Math.round(row0?.x)}` : "✕ が無い"]);
+
+const rows = await p.evaluate(`[...document.querySelectorAll(".choices.elim .row")].map(e => {
+  const r = e.getBoundingClientRect(); return { y: r.top, w: r.width };
+})`);
+ok.push(["選択肢は縦に重ならずに並ぶ",
+  rows.length === 4 && rows.every((r, i) => i === 0 || r.y > rows[i - 1].y) &&
+  rows.every(r => r.w > view.w * 0.7),
+  JSON.stringify(rows.map(r => Math.round(r.y)))]);
+
+// 画面の外へはみ出していないか
+const over = await p.evaluate(`(() => {
+  const w = document.documentElement.clientWidth;
+  return [...document.querySelectorAll("#app *")]
+    .filter(e => e.getBoundingClientRect().right > w + 1)
+    .slice(0, 3).map(e => e.className || e.tagName);
+})()`);
+ok.push(["横にはみ出す要素が無い", over.length === 0, over.join(" / ")]);
+
 ok.forEach(([n, v, x]) => console.log((v ? "✓ " : "✗ ") + n + (v ? "" : "  ← " + x)));
 await b.close();
 process.exit(ok.every(o => o[1]) ? 0 : 1);

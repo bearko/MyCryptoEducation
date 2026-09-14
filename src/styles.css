@@ -626,10 +626,11 @@
   .choices.elim{gap:9px}
   .choices.elim .row{display:flex;align-items:stretch;gap:7px;position:relative}
   .choices.elim .row .choice{flex:1;min-width:0}
-  .cut{flex:none;width:46px;border:1px solid var(--pen);background:#FDF4F2;color:var(--pen);
+  /* **`.cut` にしない。** 帯が `class="band cut"` なので、width が帯にも当たって崩れる */
+  .xcut{flex:none;width:46px;border:1px solid var(--pen);background:#FDF4F2;color:var(--pen);
     font:inherit;font-size:17px;line-height:1;border-radius:3px;cursor:pointer}
-  .cut:hover{background:#F8E6E2}
-  .row.gone .cut{visibility:hidden}
+  .xcut:hover{background:#F8E6E2}
+  .row.gone .xcut{visibility:hidden}
   .row.gone .choice{opacity:.32;text-decoration:line-through;
     text-decoration-color:var(--pen);cursor:default}
   /* 消したその場で、いくつ入ったかを出す */
