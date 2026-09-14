@@ -2167,7 +2167,7 @@
     "newCurriculum": false,
     "figure": null,
     "format": "choice",
-    "prompt": "母語として話す人の数が世界で最も多い言語はどれですか?",
+    "prompt": "母語として話す人の数が世界で最も多い言語は何ですか?",
     "choices": [
       "スペイン語",
       "ヒンディー語",
