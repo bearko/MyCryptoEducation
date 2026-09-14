@@ -407,13 +407,23 @@ export const familyPoints = (state, family) =>
     ? Object.values(state.points || {}).reduce((a, b) => a + b, 0)
     : (state.points || {})[family] || 0;
 
+/* その教科の知識カードを何枚持っているか。応用は同じカードの別形なので数えない */
+export function subjectCardCount(db, state, subject) {
+  const seen = new Set();
+  Object.keys(state.cards || {}).forEach(c => {
+    const base = c.replace("（応用）", "");
+    if (db.cardSubject?.[base] === subject) seen.add(base);
+  });
+  return seen.size;
+}
+
 /**
  * クラフトの可否と、その内訳。画面もホームの通知ドットもこれを見る。
  * 足りないものが分かるように、満たしているかどうかを項目ごとに返す。
  */
 export function craftCheck(db, state, id) {
   const e = db.extensions?.[id];
-  if (!e) return { ok: false, crystals: [], below: null, cards: null };
+  if (!e) return { ok: false, crystals: [], cards: [] };
 
   /**
    * **クリスタルは族ごとのポイントで要求する。**（「石英120pt」のように）
@@ -427,21 +437,20 @@ export function craftCheck(db, state, id) {
       })
     : [];
 
-  const below = e.below
-    ? { id: e.below, name: db.extensions[e.below]?.name || e.below,
-        have: state.exts[e.below] || 0, ok: (state.exts[e.below] || 0) >= 1 }
-    : null;
+  /**
+   * **知識カードは、その品の由来がまたがる教科それぞれで要ります。**
+   *
+   * 素材だけで作れると「素材の量＝強さ」に戻ります。ここを閉じると、
+   * クイズ → 素材 → クラフト の回路に知識が通ります。大唐西域記（奥伝）を作るには、
+   * 社会・国語・外国語のどれも実際に解いていないと届きません。
+   */
+  const cards = Object.entries(e.cards || {}).map(([subject, need]) => {
+    const have = subjectCardCount(db, state, subject);
+    return { subject, need, have, ok: have >= need };
+  });
 
-  // Legendary だけ知識カードの所持を条件に入れる。
-  // 最上位が素材だけで手に入ると「素材の量＝強さ」に戻ってしまうため
-  const cards = e.cards
-    ? { need: e.cards, have: Object.keys(state.cards || {}).length,
-        ok: Object.keys(state.cards || {}).length >= e.cards }
-    : null;
-
-  const ok = crystals.every(c => c.enough)
-          && (!below || below.ok) && (!cards || cards.ok);
-  return { ok, crystals, below, cards };
+  const ok = crystals.every(c => c.enough) && cards.every(c => c.ok);
+  return { ok, crystals, cards };
 }
 
 /* いま作れるエクステンションのキー。

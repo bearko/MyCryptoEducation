@@ -20,7 +20,7 @@ const db = {
   questions,
   figures:    await json("data/figures.json"),
   heroes:     await json("data/heroes.json"),
-  extensions: await json("data/extensions.json"),
+  curated:    await json("data/extensions-curated.json"),
   advice:     await json("data/advice.json"),
   titles:     await json("data/titles.json"),
   crystals:   await json("data/crystals.json"),

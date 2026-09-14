@@ -67,6 +67,9 @@
   .hr{font-size:10px;letter-spacing:.08em;padding:0 5px;border-radius:2px;border:1px solid currentColor}
   .rCommon{color:#7A8794}.rUncommon{color:var(--moss)}.rRare{color:var(--ai)}
   .rEpic{color:#7A4E9B}.rLegendary{color:var(--brass)}.rMCH{color:var(--ink-faint)}
+  /* 独自ランク。由来がいくつの教科にまたがるかで決まる（MCHのレアリティとは別） */
+  .rk{font-size:10px;letter-spacing:.08em;padding:0 5px;border-radius:2px;border:1px solid currentColor}
+  .rk.r0{color:var(--ink-soft)}.rk.r1{color:var(--ai)}.rk.r2{color:var(--pen)}
 
   /* 狭い画面でも折り返して収まるようにする。min-width を固定値のままにすると、
      4つ並ぶ帯（おまかせ/小学校/中学校/世界）が 320px 幅ではみ出す */

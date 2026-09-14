@@ -99,10 +99,17 @@ check("ホームから素材・カード枚数・英雄一覧を外した",
 
 // クラフトの通知ドットは、素材が足りているときだけ出す
 check("素材0なら通知ドットなし", !d.querySelector("#tocraft .dot"));
+// 素材だけでは足りない。知識カードもそろって初めてドットが出る
 const keptPoints = ev("JSON.stringify(S.points)");
+const keptCards = ev("JSON.stringify(S.cards)");
 ev(`S.points=Object.fromEntries(DB.families.map(f => [f, 9999]));render()`);
+check("素材だけではドットが出ない", !d.querySelector("#tocraft .dot"));
+ev(`(() => {
+  Object.keys(DB.cardSubject).filter(c => !c.endsWith("（応用）")).forEach(c => S.cards[c] = true);
+  render();
+})()`);
 check("クラフトできると通知ドット", !!d.querySelector("#tocraft .dot"));
-ev(`S.points=${keptPoints};render()`);
+ev(`S.points=${keptPoints};S.cards=${keptCards};render()`);
 
 // 英雄詳細と図鑑への入口は、ホームからヒーロー画面へ移した
 d.getElementById("toheroes").click();
@@ -566,8 +573,12 @@ ev(`(() => {
 check("写真を外せば元に戻る", d.querySelectorAll(".photo").length === 0);
 
 /* ---- 報酬とチャレンジが壊れていないか ---- */
-// クリスタルは確率で落ちるので、ここだけ乱数を止めて必ず当たるようにする。
-// 止めないと、外国語なら1セッションで出ない確率のほうが高く、検査が気まぐれになる
+/**
+ * **この10問のあいだだけ**乱数を止めて、必ず当たるようにする。
+ * クリスタルは確率で落ちるので、止めないと検査が気まぐれになる——外国語なら
+ * 1セッションで1個も出ない確率のほうが高い。**出ないのが正しい挙動**なので、
+ * アプリ側は素の Math.random のまま。ここで差し替え、答え終わったらすぐ戻す。
+ */
 ev("window.__rnd = Math.random; Math.random = () => 0");
 ev(`(() => {
   const ids = DB.questions.filter(q => (q.format || "choice") === "choice").slice(0, 10).map(q => q.id);
@@ -582,6 +593,9 @@ for (let k = 0; k < 10; k++) {
     if (ex.length) ex[ev("DB.byId[S.run.ids[S.run.i]].applied.answer")].click(); }
   d.getElementById("next").click();
 }
+ev("Math.random = window.__rnd; delete window.__rnd");   // 以降は素の乱数に戻す
+check("乱数は借りたらすぐ返す", ev("typeof window.__rnd") === "undefined" &&
+  ev("Math.random() !== Math.random()"));
 check("族ポイントが貯まる", ev("Object.values(S.points).reduce((x,y)=>x+y,0)") > 0,
   ev("JSON.stringify(S.points)"));
 check("出会った鉱物は図鑑に残る", ev("crystalKinds(S)") > 0, `${ev("crystalKinds(S)")}種`);
@@ -590,7 +604,6 @@ check("解いた教科に対応する族に入る", ev(`(() => {
   const want = new Set([...subs].map(s => DB.subjectToFamily[s]));
   return Object.keys(S.points).every(f => want.has(f));
 })()`) === true, ev("JSON.stringify(S.points)"));
-ev("Math.random = window.__rnd");
 
 /* ---- GUM は難易度なり（1〜10） ---- */
 check("易しい問題は1GUM", ev('gumFor({grade:"e1"})') === 1);
@@ -608,74 +621,113 @@ check("今回のGUMは正解数と釣り合う",
   `${ev("S.run.gum")} GUM / 正解 ${ev("S.run.right")}問`);
 check("リザルトに到達", !!d.getElementById("again"), txt().slice(0, 80));
 
-/* ---- クラフト（40種・クリスタル込み） ---- */
-ev('S.view="craft";S.craftTab="ペン";render()');
-check("40種そろっている", ev("Object.keys(DB.extensions).length") === 40,
+/* ---- クラフト（由来のある108種・族ポイント＋知識カード） ---- */
+// その教科の知識カードを n 枚だけ持たせる
+const giveCards = (sub, n) => ev(`(() => {
+  S.cards = {};
+  Object.entries(DB.cardSubject).filter(([c, s]) => s === ${JSON.stringify(sub)} && !c.endsWith("（応用）"))
+    .slice(0, ${n}).forEach(([c]) => S.cards[c] = true);
+  render();
+})()`);
+
+ev('S.view="craft";S.craftTab="初伝";render()');
+check("由来のある108種そろっている", ev("Object.keys(DB.extensions).length") === 108,
   `${ev("Object.keys(DB.extensions).length")}種`);
-check("系統ごとのタブは8つ", d.querySelectorAll("#linetab button").length === 8,
-  `${d.querySelectorAll("#linetab button").length}件`);
-check("1つの系統は5段階", d.querySelectorAll(".ext").length === 5,
-  `${d.querySelectorAll(".ext").length}件`);
+check("ランクは初伝・中伝・奥伝の3つ", d.querySelectorAll("#ranktab button").length === 3,
+  `${d.querySelectorAll("#ranktab button").length}件`);
+check("ランクは、由来がまたがる教科数で決まる", ev(`(() => {
+  return Object.values(DB.extensions).every(e => {
+    const n = new Set(e.subs).size;
+    return e.rank === (n >= 3 ? "奥伝" : n === 2 ? "中伝" : "初伝");
+  });
+})()`) === true);
+check("越境しているものほど、ゲージ寄与も大きい", ev(`(() => {
+  const g = r => Object.values(DB.extensions).find(e => e.rank === r).gauge;
+  return g("初伝") < g("中伝") && g("中伝") < g("奥伝");
+})()`) === true);
+check("由来がそのまま説明になる",
+  txt().includes(ev(`Object.values(DB.extensions).find(e => e.rank === "初伝").origin`).slice(0, 12)),
+  txt().slice(0, 80));
 
-// Common も少しだけクリスタルが要る（魔石を廃止したので、ここが入口の関門になる）
-ev('S.points={};S.exts={};S.crystals={};render()');
-check("素材が無ければCommonも作れない",
-  [...d.querySelectorAll(".mini[data-k]")].every(b => b.disabled));
-ev('S.points={"生物起源":10,"宝石":10};render()');   // ノービスペンは 生物起源10 ＋ 宝石10
-const common = [...d.querySelectorAll(".mini[data-k]")].filter(b => !b.disabled);
-check("Commonは少しのクリスタルで作れる", common.length === 1 && common[0].dataset.k === "1003",
-  common.map(b => b.dataset.k).join(","));
-common[0].click();
-check("作るとポイントが減る", ev('familyPoints(S, "生物起源")') === 0,
-  `${ev('familyPoints(S, "生物起源")')}pt`);
-check("作ったものが手元に入る", ev(`S.exts["1003"]`) === 1);
+/* **素材だけでは作れない。** ここがクイズ→素材→クラフトに知識を通す関門 */
+ev('S.points={"貴金属":9999};S.exts={};S.cards={};render()');
+check("素材だけでは作れない（知識カードが要る）",
+  d.querySelector('.mini[data-k="5006"]').disabled,
+  `社会の札 ${ev('subjectCardCount(DB, S, "社会")')}枚`);
+giveCards("国語", 40);
+check("別の教科のカードでは通らない",
+  d.querySelector('.mini[data-k="5006"]').disabled,
+  `国語 ${ev('subjectCardCount(DB, S, "国語")')}枚 / 社会 ${ev('subjectCardCount(DB, S, "社会")')}枚`);
+giveCards("社会", 4);
+check("枚数が1枚足りなければ作れない",
+  d.querySelector('.mini[data-k="5006"]').disabled,
+  `社会 ${ev('subjectCardCount(DB, S, "社会")')}枚`);
+giveCards("社会", 5);
+check("その教科のカードがそろえば作れる（初伝）",
+  !d.querySelector('.mini[data-k="5006"]').disabled,
+  `社会 ${ev('subjectCardCount(DB, S, "社会")')}枚`);
 
-// Uncommon はもっと要る
+// 素材のほうも要る
 ev('S.points={};render()');
-check("クリスタルが無いとUncommonは作れない",
-  d.querySelector('.mini[data-k="2003"]').disabled);
-// エリートペン（国語・外国語）は 生物起源30pt ＋ 宝石20pt。
-// **別の族をいくら積んでも作れない。** ここが族ごとの要求の要
-ev('S.points={"貴金属":240};render()');   // 貴金属を240pt 持っていても
-check("別の族のポイントでは作れない",
-  d.querySelector('.mini[data-k="2003"]').disabled,
-  `貴金属 ${ev('familyPoints(S, "貴金属")')}pt`);
-ev('S.points={"生物起源":102,"宝石":57};S.crystals={"046":1,"036":3};render()');
-check("要求された族があれば作れる", !d.querySelector('.mini[data-k="2003"]').disabled,
-  `生物起源 ${ev('familyPoints(S, "生物起源")')}pt / 宝石 ${ev('familyPoints(S, "宝石")')}pt`);
-// 足りているときは要求だけ、足りないときは「持ち高/要求」を出す
+check("カードがそろっていても、素材が無ければ作れない",
+  d.querySelector('.mini[data-k="5006"]').disabled);
+ev('S.points={"貴金属":50};render()');
+d.querySelector('.mini[data-k="5006"]').click();
+check("作るとポイントが減る", ev('familyPoints(S, "貴金属")') === 0,
+  `${ev('familyPoints(S, "貴金属")')}pt`);
+check("作っても知識カードは減らない", ev('subjectCardCount(DB, S, "社会")') === 5,
+  `${ev('subjectCardCount(DB, S, "社会")')}枚`);
+check("作ったものが手元に入る", ev(`S.exts["5006"]`) === 1);
+
+/* 中伝は2教科、奥伝は3教科すべてで要る */
+ev('S.craftTab="中伝";S.points={"貴金属":9999,"生物起源":9999};render()');
+ev(`(() => {
+  S.cards = {};
+  const put = (sub, n) => Object.entries(DB.cardSubject)
+    .filter(([c, s]) => s === sub && !c.endsWith("（応用）")).slice(0, n)
+    .forEach(([c]) => S.cards[c] = true);
+  put("社会", 20); put("国語", 7);   // 与一の弓は 社会8 ＋ 国語8
+  render();
+})()`);
+check("中伝は、片方の教科だけでは作れない",
+  d.querySelector('.mini[data-k="5013"]').disabled,
+  `社会 ${ev('subjectCardCount(DB, S, "社会")')} / 国語 ${ev('subjectCardCount(DB, S, "国語")')}`);
+ev(`(() => {
+  Object.entries(DB.cardSubject).filter(([c, s]) => s === "国語" && !c.endsWith("（応用）"))
+    .slice(0, 8).forEach(([c]) => S.cards[c] = true);
+  render();
+})()`);
+check("中伝は、2教科そろえば作れる", !d.querySelector('.mini[data-k="5013"]').disabled);
+
+ev('S.craftTab="奥伝";S.points={"貴金属":9999,"生物起源":9999,"宝石":9999};render()');
+check("奥伝は、3教科目が欠けていれば作れない",
+  d.querySelector('.mini[data-k="5016"]').disabled,
+  `外国語 ${ev('subjectCardCount(DB, S, "外国語")')}枚`);
+ev(`(() => {
+  ["社会", "国語", "外国語"].forEach(sub => Object.entries(DB.cardSubject)
+    .filter(([c, s]) => s === sub && !c.endsWith("（応用）")).slice(0, 12)
+    .forEach(([c]) => S.cards[c] = true));
+  render();
+})()`);
+check("奥伝は、3教科すべてそろえば作れる", !d.querySelector('.mini[data-k="5016"]').disabled,
+  `社会 ${ev('subjectCardCount(DB, S, "社会")')} / 国語 ${ev('subjectCardCount(DB, S, "国語")')} / 外国語 ${ev('subjectCardCount(DB, S, "外国語")')}`);
+check("奥伝は4種だけ", ev(`Object.values(DB.extensions).filter(e => e.rank === "奥伝").length`) === 4);
+
+// 108種あるので、作れるものが先に並ばないと見つけられない
+check("作れるものが先に並ぶ", (() => {
+  ev('S.craftTab="初伝";S.points={"貴金属":9999};render()');
+  const first = d.querySelector(".ext");
+  return first && !first.classList.contains("dim");
+})(), d.querySelector(".ext")?.className);
+
 check("足りない族は、持ち高と要求を並べて見せる", (() => {
-  ev('S.points={"生物起源":5,"宝石":5};render()');
-  const short = /生物起源 5\/30pt/.test(txt()) && /宝石 5\/20pt/.test(txt());
-  ev('S.points={"生物起源":102,"宝石":57};render()');
-  return short && /生物起源 30pt/.test(txt()) && !/生物起源 \d+\/30pt/.test(txt());
+  ev('S.craftTab="初伝";S.points={"貴金属":20};render()');
+  const short = /貴金属 20\/50pt/.test(txt());
+  ev('S.points={"貴金属":50};render()');
+  return short && /貴金属 50pt/.test(txt()) && !/貴金属 \d+\/50pt/.test(txt());
 })(), txt().slice(0, 60));
-d.querySelector('.mini[data-k="2003"]').click();
-check("要求ぶんだけポイントが減る",
-  ev('familyPoints(S, "生物起源")') === 72 && ev('familyPoints(S, "宝石")') === 37,
-  `生物起源 ${ev('familyPoints(S, "生物起源")')}pt / 宝石 ${ev('familyPoints(S, "宝石")')}pt`);
-// **鉱物そのものは減らない。** 減らすと豆知識が読めなくなり、図鑑が欠ける
-check("クラフトしても図鑑は欠けない",
-  ev(`S.crystals["046"]`) === 1 && ev(`S.crystals["036"]`) === 3,
-  `琥珀 ${ev(`S.crystals["046"] || 0`)} / ジルコニア ${ev(`S.crystals["036"] || 0`)}`);
 
-// Rare は下位を1つ食う
-ev('S.points={"生物起源":90,"宝石":60};S.exts={};render()');
-check("下位が無いとRareは作れない", d.querySelector('.mini[data-k="3003"]').disabled,
-  `2003の所持 ${ev(`S.exts["2003"] || 0`)}`);
-ev(`S.exts["2003"]=1;render()`);
-check("下位があればRareを作れる", !d.querySelector('.mini[data-k="3003"]').disabled);
-d.querySelector('.mini[data-k="3003"]').click();
-check("Rareを作ると下位が消える", !ev(`S.exts["2003"]`), `残り ${ev(`S.exts["2003"] || 0`)}`);
-
-// Legendary は知識カードの所持も条件
-ev('S.points={"生物起源":240,"宝石":160};S.exts={"4003":1};render()');
-const cardCount0 = ev("Object.keys(S.cards).length");
-check("知識カードが足りないとLegendaryは作れない",
-  cardCount0 >= 30 || d.querySelector('.mini[data-k="5003"]').disabled,
-  `カード ${cardCount0}枚`);
-
-ev('S.view="craft";S.craftTab="ペン";S.exts={};S.crystals={};S.points={};render()');
+ev('S.view="craft";S.craftTab="初伝";S.exts={};S.crystals={};S.points={};S.cards={};render()');
 d.querySelector(".mapbtn").click();
 
 ev('S.view="home";render()');
@@ -1227,11 +1279,17 @@ check("難度係数が低いほど早く届く", ev(`(() => {
 })()`) === true);
 
 /* ---- 装備画面の before/after（docs/reward-economy.md §2）---- */
+// 測る相手をピタゴラス（算数・数学）に固定する。ここまでで解放されていると
+// 相手が変わり、コンパス（算数・数学）が噛み合わなくなって検査が意味を失う
 ev(`window.__cards = JSON.stringify(S.cards);
+    S.cards = {};
     Object.keys(DB.cardSubject).filter(c => !c.endsWith("（応用）"))
       .forEach((c, i) => { if (i % 5 === 0) S.cards[c] = true; });
-    S.exts={"5003":1,"1001":1}; S.owned["10001"]=1; delete S.equip["10001"];
+    delete S.owned["1006"];
+    S.exts={"5003":1,"2156":1}; S.owned["10001"]=1; delete S.equip["10001"];
     S.heroView="10001"; go("hero")`);
+check("測る相手はピタゴラス", d.getElementById("gtarget").value === "1006",
+  d.getElementById("gtarget")?.value);
 check("装備画面に到達度が出る", /への到達度/.test(txt()), txt().slice(0, 120));
 check("誰への到達度を見るか選べる", !!d.getElementById("gtarget"),
   d.querySelector(".reach")?.textContent);
@@ -1240,12 +1298,25 @@ check("装備の候補に、つけたときの到達度が並ぶ",
   `${d.querySelectorAll(".eqi em").length}件`);
 check("装備を切り替えると数字が動く", (() => {
   const before = d.querySelector(".rnum b").textContent;
-  [...d.querySelectorAll(".eqi")].find(b => b.dataset.k === "1001").click();
+  [...d.querySelectorAll(".eqi")].find(b => b.dataset.k === "2156").click();
   const after = d.querySelector(".rnum b").textContent;
   return after !== before && after.includes("→");
 })(), d.querySelector(".rnum b")?.textContent);
+// 初伝ひとつの効きは1%に満たないことがある。整数に丸めると「動いた」が消えるので、
+// そのときだけ小数第1位まで出す
+check("1%未満の変化も見えるようにする", (() => {
+  const t = d.querySelector(".rnum b").textContent;
+  return !t.includes("→") || /\d/.test(t);
+})() && ev(`(() => {
+  const a = 20.62, b = 21.39;
+  return Math.round(a) === Math.round(b);   // 丸めると同じになる幅でも
+})()`) === true, d.querySelector(".rnum b")?.textContent);
+check("候補には差分を出す",
+  [...d.querySelectorAll(".eqi em")].some(e => /＋/.test(e.textContent)) &&
+  [...d.querySelectorAll(".eqi em")].some(e => /±0/.test(e.textContent)),
+  [...d.querySelectorAll(".eqi em")].map(e => e.textContent).join(" / "));
 check("分野が噛み合わない装備では動かない", (() => {
-  // 劇作家の羽ペンは国語・外国語。算数・数学のピタゴラスへは効かない
+  // 劇作家の羽ペンは国語・外国語。算数・数学のピタゴラスへは効かない（コンパスは効く）
   [...d.querySelectorAll(".eqi")].find(b => b.dataset.k === "5003").click();
   return !d.querySelector(".rnum b").textContent.includes("→");
 })(), d.querySelector(".rnum b")?.textContent);
@@ -1254,12 +1325,6 @@ check("外せば元に戻る", (() => {
   return !d.querySelector(".rnum b").textContent.includes("→");
 })(), d.querySelector(".rnum b")?.textContent);
 ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
-
-check("レアリティが上がるほどゲージ寄与も上がる", ev(`(() => {
-  const ids = ["1003", "2003", "3003", "4003", "5003"];
-  const g = ids.map(id => DB.extensions[id].gauge);
-  return g.every((v, i) => i === 0 || v > g[i - 1]);
-})()`) === true);
 
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));
 console.log(failed ? `\n${failed}件 失敗\n` : "\nすべて通過\n");

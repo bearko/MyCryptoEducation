@@ -10,6 +10,8 @@ import { fileURLToPath } from "node:url";
 import { answerMode, hintGroup, hintsFor, normalizeHints, answerText, numericParts }
   from "../src/answer-mode.js";
 import { panelLayout } from "../src/engine.js";
+/* 釣り合いはアプリと同じ式から導く。2箇所に分けると必ずズレる */
+import { buildExtensions } from "../src/data.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const RUN_LENGTH = 10;
@@ -43,7 +45,7 @@ for (const file of await readdir(join(ROOT, "data/questions"))) {
 }
 const figures    = await json("data/figures.json");
 const heroes     = await json("data/heroes.json");
-const extensions = await json("data/extensions.json");
+const curated    = await json("data/extensions-curated.json");
 const crystals   = await json("data/crystals.json");
 const curriculum = await json("data/curriculum.json");
 const imageBook  = await json("data/images.json");
@@ -269,58 +271,76 @@ for (const h of heroes) {
 }
 
 /* ---- エクステンション ---- */
-const RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
-for (const [k, e] of Object.entries(extensions)) {
-  for (const f of ["name", "line", "rarity", "subs", "gauge", "crystals", "text"]) {
+const extensions = buildExtensions(curated, crystals);
+
+/**
+ * 台帳（data/extensions-curated.json）に書くのは由来が参照できる事実だけで、
+ * ゲージ寄与・クリスタルの要求・知識カードの条件は data.js が導きます。
+ * ここで見るのは台帳のほうと、導いた結果が破綻していないかの両方です。
+ */
+const RANKS = ["初伝", "中伝", "奥伝"];
+const extIds = new Set();
+for (const e of curated) {
+  const k = e.id || "(id未設定)";
+  if (extIds.has(e.id)) err(k, "エクステンションIDが重複しています");
+  extIds.add(e.id);
+  for (const f of ["id", "name", "series", "rank", "subjects", "origin"]) {
     if (e[f] === undefined || e[f] === null || e[f] === "") err(k, `必須項目 ${f} がありません`);
   }
-  if (!RARITIES.includes(e.rarity)) err(k, `未知のレアリティ "${e.rarity}"`);
-  if (e.cost) err(k, "魔石は廃止しました。cost を消して crystals に族ごとのポイントで書いてください");
-  e.subs.forEach(s => { if (!SUBJECTS.includes(s)) err(k, `未知の分野 "${s}"`); });
-  // 下位は実在して、1段だけ下であること
-  if (e.below) {
-    const b = extensions[e.below];
-    if (!b) err(k, `下位 "${e.below}" がありません`);
-    else if (RARITIES.indexOf(b.rarity) !== RARITIES.indexOf(e.rarity) - 1)
-      err(k, `下位 "${e.below}" のレアリティが1段下ではありません（${b.rarity}）`);
-    else if (b.line !== e.line) err(k, `下位 "${e.below}" が別の系統です（${b.line}）`);
-  }
-  if (e.crystal !== undefined)
-    err(k, "crystal（族を問わない合計）は廃止しました。crystals に族ごとのポイントで書いてください");
+  if (!RANKS.includes(e.rank)) err(k, `未知のランク "${e.rank}"`);
+  (e.subjects || []).forEach(x => { if (!SUBJECTS.includes(x)) err(k, `未知の分野 "${x}"`); });
+  if (!(e.subjects || []).length) err(k, "subjects が空です");
+  if (new Set(e.subjects).size !== (e.subjects || []).length) err(k, "subjects に同じ教科が2回あります");
 
-  // クラフトは族ごとのポイントで要求する。個別の鉱物を名指ししない
-  if (e.crystals) {
-    const fams = crystals.families || [];
-    const keys = Object.keys(e.crystals);
-    if (!keys.length) err(k, "crystals が空です");
-    keys.forEach(f => {
-      if (f !== "*" && !fams.includes(f)) err(k, `未知の族 "${f}"`);
-      const v = e.crystals[f];
-      if (!Number.isInteger(v) || v <= 0) err(k, `${f} のポイントが正の整数ではありません (${v})`);
-    });
-    if (keys.includes("*") && keys.length > 1)
-      err(k, "族を問わない要求（*）は、ほかの族と混ぜられません");
-    // 要求する族は、その品が広げる教科の族であること（どの教科を解くかの誘導になる）
-    if (!keys.includes("*")) {
-      const want = new Set(e.subs.map(x => crystals.subjectToFamily?.[x]));
-      keys.forEach(f => {
-        if (!want.has(f)) err(k, `族 "${f}" は、この品の分野（${e.subs.join("・")}）と噛み合いません`);
-      });
-    }
-  }
-  if (e.rarity === "Legendary" && !e.cards)
-    err(k, "Legendaryには知識カードの所持を条件に入れてください（素材だけで最上位が手に入らないように）");
-  if (!existsSync(join(ROOT, `public/extensions/${k}.webp`)))
+  // **ランクは、由来がいくつの教科にまたがるかで決まる。** ここがずれると、
+  // 「越境しているものほど上」というランクの意味が崩れる
+  const n = new Set(e.subjects || []).size;
+  const want = n >= 3 ? "奥伝" : n === 2 ? "中伝" : "初伝";
+  if (e.rank !== want)
+    err(k, `ランクが教科数と合いません（${n}教科なら ${want}、いまは ${e.rank}）`);
+
+  if (e.upgrade && (!e.upgrade.id || !e.upgrade.name)) err(k, "upgrade は id と name の両方が要ります");
+  if (!existsSync(join(ROOT, `public/extensions/${e.id}.webp`)))
     err(k, "画像が public/extensions にありません");
 }
 
-// 8系統 × 5レアリティが揃っているか
-const byLine = {};
-for (const [k, e] of Object.entries(extensions)) (byLine[e.line] ??= []).push(e.rarity);
-for (const [line, rs] of Object.entries(byLine)) {
-  const missing = RARITIES.filter(r => !rs.includes(r));
-  if (missing.length) err(line, `レアリティが欠けています: ${missing.join(", ")}`);
+/* 導いた結果のほう。釣り合いは data.js が決めるので、壊れていないかだけ見る */
+for (const [k, e] of Object.entries(extensions)) {
+  const fams = crystals.families || [];
+  const keys = Object.keys(e.crystals || {});
+  if (!keys.length) err(k, "クリスタルの要求が空です");
+  const want = new Set(e.subs.map(x => crystals.subjectToFamily?.[x]));
+  keys.forEach(f => {
+    if (!fams.includes(f)) err(k, `未知の族 "${f}"`);
+    if (!want.has(f)) err(k, `族 "${f}" は、この品の分野（${e.subs.join("・")}）と噛み合いません`);
+    if (!Number.isInteger(e.crystals[f]) || e.crystals[f] <= 0)
+      err(k, `${f} のポイントが正の整数ではありません (${e.crystals[f]})`);
+  });
+  // **知識カードは、またがる教科すべてで要る。** 1つでも抜けると素材だけで作れてしまう
+  const cardSubs = Object.keys(e.cards || {});
+  if (cardSubs.length !== e.subs.length || !e.subs.every(x => cardSubs.includes(x)))
+    err(k, `知識カードの条件が分野とそろっていません（分野 ${e.subs.join("・")} / 条件 ${cardSubs.join("・")}）`);
+  cardSubs.forEach(x => {
+    if (!Number.isInteger(e.cards[x]) || e.cards[x] <= 0) err(k, `${x} の必要枚数がおかしい (${e.cards[x]})`);
+    // その教科に、条件を満たせるだけのカードが実在するか
+    const stockCards = new Set(questions.filter(q => q.subject === x).map(q => q.card)).size;
+    if (stockCards < e.cards[x])
+      err(k, `${x} の知識カードは ${stockCards}種しかなく、条件の ${e.cards[x]}枚に届きません`);
+  });
+  if (!(e.gauge > 0)) err(k, `ゲージ寄与がおかしい (${e.gauge})`);
 }
+
+// upgrade の指す先は、台帳にあってもなくてもよい（「真・」は未実装）。
+// ただし台帳にあるなら、由来は同じでなければならない
+for (const e of curated) {
+  const up = e.upgrade && curated.find(x => x.id === e.upgrade.id);
+  if (up && up.rank !== e.rank)
+    err(e.id, `上位 "${up.name}" のランクが違います（${up.rank} / ${e.rank}）`);
+}
+
+const byRank = {};
+for (const e of curated) (byRank[e.rank] ??= []).push(e);
+RANKS.forEach(r => { if (!byRank[r]?.length) err("extensions", `ランク "${r}" の品がありません`); });
 
 /* ---- クリスタル ---- */
 const FAMILIES = crystals.families || [];
@@ -408,7 +428,8 @@ for (const s of SUBJECTS) {
 }
 
 /* ---- 出力 ---- */
-console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${Object.keys(extensions).length}種（${Object.keys(byLine).length}系統） / クリスタル ${(crystals.crystals || []).length}種\n`);
+console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${curated.length}種（${
+  RANKS.map(r => `${r}${byRank[r].length}`).join("・")}） / クリスタル ${(crystals.crystals || []).length}種\n`);
 console.table(table);
 console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ ${RUN_LENGTH}問未満 ${thinCells}` +
   `　（「−」はカリキュラムに無い組み合わせ）`);

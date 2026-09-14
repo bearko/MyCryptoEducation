@@ -20,14 +20,60 @@ export async function loadDatabase(base = "./data") {
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
-    json(`${base}/extensions.json`),
+    json(`${base}/extensions-curated.json`),
     json(`${base}/advice.json`),
     json(`${base}/titles.json`),
     json(`${base}/crystals.json`),
     json(`${base}/images.json`),
   ]);
-  return index({ questions: questionSets.flat(), figures, heroes, extensions,
+  return index({ questions: questionSets.flat(), figures, heroes, curated: extensions,
                  advice, titles, crystals, images });
+}
+
+/**
+ * **エクステンションの釣り合いは、台帳から導きます。手で書きません。**
+ *
+ * `data/extensions-curated.json` に書くのは、由来が参照できる事実だけ
+ * （名前・系統・ランク・またがる教科・由来）。ゲージ寄与もクリスタルの要求も
+ * 知識カードの条件も、ランクとまたがる教科から機械的に決めます。
+ * 品を足すときに数字を釣り合わせる手間が要らず、釣り合いが崩れることもありません。
+ *
+ * ランクは**由来がいくつの教科にまたがるか**で決まります。MCHのレアリティは使いません。
+ * 上位レアリティだけを見ていると、算数・数学がゼロのままになるためです。
+ */
+export const RANKS = {
+  初伝: { gauge: 15, crystals: 50,  cards: 5 },
+  中伝: { gauge: 30, crystals: 150, cards: 8 },
+  奥伝: { gauge: 60, crystals: 400, cards: 12 },
+};
+export const RANK_ORDER = ["初伝", "中伝", "奥伝"];
+
+export function buildExtensions(curated, crystals) {
+  const toFamily = crystals?.subjectToFamily || {};
+  const out = {};
+  for (const e of curated || []) {
+    const r = RANKS[e.rank] || RANKS.初伝;
+    const subs = e.subjects || [];
+
+    // クリスタルは、またがる教科ぶんの族へ均等に割る。端数は先頭の族が持つ
+    const fams = [...new Set(subs.map(s => toFamily[s]).filter(Boolean))];
+    const crystalsNeed = {};
+    if (fams.length) {
+      const each = Math.max(10, Math.round(r.crystals / fams.length / 10) * 10);
+      fams.forEach((f, i) => { crystalsNeed[f] = i === 0 ? r.crystals - each * (fams.length - 1) : each; });
+    }
+
+    // **知識カードは、またがる教科それぞれで要る。** ここがクイズとクラフトをつなぐ回路
+    const cards = {};
+    subs.forEach(sub => { cards[sub] = r.cards; });
+
+    out[e.id] = {
+      id: e.id, name: e.name, series: e.series, rank: e.rank,
+      subs, gauge: r.gauge, crystals: crystalsNeed, cards,
+      origin: e.origin, upgrade: e.upgrade || null, mchRarity: e.mchRarity,
+    };
+  }
+  return out;
 }
 
 function index(raw) {
@@ -48,6 +94,8 @@ function index(raw) {
   db.heroById = Object.fromEntries(db.heroes.map(h => [h.id, h]));
   db.crystalById = Object.fromEntries((db.crystals?.crystals || []).map(c => [c.id, c]));
   db.photos = db.images?.images || {};
+  db.extensions = buildExtensions(db.curated, db.crystals);
+
   // 教科 ↔ 族。クラフトの要求先と、どの教科を解けばその族が貯まるかを結ぶ
   db.families = db.crystals?.families || [];
   db.subjectToFamily = db.crystals?.subjectToFamily || {};
