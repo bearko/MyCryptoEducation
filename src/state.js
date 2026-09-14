@@ -12,7 +12,7 @@ export function capName(name) {
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
 const PERSISTED = ["settings", "profile", "gum", "points", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score", "days",
-                   "totalRight", "crossRight", "countries", "crystals"];
+                   "totalRight", "crossRight", "countries", "crystals", "introDone"];
 
 function defaults() {
   return {
@@ -36,6 +36,8 @@ function defaults() {
     cells: {},
     seen: {},
     runs: 0,
+    // 無説明の初回起動（決定1）を終えたか。終えるまでホームは出さない
+    introDone: false,
     score: 0,
 
     crystals: {},         // 出会ったクリスタル { "001": 個数, ... }。図鑑。減らない
