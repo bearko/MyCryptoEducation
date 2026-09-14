@@ -127,12 +127,66 @@ export const BLOCKS = 3;        // 1セッションの束の数
 export const blockSize = mode => Math.max(BLOCK_MIN,
   Math.min(BLOCK_MAX, Math.round(BLOCK_WORK / (MODE_WORK[mode] ?? 2))));
 
-/* 出題の優先順（白いマス → 未出題 → 既出）。束の中でもこの順を保つ */
-function rankPool(list, state) {
-  const blank = list.filter(q => !state.cells[cellKey(q)]);
-  const fresh = list.filter(q => state.cells[cellKey(q)] && !state.seen[q.id]);
-  const rest  = list.filter(q => state.cells[cellKey(q)] && state.seen[q.id]);
-  return [...shuffle(blank), ...shuffle(fresh), ...shuffle(rest)];
+/**
+ * **形式ごとの段（Lv.1〜Lv.3）。**
+ *
+ * 学年は「どの教育課程の問題か」で、段は**同じ学年の中での踏みこみ方**です。
+ * 中学1年のままでも、用語を言い当てるだけの問い（Lv.1）と、似たものを見分ける問い
+ * （Lv.2）と、理由や例外を問う問い（Lv.3）では手ごたえが違います。
+ *
+ * **段は形式ごとに別で持ちます。** 消去法は得意だが文字パネルは苦手、という差が
+ * ふつうにあるので、ひとつの数字にまとめると、どちらかが必ず合わなくなります。
+ *
+ * **上がるだけで、下がりません。** 原則3（失敗は罰されない）と揃えるためです。
+ * 下げる仕組みを入れると、外した回が「降格」として画面に出ることになります。
+ */
+export const MAX_LEVEL = 3;
+export const LEVEL_UP_RATE = 0.75;   // その束で これだけ取れたら一段上がる
+export const LEVEL_UP_MIN = 3;       // 束が短すぎると、まぐれで上がってしまう
+
+export const levelOf = q => Math.min(MAX_LEVEL, Math.max(1, q.level || 1));
+export const modeLevel = (state, mode) =>
+  Math.min(MAX_LEVEL, Math.max(1, (state.modeLevel || {})[mode] || 1));
+
+/**
+ * そのセッションで上がった段を返す `[{ mode, from, to }]`。
+ * **記録からの再挑戦（noReward）では動かしません。**
+ */
+export function levelUps(state, run) {
+  const out = [];
+  if (!run || run.noReward) return out;
+  let at = 0;
+  for (const b of run.plan || []) {
+    const ids = (run.ids || []).slice(at, at + b.n);
+    at += b.n;
+    if (ids.length < LEVEL_UP_MIN) continue;
+    const right = ids.filter(id => run.results?.[id] === "ok").length;
+    if (right < Math.ceil(ids.length * LEVEL_UP_RATE)) continue;
+    const from = modeLevel(state, b.mode);
+    if (from >= MAX_LEVEL) continue;
+    out.push({ mode: b.mode, from, to: from + 1 });
+  }
+  return out;
+}
+
+/**
+ * 出題の優先順。**白いマス → 未出題 → 既出**（知識マップの空白を先に埋める）。
+ * **その中で、いまの段のものを先に出します。** 順番を逆にすると、段が上がった人が
+ * 白いマスにたどり着けなくなり、知識マップが埋まらなくなります。
+ */
+function rankPool(list, state, level = MAX_LEVEL) {
+  const byLevel = g => {
+    const out = [];
+    for (let l = level; l >= 1; l--) out.push(...shuffle(g.filter(q => levelOf(q) === l)));
+    // 段を上げきっていない人にも、上の段の問題は最後の逃げ道として残す
+    for (let l = level + 1; l <= MAX_LEVEL; l++) out.push(...shuffle(g.filter(q => levelOf(q) === l)));
+    return out;
+  };
+  return [
+    ...byLevel(list.filter(q => !state.cells[cellKey(q)])),
+    ...byLevel(list.filter(q => state.cells[cellKey(q)] && !state.seen[q.id])),
+    ...byLevel(list.filter(q => state.cells[cellKey(q)] && state.seen[q.id])),
+  ];
 }
 
 const distance = q => q.chapter * 100 + (GRADE_ORDER[q.grade] || 0);
@@ -165,9 +219,10 @@ export function planRun(db, state, opts = {}) {
 
   // スワイプだけのセッションは1束。**10問ぜんぶ同じ形式**という約束を保つ
   if (kind === "swipe") {
-    const pool = rankPool(cand, state);
+    const pool = rankPool(cand, state, modeLevel(state, "swipe"));
     const ids = withTail(pool.slice(0, Math.min(RUN_LENGTH, pool.length)), pool);
-    return { ids: ids.map(q => q.id), plan: [{ mode: "swipe", n: ids.length }] };
+    return { ids: ids.map(q => q.id),
+             plan: [{ mode: "swipe", n: ids.length, level: modeLevel(state, "swipe") }] };
   }
 
   const pools = new Map();
@@ -175,7 +230,7 @@ export function planRun(db, state, opts = {}) {
     if (!pools.has(q.mode)) pools.set(q.mode, []);
     pools.get(q.mode).push(q);
   });
-  for (const [m, list] of pools) pools.set(m, rankPool(list, state));
+  for (const [m, list] of pools) pools.set(m, rankPool(list, state, modeLevel(state, m)));
 
   // **3問そろわない形式は束にしない。** 1〜2問では「まとめて出す」意味がない
   const full = [...pools.keys()].filter(m => pools.get(m).length >= BLOCK_MIN);
@@ -198,7 +253,7 @@ export function planRun(db, state, opts = {}) {
     const block = i === picked.length - 1
       ? withTail(pool.slice(0, want), pool)   // 最後の束だけ、末尾を越境問題にする
       : pool.slice(0, want);
-    plan.push({ mode, n: block.length });
+    plan.push({ mode, n: block.length, level: modeLevel(state, mode) });
     block.forEach(q => ids.push(q.id));
   });
   return { ids, plan };

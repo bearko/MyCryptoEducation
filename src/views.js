@@ -2,6 +2,7 @@
 
 import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedChapters, buildRun, planRun, BLOCKS, gaugeBreakdown, challengeStage,
+         levelUps, modeLevel, MAX_LEVEL,
          cellKey, craftableKeys, nextHero, lockedHeroes, nextIndex,
          adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
          titleProgress, earnedTitles, countryOf,
@@ -420,6 +421,11 @@ function vSelect() {
     <p class="fine"><b>出題形式は毎回3つ、くじで選びます。</b>形式ごとにまとめて出すので、
       操作を覚え直す回数が減ります。束の長さは手数なりで、はらうだけのスワイプは8問、
       なぞる文字パネルは3問。<b>何が来るかは得意不得意で変わりません。</b></p>
+    <div class="lvbar">${Object.keys(MODE_LABEL).map(m =>
+      `<span class="lvcell"><b>${esc(MODE_LABEL[m])}</b><i>Lv.${modeLevel(S, m)}</i></span>`).join("")}</div>
+    <p class="fine">段は形式ごとに別で、<b>その形式の束で4分の3以上とれた回に1つ上がります</b>
+      （Lv.3まで）。学年は変わらず、同じ学年の中で踏みこんだ問いに変わります。
+      <b>下がることはありません。</b></p>
 
     <div class="seg" id="band">${bands.map(([k, l]) =>
       `<button data-k="${k}" class="${S.select.band === k ? "on" : ""}" ${
@@ -510,6 +516,9 @@ function finishRun() {
   S.run.done = true;
   if (S.run.intro) S.introDone = true;   // ここを過ぎて、初めてホームが出る
   if (S.run.noReward) return;
+  /* **形式ごとの段は、その束の出来だけで決まります。**上がるだけで下がりません */
+  S.run.levelUps = levelUps(S, S.run);
+  S.run.levelUps.forEach(u => { (S.modeLevel ||= {})[u.mode] = u.to; });
   S.runs++;
   const k = dayKey();
   S.days[k] = mergeDay(S.days[k], S.run);
@@ -552,6 +561,19 @@ const MODE_LABEL = { swipe: "スワイプ", choice: "4択", elimination: "消去
                      numeric: "数値入力", range: "レンジ", panel: "文字パネル" };
 
 /**
+ * その問題の段。**学年の隣に置きます。**
+ *
+ * 学年は「どの教育課程の問題か」、段は「同じ学年の中でどれだけ踏みこむか」。
+ * 隣り合わせに出すと、この2つが別の軸だと目で分かります。
+ */
+function levelChip(q, mode) {
+  const lv = Math.min(MAX_LEVEL, Math.max(1, q.level || 1));
+  const now = modeLevel(S, mode);
+  return `<span class="lv${lv >= now ? " top" : ""}" title="${
+    esc(MODE_LABEL[mode] || mode)}の段">Lv.${lv}</span>`;
+}
+
+/**
  * ヘッダの進み具合を、**束の並びごと**見せる。
  *
  * 1セッションは3つの形式の束でできています（`engine.planRun`）。
@@ -592,7 +614,7 @@ function vQuiz() {
     ${planStrip()}</header>
   <div class="pad">
     <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
-      <span class="unit">${esc(q.unit)}</span></div>
+      <span class="unit">${esc(q.unit)}</span>${levelChip(q, mode)}</div>
     <div class="qtext">${esc(q.prompt)}</div>
     ${photoAt(q, "prompt")}
     ${q.figure ? `<div class="figure">${DB.figures[q.figure]}</div>` : ""}
@@ -1397,7 +1419,7 @@ function vSwipe() {
     ${planStrip()}</header>
   <div class="pad swp">
     <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
-      <span class="unit">${esc(q.unit)}</span></div>
+      <span class="unit">${esc(q.unit)}</span>${levelChip(q, "swipe")}</div>
     <div class="swp-q">${esc(q.prompt)}</div>
     <div class="swp-picks">
       <button class="swp-pick l" data-s="0"><i aria-hidden="true">←</i>
@@ -1561,6 +1583,13 @@ function vResult() {
       (S.run.plan || []).length}つしか組めなかったので、${S.run.ids.length}問で終わりました。</p>` : ""}
     ${(S.run.plan || []).length > 1 ? `<p class="cue">今回の形式 ・ ${
       S.run.plan.map(b => `${MODE_LABEL[b.mode] || b.mode} ${b.n}問`).join(" → ")}</p>` : ""}
+    ${(S.run.levelUps || []).length ? `<div class="panel lvup">
+      <div class="phead"><h2>段が上がりました</h2></div>
+      ${S.run.levelUps.map(u => `<p class="lvrow"><b>${esc(MODE_LABEL[u.mode] || u.mode)}</b>
+        <span>Lv.${u.from} → <em>Lv.${u.to}</em></span></p>`).join("")}
+      <p class="fine">学年はそのままで、<b>同じ学年の中でもう一段こみ入った問い</b>が出るようになります。
+        形式ごとに別なので、ほかの形式の出方は変わりません。<b>下がることはありません。</b></p>
+    </div>` : ""}
     ${swipeReview()}
     ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、クリスタルも知識カードも増えていません。</p>`
     : `<div class="panel">
