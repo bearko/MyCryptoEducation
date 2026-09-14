@@ -811,3 +811,21 @@
   .lvrow{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
     margin:0 0 6px;font-size:14px}
   .lvrow em{font-style:normal;font-family:var(--mincho);font-size:17px;color:var(--brass)}
+
+  /* ---- 絵の選択肢（choiceArt）-------------------------------------------
+     語のかわりに絵と ◯ を出す。◯ はその語の文字数で、**どの絵が何のことかを
+     言い当てるための手がかり**。答えたあとに語を出して、何だったのかを見せる  */
+  .choice.art{display:flex;align-items:center;gap:14px;padding:10px 14px;min-height:74px}
+  .choice.art .cart{flex:none;width:64px;line-height:0}
+  .choice.art .cart svg{display:block;width:64px;height:auto}
+  .cdots{display:flex;gap:6px;flex:none}
+  .cdots i{display:block;width:12px;height:12px;border:1.5px solid var(--ink-faint);
+    border-radius:50%}
+  .cword{margin-left:auto;font-family:var(--mincho);font-size:16px;color:var(--ink);
+    letter-spacing:.06em}
+  .choice.art.dim .cword{opacity:.55}
+  .choices.elim .row .choice.art{cursor:default}
+  @media (max-width:360px){
+    .choice.art{gap:10px;padding:8px 10px}
+    .choice.art .cart,.choice.art .cart svg{width:54px}
+  }

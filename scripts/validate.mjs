@@ -231,6 +231,52 @@ for (const q of questions) {
   else cardOwner.set(q.card, q.id);
 }
 
+/* ---- 絵の選択肢（choiceArt）---- */
+/**
+ * **語のかわりに絵と ◯ を出す選択肢。**
+ *
+ * 「かたかなで書く言葉はどれ?」を語のまま並べると、カタカナの語が1つだけ
+ * 見た目で浮いて、読まずに当てられます。絵にすると、その語がかなで書くものか
+ * 外来語かは見ただけでは分かりません。◯ の数はその語の文字数で、
+ * **どの絵が何のことかを言い当てるための手がかり**です。
+ *
+ * 気をつけるところが3つあります。
+ *   1. **選択肢が見えない方式では、絵も出ません。** 文字パネルや数値入力に
+ *      回る問題に付けても意味がない
+ *   2. **文字数が答えを教えてしまう問いには使えません。** ◯ の数だけ他と違う
+ *      選択肢が正解だと、絵を見なくても当たります
+ *   3. 図版がそろっていないと、一部だけ語のまま出て不ぞろいになります
+ */
+{
+  for (const q of questions) {
+    if (q.choiceArt === undefined) continue;
+    const id = q.id;
+    if ((q.format || "choice") !== "choice")
+      err(id, `choiceArt は4択・消去法の問題にだけ置けます（いま "${q.format}"）`);
+    if (!Array.isArray(q.choiceArt) || q.choiceArt.length !== (q.choices || []).length) {
+      err(id, `choiceArt は選択肢と同じ数の配列にしてください（絵 ${
+        Array.isArray(q.choiceArt) ? q.choiceArt.length : "?"} / 選択肢 ${(q.choices || []).length}）`);
+      continue;
+    }
+    q.choiceArt.forEach(k => {
+      if (!figures[k]) err(id, `choiceArt の図版 "${k}" が figures.json にありません`);
+    });
+    let mode = answerMode(q);
+    if (mode === "panel" && !panelLayout(q.reading, q.id)) mode = "elimination";
+    if (hintGroup(mode) === "hidden")
+      err(id, `choiceArt を置いていますが ${MODE_LABEL_V[mode] || mode} は選択肢を出しません`);
+    // **文字数だけで当てられないか。** 正解の文字数が1つだけ違うと、絵を見ずに済む
+    const len = q.choices.map(c => [...String(c)].length);
+    const same = len.filter(n => n === len[q.answer]).length;
+    if (same === 1)
+      err(id, `◯の数（文字数）が正解だけ他と違います（${len.join("・")}）。` +
+              `絵を見なくても当てられます`);
+  }
+  const withArt = questions.filter(q => q.choiceArt);
+  if (withArt.length)
+    console.log(`\n絵の選択肢 ・ ${withArt.length}問（${withArt.map(q => q.id).join(" / ")}）`);
+}
+
 /* ---- 問題文と回答方式の噛み合わせ ---- */
 /**
  * **選択肢が見えない方式に、選択肢を前提にした問題文を回さないでください。**
