@@ -129,7 +129,7 @@ for (const [key, entry] of wanted) {
        ○ が使えるライセンス、× は allow に無いもの                              */
     if (LIST) {
       console.log(`\n  ${key}  ${asked}`);
-      cands.slice(0, 12).forEach((c, i) => {
+      cands.slice(0, 20).forEach((c, i) => {
         const mark = allow.includes(c.license.toLowerCase()) ? "○" : "×";
         const w = c.info.width, h = c.info.height;
         console.log(`   ${mark} ${String(i + 1).padStart(2)}. ${c.license.padEnd(16)}` +
