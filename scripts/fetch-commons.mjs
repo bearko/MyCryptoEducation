@@ -5,6 +5,11 @@
    使い方: node scripts/fetch-commons.mjs [キー ...]
      キーを省くと、台帳のうち file がまだ無いものだけを取りに行く。
 
+   node scripts/fetch-commons.mjs --list [キー ...]
+     **取り込まずに、候補だけを並べる。** 日用品（パン・いぬ・たまご）は検索語だけでは
+     まず当たらない。実際に「dog sitting portrait」で投稿者名 DogTwo に当たり、
+     カフェの写真が来た。候補を見てから File:名 を決めるほうが速い。
+
    やること
      1. images.json の commons（File:名）を見る。無ければ search で検索する
         insource に "PD-USGov" のようなライセンス定型文の名を書くと、
@@ -47,12 +52,15 @@ const bookBefore = await readFile(bookPath, "utf8");
 const book = JSON.parse(bookBefore);
 const allow = book.allow.map(s => s.toLowerCase());
 const entries = Object.entries(book.images);
-const wanted = process.argv.slice(2).length
-  ? entries.filter(([k]) => process.argv.slice(2).includes(k))
+const args = process.argv.slice(2);
+const LIST = args.includes("--list");           // 取り込まずに候補を並べるだけ
+const keys = args.filter(a => !a.startsWith("--"));
+const wanted = keys.length
+  ? entries.filter(([k]) => keys.includes(k))
   : entries.filter(([, v]) => !v.file || !existsSync(join(ROOT, OUT, v.file + ".webp")));
 
 if (!wanted.length) { console.log("取りに行くものはありません。"); process.exit(0); }
-await mkdir(join(ROOT, OUT, "small"), { recursive: true });
+if (!LIST) await mkdir(join(ROOT, OUT, "small"), { recursive: true });
 
 /* ライセンス名の表記ゆれを吸収する。コモンズは "cc-by-4.0" の形で返してくる */
 const normalizeLicense = m => {
@@ -78,7 +86,7 @@ const dedupe = s => {
   return (t.length % 2 === 0 && t.slice(0, half) === t.slice(half)) ? t.slice(0, half) : t;
 };
 
-let ok = 0, ng = 0;
+let ok = 0, ng = 0, listed = 0;
 for (const [key, entry] of wanted) {
   try {
     // commons に File:名が書いてあればそれを直接採る。無ければ search で探す
@@ -112,6 +120,23 @@ for (const [key, entry] of wanted) {
       const info = p.imageinfo?.[0] || {};
       return { page: p, info, license: normalizeLicense(info.extmetadata) };
     });
+    /* --list: 候補を並べて終わり。**選ぶのは人**。
+       ○ が使えるライセンス、× は allow に無いもの                              */
+    if (LIST) {
+      console.log(`\n  ${key}  「${entry.commons || entry.search}」`);
+      cands.slice(0, 12).forEach((c, i) => {
+        const mark = allow.includes(c.license.toLowerCase()) ? "○" : "×";
+        const w = c.info.width, h = c.info.height;
+        console.log(`   ${mark} ${String(i + 1).padStart(2)}. ${c.license.padEnd(16)}` +
+                    ` ${String(w).padStart(5)}x${String(h).padEnd(5)} ${c.page.title}`);
+      });
+      console.log(`      → 決めたら images.json の "${key}" に "commons": "File:〜" を書いて、`);
+      console.log(`        node scripts/fetch-commons.mjs ${key}`);
+      listed++;
+      await sleep(WAIT);
+      continue;
+    }
+
     const hit = cands.find(c => allow.includes(c.license.toLowerCase()));
 
     if (!hit) {
@@ -166,6 +191,10 @@ const bookAfter = JSON.stringify(book, null, 2) + "\n";
 const changed = bookAfter !== bookBefore;
 if (changed) await writeFile(bookPath, bookAfter);
 
+if (LIST) {
+  console.log(`\n候補を並べました（${listed}件）。取り込みはしていません。`);
+  process.exit(0);
+}
 console.log(`\n取り込み ${ok}件 / 見送り ${ng}件  →  ${OUT}/`);
 console.log(changed
   ? "data/images.json を更新しました。npm run validate で確かめてください。"
