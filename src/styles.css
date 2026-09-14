@@ -815,9 +815,14 @@
   /* ---- 絵の選択肢（choiceArt）-------------------------------------------
      語のかわりに絵と ◯ を出す。◯ はその語の文字数で、**どの絵が何のことかを
      言い当てるための手がかり**。答えたあとに語を出して、何だったのかを見せる  */
-  .choice.art{display:flex;align-items:center;gap:14px;padding:10px 14px;min-height:74px}
-  .choice.art .cart{flex:none;width:64px;line-height:0}
-  .choice.art .cart svg{display:block;width:64px;height:auto}
+  .choice.art{display:flex;align-items:center;gap:14px;padding:10px 14px;min-height:86px}
+  .choice.art .cart{flex:none;width:88px;line-height:0}
+  .choice.art .cart svg{display:block;width:88px;height:auto}
+  /* 写真は切り取らずに収める。**端を切ると山の頂が消える**ようなことが起きる */
+  .choice.art .cart img{display:block;width:88px;height:66px;object-fit:contain;
+    background:#F3F4F2;border-radius:3px}
+  .cartcred{font-size:10px;line-height:1.6;color:var(--ink-faint);margin:7px 0 0}
+  .cartcred a{color:var(--ink-soft)}
   .cdots{display:flex;gap:6px;flex:none}
   .cdots i{display:block;width:12px;height:12px;border:1.5px solid var(--ink-faint);
     border-radius:50%}
@@ -827,5 +832,6 @@
   .choices.elim .row .choice.art{cursor:default}
   @media (max-width:360px){
     .choice.art{gap:10px;padding:8px 10px}
-    .choice.art .cart,.choice.art .cart svg{width:54px}
+    .choice.art .cart,.choice.art .cart svg{width:72px}
+    .choice.art .cart img{width:72px;height:56px}
   }

@@ -418,6 +418,34 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AGlen%20Beck%20and%20Betty%20Snyder%20program%20the%20ENIAC%20in%20building%20328%20at%20the%20Ballistic%20Research%20Laboratory.jpg",
       "width": 640,
       "height": 489
+    },
+    "obj-yama": {
+      "search": "mountain peak landscape",
+      "insource": "PD-USGov",
+      "alt": "雪の残る高い山が、青空を背にそびえている写真",
+      "use": "kokugo-012（絵の選択肢）",
+      "where": "lesson"
+    },
+    "obj-pan": {
+      "search": "sliced bread loaf",
+      "alt": "食パンが一斤と、切り分けられた数枚が並んでいる写真",
+      "use": "kokugo-012（絵の選択肢）",
+      "where": "lesson",
+      "insource": "Cc-zero"
+    },
+    "obj-tamago": {
+      "search": "chicken egg white",
+      "alt": "白いにわとりの卵が写っている写真",
+      "use": "kokugo-012（絵の選択肢）",
+      "where": "lesson",
+      "insource": "Cc-zero"
+    },
+    "obj-inu": {
+      "search": "dog sitting portrait",
+      "alt": "犬が座って正面を向いている写真",
+      "use": "kokugo-012（絵の選択肢）",
+      "where": "lesson",
+      "insource": "Cc-zero"
     }
   }
 }

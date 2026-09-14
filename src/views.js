@@ -575,11 +575,38 @@ const MODE_LABEL = { swipe: "スワイプ", choice: "4択", elimination: "消去
  */
 function choiceArtHTML(q, i) {
   const key = q.choiceArt?.[i];
-  const svg = key && DB.figures?.[key];
-  if (!svg) return null;
+  if (!key) return null;
   const n = [...String(q.choices[i] ?? "")].length;
-  return `<span class="cart">${svg}</span>
-    <span class="cdots" role="img" aria-label="${n}文字">${"<i></i>".repeat(n)}</span>`;
+  const dots = `<span class="cdots" role="img" aria-label="${n}文字">${"<i></i>".repeat(n)}</span>`;
+  /* **イメージは写真、図形は線画。** 台帳（images.json）にあれば写真、
+     無ければ図版（figures.json）。alt は空にする——名前を書けばそこが答えになる */
+  const photo = DB.photos?.[key];
+  if (photo?.file && photo.license)
+    return `<span class="cart"><img src="${assetPath.photo(photo.file)}" alt="" loading="lazy"></span>${dots}`;
+  const svg = DB.figures?.[key];
+  return svg ? `<span class="cart">${svg}</span>${dots}` : null;
+}
+
+/**
+ * 絵の選択肢に写真を使ったときのクレジット。
+ * **写真はクレジットとセットでしか出しません**（原則どおり）。ただし4枚ぶんの
+ * 題名まで並べると選択肢より背が高くなるので、**作者・ライセンス・出典**に畳みます。
+ * 題名を落とせるのは、**絵の選択肢に使える写真を PD と CC0 に限ってある**ためです
+ * （この2つは表示義務そのものが無く、作者と出典を出している時点で条件より厚い）。
+ * 作者の名前が、その写真の出典ページへのリンクになります。
+ */
+function choiceArtCredit(q) {
+  const list = (q.choiceArt || []).map(k => DB.photos?.[k])
+    .filter(p => p && p.file && p.license);
+  if (!list.length) return "";
+  const who = list.map(p => {
+    const name = esc(p.author || "作者不明");
+    return p.source
+      ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">${name}</a>`
+      : name;
+  }).join(" ／ ");
+  const lic = [...new Set(list.map(p => p.license))].map(esc).join("・");
+  return `<p class="cartcred">写真 ${who} ・ ${lic} ・ Wikimedia Commons</p>`;
 }
 
 /**
@@ -673,6 +700,7 @@ function vQuiz() {
              <div class="${cls}" data-i="${i}">${art || esc(t)}</div></div>`
         : `<button class="${cls}" data-i="${i}">${art || esc(t)}</button>`;
       }).join("")}</div>
+      ${choiceArtCredit(q)}
       ${mode === "elimination" ? `
         <p class="fine"><b>1つ目より2つ目、2つ目より3つ目のほうが点は大きくなります。</b>
           まちがえて消すとそこで終わりますが、消せたぶんの点は残ります。</p>
