@@ -359,6 +359,30 @@ const byRank = {};
 for (const e of curated) (byRank[e.rank] ??= []).push(e);
 RANKS.forEach(r => { if (!byRank[r]?.length) err("extensions", `ランク "${r}" の品がありません`); });
 
+/* ---- 長音符（JIS Z 8301・2019年改正）---- */
+/**
+ * **英語の -er / -or / -ar 由来のカタカナ語は、語尾に長音符を付けます。**
+ * 2019年の JIS Z 8301 改正で、原則つけると改められました。それ以前は3音以上の語で
+ * 省くとされていて、古い表記が混ざります。**混ざっていること自体が読み手の負担**なので、
+ * DBの中では揃えます。省いた形も誤りではないので、答えになる語は `accept` で受け、
+ * なぜ両方正しいかを `note` に書きます。
+ *
+ * メモリー（-ory）やソフトウェア（-ware）は別の決まりなので、ここには入れません。
+ */
+const LONG_VOWEL = ["コンピュータ", "センサ", "サーバ", "ブラウザ", "プリンタ", "ルータ",
+  "アクチュエータ", "パラメータ", "モニタ", "ユーザ", "フォルダ", "ドライバ", "スキャナ",
+  "プロセッサ", "モータ", "コンデンサ", "トランジスタ", "タイマ", "カウンタ", "スピーカ",
+  "アダプタ", "エディタ", "コネクタ", "レーザ"];
+{
+  const bare = new RegExp("(" + LONG_VOWEL.join("|") + ")(?!ー)", "g");
+  for (const q of questions) {
+    // accept と note は、短い形をわざと引き合いに出す欄なので見ない
+    const { accept, note, ...rest } = q;
+    const hit = JSON.stringify(rest).match(bare);
+    if (hit) err(q.id, `語尾の長音符が抜けています: ${[...new Set(hit)].join("・")}（JIS Z 8301）`);
+  }
+}
+
 /* ---- 別表記（accept）と注釈（note）---- */
 for (const q of questions) {
   if (q.accept !== undefined) {
