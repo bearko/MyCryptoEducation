@@ -23,11 +23,26 @@ export function unlockedChapters(db, state) {
   return set;
 }
 
+/**
+ * その問題がいま出題されうるか。
+ *
+ * `needs` を持つ問題は、**そのカードを手に入れるまで出てきません。**
+ * 報酬のゴールを「所持数」ではなく「次の問い」にするための仕掛けです
+ * （`docs/reward-economy.md` §7）。外的報酬は露出が続くと動機を下げますが、
+ * 増やすのが種類ではなく**問い**なら、そこは頭打ちになりません。
+ */
+export const questionOpen = (state, q) => !q.needs || !!(state.cards || {})[q.needs];
+
+/* ある問題を開くと出てくる問題たち。解放されたことを知らせるのに使う */
+export const unlockedBy = (db, card) =>
+  (db.questions || []).filter(q => q.needs === card);
+
 /* 指定した範囲で出題しうる問題（在庫） */
 export function inventory(db, state, band = "auto", subject = "auto") {
   const open = unlockedChapters(db, state);
   return db.questions.filter(q => {
     if (!open.has(q.chapter)) return false;
+    if (!questionOpen(state, q)) return false;
     if (band !== "auto") {
       const g = GRADES.find(x => x.k === q.grade);
       if (!g || g.band !== band) return false;
@@ -423,7 +438,7 @@ export function subjectCardCount(db, state, subject) {
  */
 export function craftCheck(db, state, id) {
   const e = db.extensions?.[id];
-  if (!e) return { ok: false, crystals: [], cards: [] };
+  if (!e) return { ok: false, crystals: [], cards: [], origin: null };
 
   /**
    * **クリスタルは族ごとのポイントで要求する。**（「石英120pt」のように）
@@ -449,8 +464,19 @@ export function craftCheck(db, state, id) {
     return { subject, need, have, ok: have >= need };
   });
 
-  const ok = crystals.every(c => c.enough) && cards.every(c => c.ok);
-  return { ok, crystals, cards };
+  /**
+   * **由来カード。** その品の元になった人物や出来事の問題を解くと手に入ります。
+   * 素材と教科の広さだけでは足りず、**その品そのものを知っていること**が要る。
+   * 奥伝だけの条件です。クラフト画面から直接その問いに挑めます。
+   */
+  const origin = e.originCard
+    ? { card: e.originCard, ok: !!(state.cards || {})[e.originCard],
+        qid: (db.questions || []).find(q => q.card === e.originCard)?.id || null }
+    : null;
+
+  const ok = crystals.every(c => c.enough) && cards.every(c => c.ok)
+          && (!origin || origin.ok);
+  return { ok, crystals, cards, origin };
 }
 
 /* いま作れるエクステンションのキー。

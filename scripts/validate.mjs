@@ -300,6 +300,23 @@ for (const e of curated) {
     err(k, `ランクが教科数と合いません（${n}教科なら ${want}、いまは ${e.rank}）`);
 
   if (e.upgrade && (!e.upgrade.id || !e.upgrade.name)) err(k, "upgrade は id と name の両方が要ります");
+
+  /**
+   * **由来カードは、奥伝だけが持ちます。** その品の元になった人物や出来事の問題を
+   * 解くと手に入るので、対応する問題がDBに1つだけ実在していなければなりません。
+   * 無いと、その品は永久に作れなくなります。
+   */
+  if (e.originCard) {
+    if (e.rank !== "奥伝") err(k, `由来カードは奥伝だけです（いまは ${e.rank}）`);
+    const src = questions.filter(x => x.card === e.originCard);
+    if (!src.length) err(k, `由来カード "${e.originCard}" を配る問題がありません`);
+    else if (src.length > 1)
+      err(k, `由来カード "${e.originCard}" を配る問題が ${src.length}問あります（1問にしてください）`);
+    else if (src[0].needs)
+      err(k, `由来カードを配る問題 ${src[0].id} 自身が needs で閉じています（たどり着けません）`);
+  } else if (e.rank === "奥伝") {
+    err(k, "奥伝には originCard が要ります（素材と教科の広さだけでは作れないようにするため）");
+  }
   if (!existsSync(join(ROOT, `public/extensions/${e.id}.webp`)))
     err(k, "画像が public/extensions にありません");
 }
@@ -341,6 +358,31 @@ for (const e of curated) {
 const byRank = {};
 for (const e of curated) (byRank[e.rank] ??= []).push(e);
 RANKS.forEach(r => { if (!byRank[r]?.length) err("extensions", `ランク "${r}" の品がありません`); });
+
+/* ---- 報酬が開く問い（needs）---- */
+{
+  const cards = new Set(questions.map(q => q.card));
+  const gated = questions.filter(q => q.needs);
+  gated.forEach(q => {
+    if (!cards.has(q.needs)) err(q.id, `needs "${q.needs}" を配る問題がありません`);
+    if (q.card === q.needs) err(q.id, "自分が配るカードで自分を閉じています");
+  });
+  // 鍵になる問題が、それ自身 needs で閉じていると永久に開かない
+  const keyOf = c => questions.find(q => q.card === c);
+  gated.forEach(q => {
+    const seen = new Set([q.id]);
+    let cur = keyOf(q.needs);
+    while (cur && cur.needs) {
+      if (seen.has(cur.id)) { err(q.id, "needs が輪になっています"); break; }
+      seen.add(cur.id);
+      cur = keyOf(cur.needs);
+    }
+  });
+  const byKey = {};
+  gated.forEach(q => (byKey[q.needs] ??= []).push(q.id));
+  if (gated.length) console.log("\n報酬が開く問い ・ " +
+    Object.entries(byKey).map(([c, ids]) => `${c} → ${ids.length}問`).join(" / "));
+}
 
 /* ---- クリスタル ---- */
 const FAMILIES = crystals.families || [];

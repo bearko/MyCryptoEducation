@@ -71,6 +71,8 @@ export function buildExtensions(curated, crystals) {
       id: e.id, name: e.name, series: e.series, rank: e.rank,
       subs, gauge: r.gauge, crystals: crystalsNeed, cards,
       origin: e.origin, upgrade: e.upgrade || null, mchRarity: e.mchRarity,
+      // 由来カード。奥伝だけが持つ。その品の元になった問いを解くと手に入る
+      originCard: e.originCard || null,
     };
   }
   return out;
