@@ -12,7 +12,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          challengeNeed, challengePrompt, challengeCard,
          CHALLENGE_QUESTIONS } from "./engine.js";
 import { matches } from "./normalize.js";
-import { assetPath } from "./data.js";
+import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
 
@@ -21,6 +21,13 @@ const esc = s => String(s).replace(/[&<>"]/g,
 
 /* 到達度の内訳は「何ポイント押し上げたか」で出す。頭打ちのぶんだけ負になる */
 const signed = v => (v < 0 ? `−${-v}%` : `＋${v}%`);
+
+/* ランクの意味を、タブを切り替えた人がその場で読めるように */
+const RANK_NOTE = {
+  初伝: "由来が1つの教科に収まる品。その教科の知識カードが要ります。",
+  中伝: "由来が2つの教科にまたがる品。どちらの教科の知識カードも要ります。",
+  奥伝: "由来が3つ以上の教科にまたがる品。教科の壁を越えているものだけが、ここに来ます。",
+};
 
 const STAGE_LABELS = [
   "この英雄の、最も深いところ", "少し輪郭が見えてきた",
@@ -1215,75 +1222,65 @@ function vResult() {
 /* ---------- クラフト・装備 ---------- */
 
 function vCraft() {
-  const lines = [];
-  for (const [id, e] of Object.entries(DB.extensions)) {
-    const g = lines.find(x => x.line === e.line) || (lines.push({ line: e.line, items: [] }), lines.at(-1));
-    g.items.push({ id, ...e });
-  }
-  const tab = lines.some(l => l.line === S.craftTab) ? S.craftTab : lines[0].line;
-  const group = lines.find(l => l.line === tab);
+  const tab = RANK_ORDER.includes(S.craftTab) ? S.craftTab : RANK_ORDER[0];
+  const all = Object.values(DB.extensions);
+  /* 作れるものを先に、次に足りないものが少ない順。108種あるので並び順が効く */
+  const items = all.filter(e => e.rank === tab).map(e => {
+    const c = craftCheck(DB, S, e.id);
+    const short = c.crystals.filter(x => !x.enough).length + c.cards.filter(x => !x.ok).length;
+    return { e, c, short };
+  }).sort((a, b) => a.short - b.short || a.e.name.localeCompare(b.e.name, "ja"));
   const made = Object.values(S.exts).reduce((a, b) => a + b, 0);
 
   app.innerHTML = `
   <header><div class="hbar"><div class="place">クラフト</div>
     <button class="mapbtn" id="back">もどる</button></div></header>
   <div class="pad">
-
     <p class="fine">エクステンションは攻撃力ではありません。持っている知識が、どこまで遠くの問いに届くかを広げます。
       <b>到達度を上げるのは知識カードで、装備はそれを最大で2倍にするところまでです。</b></p>
-    <div class="fams">${DB.families.map(f => {
-      const pt = familyPoints(S, f);
-      return `<span class="fam ${pt ? "" : "zero"}" title="${esc(DB.familyToSubject[f] || "")}"
-        ><b>${esc(f)}</b>${pt}pt</span>`;
-    }).join("")}</div>
-    <p class="fine">クラフトは<b>族ごとのポイント</b>で払います。ポイントは鉱物に出会ったときに入り、
+    ${famStrip()}
+    <p class="fine">クラフトには<b>族ごとのポイント</b>と、<b>その品の由来がまたがる教科の知識カード</b>が
+      要ります。素材だけでは作れません。ポイントは鉱物に出会ったときに入り、
       <b>鉱物そのものは図鑑に残ります</b>（クラフトでは減りません）。</p>
-    <div class="seg wrap" id="linetab">${lines.map(l => {
-      const n = l.items.filter(i => S.exts[i.id]).length;
-      return `<button data-l="${esc(l.line)}" class="${l.line === tab ? "on" : ""}">${esc(l.line)}<i>${n}/5</i></button>`;
+    <div class="seg" id="ranktab">${RANK_ORDER.map(r => {
+      const n = all.filter(e => e.rank === r);
+      const own = n.filter(e => S.exts[e.id]).length;
+      return `<button data-r="${esc(r)}" class="${r === tab ? "on" : ""}">${esc(r)}<i>${own}/${n.length}</i></button>`;
     }).join("")}</div>
+    <p class="fine">${esc(RANK_NOTE[tab])}</p>
 
-    ${group.items.map(e => {
+    ${items.map(({ e, c }) => {
       const have = S.exts[e.id] || 0;
-      const c = craftCheck(DB, S, e.id);
       return `<div class="ext ${c.ok ? "" : "dim"}">
         <div class="exthead">
           <img class="exticon" src="${assetPath.ext(e.id)}" alt="">
           <div><div class="extname">${esc(e.name)}${have ? ` <span class="cnt">×${have}</span>` : ""}</div>
-            <div class="extsub"><span class="hr r${e.rarity}">${esc(e.rarity)}</span>
+            <div class="extsub"><span class="rk r${RANK_ORDER.indexOf(e.rank)}">${esc(e.rank)}</span>
               ${e.subs.join(" ・ ")} ・ ゲージ +${e.gauge}</div></div></div>
-        <p class="extt">${esc(e.text)}</p>
+        <p class="extt">${esc(e.origin)}</p>
         <div class="cost">
           ${c.crystals.map(x => `<span class="${x.enough ? "" : "short"}"
-            title="${x.family === ANY_FAMILY ? "どの族のクリスタルでも払えます"
-              : `${esc(x.family)}は${esc(DB.familyToSubject[x.family] || "")}を解くと貯まります`}"
-            >${x.family === ANY_FAMILY ? "どの族でも" : esc(x.family)} ${
-              x.enough ? `${x.need}pt` : `${x.have}/${x.need}pt`}</span>`).join("")}
-          ${c.below ? `<span class="${c.below.ok ? "" : "short"}">${esc(c.below.name)} ×1</span>` : ""}
-          ${c.cards ? `<span class="${c.cards.ok ? "" : "short"}">知識カード ${c.cards.have}/${c.cards.need}</span>` : ""}
+            title="${esc(x.family)}は${esc(DB.familyToSubject[x.family] || "")}を解くと貯まります"
+            >${esc(x.family)} ${x.enough ? `${x.need}pt` : `${x.have}/${x.need}pt`}</span>`).join("")}
+          ${c.cards.map(x => `<span class="${x.ok ? "" : "short"}"
+            title="${esc(x.subject)}の知識カード">${esc(x.subject)}の札 ${
+              x.ok ? `${x.need}枚` : `${x.have}/${x.need}枚`}</span>`).join("")}
           <button class="mini" data-k="${e.id}" ${c.ok ? "" : "disabled"}>クラフト</button></div>
-
+        ${e.upgrade ? `<p class="fine">上位に「${esc(e.upgrade.name)}」があります。</p>` : ""}
       </div>`;
     }).join("")}
-    <p class="fine">作った数 ${made} ・ 最上位だけは知識カードの所持も条件です。素材だけで最上位が手に入ると、
-      強さの源が知識から素材へ移ってしまうためです。</p>
+    <p class="fine">作った数 ${made} ・ ランクは<b>由来がいくつの教科にまたがるか</b>で決まります。
+      MCHのレアリティは使いません。上位レアリティだけを見ていると、算数・数学がゼロのままになるためです。</p>
   </div>`;
 
   document.getElementById("back").onclick = () => go(S.runs ? "result" : "home");
-  app.querySelectorAll("#linetab button").forEach(b =>
-    b.onclick = () => { S.craftTab = b.dataset.l; render(); });
+  app.querySelectorAll("#ranktab button").forEach(b =>
+    b.onclick = () => { S.craftTab = b.dataset.r; render(); });
   app.querySelectorAll(".mini[data-k]").forEach(b => b.onclick = () => {
     const id = b.dataset.k, e = DB.extensions[id];
     const c = craftCheck(DB, S, id);
     if (!c.ok) return;
     c.crystals.forEach(x => { S.points[x.family] = (S.points[x.family] || 0) - x.need; });
-    if (c.below) {
-      S.exts[c.below.id] -= 1;
-      if (S.exts[c.below.id] <= 0) {
-        delete S.exts[c.below.id];
-        Object.entries(S.equip).forEach(([hid, k]) => { if (k === c.below.id) delete S.equip[hid]; });
-      }
-    }
     S.exts[id] = (S.exts[id] || 0) + 1;
     S.toast = `<img src="${assetPath.ext(id)}" alt=""><em>${esc(e.name)}</em>`;
     render();
@@ -1307,15 +1304,26 @@ function equipWith(heroId, key) {
   return eq;
 }
 
-/* その装備にしたときの、対象英雄への到達度（%） */
+/**
+ * その装備にしたときの、対象英雄への到達度（%）。**丸めません。**
+ * 初伝ひとつの効きは1%に満たないことがあり、整数に丸めると
+ * 「動いた」ことが画面から消えます。丸めるのは出すときだけ。
+ */
 function reachWith(target, heroId, key) {
   if (!target || !target.rel) return null;
-  return gaugeBreakdown(DB, { ...S, equip: equipWith(heroId, key) }, target).percent;
+  return gaugeBreakdown(DB, { ...S, equip: equipWith(heroId, key) }, target).reach * 100;
+}
+
+/* 整数では同じに見えてしまうときだけ、小数第1位まで出す */
+function reachPair(a, b) {
+  const same = Math.round(a) === Math.round(b);
+  const d = same && a !== b ? 1 : 0;
+  return [a.toFixed(d), b.toFixed(d)];
 }
 
 function vHero() {
   const h = DB.heroById[S.heroView], eq = S.equip[h.id];
-  const inv = Object.entries(S.exts).filter(([, n]) => n > 0);
+  const inv = Object.entries(S.exts).filter(([k, n]) => n > 0 && DB.extensions[k]);
 
   /* 到達度を測る相手。まだ解放していない英雄がいればそちらを既定にする */
   const targets = DB.heroes.filter(x => x.rel);
@@ -1342,18 +1350,23 @@ function vHero() {
           ${pool.map(x => `<option value="${x.id}" ${x.id === target.id ? "selected" : ""}
             >${esc(x.name)}（${esc(x.rarity)}）</option>`).join("")}</select>
         <div class="rnum"><span>${esc(target.name)}への到達度</span>
-          <b class="${now > bare ? "up" : ""}">${bare}%${now === bare ? "" : ` → ${now}%`}</b></div>
+          <b class="${now > bare ? "up" : ""}">${(([x, y]) =>
+            now === bare ? `${x}%` : `${x}% → ${y}%`)(reachPair(bare, now))}</b></div>
         <div class="rbar"><i style="width:${bare}%"></i>
           <u style="left:${Math.min(bare, now)}%;width:${Math.abs(now - bare)}%"></u></div>
       </div>` : ""}
       ${inv.length ? `<div class="eqlist">
         <button class="eqi ${!eq ? "on" : ""}" data-k="">外す${
-          target && bare !== null ? `<em>${bare}%</em>` : ""}</button>
+          target ? `<em>±0</em>` : ""}</button>
         ${inv.map(([k]) => {
           const r = reachWith(target, h.id, k);
+          // **候補には差分を出します。** 到達度そのものを並べると、効きが小さいときに
+          // どれも同じ数字に見えてしまい、選ぶ手がかりにならない
+          const dd = r === null ? null : r - bare;
           return `<button class="eqi ${eq === k ? "on" : ""}" data-k="${k}">
           <img class="exticon sm" src="${assetPath.ext(k)}" alt="">${esc(DB.extensions[k].name)}${
-            r === null ? "" : `<em class="${r > bare ? "up" : ""}">${r}%</em>`}</button>`;
+            dd === null ? "" : `<em class="${dd > 0 ? "up" : ""}">${
+              dd > 0 ? `＋${dd < 1 ? dd.toFixed(1) : Math.round(dd)}` : "±0"}</em>`}</button>`;
         }).join("")}</div>
         ${eq ? `<p class="fine">${DB.extensions[eq].subs.some(s => h.fit.includes(s))
           ? "この英雄の得意分野と噛み合っています。効果が2倍になります。"
