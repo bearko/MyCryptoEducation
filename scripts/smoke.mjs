@@ -330,12 +330,12 @@ const e1 = JSON.parse(ev(elimRun));
 check("消去法の問題がある", e1.n === 4, JSON.stringify(e1));
 check("消去法では選択肢が出る", d.querySelectorAll(".choices.elim .choice").length === 4,
   String(d.querySelectorAll(".choices .choice").length));
-// **消すのと答えるのを、押す場所で分ける。** 同じ場所で意味が変わると取りちがえる
-check("消すボタンと答えるボタンが別", d.querySelectorAll(".xcut[data-c]").length === 4 &&
+// **押せるのは ✕ だけ。** 文字は読むためのもので、押す場所は行ごとに1つに絞る
+check("行ごとに ✕ が1つずつ並ぶ", d.querySelectorAll(".xcut[data-c]").length === 4 &&
   d.querySelectorAll(".choices.elim .row .choice").length === 4,
   `✕${d.querySelectorAll(".xcut[data-c]").length} / 文字${d.querySelectorAll(".choices.elim .row .choice").length}`);
 check("何をするかを帯で出す", (d.querySelector(".band.cut .bmain")?.textContent || "")
-  .includes("✕ で消す"), d.querySelector(".band")?.textContent);
+  .includes("誤っているものを 3つ 消す"), d.querySelector(".band")?.textContent);
 check("次にいくつ入るかを見せる",
   (d.getElementById("ecnt")?.textContent || "").includes("次は＋2"),
   d.getElementById("ecnt")?.textContent);
@@ -379,15 +379,29 @@ check("外しても消せたぶんの点は残る", ev("S.score") === 5, `${ev("
 check("外しても解説と知識カードは出る（原則3）",
   txt().includes("面白い単元") && txt().includes("知識カード"));
 
-// 削らずにそのまま答えてもいい。降りるかどうかは常にプレイヤーの手にある
+/* **消すことと選ぶことを同じ画面に混ぜない。** 消去法では選択肢の文字は押せず、
+   できるのは ✕ で消すことだけ。正しいものを1つ選びたい人は、
+   「4択に切り替える」で明示的に降りる（降りるのは常にプレイヤーの手・決定2）*/
 const e3 = JSON.parse(ev(`(() => {
   S.run.i = 2; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null; S.score = 0; render();
   const id = S.run.ids[2];
   return JSON.stringify({ id, answer: DB.byId[id].answer });
 })()`));
-d.querySelector(`.choice[data-i="${e3.answer}"]`).click();
+d.querySelector(`.choices.elim .choice[data-i="${e3.answer}"]`).click();
 await wait(60);
-check("削らずに答えてもよい", ev("S.run.results['" + e3.id + "']") === "ok",
+check("消去法では選択肢の文字を押しても何も起きない",
+  ev("S.run.picked") === null && ev("S.run.results['" + e3.id + "']") === undefined,
+  String(ev("S.run.picked")));
+check("4択への降り口がある", !!d.getElementById("tochoice"),
+  d.querySelector(".elimbar")?.textContent);
+d.getElementById("tochoice").click();
+await wait(60);
+check("降りると帯が「正しいものを 1つ 選ぶ」に変わる",
+  !!d.querySelector(".band.pick") && !d.querySelector(".xcut"),
+  d.querySelector(".band")?.textContent);
+d.querySelector(`.choices .choice[data-i="${e3.answer}"]`).click();
+await wait(60);
+check("降りたあとは選んで答えられる", ev("S.run.results['" + e3.id + "']") === "ok",
   ev("S.run.results['" + e3.id + "']"));
 check("削らなければ上乗せは無い", ev("S.score") === 10, `${ev("S.score")}点`);
 
@@ -395,12 +409,13 @@ check("削らなければ上乗せは無い", ev("S.score") === 10, `${ev("S.sco
 ev(`S.run.i = 3; S.run.picked = null; S.run.cut = null; render()`);
 check("次の問題は4つとも生きている",
   d.querySelectorAll(".choices.elim .row.gone").length === 0);
-check("消した行は答えにも使えない", (() => {
+check("消した行はもう消せない", (() => {
   const a = ev("DB.byId[S.run.ids[3]].answer");
   const other = [0, 1, 2, 3].find(i => i !== a);
   d.querySelector(`.xcut[data-c="${other}"]`).click();
-  d.querySelector(`.choice[data-i="${other}"]`).click();
-  return ev("S.run.picked") === null;
+  const before = ev("S.score");
+  d.querySelector(`.xcut[data-c="${other}"]`).click();
+  return ev("S.score") === before && ev("S.run.picked") === null;
 })());
 /* **増えるのは点だけ。** 深く削っても GUM・クリスタル・知識カードは動かない（原則3-2）*/
 check("削った数で GUM は変わらない", ev(`(() => {
@@ -413,7 +428,11 @@ check("削った数で GUM は変わらない", ev(`(() => {
     for (let k = 0; k < cuts; k++) {
       document.querySelector('.xcut[data-c="' + wrong[k] + '"]').click();
     }
-    if (cuts < 3) document.querySelector('.choice[data-i="' + q.answer + '"]').click();
+    // 削らない側は「4択に切り替える」で降りてから答える（文字は押せないため）
+    if (cuts < 3) {
+      document.getElementById("tochoice").click();
+      document.querySelector('.choices .choice[data-i="' + q.answer + '"]').click();
+    }
     return { gum: S.gum, score: S.score, cards: Object.keys(S.cards).length,
              points: Object.values(S.points).reduce((a, b) => a + b, 0) };
   };

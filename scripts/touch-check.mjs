@@ -141,6 +141,17 @@ ok.push(["選択肢は縦に重ならずに並ぶ",
   rows.every(r => r.w > view.w * 0.7),
   JSON.stringify(rows.map(r => Math.round(r.y)))]);
 
+/* 4択への降り口は、選択肢の下に、指で押せる大きさで出ているか。
+   消去法では文字が押せないぶん、ここが唯一の逃げ道になる                      */
+const lastRow = await p.evaluate(`(() => {
+  const e = [...document.querySelectorAll(".choices.elim .row")].pop();
+  const r = e.getBoundingClientRect(); return { y: r.bottom };
+})()`);
+const downBtn = await box("#tochoice");
+ok.push(["4択への降り口が選択肢の下に出る",
+  !!downBtn && downBtn.y > lastRow.y && downBtn.h >= 28 && downBtn.w >= 60,
+  downBtn ? `y${Math.round(downBtn.y)} / 選択肢の下端 ${Math.round(lastRow.y)} / ${Math.round(downBtn.w)}x${Math.round(downBtn.h)}` : "降り口が無い"]);
+
 // 画面の外へはみ出していないか
 const over = await p.evaluate(`(() => {
   const w = document.documentElement.clientWidth;

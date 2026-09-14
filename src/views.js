@@ -550,12 +550,13 @@ function vQuiz() {
       mode === "elimination"
         ? `<div class="row${(S.run.cut || []).includes(i) ? " gone" : ""}" data-r="${i}">
              <button class="xcut" data-c="${i}" aria-label="これを消す">✕</button>
-             <button class="choice" data-i="${i}">${esc(t)}</button></div>`
+             <div class="choice" data-i="${i}">${esc(t)}</div></div>`
         : `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
       ${mode === "elimination" ? `
-        <p class="fine">消せるところまで消してから答えても、すぐ答えてもかまいません。
-          <b>消すほど点は増えますが、まちがえて消すとそこで終わります。</b>
-          外しても、消せたぶんの点は残ります。</p>` : ""}`}
+        <p class="fine"><b>1つ目より2つ目、2つ目より3つ目のほうが点は大きくなります。</b>
+          まちがえて消すとそこで終わりますが、消せたぶんの点は残ります。</p>
+        <div class="elimbar">
+          <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
     <div class="hero-row">
       <img class="ava" src="${assetPath.hero(h.id)}" alt="">
       <div><div class="hero-name">${esc(h.name)}</div>
@@ -998,11 +999,12 @@ function drawRetry(q, head) {
  */
 function modeBand(q, mode) {
   if (mode === "elimination") {
+    const need = q.choices.length - 1;
     const done = (S.run.cut || []).length;
     const got = cutScore(done), next = CUT_SCORE[done];
-    return `<div class="band cut"><span class="bmain">✕ で消す ・ 文字を押すと答える</span>
-      <span class="bcnt" id="ecnt">${got ? `＋${got}点 ` : ""}${
-        next ? `<i>次は＋${next}</i>` : `<i>あと1つ</i>`}</span></div>`;
+    return `<div class="band cut"><span class="bmain">誤っているものを ${need}つ 消す</span>
+      <span class="bcnt" id="ecnt">${done} / ${need}${
+        got ? ` <i>＋${got}点</i>` : ""}${next ? ` <i>次は＋${next}</i>` : ""}</span></div>`;
   }
   if (mode === "choice") {
     return `<div class="band pick"><span class="bmain">正しいものを 1つ 選ぶ</span></div>`;
@@ -1011,17 +1013,6 @@ function modeBand(q, mode) {
 }
 
 /**
- * 消去法。正解を選ぶのではなく、違うものを選んで消す。
- *
- * **3つそろうまで答えられない。** 1手目で決まると、押す意味を取りちがえた人が
- * そこで終わってしまう。選び直せるようにして、決めるのは決定ボタンに寄せた。
- * 文字パネルや数値入力と同じで、確定するまではやり直せる。
- *
- * 正解を選んでいたら、そこで不正解になる。ダミー選択肢が初めて働く。
- * 4択へ降りるかどうかは常にプレイヤーの手にあり、システムは勝手に降ろさない
- * （原則3・決定2）。降りてもその問題かぎりで、次の問題ではまた難モードから始まる。
- */
-/**
  * 消去法。**何個まで削るかを、プレイヤーが決める。**
  *
  * ✕ を押すと1つ消して、その場で当たり外れが決まる。正しく消せれば点が入り、
@@ -1029,10 +1020,13 @@ function modeBand(q, mode) {
  * 点が伸びる。まちがえて正解を消したらそこで終わりだが、
  * **そこまでに消せたぶんの点は残る。** リスクを取った手前までは自分のものになる。
  *
- * 削らずにいきなり答えてもいい。**降りるかどうかは常にプレイヤーの手にある**（決定2）。
+ * **この画面でできるのは消すことだけです。** 「誤っているものを消す」と
+ * 「正しいものを選ぶ」が同じ画面に同居すると、どちらをすればよいのか分からなくなる。
+ * 選択肢の文字は押せず、✕ だけが押せる。
  *
- * 押す意味が入れ替わらないように、**消すのは ✕ ボタン、答えるのは文字のほう**と
- * 分けてある。同じ場所を押して意味が変わると、取りちがえた人がそこで終わる。
+ * 正しいものを選びたい人は、下の「4択に切り替える」で明示的に降りる。
+ * **降りるかどうかは常にプレイヤーの手にある**（決定2）。降りてもその問題かぎりで、
+ * 次の問題ではまた難モードから始まる。
  *
  * **増えるのは点だけ。** GUM・クリスタル・知識カードは動かさない（原則3-2）。
  */
@@ -1076,14 +1070,14 @@ function wireElimination(q) {
     };
   });
 
-  app.querySelectorAll(".choices .choice").forEach(b => {
-    b.onclick = () => {
-      if (S.run.picked !== null) return;
-      const i = Number(b.dataset.i);
-      if (cuts().includes(i)) return;       // 消した行はもう押せない
-      onPick(i);
-    };
-  });
+  /**
+   * **消去法では、選択肢の文字は押せません。** できるのは ✕ で消すことだけ。
+   * 「誤っているものを消す」と「正しいものを選ぶ」が同じ画面に同居すると、
+   * どちらをすればよいのか分からなくなります。正しいものを選びたい人は、
+   * 下の「4択に切り替える」で明示的に降ります（決定2）。
+   */
+  const down = document.getElementById("tochoice");
+  if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
 }
 
 function onPick(idx, forcedOk = null) {
