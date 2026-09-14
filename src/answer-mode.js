@@ -1,6 +1,6 @@
 /* 回答方式のルーター。アプリと validate.mjs の両方から使う。
    「選択肢が見えるか」で二分される点が重要:
-     choice … 4択・消去法（選択肢が画面に出る）
+     choice … 4択・消去法・絞り込み（選択肢が画面に出る）
      hidden … 文字パネル・数値入力・レンジ（選択肢が出ない）
    ヒントの出し分けはこの区別に従う。                                */
 
@@ -44,12 +44,25 @@ export function answerMode(q) {
   if (ERA.test(a)) return "range";
   if (q.multi) return "multi";
   if (q.reading && JA_TERM.test(a)) return "panel";
-  return "elimination";
+  /**
+   * **選択肢が長いものは「絞り込み」へ。**
+   *
+   * 消去法は、誤りを3つ選んでから決める。選択肢が短い語なら見比べは一瞬で済むが、
+   * 文の形になると、読んで潰す作業が3回続いて手数のわりに手ごたえが薄い。
+   * 絞り込みは2つ消して、**残った2つから選ぶ**。タップは1回少なく、
+   * 最後に必ず二択が来る——迷って決めるところが、いちばん面白いところなので。
+   */
+  return longestChoice(q) >= NARROW_MIN ? "narrow" : "elimination";
 }
+
+/* 絞り込みに回す境目。いちばん長い選択肢がこれ以上なら、読んで潰すのが重くなる */
+export const NARROW_MIN = 7;
+export const longestChoice = q =>
+  Array.isArray(q.choices) ? Math.max(...q.choices.map(c => [...String(c)].length)) : 0;
 
 /** その方式で選択肢が画面に見えるか */
 export function isChoiceVisible(mode) {
-  return mode === "elimination" || mode === "choice";
+  return mode === "elimination" || mode === "choice" || mode === "narrow";
 }
 
 /** ヒントの表示グループ。"choice" | "hidden" */
