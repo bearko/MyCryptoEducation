@@ -37,10 +37,22 @@ export const questionOpen = (state, q) => !q.needs || !!(state.cards || {})[q.ne
 export const unlockedBy = (db, card) =>
   (db.questions || []).filter(q => q.needs === card);
 
-/* 指定した範囲で出題しうる問題（在庫） */
-export function inventory(db, state, band = "auto", subject = "auto") {
+/**
+ * **スワイプ問題は、ふつうのセッションには混ざりません。**
+ *
+ * スワイプは「10問ぜんぶ同じ形式で、解説を挟まずに矢継ぎ早に」出すためのモードです。
+ * 途中に1問だけ混ざると、テンポの設計そのものが成り立ちません
+ * （`spreadModes` が方式をばらけさせるのと、狙いが正反対になります）。
+ * だから在庫の段階で分けます。
+ */
+export const isSwipe = q => (q.format || "choice") === "swipe";
+
+/* 指定した範囲で出題しうる問題（在庫）。kind で通常とスワイプの在庫を分ける */
+export function inventory(db, state, band = "auto", subject = "auto", kind = "normal") {
   const open = unlockedChapters(db, state);
+  const wantSwipe = kind === "swipe";
   return db.questions.filter(q => {
+    if (isSwipe(q) !== wantSwipe) return false;
     if (!open.has(q.chapter)) return false;
     if (!questionOpen(state, q)) return false;
     if (band !== "auto") {
@@ -53,9 +65,9 @@ export function inventory(db, state, band = "auto", subject = "auto") {
 }
 
 /* 教科ごとの在庫内訳（出題選択画面の表示用） */
-export function inventoryBySubject(db, state, band = "auto") {
+export function inventoryBySubject(db, state, band = "auto", kind = "normal") {
   const out = {};
-  SUBJECTS.forEach(s => { out[s] = inventory(db, state, band, s).length; });
+  SUBJECTS.forEach(s => { out[s] = inventory(db, state, band, s, kind).length; });
   return out;
 }
 
@@ -92,7 +104,8 @@ export function gumFor(q) {
 export function buildRun(db, state, opts = {}) {
   const band = opts.band ?? state.select.band;
   const subject = opts.subject ?? state.select.subject;
-  const cand = inventory(db, state, band, subject);
+  const kind = opts.kind ?? "normal";
+  const cand = inventory(db, state, band, subject, kind);
   if (cand.length === 0) return [];
 
   const blank = cand.filter(q => !state.cells[cellKey(q)]);
@@ -120,7 +133,8 @@ export function buildRun(db, state, opts = {}) {
   }
   if (!used.has(tail.id) && chosen.length < size) chosen.push(tail);
 
-  return spreadModes(chosen).map(q => q.id);
+  // スワイプは全問が同じ方式なので、ばらけさせる相手がいない
+  return (kind === "swipe" ? chosen : spreadModes(chosen)).map(q => q.id);
 }
 
 /**

@@ -161,6 +161,96 @@ const over = await p.evaluate(`(() => {
 })()`);
 ok.push(["横にはみ出す要素が無い", over.length === 0, over.join(" / ")]);
 
+/* ---- スワイプ（はらう向きがそのまま答え）--------------------------------
+   jsdom には座標も寸法も無いので、「はらう」は通しテストでは確かめられない。
+   押しても答えられるようにはしてあるが、**指ではらって答えられなければ
+   この形式は成立しない**ので、ここで実際にドラッグする。              */
+const swipeSetup = async () => p.evaluate(`(() => {
+  const list = DB.questions.filter(q => q.mode === "swipe");
+  S.run = { ids: list.slice(0, 2).map(q => q.id), i: 0, picked: null, hintsUsed: 0,
+            tipOpen: false, applied: null, found: [], cut: null, right: 0, wrong: 0,
+            appliedRight: 0, shortage: 0, gum: 0, results: {}, noReward: true,
+            done: false, hard: {}, swipe: true };
+  S.view = "swipe"; render(); window.scrollTo(0, 0);
+  const q = DB.byId[S.run.ids[0]];
+  return { id: q.id, answer: q.answer };
+})()`);
+
+const dragCard = async (dx, steps = 12) => {
+  const r = await box("#swpcard");
+  const y = r.y + r.h / 2, x = r.x + r.w / 2;
+  await p.dispatchEvent("#swpcard", "pointerdown", { pointerId: 21, pointerType: "touch",
+    isPrimary: true, clientX: x, clientY: y, buttons: 1 });
+  for (let t = 1; t <= steps; t++) {
+    await p.evaluate(`document.dispatchEvent(new PointerEvent("pointermove", { pointerId: 21,
+      pointerType: "touch", isPrimary: true, bubbles: true,
+      clientX: ${x + (dx * t) / steps}, clientY: ${y} }))`);
+  }
+  return { x, y, end: x + dx };
+};
+const dropCard = async end => p.evaluate(`document.dispatchEvent(
+  new PointerEvent("pointerup", { pointerId: 21, pointerType: "touch", bubbles: true,
+    clientX: ${end}, clientY: 0 }))`);
+
+let sq = await swipeSetup();
+const swView = await p.evaluate("({ w: innerWidth, h: innerHeight })");
+
+// 画面の並び: 問い → 左右の答え → カード。カードは画面に収まっているか
+const swCard = await box("#swpcard");
+const swPicks = await p.evaluate(`[...document.querySelectorAll(".swp-pick")].map(e => {
+  const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height };
+})`);
+ok.push(["左右の答えが横に2つ並ぶ",
+  swPicks.length === 2 && swPicks[0].x + swPicks[0].w <= swPicks[1].x + 1 &&
+  swPicks.every(b => b.h >= 44 && b.w > 80),
+  JSON.stringify(swPicks.map(b => `${Math.round(b.w)}x${Math.round(b.h)}`))]);
+ok.push(["カードは答えの下に、画面に収まって出る",
+  !!swCard && swCard.y > swPicks[0].y && swCard.w <= swView.w - 24 && swCard.h > 80,
+  swCard ? `${Math.round(swCard.w)}x${Math.round(swCard.h)} @${Math.round(swCard.y)}` : "カードが無い"]);
+
+// ① 少しだけ動かして放す → 戻る（**踏み切る前なら取り消せる**）
+let d1 = await dragCard(-24);
+const leaned = await p.evaluate(`document.querySelector(".swp-pick.l").classList.contains("on")`);
+await dropCard(d1.end);
+await p.waitForTimeout(80);
+ok.push(["少し動かすと、その側が光る", leaned === true]);
+ok.push(["途中で放せば答えにならない", await p.evaluate("S.run.picked === null"),
+  String(await p.evaluate("S.run.picked"))]);
+
+// ② しっかりはらう → その向きの答えで確定する
+sq = await swipeSetup();
+const want = sq.answer === 0 ? -140 : 140;
+const d2 = await dragCard(want);
+await dropCard(d2.end);
+await p.waitForTimeout(120);
+ok.push(["はらった向きの答えで確定する",
+  await p.evaluate(`S.run.results[${JSON.stringify(sq.id)}] === "ok"`),
+  String(await p.evaluate(`S.run.results[${JSON.stringify(sq.id)}]`))]);
+ok.push(["○ がカードの上に大きく出る", await p.evaluate(`(() => {
+  const s = document.getElementById("swpseal");
+  if (!s || s.textContent !== "○") return false;
+  const r = s.getBoundingClientRect(), c = document.getElementById("swpcard").getBoundingClientRect();
+  return parseFloat(getComputedStyle(s).fontSize) >= 60
+    && r.top >= c.top - 1 && r.bottom <= c.bottom + 1;
+})()`), await p.evaluate(`document.getElementById("swpseal")?.textContent`)]);
+
+// ③ 逆へはらえば外れる。**外しても罰は無い**ので、知識カードは入る
+sq = await swipeSetup();
+const wrongWay = sq.answer === 0 ? 140 : -140;
+const d3 = await dragCard(wrongWay);
+await dropCard(d3.end);
+await p.waitForTimeout(120);
+ok.push(["逆へはらえば ✕ になる",
+  await p.evaluate(`document.getElementById("swpseal")?.textContent === "✕"`)]);
+
+const swOver = await p.evaluate(`(() => {
+  const w = document.documentElement.clientWidth;
+  return [...document.querySelectorAll("#app *")]
+    .filter(e => e.getBoundingClientRect().right > w + 1)
+    .slice(0, 3).map(e => e.className || e.tagName);
+})()`);
+ok.push(["スワイプの画面も横にはみ出さない", swOver.length === 0, swOver.join(" / ")]);
+
 ok.forEach(([n, v, x]) => console.log((v ? "✓ " : "✗ ") + n + (v ? "" : "  ← " + x)));
 await b.close();
 process.exit(ok.every(o => o[1]) ? 0 : 1);

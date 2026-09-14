@@ -711,3 +711,68 @@
   .panelline{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
   .panelline polyline{fill:none;stroke:var(--pen);stroke-width:1.1;stroke-opacity:.55;
     stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+
+  /* ---- スワイプ（2択・テンポ優先）----------------------------------------
+     クラス名は .swp- でそろえる。.sw- は知識マップの凡例（.sw-ok / .sw-st など）と
+     設定のスイッチ（.sw）が先に使っている。同じ名前にすると、帯が幅46pxの塊に
+     なったときと同じことが起きる                                             */
+  .swp-q{font-family:var(--mincho);font-size:19px;line-height:1.6;margin:14px 0 12px}
+  .swp-picks{display:flex;gap:8px;margin-bottom:12px}
+  .swp-pick{flex:1;min-width:0;display:flex;align-items:center;gap:6px;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);
+    font:inherit;font-size:14px;line-height:1.4;padding:12px 10px;border-radius:6px;
+    min-height:56px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+  .swp-pick.l{justify-content:flex-start;text-align:left}
+  .swp-pick.r{justify-content:flex-end;text-align:right}
+  .swp-pick span{min-width:0;overflow-wrap:anywhere}
+  .swp-pick i{font-style:normal;color:var(--ink-faint);flex:none;font-size:17px}
+  .swp-pick.on{border-color:var(--ai);background:#EEF4FA;transform:translateY(-1px)}
+  .swp-pick.on i{color:var(--ai)}
+  .swp-pick.miss{border-color:var(--pen);background:#FBEEEC}
+  .swp-pick.miss i{color:var(--pen)}
+  .swp-pick.right{border-color:var(--moss);background:#EFF5F0}
+  .swp-pick:disabled{cursor:default}
+
+  .swp-stage{position:relative;display:flex;justify-content:center;
+    touch-action:pan-y;overflow:hidden;padding:2px 0}
+  .swp-card{position:relative;width:100%;max-width:340px;border:1px solid var(--line);
+    border-radius:10px;overflow:hidden;background:#F3F4F2;cursor:grab;
+    box-shadow:0 2px 10px rgba(23,36,63,.07);transition:transform .22s cubic-bezier(.2,.7,.3,1)}
+  .swp-card.held{cursor:grabbing;transition:none}
+  .swp-card.thrown{opacity:.45}
+  .swp-card img{display:block;width:100%;height:auto;max-height:46vh;object-fit:contain;
+    user-select:none;-webkit-user-drag:none}
+  .swp-card:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+
+  /* ○✕ はカードの上に大きく出す。**マルバツは必ず出す** */
+  .swp-seal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:96px;line-height:1;font-weight:300;pointer-events:none}
+  .swp-seal.ok{color:var(--moss);text-shadow:0 0 14px rgba(255,255,255,.9)}
+  .swp-seal.ng{color:var(--pen);text-shadow:0 0 14px rgba(255,255,255,.9)}
+
+  /* 出題中は題名を伏せるが、作者・ライセンス・出典は必ず出す */
+  .swp-cred{font-size:10px;line-height:1.5;color:var(--ink-faint);text-align:center;margin:6px 0 0}
+  .swp-cred a{color:var(--ink-soft)}
+  .swp-how{text-align:center;margin-top:10px}
+  .swp-entry{margin-top:22px}
+
+  /* ---- ふりかえり（スワイプの解説をまとめて出す）---- */
+  .rv{border:1px solid var(--line);background:var(--card);border-radius:6px;margin-top:8px}
+  .rv>summary{display:flex;align-items:baseline;gap:8px;padding:10px 12px;cursor:pointer;
+    font-size:13.5px;line-height:1.6;list-style:none}
+  .rv>summary::-webkit-details-marker{display:none}
+  .rv>summary b{font-family:var(--mincho);color:var(--ink-faint);font-weight:400;flex:none}
+  .rv .rvq{flex:1;min-width:0}
+  .rv>summary i{font-style:normal;color:var(--ink-soft);flex:none;font-size:12.5px}
+  .rvmark{flex:none;font-size:15px;line-height:1}
+  .rv.ok .rvmark{color:var(--moss)}
+  .rv.ng .rvmark{color:var(--pen)}
+  .rv.ng{border-color:#EBC9C4}
+  .rvbody{padding:0 12px 12px;font-size:13.5px;line-height:1.85}
+  .rvbody p{margin:0 0 8px}
+  .photo.rvpic img{max-height:30vh}
+
+  @media (max-width:360px){
+    .swp-pick{font-size:13px;padding:10px 8px}
+    .swp-seal{font-size:76px}
+  }
