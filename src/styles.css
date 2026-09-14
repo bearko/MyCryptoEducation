@@ -776,3 +776,20 @@
     .swp-pick{font-size:13px;padding:10px 8px}
     .swp-seal{font-size:76px}
   }
+
+  /* ---- 形式の束（ヘッダに、3つの束の並びと進み具合を出す）---------------
+     クラス名は .plan / .pseg。.panel（枠）や .place（ヘッダの左）と別物なので
+     省略形にはしない                                                        */
+  .plan{display:flex;gap:3px;margin-top:9px}
+  .pseg{position:relative;flex:1;min-width:0;height:18px;border-radius:3px;
+    background:#EFF2F5;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  /* 進み具合は下の細い線で出す。**名前の背後を塗らない**——塗ると、
+     半分だけ塗られた帯の上で文字が読めなくなる */
+  .pseg i{position:absolute;left:0;bottom:0;height:3px;background:#A9BED2;
+    transition:width .45s cubic-bezier(.2,.7,.3,1)}
+  .pseg.on i{background:var(--ai)}
+  .pseg b{position:relative;font-size:9.5px;font-weight:400;line-height:1;
+    color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+  .pseg.done b{color:var(--ink-soft)}
+  .pseg.on{background:#E7EFF7}
+  .pseg.on b{color:var(--ai);font-weight:700}

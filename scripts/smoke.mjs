@@ -217,10 +217,10 @@ const thinBand = THIN_BAND, thinSub = THIN_SUB, thinN = THIN_N;
 // 学年帯を選び直すと教科は「おまかせ」に戻るので、帯を先に押す
 [...d.querySelectorAll("#band button")].find(b => b.dataset.k === thinBand).click();
 [...d.querySelectorAll("#sub button")].find(b => b.dataset.k === thinSub).click();
-check("在庫不足の警告", txt().includes(`この範囲は現在 ${thinN}問です`),
+check("在庫不足の警告", txt().includes(`この範囲は在庫が ${thinN}問なので`),
   `${thinSub} ${thinN}問 / ${txt().slice(0, 160)}`);
-check("開始ボタンが問題数に追従",
-  d.getElementById("start").textContent.includes(`${thinN}問を始める`),
+check("開始ボタンは形式の数で言う",
+  d.getElementById("start").textContent.includes("3つの形式で解く"),
   d.getElementById("start").textContent);
 
 d.getElementById("start").click();
@@ -237,11 +237,21 @@ ev('DB.questions = window.__allQs; render();');
 ev('S.view="select";S.select.band="auto";S.select.subject="auto";render()');
 d.getElementById("start").click();
 const arr2 = JSON.parse(ev("JSON.stringify(S.run.ids)"));
-check("おまかせは10問", arr2.length === 10);
-check("10問すべて別問題", new Set(arr2).size === 10);
-check("最後は越境問題", ev(`DB.byId["${arr2[9]}"].chapter`) >= 2 ||
-  ["j3", "w"].includes(ev(`DB.byId["${arr2[9]}"].grade`)),
-  ev(`DB.byId["${arr2[9]}"].gradeLabel + " ch" + DB.byId["${arr2[9]}"].chapter`));
+/* **1セッションの長さは、束の長さの合計。**（`engine.blockSize`）
+   はらうだけのスワイプは8問、なぞる文字パネルは3問。同じ問題数にすると、
+   重い形式の束だけが長く感じる */
+check("おまかせは3つの束でできている", (() => {
+  const plan = JSON.parse(ev("JSON.stringify(S.run.plan)"));
+  const want = plan.reduce((a, b) => a + b.n, 0);
+  return plan.length === 3 && want === arr2.length &&
+    plan.every(b => b.n === ev(`blockSize(${JSON.stringify(b.mode)})`));
+})(), ev("JSON.stringify(S.run.plan)"));
+check("同じ問題は1問も重ならない", new Set(arr2).size === arr2.length,
+  `${arr2.length}問 / 別 ${new Set(arr2).size}`);
+const lastId = arr2[arr2.length - 1];
+check("最後は越境問題", ev(`DB.byId["${lastId}"].chapter`) >= 2 ||
+  ["j3", "w"].includes(ev(`DB.byId["${lastId}"].grade`)),
+  ev(`DB.byId["${lastId}"].gradeLabel + " ch" + DB.byId["${lastId}"].chapter`));
 
 /* 20セッション連続で重複が出ないか */
 let dup = 0;
@@ -281,34 +291,79 @@ answerNow(false);
 await wait(60);
 check("OFFでも不正解なら解説が出る", !!d.getElementById("next") && txt().includes("面白い単元"));
 
-/* ---- 方式のばらけ ---- */
-// 同じ形の操作が続くと、解いているというより作業になる
-check("同じ方式が3問以上続かない（おまかせ）", ev(`(() => {
+/* ---- 方式の束（ポケモンフレンズのような、形式ごとのまとまり）---- */
+/* **以前とは逆で、同じ形式を続けて出す。** 操作を覚え直す回数が減るぶん、
+   問題そのものに集中できる。飽きは「ばらけさせる」ではなく
+   **「束を3つに分ける」**ほうで防ぐ（`engine.planRun`）                      */
+const planStats = ev(`(() => {
   const keep = JSON.stringify(S.seen), keepOwned = JSON.stringify(S.owned);
   DB.heroes.forEach(h => S.owned[h.id] = 1);
-  let bad = 0;
-  for (let n = 0; n < 60; n++) {
+  const runs = [];
+  for (let n = 0; n < 80; n++) {
     S.seen = {};
-    const modes = buildRun(DB, S, { subject: "auto" }).map(i => DB.byId[i].mode);
-    let cur = 1;
-    for (let k = 1; k < modes.length; k++) {
-      cur = modes[k] === modes[k - 1] ? cur + 1 : 1;
-      if (cur >= 3) { bad++; break; }
-    }
+    const r = planRun(DB, S, { subject: "auto" });
+    runs.push({ plan: r.plan, modes: r.ids.map(i => DB.byId[i].mode), ids: r.ids });
   }
   S.seen = JSON.parse(keep);
   S.owned = JSON.parse(keepOwned);      // 借りた解放は返す
-  return bad <= 6;                      // 60セッション中10%まで
-})()`) === true, "同じ方式が続きすぎる");
-check("並べ替えても出る問題は変わらない", ev(`(() => {
-  const a = [{ id: "x", mode: "panel" }, { id: "y", mode: "panel" },
-             { id: "z", mode: "panel" }, { id: "w", mode: "numeric" },
-             { id: "v", mode: "tail" }];
-  const out = spreadModes(a);
-  return out.length === a.length &&
-    a.every(q => out.includes(q)) &&
-    out[out.length - 1].id === "v";     // 末尾の越境問題は動かさない
-})()`) === true);
+  return JSON.stringify(runs);
+})()`);
+const runs = JSON.parse(planStats);
+
+check("1セッションは3つの束でできている",
+  runs.every(r => r.plan.length === 3), JSON.stringify(runs.find(r => r.plan.length !== 3)));
+// **同じ形式は1か所にまとまる。** 離れて2度現れたら「まとめて出す」になっていない
+check("同じ形式は続けて出る", runs.every(r => {
+  const runsOf = [];
+  r.modes.forEach((m, i) => { if (i === 0 || m !== r.modes[i - 1]) runsOf.push(m); });
+  return new Set(runsOf).size === runsOf.length && runsOf.length === r.plan.length;
+}), JSON.stringify(runs.find(r => {
+  const g = []; r.modes.forEach((m, i) => { if (i === 0 || m !== r.modes[i - 1]) g.push(m); });
+  return new Set(g).size !== g.length;
+})?.modes));
+check("束の並びは plan のとおり", runs.every(r => {
+  let at = 0;
+  return r.plan.every(b => {
+    const seg = r.modes.slice(at, at + b.n); at += b.n;
+    return seg.length === b.n && seg.every(m => m === b.mode);
+  }) && at === r.modes.length;
+}));
+// **束の長さは手数なり。** 軽い形式ほど多く出す
+check("束の長さは手数で決まる", runs.every(r =>
+  r.plan.every(b => b.n === ev(`blockSize(${JSON.stringify(b.mode)})`))),
+  JSON.stringify(runs[0].plan));
+check("スワイプの束は8問・文字パネルは3問",
+  ev(`blockSize("swipe")`) === 8 && ev(`blockSize("panel")`) === 3 &&
+  ev(`blockSize("choice")`) === 6 && ev(`blockSize("elimination")`) === 4,
+  [ "swipe", "choice", "elimination", "panel" ].map(m =>
+    `${m}${ev(`blockSize(${JSON.stringify(m)})`)}`).join(" "));
+check("同じ問題は2度出ない", runs.every(r => new Set(r.ids).size === r.ids.length));
+// **最後の1問はいまの範囲の外**（束にしても、この約束は変えない）
+check("最後の1問は範囲の外", runs.filter(r =>
+  ev(`DB.byId[${JSON.stringify(r.ids[r.ids.length - 1])}].chapter`) >= 2).length >= runs.length * 0.8,
+  `${runs.filter(r => ev(`DB.byId[${JSON.stringify(r.ids[r.ids.length-1])}].chapter`) >= 2).length}/${runs.length}`);
+
+/* **形式を選ぶのは完全な乱数。** 正答率や履歴で選ぶと、得意な形式ばかり来る人と
+   苦手な形式ばかり来る人に分かれる（ご指示の狙い3）                          */
+{
+  const tally = {};
+  runs.forEach(r => r.plan.forEach(b => { tally[b.mode] = (tally[b.mode] || 0) + 1; }));
+  const usable = ev(`(() => {
+    const c = {}; inventory(DB, S, "auto", "auto").forEach(q => c[q.mode] = (c[q.mode] || 0) + 1);
+    return Object.keys(c).filter(m => c[m] >= 3).length;
+  })()`);
+  const seen = Object.keys(tally).length;
+  check("出せる形式はひととおり出る", seen === usable, `${seen} / 出せる形式 ${usable}`);
+  const top = Math.max(...Object.values(tally)), low = Math.min(...Object.values(tally));
+  // 3/形式数 が期待値。乱数なので幅は見るが、特定の形式に寄っていないことだけ確かめる
+  check("どれかの形式に寄らない", top <= low * 2.2,
+    JSON.stringify(tally));
+}
+// **スワイプは「束としてなら」混ざる。** 1問だけ紛れ込むことはない
+check("スワイプは束としてだけ出る", runs.every(r => {
+  const n = r.modes.filter(m => m === "swipe").length;
+  return n === 0 || n === ev(`blockSize("swipe")`);
+}), JSON.stringify(runs.map(r => r.modes.filter(m => m === "swipe").length)));
 
 /* ---- 消去法（難モード）・何個まで削るかを選ぶ ---- */
 // ✕ で1つずつ消す。消すほど点が増え、まちがえて消すとそこで終わる。
@@ -468,18 +523,13 @@ check("難モードでも4択でも報酬は同じ", ev(`(() => {
    解説は終わりの「ふりかえり」でまとめて出す（原則3はそこで守る）           */
 check("スワイプの問題がある", ev("DB.questions.filter(q => q.mode === 'swipe').length") >= 10,
   String(ev("DB.questions.filter(q => q.mode === 'swipe').length")));
-// **ふつうのセッションには1問も混ざらない。** 混ざった時点でテンポの設計が壊れる
-check("スワイプはふつうの在庫に入らない",
-  ev("inventory(DB, S, 'auto', 'auto').filter(q => q.mode === 'swipe').length") === 0);
-check("スワイプの在庫はスワイプ側にだけ出る",
+/* **混ぜてはいけないのは「1問だけ」。** 8問続けて出るぶんにはテンポが切れない
+   （むしろそれがこの形式の持ち味）。束で出せるようになったので在庫は分けていない */
+check("スワイプもふつうの在庫に入る",
+  ev("inventory(DB, S, 'auto', 'auto').filter(q => q.mode === 'swipe').length") >= 10);
+check("スワイプだけの在庫も引ける",
   ev("inventory(DB, S, 'auto', 'auto', 'swipe').every(q => q.mode === 'swipe')") === true &&
-  ev("inventory(DB, S, 'auto', 'auto', 'swipe').length") >= 10);
-check("ふつうの出題にスワイプは1問も来ない", ev(`(() => {
-  for (let k = 0; k < 20; k++) {
-    if (buildRun(DB, S).some(id => DB.byId[id].mode === "swipe")) return false;
-  }
-  return true;
-})()`) === true);
+  ev("inventory(DB, S, 'auto', 'auto', 'normal').every(q => q.mode !== 'swipe')") === true);
 
 ev('S.view="select";S.select.band="auto";S.select.subject="auto";render()');
 check("出題を選ぶ画面にスワイプの入口がある", !!d.getElementById("startswipe"),
@@ -492,7 +542,9 @@ const swKeep = `window.__keep = JSON.stringify({ score: S.score, gum: S.gum, car
 ev(`(() => { ${swKeep} })()`);
 d.getElementById("startswipe").click();
 
-check("押すとスワイプの画面になる", ev('S.view === "swipe"') && !!d.getElementById("swpcard"));
+// 画面は「クイズ」ひとつ。スワイプの問題のときだけカードの画面になる
+check("押すとスワイプのカードが出る",
+  ev('S.view === "quiz"') && !!d.getElementById("swpcard"));
 check("10問ぜんぶがスワイプ",
   ev("S.run.ids.length") === 10 &&
   ev("S.run.ids.every(id => DB.byId[id].mode === 'swipe')") === true,
@@ -552,7 +604,7 @@ check("解説はその場では出さない", !txt().includes(ev(`DB.byId['${swQ
 
 check("勝手に次へ進む", await (async () => {
   await wait(1100);
-  return ev("S.run.i") === 1 && ev('S.view === "swipe"');
+  return ev("S.run.i") === 1 && !!d.getElementById("swpcard");
 })(), `i=${ev("S.run.i")} / view=${ev("S.view")}`);
 
 // 外したときは ✕。**問題はそこで終わるが、罰は無い**（原則3）
@@ -586,7 +638,7 @@ await wait(1100);
 
 // 残りを流して、ふりかえりまで行く
 const swWrong = [];
-while (ev('S.view === "swipe"')) {
+while (ev('S.view === "quiz"')) {
   const q = JSON.parse(ev(`(() => {
     const x = DB.byId[S.run.ids[S.run.i]];
     return JSON.stringify({ id: x.id, answer: x.answer });
@@ -618,8 +670,7 @@ check("もう一度もスワイプで始まる", (() => {
   const b = d.getElementById("again");
   if (!b) return false;
   b.click();
-  const ok = ev('S.view === "swipe"') && ev("S.run.swipe") === true;
-  return ok;
+  return ev("S.run.swipe") === true && !!d.getElementById("swpcard");
 })(), ev("S.view"));
 
 // 借りた状態を返す
@@ -1120,9 +1171,7 @@ check("持ち帰るカードはその英雄の関連カードだけ", ev(`(() =>
 // 解放すると出題範囲が広がる
 ev('S.owned["4007"]=1;S.owned["5016"]=1;S.view="select";S.select.subject="auto";render()');
 const gatedCount = ev("DB.questions.filter(q => q.needs).length");
-/* **スワイプはふつうのセッションの在庫に入りません**（engine.inventory が分ける）。
-   在庫の数を見るときは、スワイプを引いたほうと比べる */
-const normalCount = ev("DB.questions.filter(q => q.format !== 'swipe').length");
+const normalCount = ev("DB.questions.length");
 check("章を全部開いても、needs の問題はまだ出てこない",
   new RegExp(`おまかせ\\s*${normalCount - gatedCount}`).test(txt()),
   `通常 ${normalCount}問 / 閉じ ${gatedCount}問 / ${txt().slice(0, 120)}`);

@@ -1,7 +1,7 @@
 /* 画面描画。db と state を受け取り、#app に流し込む */
 
 import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
-         unlockedChapters, buildRun, gaugeBreakdown, challengeStage,
+         unlockedChapters, buildRun, planRun, BLOCKS, gaugeBreakdown, challengeStage,
          cellKey, craftableKeys, nextHero, lockedHeroes, nextIndex,
          adviceFor, gumFor, dayKey, monthGrid, mergeDay, shiftMonth,
          titleProgress, earnedTitles, countryOf,
@@ -87,11 +87,11 @@ function render() {
   app.classList.toggle("home", home);
   document.body.classList.toggle("home", home);
 
-  ({ home: vHome, select: vSelect, quiz: vQuiz, swipe: vSwipe, result: vResult, craft: vCraft,
+  ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
      calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop, map: vMap }[S.view])();
   drawToast();
-  if (S.view !== "swipe") unbindSwipe();
+  if (!(S.view === "quiz" && currentQ() && modeOf(currentQ()) === "swipe")) unbindSwipe();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
 }
@@ -374,7 +374,7 @@ function vHome() {
     </div>
     <button class="tile quiz" id="toquiz"
       style="background-image:var(--g-quiz),url('${assetPath.bg("1030")}')">
-      <img src="${assetPath.ext("5003")}" alt=""><b>${RUN_LENGTH}問を解く</b></button>
+      <img src="${assetPath.ext("5003")}" alt=""><b>クイズを解く</b></button>
   </div>`;
 
   document.getElementById("toquiz").onclick = () => go("select");
@@ -392,6 +392,15 @@ function vHome() {
 
 /* ---------- 出題選択（在庫表示つき） ---------- */
 
+/* 形式ごとの在庫。3問そろわない形式は束にできない（engine.planRun）*/
+function modeStock(db, state, band, subject) {
+  const out = {};
+  inventory(db, state, band, subject).forEach(q => {
+    out[q.mode] = (out[q.mode] || 0) + 1;
+  });
+  return out;
+}
+
 function vSelect() {
   const bands = [["auto", "おまかせ"], ["e", "小学校"], ["j", "中学校"], ["w", "世界"]];
   const counts = inventoryBySubject(DB, S, S.select.band);
@@ -408,6 +417,9 @@ function vSelect() {
   <div class="pad">
     <h2 style="margin-top:20px">どこを解きますか</h2>
     <p class="fine">おまかせは知識マップの白いマスから優先して出します。最後の1問は必ずいまの範囲の外から出ます。</p>
+    <p class="fine"><b>出題形式は毎回3つ、くじで選びます。</b>形式ごとにまとめて出すので、
+      操作を覚え直す回数が減ります。束の長さは手数なりで、はらうだけのスワイプは8問、
+      なぞる文字パネルは3問。<b>何が来るかは得意不得意で変わりません。</b></p>
 
     <div class="seg" id="band">${bands.map(([k, l]) =>
       `<button data-k="${k}" class="${S.select.band === k ? "on" : ""}" ${
@@ -436,11 +448,14 @@ function vSelect() {
     ${n === 0
       ? `<p class="fine lock">この範囲にはまだ問題がありません。</p>`
       : short
-        ? `<p class="fine lock">この範囲は現在 ${n}問です。${n}問だけ出題します。</p>`
-        : `<p class="fine">出題できる問題 ${n}問</p>`}
+        ? `<p class="fine lock">この範囲は在庫が ${n}問なので、束が3つそろわないことがあります。</p>`
+        : `<p class="fine">出題できる問題 ${n}問 ・ 出せる形式 ${
+            Object.entries(modeStock(DB, S, S.select.band, S.select.subject))
+              .filter(([, c]) => c >= 3)
+              .map(([m, c]) => `${MODE_LABEL[m] || m}${c}`).join(" / ") || "なし"}</p>`}
 
     <div class="stack"><button class="btn" id="start" ${n ? "" : "disabled"}>
-      ${n ? `${Math.min(n, RUN_LENGTH)}問を始める` : "問題がありません"}</button></div>
+      ${n ? `${BLOCKS}つの形式で解く` : "問題がありません"}</button></div>
 
     <div class="panel swp-entry">
       <div class="phead"><h2>スワイプで解く</h2></div>
@@ -473,13 +488,16 @@ function vSelect() {
 
 function startRun(opts = {}) {
   const swipe = !!opts.swipe;
-  const ids = opts.ids || buildRun(DB, S, swipe ? { kind: "swipe" } : {});
+  const built = opts.ids ? { ids: opts.ids, plan: [] }
+                         : planRun(DB, S, swipe ? { kind: "swipe" } : {});
+  const ids = built.ids;
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             right: 0, wrong: 0, appliedRight: 0,
-            shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
+            // 束の数ぶんそろわなかったときだけ「在庫が足りない」と言う
+            shortage: opts.ids || built.plan.length >= BLOCKS || swipe ? 0 : 1,
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
-            cut: null, intro: !!opts.intro, swipe };
-  go(swipe ? "swipe" : "quiz");
+            cut: null, intro: !!opts.intro, swipe, plan: built.plan };
+  go("quiz");
 }
 
 /**
@@ -530,17 +548,48 @@ const photoAt = (q, where) => (q.image && (q.imageAt || "lesson") === where)
 
 /* ---------- クイズ ---------- */
 
+const MODE_LABEL = { swipe: "スワイプ", choice: "4択", elimination: "消去法",
+                     numeric: "数値入力", range: "レンジ", panel: "文字パネル" };
+
+/**
+ * ヘッダの進み具合を、**束の並びごと**見せる。
+ *
+ * 1セッションは3つの形式の束でできています（`engine.planRun`）。
+ * ただの1本の線にすると、「あと何問このやり方が続くのか」が分かりません。
+ * 束ごとに区切って名前を出すと、**いま集中すべき形式と、次に来る形式**が見えます。
+ * 束の幅は問題数に比例するので、軽い形式の束が長いことも目で分かります。
+ */
+function planStrip() {
+  const plan = (S.run.plan || []).filter(b => b.n > 0);
+  const total = S.run.ids.length || 1;
+  if (plan.length < 2)
+    return `<div class="track"><i style="width:${Math.round(S.run.i / total * 100)}%"></i></div>`;
+  let from = 0;
+  return `<div class="plan">${plan.map(b => {
+    const to = from + b.n, at = from;
+    from = to;
+    const done = S.run.i >= to, on = !done && S.run.i >= at;
+    const fill = done ? 1 : on ? (S.run.i - at) / b.n : 0;
+    return `<span class="pseg${done ? " done" : on ? " on" : ""}" style="flex:${b.n}">
+      <i style="width:${Math.round(fill * 100)}%"></i>
+      <b>${esc(MODE_LABEL[b.mode] || b.mode)}</b></span>`;
+  }).join("")}</div>`;
+}
+
+
 function vQuiz() {
   if (S.run.i >= S.run.ids.length) return go("result");
   const q = currentQ(), h = heroFor(q), fit = fitOf(q, h);
   const mode = modeOf(q);
+  // スワイプは画面ごと別。束で出るので、ふつうのセッションの途中にも現れる
+  if (mode === "swipe") return vSwipe();
   const place = q.country ? `<b>${esc(q.country)}</b>` : `日本 <b>${esc(q.gradeLabel)}</b>`;
 
   app.innerHTML = `
   <header><div class="hbar">
     <div class="place">${place} ・ ${esc(q.subject)}</div>
     <div class="score">${S.run.i + 1} / ${S.run.ids.length}</div></div>
-    <div class="track"><i style="width:${Math.round(S.run.i / S.run.ids.length * 100)}%"></i></div></header>
+    ${planStrip()}</header>
   <div class="pad">
     <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
       <span class="unit">${esc(q.unit)}</span></div>
@@ -666,9 +715,11 @@ function onRange(q) {
  * プレイヤーが4択へ降りたら `S.run.hard[id]` に "choice" が入り、
  * その問題のあいだだけ選択肢の側に固定される（決定2・不可逆は1問かぎり）。
  */
-const READY_MODES = new Set(["elimination", "numeric", "panel", "range", "choice"]);
+const READY_MODES = new Set(["elimination", "numeric", "panel", "range", "choice", "swipe"]);
 
 function modeOf(q) {
+  // スワイプは降りる先が同じ2択になるので、難モードの梯子に乗らない
+  if (q.mode === "swipe") return "swipe";
   const dropped = S.run.hard?.[q.id];
   if (dropped) return dropped;
   // 初回起動の最初の数問は4択だけ。基本形を先に見せる（決定1）
@@ -1330,6 +1381,9 @@ function unbindSwipe() {
   swipeBound = null;
 }
 
+/* その handler がまだ生きているか。画面を離れても問題が進んでも死ぬ */
+const swipeLive = q => S.view === "quiz" && S.run.ids[S.run.i] === q.id;
+
 function vSwipe() {
   if (S.run.i >= S.run.ids.length) return go("result");
   const q = currentQ();
@@ -1340,7 +1394,7 @@ function vSwipe() {
   <header><div class="hbar">
     <div class="place">${place} ・ ${esc(q.subject)}</div>
     <div class="score">${S.run.i + 1} / ${S.run.ids.length}</div></div>
-    <div class="track"><i style="width:${Math.round(S.run.i / S.run.ids.length * 100)}%"></i></div></header>
+    ${planStrip()}</header>
   <div class="pad swp">
     <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
       <span class="unit">${esc(q.unit)}</span></div>
@@ -1385,12 +1439,12 @@ function wireSwipe(q) {
   };
 
   const move = e => {
-    if (!dragging || S.view !== "swipe" || e.pointerId !== pid) return;
+    if (!dragging || !swipeLive(q) || e.pointerId !== pid) return;
     dx = e.clientX - x0;
     lean(dx);
   };
   const up = e => {
-    if (!dragging || S.view !== "swipe") return;
+    if (!dragging || !swipeLive(q)) return;
     if (e.pointerId != null && e.pointerId !== pid) return;
     dragging = false;
     card.classList.remove("held");
@@ -1400,7 +1454,7 @@ function wireSwipe(q) {
     else settle();
   };
   const key = e => {
-    if (S.view !== "swipe") return;
+    if (!swipeLive(q)) return;
     if (e.key === "ArrowLeft") { e.preventDefault(); onSwipe(q, 0); }
     else if (e.key === "ArrowRight") { e.preventDefault(); onSwipe(q, 1); }
   };
@@ -1454,7 +1508,7 @@ function onSwipe(q, side) {
   const p = DB.photos?.[q.image];
   if (cred && p) cred.innerHTML = creditLine(p, true);
 
-  setTimeout(() => { if (S.view === "swipe") { unbindSwipe(); advance(); } }, SWIPE_HOLD);
+  setTimeout(() => { if (swipeLive(q)) { unbindSwipe(); advance(); } }, SWIPE_HOLD);
 }
 
 /**
@@ -1462,10 +1516,13 @@ function onSwipe(q, side) {
  * 外した問題は開いた状態で並べます（解説スキップ設定に関わらず出します）。
  */
 function swipeReview() {
-  const rows = S.run.ids.map((id, n) => {
-    const q = DB.byId[id];
-    if (!q) return "";
-    const ok = S.run.results[id] === "ok";
+  /* **スワイプは解説を途中で出さないので、ここで必ず出す**（原則3）。
+     束で混ざったセッションでも、そのぶんだけを並べる */
+  const list = S.run.ids.map((id, n) => [DB.byId[id], n])
+    .filter(([q]) => q && q.mode === "swipe");
+  if (!list.length) return "";
+  const rows = list.map(([q, n]) => {
+    const ok = S.run.results[q.id] === "ok";
     return `<details class="rv ${ok ? "ok" : "ng"}"${ok ? "" : " open"}>
       <summary><span class="rvmark">${ok ? "○" : "✕"}</span>
         <b>${n + 1}</b><span class="rvq">${esc(q.prompt)}</span>
@@ -1476,7 +1533,7 @@ function swipeReview() {
         <div class="gain"><span class="seal">✓</span>
           <span>知識カード ・ <em>${esc(q.card)}</em></span></div></div></details>`;
   }).join("");
-  return `<div class="panel"><div class="phead"><h2>${S.run.ids.length}問のふりかえり</h2></div>
+  return `<div class="panel"><div class="phead"><h2>スワイプ ${list.length}問のふりかえり</h2></div>
     <p class="fine">テンポを切らさないために、解説はここへまとめました。
       <b>外した問題は開いてあります。</b></p>${rows}</div>`;
 }
@@ -1500,8 +1557,11 @@ function vResult() {
       <div><b>${S.run.appliedRight}</b><span>応用も突破</span></div>
       <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
       ${S.run.noReward ? "" : `<div><b>${S.run.gum}</b><span>GUM</span></div>`}</div>
-    ${S.run.shortage ? `<p class="cue">この範囲は在庫が ${S.run.ids.length}問だったので、${S.run.ids.length}問で終わりました。</p>` : ""}
-    ${S.run.swipe ? swipeReview() : ""}
+    ${S.run.shortage ? `<p class="cue">この範囲では形式の束が ${
+      (S.run.plan || []).length}つしか組めなかったので、${S.run.ids.length}問で終わりました。</p>` : ""}
+    ${(S.run.plan || []).length > 1 ? `<p class="cue">今回の形式 ・ ${
+      S.run.plan.map(b => `${MODE_LABEL[b.mode] || b.mode} ${b.n}問`).join(" → ")}</p>` : ""}
+    ${swipeReview()}
     ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、クリスタルも知識カードも増えていません。</p>`
     : `<div class="panel">
       <div class="phead"><h2>今回出会ったもの</h2></div>
@@ -1521,7 +1581,7 @@ function vResult() {
     ${next ? `<p class="cue">次に挑めるのは ${esc(next.name)}（${next.rarity}）。いまの知識での到達度は ${
       nextGauge.percent}% です。</p>` : ""}
     <div class="stack">
-      <button class="btn" id="again">もう${RUN_LENGTH}問 ・ ${
+      <button class="btn" id="again">もう一度 ・ ${
         S.run.swipe ? "スワイプ" : S.select.band === "auto" ? "おまかせ" : "同じ範囲"}</button>
       <button class="btn ghost" id="change">範囲を変えて解く</button>
       ${craftable ? `<button class="btn ghost" id="craft">クラフトする</button>` : ""}

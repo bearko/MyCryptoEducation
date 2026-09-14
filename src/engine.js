@@ -38,21 +38,21 @@ export const unlockedBy = (db, card) =>
   (db.questions || []).filter(q => q.needs === card);
 
 /**
- * **スワイプ問題は、ふつうのセッションには混ざりません。**
+ * **スワイプは、束としてなら ふつうのセッションにも出ます。**
  *
- * スワイプは「10問ぜんぶ同じ形式で、解説を挟まずに矢継ぎ早に」出すためのモードです。
- * 途中に1問だけ混ざると、テンポの設計そのものが成り立ちません
- * （`spreadModes` が方式をばらけさせるのと、狙いが正反対になります）。
- * だから在庫の段階で分けます。
+ * 混ぜてはいけないのは「1問だけ」で、**8問続けて出るぶんにはテンポが切れません**
+ * （むしろそれがこの形式の持ち味です）。出題が束でできるようになったので、
+ * 在庫ごと切り離す必要は無くなりました。
+ * `kind` は "all"（既定）・"swipe"（スワイプだけの10問）・"normal"（スワイプ抜き）。
  */
 export const isSwipe = q => (q.format || "choice") === "swipe";
 
-/* 指定した範囲で出題しうる問題（在庫）。kind で通常とスワイプの在庫を分ける */
-export function inventory(db, state, band = "auto", subject = "auto", kind = "normal") {
+/* 指定した範囲で出題しうる問題（在庫） */
+export function inventory(db, state, band = "auto", subject = "auto", kind = "all") {
   const open = unlockedChapters(db, state);
-  const wantSwipe = kind === "swipe";
   return db.questions.filter(q => {
-    if (isSwipe(q) !== wantSwipe) return false;
+    if (kind === "swipe" && !isSwipe(q)) return false;
+    if (kind === "normal" && isSwipe(q)) return false;
     if (!open.has(q.chapter)) return false;
     if (!questionOpen(state, q)) return false;
     if (band !== "auto") {
@@ -95,85 +95,139 @@ export function gumFor(q) {
 }
 
 /**
- * 1セッションぶんの出題を組む。
+ * **出題形式ごとにまとめて出す。** 1セッションは3つの形式の「束」でできています。
  *
- * ・同じ問題は絶対に2回出さない（在庫が足りなければ、その数だけ出題する）
- * ・知識マップの白いマスを最優先、次に未出題、最後に既出
- * ・最後の1問は必ず「いまの範囲の外」。無ければ最も遠い学年・章の問題
+ * 以前は `spreadModes` で方式をばらけさせていました（同じ形式が3問続かないように）。
+ * **いまは逆で、同じ形式を続けて出します。** 操作のしかたを覚え直す回数が減るので、
+ * 問題そのものに集中できます。飽きは「ばらけさせる」ではなく
+ * **「束を3つに分ける」**ほうで防ぎます。
+ *
+ * 束の長さは**操作の手数**で決めます（`MODE_WORK`）。はらうだけのスワイプは8問、
+ * なぞる文字パネルは3問。**同じ問題数にすると、重い形式の束だけが長く感じます。**
+ *
+ * 形式を選ぶのは**完全な乱数**です。正答率や履歴で選ぶと、得意な形式ばかり来る人と
+ * 苦手な形式ばかり来る人に分かれます。
  */
-export function buildRun(db, state, opts = {}) {
-  const band = opts.band ?? state.select.band;
-  const subject = opts.subject ?? state.select.subject;
-  const kind = opts.kind ?? "normal";
-  const cand = inventory(db, state, band, subject, kind);
-  if (cand.length === 0) return [];
 
-  const blank = cand.filter(q => !state.cells[cellKey(q)]);
-  const fresh = cand.filter(q => state.cells[cellKey(q)] && !state.seen[q.id]);
-  const rest  = cand.filter(q => state.cells[cellKey(q)] && state.seen[q.id]);
-  const ranked = [...shuffle(blank), ...shuffle(fresh), ...shuffle(rest)];
+/** 1問あたりの操作の重さ。束の長さはここから決まる */
+export const MODE_WORK = {
+  swipe: 1.0,        // はらう（または押す）1回
+  choice: 1.4,       // 押す1回。ただし選択肢を4つ読む
+  elimination: 2.0,  // ✕ を3回。どこで止めるかも決める
+  range: 2.4,        // 2つ入れて決定
+  numeric: 2.4,      // テンキーを叩いて決定
+  panel: 2.8,        // 盤面を探してなぞる
+};
+export const BLOCK_WORK = 8;    // 1束ぶんの手数の目安
+export const BLOCK_MIN = 3;
+export const BLOCK_MAX = 8;
+export const BLOCKS = 3;        // 1セッションの束の数
 
-  const size = Math.min(RUN_LENGTH, cand.length);
-  const chosen = [];
-  const used = new Set();
+/** その形式を何問続けて出すか */
+export const blockSize = mode => Math.max(BLOCK_MIN,
+  Math.min(BLOCK_MAX, Math.round(BLOCK_WORK / (MODE_WORK[mode] ?? 2))));
 
-  // 末尾に置く「越境問題」を先に確保する
-  const distance = q => q.chapter * 100 + (GRADE_ORDER[q.grade] || 0);
-  const crossing = ranked.filter(q => q.chapter >= 2);
-  const tail = crossing.length
-    ? crossing[0]
-    : ranked.slice().sort((a, b) => distance(b) - distance(a))[0];
+/* 出題の優先順（白いマス → 未出題 → 既出）。束の中でもこの順を保つ */
+function rankPool(list, state) {
+  const blank = list.filter(q => !state.cells[cellKey(q)]);
+  const fresh = list.filter(q => state.cells[cellKey(q)] && !state.seen[q.id]);
+  const rest  = list.filter(q => state.cells[cellKey(q)] && state.seen[q.id]);
+  return [...shuffle(blank), ...shuffle(fresh), ...shuffle(rest)];
+}
 
-  for (const q of ranked) {
-    if (chosen.length >= size - 1) break;
-    if (q.id === tail.id) continue;
-    if (used.has(q.id)) continue;
-    used.add(q.id);
-    chosen.push(q);
+const distance = q => q.chapter * 100 + (GRADE_ORDER[q.grade] || 0);
+
+/* 乱数で n 個選ぶ。**履歴も得意不得意も見ない** */
+function sample(list, n, rng) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  if (!used.has(tail.id) && chosen.length < size) chosen.push(tail);
-
-  // スワイプは全問が同じ方式なので、ばらけさせる相手がいない
-  return (kind === "swipe" ? chosen : spreadModes(chosen)).map(q => q.id);
+  return a.slice(0, n);
 }
 
 /**
- * **同じ回答方式が続かないように、並びだけを入れ替える。**
+ * 1セッションの組み立てを返す。`{ ids, plan }`。
+ * plan は `[{ mode, n }]` で、画面に「いまどの束の何問めか」を出すのに使います。
  *
- * 出題の優先順（白いマス → 未出題 → 既出）と、末尾の越境問題はそのままにして、
- * 3問続いたときだけ後ろから違う方式を持ってくる。測ったところ、手を入れる前は
- * **40セッション中27回で3問以上続き、最長6問連続**だった。同じ形の操作が
- * 4回続くと、解いているというより作業になる。
- *
- * 入れ替えるのは順番だけで、出る問題そのものは変えない。
+ * ・同じ問題は絶対に2回出さない（在庫が足りなければ、その数だけ出題する）
+ * ・束の中は 白いマス → 未出題 → 既出 の順
+ * ・**最後の1問は「いまの範囲の外」**。その問題を持つ形式の束を最後に回す
  */
-export function spreadModes(list, limit = 2) {
-  if (list.length < limit + 1) return list.slice();
-  const tail = list[list.length - 1];   // 末尾の越境問題は動かさない
-  const groups = new Map();
-  list.slice(0, -1).forEach(q => {
-    if (!groups.has(q.mode)) groups.set(q.mode, []);
-    groups.get(q.mode).push(q);         // 束の中では、出題の優先順を保つ
-  });
+export function planRun(db, state, opts = {}) {
+  const band = opts.band ?? state.select.band;
+  const subject = opts.subject ?? state.select.subject;
+  const kind = opts.kind ?? "all";
+  const rng = opts.rng || Math.random;
+  const cand = inventory(db, state, band, subject, kind);
+  if (cand.length === 0) return { ids: [], plan: [] };
 
-  const out = [];
-  const left = () => [...groups.values()].reduce((a, g) => a + g.length, 0);
-  while (left()) {
-    // 直前が limit 問とも同じ方式なら、その方式は今回選ばない
-    const run = out.slice(-limit);
-    const banned = run.length === limit && run.every(q => q.mode === run[0].mode)
-      ? run[0].mode : null;
-    // **残りがいちばん多い束から取る。** 多いものを後回しにすると、終わりで固まる
-    let pick = null;
-    for (const [mode, g] of groups) {
-      if (!g.length || mode === banned) continue;
-      if (!pick || g.length > groups.get(pick).length) pick = mode;
-    }
-    if (!pick) pick = [...groups].find(([, g]) => g.length)[0];   // ほかに無ければ諦める
-    out.push(groups.get(pick).shift());
+  // スワイプだけのセッションは1束。**10問ぜんぶ同じ形式**という約束を保つ
+  if (kind === "swipe") {
+    const pool = rankPool(cand, state);
+    const ids = withTail(pool.slice(0, Math.min(RUN_LENGTH, pool.length)), pool);
+    return { ids: ids.map(q => q.id), plan: [{ mode: "swipe", n: ids.length }] };
   }
-  out.push(tail);
+
+  const pools = new Map();
+  cand.forEach(q => {
+    if (!pools.has(q.mode)) pools.set(q.mode, []);
+    pools.get(q.mode).push(q);
+  });
+  for (const [m, list] of pools) pools.set(m, rankPool(list, state));
+
+  // **3問そろわない形式は束にしない。** 1〜2問では「まとめて出す」意味がない
+  const full = [...pools.keys()].filter(m => pools.get(m).length >= BLOCK_MIN);
+  const thin = [...pools.keys()].filter(m => pools.get(m).length < BLOCK_MIN);
+  let picked = sample(full, BLOCKS, rng);
+  // 在庫が薄くて束が足りないときだけ、端数の形式も使う（セッションを短くしすぎない）
+  if (picked.length < BLOCKS) picked = [...picked, ...sample(thin, BLOCKS - picked.length, rng)];
+  if (!picked.length) return { ids: [], plan: [] };
+
+  /* 越境問題（いまの範囲の外）を持つ束を最後に回す。
+     どの束も持っていなければ、いちばん遠い問題を持つ束を最後にする */
+  const best = m => pools.get(m).reduce((a, q) =>
+    Math.max(a, q.chapter >= 2 ? 1000 + distance(q) : distance(q)), 0);
+  picked.sort((a, b) => best(a) - best(b));
+
+  const plan = [], ids = [];
+  picked.forEach((mode, i) => {
+    const pool = pools.get(mode);
+    const want = Math.min(blockSize(mode), pool.length);
+    const block = i === picked.length - 1
+      ? withTail(pool.slice(0, want), pool)   // 最後の束だけ、末尾を越境問題にする
+      : pool.slice(0, want);
+    plan.push({ mode, n: block.length });
+    block.forEach(q => ids.push(q.id));
+  });
+  return { ids, plan };
+}
+
+/**
+ * 束の末尾を「いまの範囲の外」の問題にする。
+ * 束の中に無ければ、その形式の在庫から最も遠い問題を1問だけ引き入れる。
+ */
+function withTail(block, pool) {
+  const out = block.slice();
+  if (!out.length) return out;
+  const has = out.find(q => q.chapter >= 2);
+  if (has) {
+    out.splice(out.indexOf(has), 1);
+    out.push(has);
+    return out;
+  }
+  const far = pool.slice().sort((a, b) => distance(b) - distance(a))[0];
+  if (!far) return out;
+  const at = out.indexOf(far);
+  if (at >= 0) { out.splice(at, 1); out.push(far); return out; }
+  out[out.length - 1] = far;    // 束の最後の1問を、いちばん遠い問題に差し替える
   return out;
+}
+
+/** 出題IDだけが要るとき */
+export function buildRun(db, state, opts = {}) {
+  return planRun(db, state, opts).ids;
 }
 
 /* ---- レンジ回答（年代当て） ---- */
