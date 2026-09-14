@@ -256,9 +256,11 @@ check("20セッション連続で重複ゼロ", dup === 0, `${dup}件`);
 
 
 /* ---- 修正2: 解説スキップ ---- */
-// レンジ回答が混ざるようになったので、この節は4択だけで組む
+// レンジ回答が混ざるようになったので、この節は4択だけで組む。
+// 文字パネルと数値入力は「外しても問題が終わらない」ので、不正解の検査には使えない
 ev(`(() => {
-  const ids = DB.questions.filter(q => (q.format || "choice") === "choice").slice(0, 6).map(q => q.id);
+  const ids = DB.questions.filter(q => (q.format || "choice") === "choice" &&
+    (q.mode === "choice" || q.mode === "elimination")).slice(0, 6).map(q => q.id);
   S.settings.showExplanationOnCorrect = true;
   startRun({ ids });
 })()`);
