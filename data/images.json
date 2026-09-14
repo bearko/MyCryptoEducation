@@ -420,32 +420,28 @@
       "height": 489
     },
     "obj-yama": {
-      "search": "Mount Fuji snow symmetrical cone",
-      "insource": "Cc-zero",
+      "search": "Mount Fuji",
       "alt": "雪をかぶった円すい形の山が、青空を背にそびえている写真",
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson"
     },
     "obj-pan": {
-      "search": "white sandwich bread slices loaf",
+      "search": "sliced bread",
       "alt": "白い食パンが切り分けられて並んでいる写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson",
-      "insource": "Cc-zero"
+      "where": "lesson"
     },
     "obj-tamago": {
-      "search": "hen eggs in carton white shell",
+      "search": "chicken eggs",
       "alt": "白い殻のたまごが並んでいる写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson",
-      "insource": "Cc-zero"
+      "where": "lesson"
     },
     "obj-inu": {
-      "search": "Labrador Retriever dog sitting grass",
+      "search": "Labrador Retriever",
       "alt": "犬が草の上にすわって正面を向いている写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson",
-      "insource": "Cc-zero"
+      "where": "lesson"
     }
   }
 }
