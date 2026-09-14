@@ -56,7 +56,7 @@ function defaults() {
     // hard は問題IDごとの難モードの状態。4択に降りたら "choice" が入る。
     // 降りるかどうかは毎問プレイヤーが決める（決定2）。前の問題を引き継がない
     run: { ids: [], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-           right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [], narrow: null,
+           right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [], cut: null,
            results: {}, noReward: false, done: false, hard: {} },
 
     // チャレンジ。3問構成で、qi が何問目か、results が各問の正誤

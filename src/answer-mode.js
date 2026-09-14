@@ -1,6 +1,6 @@
 /* 回答方式のルーター。アプリと validate.mjs の両方から使う。
    「選択肢が見えるか」で二分される点が重要:
-     choice … 4択・消去法・絞り込み（選択肢が画面に出る）
+     choice … 4択・消去法（選択肢が画面に出る）
      hidden … 文字パネル・数値入力・レンジ（選択肢が出ない）
    ヒントの出し分けはこの区別に従う。                                */
 
@@ -44,25 +44,25 @@ export function answerMode(q) {
   if (ERA.test(a)) return "range";
   if (q.multi) return "multi";
   if (q.reading && JA_TERM.test(a)) return "panel";
-  /**
-   * **選択肢が長いものは「絞り込み」へ。**
-   *
-   * 消去法は、誤りを3つ選んでから決める。選択肢が短い語なら見比べは一瞬で済むが、
-   * 文の形になると、読んで潰す作業が3回続いて手数のわりに手ごたえが薄い。
-   * 絞り込みは2つ消して、**残った2つから選ぶ**。タップは1回少なく、
-   * 最後に必ず二択が来る——迷って決めるところが、いちばん面白いところなので。
-   */
-  return longestChoice(q) >= NARROW_MIN ? "narrow" : "elimination";
+  return "elimination";
 }
 
-/* 絞り込みに回す境目。いちばん長い選択肢がこれ以上なら、読んで潰すのが重くなる */
-export const NARROW_MIN = 7;
-export const longestChoice = q =>
-  Array.isArray(q.choices) ? Math.max(...q.choices.map(c => [...String(c)].length)) : 0;
+/**
+ * **消すごとに増える点。1つ目より2つ目、2つ目より3つ目。**
+ *
+ * 何個まで削るかはプレイヤーが決める。確信があるほど深く削れて、点が伸びる。
+ * 外したらそこで終わりだが、**そこまでに消せたぶんの点は残る**。
+ * リスクを取った手前までは、ちゃんと自分のものになる。
+ *
+ * **増えるのは点だけで、GUM・クリスタル・知識カードは動かしません**（原則3-2）。
+ * 点はヒントの本数でも増減する数字で、買えるものが何もない。
+ */
+export const CUT_SCORE = [2, 3, 5];
+export const cutScore = n => CUT_SCORE.slice(0, n).reduce((a, b) => a + b, 0);
 
 /** その方式で選択肢が画面に見えるか */
 export function isChoiceVisible(mode) {
-  return mode === "elimination" || mode === "choice" || mode === "narrow";
+  return mode === "elimination" || mode === "choice";
 }
 
 /** ヒントの表示グループ。"choice" | "hidden" */

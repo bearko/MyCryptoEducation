@@ -622,12 +622,25 @@
     background:rgba(255,255,255,.18);padding:2px 9px;border-radius:4px}
 
   /* 消去法の選択肢。破線にして、選んだものに×をつける */
-  .choices.elim .choice{border-style:dashed;background:#FCFAF8}
-  /* 絞り込み。2つ消したあと、残った2つだけが押せる */
-  .choices.narrow .choice{border-style:dashed;background:#FCFAF8}
-  .choice.gone{opacity:.3;border-style:solid;text-decoration:line-through;
-    text-decoration-color:var(--pen)}
-  .choices.narrow .choice:not(.gone):not(.x){border-style:solid}
+  /* 消去法。✕ で消す／文字で答える。押す場所で意味が分かれる */
+  .choices.elim{gap:9px}
+  .choices.elim .row{display:flex;align-items:stretch;gap:7px;position:relative}
+  .choices.elim .row .choice{flex:1;min-width:0}
+  .cut{flex:none;width:46px;border:1px solid var(--pen);background:#FDF4F2;color:var(--pen);
+    font:inherit;font-size:17px;line-height:1;border-radius:3px;cursor:pointer}
+  .cut:hover{background:#F8E6E2}
+  .row.gone .cut{visibility:hidden}
+  .row.gone .choice{opacity:.32;text-decoration:line-through;
+    text-decoration-color:var(--pen);cursor:default}
+  /* 消したその場で、いくつ入ったかを出す */
+  .cutgain{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    font-family:var(--mincho);font-size:17px;font-weight:600;color:var(--moss);
+    pointer-events:none;animation:cutpop 1.2s ease-out forwards}
+  .cutgain.ng{color:var(--pen)}
+  @keyframes cutpop{0%{opacity:0;transform:translateY(-30%)}
+    20%{opacity:1;transform:translateY(-50%)}
+    70%{opacity:1}100%{opacity:0;transform:translateY(-95%)}}
+  .band .bcnt i{font-style:normal;margin-left:6px;opacity:.75}
   .choice.x{opacity:.6;color:var(--ink-faint);border-style:solid;border-color:var(--pen);
     text-decoration:line-through;text-decoration-color:var(--pen);text-decoration-thickness:2px}
   .choice.x::after{content:"×";position:absolute;right:12px;top:50%;transform:translateY(-50%);

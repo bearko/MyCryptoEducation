@@ -39,29 +39,15 @@ const answerNow = (correct = true) => {
     d.getElementById("nsubmit").click();
     return true;
   }
-  const btns = [...d.querySelectorAll(".choices > .choice")];
+  const btns = [...d.querySelectorAll(".choices .choice")];
   if (!btns.length) return false;
-  if (mode === "narrow") {
-    // ちがうものを2つ消してから、残った2つのうち正解を選ぶ
-    const cut = [];
-    if (!correct) cut.push(a);                       // 正解を消せばその場で不正解
-    for (let i = 0; i < n && cut.length < n - 2; i++) if (i !== a && !cut.includes(i)) cut.push(i);
-    cut.forEach(i => btns[i].click());
-    d.getElementById("wsubmit").click();
-    if (!correct) return true;
-    [...d.querySelectorAll(".choices > .choice")]
-      .find(b => Number(b.dataset.i) === a)?.click();
+  if (mode === "elimination") {
+    // ✕ で消す。正解を消せばその場で不正解、ちがうものを全部消せば正解
+    if (!correct) { d.querySelector(`.cut[data-c="${a}"]`).click(); return true; }
+    for (let i = 0; i < n; i++) if (i !== a) d.querySelector(`.cut[data-c="${i}"]`)?.click();
     return true;
   }
-  if (mode === "elimination") {
-    // 誤っているものを3つ選んでから決める。正解を選んでいたら不正解になる
-    if (!correct) { btns[a].click(); for (let i = 0, k = 1; i < n && k < n - 1; i++)
-      if (i !== a) { btns[i].click(); k++; } }
-    else for (let i = 0; i < n; i++) if (i !== a) btns[i].click();
-    d.getElementById("esubmit").click();
-  } else {
-    btns[correct ? a : (a + 1) % n].click();
-  }
+  btns[correct ? a : (a + 1) % n].click();
   return true;
 };
 
@@ -295,82 +281,6 @@ answerNow(false);
 await wait(60);
 check("OFFでも不正解なら解説が出る", !!d.getElementById("next") && txt().includes("面白い単元"));
 
-/* ---- 絞り込み（難モード）---- */
-// 4つを2つまで削ってから、残った2つのうち1つを選ぶ。**最後に必ず二択が来る**
-const narrowRun = `(() => {
-  S.settings.showExplanationOnCorrect = true;
-  const ids = DB.questions.filter(q => q.mode === "narrow").slice(0, 3).map(q => q.id);
-  S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-            right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [], narrow: null,
-            results: {}, noReward: true, done: false, hard: {} };
-  S.view = "quiz"; render();
-  return JSON.stringify({ id: ids[0], answer: DB.byId[ids[0]].answer, n: ids.length });
-})()`;
-const w1 = JSON.parse(ev(narrowRun));
-check("絞り込みの問題がある", w1.n === 3, JSON.stringify(w1));
-check("選択肢が長い問題が回ってくる", ev(`(() => {
-  return DB.questions.filter(q => q.mode === "narrow")
-    .every(q => longestChoice(q) >= NARROW_MIN);
-})()`) === true, "短い選択肢の問題が混ざっている");
-check("消去法より手数が1つ少ない", ev(`(() => {
-  const w = DB.questions.find(q => q.mode === "narrow");
-  const e = DB.questions.find(q => q.mode === "elimination");
-  return (w.choices.length - 2) < (e.choices.length - 1);
-})()`) === true);
-check("何をするかを帯で出す", (d.querySelector(".band.cut .bmain")?.textContent || "")
-  .includes("ちがうものを 2つ 選んで消す"), d.querySelector(".band")?.textContent);
-check("いくつ選んだかが出る", d.getElementById("wcnt").textContent === "0 / 2",
-  d.getElementById("wcnt")?.textContent);
-check("選ぶ前は答えられない", d.getElementById("wsubmit").disabled);
-check("4択へ降りる道が常にある", !!d.getElementById("tochoice"));
-
-const nwrong = [0, 1, 2, 3].filter(i => i !== w1.answer);
-[...d.querySelectorAll(".choices > .choice")][nwrong[0]].click();
-check("押し直すと戻せる", (() => {
-  [...d.querySelectorAll(".choices > .choice")][nwrong[0]].click();
-  return d.querySelectorAll(".choice.x").length === 0;
-})());
-[nwrong[0], nwrong[1]].forEach(i => [...d.querySelectorAll(".choices > .choice")][i].click());
-check("2つそろうと消せる", !d.getElementById("wsubmit").disabled);
-d.getElementById("wsubmit").click();
-check("消しただけでは決まらない", ev("S.run.picked") === null);
-// **ここが狙い。** 迷って決めるところを毎回つくる
-check("残った2つの二択になる", d.querySelectorAll(".choices > .choice:not(.gone)").length === 2,
-  `${d.querySelectorAll(".choices > .choice:not(.gone)").length}件`);
-check("消した2つは押せない",
-  [...d.querySelectorAll(".choice.gone")].every(b => b.disabled),
-  `${d.querySelectorAll(".choice.gone").length}件`);
-check("帯が二択に変わる", (d.querySelector(".band.pick .bmain")?.textContent || "")
-  .includes("残った2つから 1つ 選ぶ"), d.querySelector(".band")?.textContent);
-[...d.querySelectorAll(".choices > .choice")].find(b => Number(b.dataset.i) === w1.answer).click();
-await wait(60);
-check("残った2つから正解を選べば正解", ev("S.run.results['" + w1.id + "']") === "ok",
-  ev("S.run.results['" + w1.id + "']"));
-
-// 正解を混ぜて消したら、その場で不正解
-const w2 = JSON.parse(ev(`(() => {
-  S.run.i = 1; S.run.picked = null; S.run.hintsUsed = 0; S.run.narrow = null; render();
-  const id = S.run.ids[1];
-  return JSON.stringify({ id, answer: DB.byId[id].answer });
-})()`));
-[...d.querySelectorAll(".choices > .choice")][w2.answer].click();
-[...d.querySelectorAll(".choices > .choice")][(w2.answer + 1) % 4].click();
-d.getElementById("wsubmit").click();
-await wait(60);
-check("正解を混ぜて消したら不正解", ev("S.run.results['" + w2.id + "']") === "ng",
-  ev("S.run.results['" + w2.id + "']"));
-check("外しても解説は出る", txt().includes("面白い単元"));
-
-// 途中まで絞った状態は、次の問題へ持ち越さない
-ev(`S.run.i = 2; S.run.picked = null; S.run.narrow = null; render()`);
-check("次の問題は4つから始まる",
-  d.querySelectorAll(".choices > .choice:not(.gone)").length === 4,
-  `${d.querySelectorAll(".choices > .choice:not(.gone)").length}件`);
-check("絞り込みからも4択に降りられる", (() => {
-  d.getElementById("tochoice").click();
-  return modeNow() === "choice" && !!d.querySelector(".band.pick");
-})(), modeNow());
-
 /* ---- 方式のばらけ ---- */
 // 同じ形の操作が続くと、解いているというより作業になる
 check("同じ方式が3問以上続かない（おまかせ）", ev(`(() => {
@@ -392,7 +302,7 @@ check("同じ方式が3問以上続かない（おまかせ）", ev(`(() => {
 })()`) === true, "同じ方式が続きすぎる");
 check("並べ替えても出る問題は変わらない", ev(`(() => {
   const a = [{ id: "x", mode: "panel" }, { id: "y", mode: "panel" },
-             { id: "z", mode: "panel" }, { id: "w", mode: "narrow" },
+             { id: "z", mode: "panel" }, { id: "w", mode: "numeric" },
              { id: "v", mode: "tail" }];
   const out = spreadModes(a);
   return out.length === a.length &&
@@ -400,81 +310,101 @@ check("並べ替えても出る問題は変わらない", ev(`(() => {
     out[out.length - 1].id === "v";     // 末尾の越境問題は動かさない
 })()`) === true);
 
-/* ---- 消去法（難モード） ---- */
-// 消去法の問題だけを並べたセッションを作って、3つ潰す／正解を潰す／4択へ降りるを見る
+/* ---- 消去法（難モード）・何個まで削るかを選ぶ ---- */
+// ✕ で1つずつ消す。消すほど点が増え、まちがえて消すとそこで終わる。
+// **外しても、消せたぶんの点は残る**
+// 点の入り方を見るので、報酬ありで回す。**終わったら元に戻す**
 const elimRun = `(() => {
+  window.__keep = JSON.stringify({ score: S.score, gum: S.gum, cards: S.cards,
+    points: S.points, crystals: S.crystals, seen: S.seen, cells: S.cells });
   S.settings.showExplanationOnCorrect = true;
-  const ids = DB.questions.filter(q => q.mode === "elimination").slice(0, 3).map(q => q.id);
+  S.score = 0;
+  const ids = DB.questions.filter(q => q.mode === "elimination").slice(0, 4).map(q => q.id);
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
-            right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [],
-            results: {}, noReward: true, done: false, hard: {} };
+            right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [], cut: null,
+            results: {}, noReward: false, done: false, hard: {} };
   S.view = "quiz"; render();
   return JSON.stringify({ id: ids[0], answer: DB.byId[ids[0]].answer, n: ids.length });
 })()`;
 const e1 = JSON.parse(ev(elimRun));
-check("消去法の問題がある", e1.n === 3, JSON.stringify(e1));
-check("消去法では選択肢が出る", d.querySelectorAll(".choices.elim > .choice").length === 4,
-  String(d.querySelectorAll(".choices > .choice").length));
-// 4択と消去法は選択肢が並ぶ見た目が同じで、押す意味は正反対。読まずに分かる必要がある
+check("消去法の問題がある", e1.n === 4, JSON.stringify(e1));
+check("消去法では選択肢が出る", d.querySelectorAll(".choices.elim .choice").length === 4,
+  String(d.querySelectorAll(".choices .choice").length));
+// **消すのと答えるのを、押す場所で分ける。** 同じ場所で意味が変わると取りちがえる
+check("消すボタンと答えるボタンが別", d.querySelectorAll(".cut[data-c]").length === 4 &&
+  d.querySelectorAll(".choices.elim .row .choice").length === 4,
+  `✕${d.querySelectorAll(".cut[data-c]").length} / 文字${d.querySelectorAll(".choices.elim .row .choice").length}`);
 check("何をするかを帯で出す", (d.querySelector(".band.cut .bmain")?.textContent || "")
-  .includes("誤っているものを 3つ 選ぶ"), d.querySelector(".band")?.textContent);
-check("4択とは色で分ける", !!d.querySelector(".band.cut") && !d.querySelector(".band.pick"));
-check("いくつ選んだかが出る", d.getElementById("ecnt").textContent === "0 / 3",
+  .includes("✕ で消す"), d.querySelector(".band")?.textContent);
+check("次にいくつ入るかを見せる",
+  (d.getElementById("ecnt")?.textContent || "").includes("次は＋2"),
   d.getElementById("ecnt")?.textContent);
-check("4択へ降りる道が常にある", !!d.getElementById("tochoice"));
-check("選ぶ前は答えられない", d.getElementById("esubmit").disabled);
+check("点は消す前は増えていない", ev("S.score") === 0, `${ev("S.score")}点`);
 
-// 3つそろうまで答えられない。1手目で終わらないので、取りちがえても取り返せる
 const wrong = [0, 1, 2, 3].filter(i => i !== e1.answer);
-[...d.querySelectorAll(".choices > .choice")][wrong[0]].click();
-check("選んだ選択肢に印がつく",
-  d.querySelectorAll(".choice.x").length === 1, String(d.querySelectorAll(".choice.x").length));
-check("数が増える", d.getElementById("ecnt").textContent === "1 / 3",
-  d.getElementById("ecnt").textContent);
-check("1つでは答えられない", d.getElementById("esubmit").disabled);
-[...d.querySelectorAll(".choices > .choice")][wrong[0]].click();
-check("押し直すと戻せる", d.querySelectorAll(".choice.x").length === 0 &&
-  d.getElementById("ecnt").textContent === "0 / 3");
-check("選んだだけでは決まらない", ev("S.run.picked") === null);
+d.querySelector(`.cut[data-c="${wrong[0]}"]`).click();
+check("1つ消すとその場で点が入る", ev("S.score") === 2, `${ev("S.score")}点`);
+check("消した行は打ち消される", !!d.querySelector(`.row[data-r="${wrong[0]}"].gone`));
+check("入った点をその場で出す", !!d.querySelector(".cutgain"),
+  d.querySelector(".cutgain")?.textContent);
+check("帯が次の点に変わる", (d.getElementById("ecnt")?.textContent || "").includes("次は＋3"),
+  d.getElementById("ecnt")?.textContent);
+check("まだ答えは決まっていない", ev("S.run.picked") === null);
 
-wrong.forEach(i => [...d.querySelectorAll(".choices > .choice")][i].click());
-check("3つそろうと答えられる", !d.getElementById("esubmit").disabled);
-d.getElementById("esubmit").click();
-await wait(60);
-check("誤りを3つ消せば正解になる", ev("S.run.results['" + e1.id + "']") === "ok",
+d.querySelector(`.cut[data-c="${wrong[1]}"]`).click();
+// **1つ目より2つ目のほうが大きい。** リスクに比例させる
+check("2つ目のほうが大きい", ev("S.score") === 5, `${ev("S.score")}点`);
+d.querySelector(`.cut[data-c="${wrong[2]}"]`).click();
+await wait(500);
+check("3つ目はさらに大きい", ev("S.score") >= 10, `${ev("S.score")}点`);
+check("全部消せば正解になる", ev("S.run.results['" + e1.id + "']") === "ok",
   ev("S.run.results['" + e1.id + "']"));
 check("正解でも解説は出る", txt().includes("知識カード"));
 
-// 正解を混ぜて消したら不正解
+// **外しても、そこまでに消せたぶんの点は残る**
 const e2 = JSON.parse(ev(`(() => {
-  S.run.i = 1; S.run.picked = null; S.run.hintsUsed = 0; render();
+  S.run.i = 1; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null; S.score = 0; render();
   const id = S.run.ids[1];
   return JSON.stringify({ id, answer: DB.byId[id].answer });
 })()`));
-const mix = [e2.answer, ...[0, 1, 2, 3].filter(i => i !== e2.answer).slice(0, 2)];
-mix.forEach(i => [...d.querySelectorAll(".choices > .choice")][i].click());
-d.getElementById("esubmit").click();
+const w2 = [0, 1, 2, 3].filter(i => i !== e2.answer);
+d.querySelector(`.cut[data-c="${w2[0]}"]`).click();
+d.querySelector(`.cut[data-c="${w2[1]}"]`).click();
+check("2つ消した時点で5点", ev("S.score") === 5, `${ev("S.score")}点`);
+d.querySelector(`.cut[data-c="${e2.answer}"]`).click();   // 正解を消してしまう
 await wait(60);
-check("正解を消したら外れる", ev("S.run.results['" + e2.id + "']") === "ng",
+check("正解を消すとそこで終わる", ev("S.run.results['" + e2.id + "']") === "ng",
   ev("S.run.results['" + e2.id + "']"));
+check("外しても消せたぶんの点は残る", ev("S.score") === 5, `${ev("S.score")}点`);
 check("外しても解説と知識カードは出る（原則3）",
   txt().includes("面白い単元") && txt().includes("知識カード"));
 
-// 4択へは自分で降りる。システムは勝手に降ろさない
+// 削らずにそのまま答えてもいい。降りるかどうかは常にプレイヤーの手にある
 const e3 = JSON.parse(ev(`(() => {
-  S.run.i = 2; S.run.picked = null; S.run.hintsUsed = 0; render();
-  return JSON.stringify({ id: S.run.ids[2] });
+  S.run.i = 2; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null; S.score = 0; render();
+  const id = S.run.ids[2];
+  return JSON.stringify({ id, answer: DB.byId[id].answer });
 })()`));
-check("降りる前は消去法のまま", !!d.querySelector(".choices.elim"));
-d.getElementById("tochoice").click();
-check("4択に降りられる", !d.querySelector(".choices.elim") && !d.getElementById("tochoice"),
-  txt().slice(0, 80));
-check("降りたのはその問題だけ", ev(`JSON.stringify(S.run.hard)`) === `{"${e3.id}":"choice"}`,
-  ev("JSON.stringify(S.run.hard)"));
-const e3a = ev(`DB.byId["${e3.id}"].answer`);
-[...d.querySelectorAll(".choices > .choice")][e3a].click();
+d.querySelector(`.choice[data-i="${e3.answer}"]`).click();
 await wait(60);
-check("降りた先でもふつうに答えられる", ev("S.run.results['" + e3.id + "']") === "ok");
+check("削らずに答えてもよい", ev("S.run.results['" + e3.id + "']") === "ok",
+  ev("S.run.results['" + e3.id + "']"));
+check("削らなければ上乗せは無い", ev("S.score") === 10, `${ev("S.score")}点`);
+
+// 消した行はもう押せない。途中の状態は次の問題へ持ち越さない
+ev(`S.run.i = 3; S.run.picked = null; S.run.cut = null; render()`);
+check("次の問題は4つとも生きている",
+  d.querySelectorAll(".choices.elim .row.gone").length === 0);
+check("消した行は答えにも使えない", (() => {
+  const a = ev("DB.byId[S.run.ids[3]].answer");
+  const other = [0, 1, 2, 3].find(i => i !== a);
+  d.querySelector(`.cut[data-c="${other}"]`).click();
+  d.querySelector(`.choice[data-i="${other}"]`).click();
+  return ev("S.run.picked") === null;
+})());
+// 借りた状態を返す。ここで得た GUM やカードを残すと、あとの検査がずれる
+ev(`(() => { Object.assign(S, JSON.parse(window.__keep)); delete window.__keep; })()`);
+
 // 報酬は答え方で変えない（原則3-2）
 check("難モードでも4択でも報酬は同じ", ev(`(() => {
   const a = DB.questions.find(q => q.mode === "elimination");
@@ -501,7 +431,7 @@ check("盤面は読みの長さで決まる", pan.size === (pan.reading.length <
 check("マスは盤面のぶんだけ出る",
   d.querySelectorAll(".pcell").length === pan.size * pan.size,
   String(d.querySelectorAll(".pcell").length));
-check("選択肢は出さない", d.querySelectorAll(".choices > .choice").length === 0);
+check("選択肢は出さない", d.querySelectorAll(".choices .choice").length === 0);
 check("文字数の枠は出さない", !/\d\s*文字/.test(txt()), txt().slice(0, 120));
 check("1文字目のマークは出さない", d.querySelectorAll(".pcell.on").length === 0,
   String(d.querySelectorAll(".pcell.on").length));
@@ -648,7 +578,7 @@ const numRun = JSON.parse(ev(`(() => {
   return JSON.stringify({ id: ids[0], want: numericParts(DB.byId[ids[0]]) });
 })()`));
 check("数値入力の問題がある", !!numRun.want, JSON.stringify(numRun));
-check("選択肢は出さない", d.querySelectorAll(".choices > .choice").length === 0);
+check("選択肢は出さない", d.querySelectorAll(".choices .choice").length === 0);
 check("テンキーが出る", d.querySelectorAll(".keypad .key").length === 12,
   String(d.querySelectorAll(".keypad .key").length));
 check("単位は固定表示で、打たせない",
@@ -684,7 +614,7 @@ const n2 = ev(`(() => { S.run.i = 1; S.run.picked = null; S.run.hintsUsed = 0; r
 check("2問目も難モードから始まる", !!d.getElementById("nsubmit"));
 d.getElementById("tochoice").click();
 check("数値入力からも4択に降りられる",
-  d.querySelectorAll(".choices > .choice").length === 4 && !d.getElementById("nsubmit"));
+  d.querySelectorAll(".choices .choice").length === 4 && !d.getElementById("nsubmit"));
 check("降りたのはその問題だけ", ev(`JSON.stringify(S.run.hard)`) === `{"${n2}":"choice"}`,
   ev("JSON.stringify(S.run.hard)"));
 
@@ -1031,7 +961,7 @@ check("解説を省いても注釈は出る", (() => {
   })()`);
   const mode = ev(`modeOf(DB.byId["joho-022"])`);
   if (mode !== "choice") ev(`S.run.hard["joho-022"]="choice";render()`);
-  d.querySelectorAll(".choices > .choice")[ev(`DB.byId["joho-022"].answer`)].click();
+  d.querySelectorAll(".choices .choice")[ev(`DB.byId["joho-022"].answer`)].click();
   const shown = !!d.querySelector(".qnote") && txt().includes("JIS Z 8301");
   ev("S.settings.showExplanationOnCorrect = true");
   return shown;

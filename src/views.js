@@ -14,7 +14,8 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          CHALLENGE_QUESTIONS } from "./engine.js";
 import { matches } from "./normalize.js";
 import { assetPath, RANK_ORDER } from "./data.js";
-import { answerText, hintGroup, hintsFor, numericParts, sameNumber } from "./answer-mode.js";
+import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
+         CUT_SCORE, cutScore } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX } from "./state.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
@@ -456,7 +457,7 @@ function startRun(opts = {}) {
             right: 0, wrong: 0, appliedRight: 0,
             shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
-            narrow: null, intro: !!opts.intro };
+            cut: null, intro: !!opts.intro };
   go("quiz");
 }
 
@@ -545,17 +546,16 @@ function vQuiz() {
         <p class="fine">狭く答えるほど高い点になります。紀元前はマイナスで書いてください（例 −221）。</p>
       </div>`
     : `${modeBand(q, mode)}
-      <div class="choices${mode === "elimination" ? " elim" : mode === "narrow" ? " narrow" : ""}"
-        >${q.choices.map((t, i) =>
-      `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
+      <div class="choices${mode === "elimination" ? " elim" : ""}">${q.choices.map((t, i) =>
+      mode === "elimination"
+        ? `<div class="row${(S.run.cut || []).includes(i) ? " gone" : ""}" data-r="${i}">
+             <button class="cut" data-c="${i}" aria-label="これを消す">✕</button>
+             <button class="choice" data-i="${i}">${esc(t)}</button></div>`
+        : `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
       ${mode === "elimination" ? `
-        <button class="btn" id="esubmit" disabled>選んだ${q.choices.length - 1}つを消す</button>
-        <div class="elimbar">
-          <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}
-      ${mode === "narrow" ? `
-        <button class="btn" id="wsubmit" disabled>この2つを消す</button>
-        <div class="elimbar">
-          <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
+        <p class="fine">消せるところまで消してから答えても、すぐ答えてもかまいません。
+          <b>消すほど点は増えますが、まちがえて消すとそこで終わります。</b>
+          外しても、消せたぶんの点は残ります。</p>` : ""}`}
     <div class="hero-row">
       <img class="ava" src="${assetPath.hero(h.id)}" alt="">
       <div><div class="hero-name">${esc(h.name)}</div>
@@ -567,10 +567,9 @@ function vQuiz() {
 
   document.getElementById("hint").onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
   if (mode === "elimination") wireElimination(q);
-  else if (mode === "narrow") wireNarrow(q);
   else if (mode === "panel") wirePanel(q);
   else if (mode === "numeric") wireNumeric(q);
-  else app.querySelectorAll(".choices > .choice").forEach(b =>
+  else app.querySelectorAll(".choices .choice").forEach(b =>
     b.onclick = () => onPick(Number(b.dataset.i)));
   if (mode !== "numeric" && mode !== "panel" && q.format === "range") wireRange(q);
   drawHints(q, h);
@@ -641,7 +640,7 @@ function onRange(q) {
  * プレイヤーが4択へ降りたら `S.run.hard[id]` に "choice" が入り、
  * その問題のあいだだけ選択肢の側に固定される（決定2・不可逆は1問かぎり）。
  */
-const READY_MODES = new Set(["elimination", "narrow", "numeric", "panel", "range", "choice"]);
+const READY_MODES = new Set(["elimination", "numeric", "panel", "range", "choice"]);
 
 function modeOf(q) {
   const dropped = S.run.hard?.[q.id];
@@ -999,16 +998,11 @@ function drawRetry(q, head) {
  */
 function modeBand(q, mode) {
   if (mode === "elimination") {
-    const n = q.choices.length - 1;
-    return `<div class="band cut"><span class="bmain">誤っているものを ${n}つ 選ぶ</span>
-      <span class="bcnt" id="ecnt">0 / ${n}</span></div>`;
-  }
-  if (mode === "narrow") {
-    const cut = q.choices.length - 2;
-    return S.run.narrow
-      ? `<div class="band pick"><span class="bmain">残った2つから 1つ 選ぶ</span></div>`
-      : `<div class="band cut"><span class="bmain">ちがうものを ${cut}つ 選んで消す</span>
-         <span class="bcnt" id="wcnt">0 / ${cut}</span></div>`;
+    const done = (S.run.cut || []).length;
+    const got = cutScore(done), next = CUT_SCORE[done];
+    return `<div class="band cut"><span class="bmain">✕ で消す ・ 文字を押すと答える</span>
+      <span class="bcnt" id="ecnt">${got ? `＋${got}点 ` : ""}${
+        next ? `<i>次は＋${next}</i>` : `<i>あと1つ</i>`}</span></div>`;
   }
   if (mode === "choice") {
     return `<div class="band pick"><span class="bmain">正しいものを 1つ 選ぶ</span></div>`;
@@ -1027,94 +1021,69 @@ function modeBand(q, mode) {
  * 4択へ降りるかどうかは常にプレイヤーの手にあり、システムは勝手に降ろさない
  * （原則3・決定2）。降りてもその問題かぎりで、次の問題ではまた難モードから始まる。
  */
+/**
+ * 消去法。**何個まで削るかを、プレイヤーが決める。**
+ *
+ * ✕ を押すと1つ消して、その場で当たり外れが決まる。正しく消せれば点が入り、
+ * **1つ目より2つ目、2つ目より3つ目のほうが大きい。** 確信があるほど深く削れて、
+ * 点が伸びる。まちがえて正解を消したらそこで終わりだが、
+ * **そこまでに消せたぶんの点は残る。** リスクを取った手前までは自分のものになる。
+ *
+ * 削らずにいきなり答えてもいい。**降りるかどうかは常にプレイヤーの手にある**（決定2）。
+ *
+ * 押す意味が入れ替わらないように、**消すのは ✕ ボタン、答えるのは文字のほう**と
+ * 分けてある。同じ場所を押して意味が変わると、取りちがえた人がそこで終わる。
+ *
+ * **増えるのは点だけ。** GUM・クリスタル・知識カードは動かさない（原則3-2）。
+ */
 function wireElimination(q) {
-  const need = q.choices.length - 1;
-  const cnt = document.getElementById("ecnt");
-  const submit = document.getElementById("esubmit");
-  const marked = new Set();
+  const cuts = () => (S.run.cut ||= []);
+  const left = () => q.choices.map((_, i) => i).filter(i => !cuts().includes(i));
 
-  const paint = () => {
-    if (cnt) cnt.textContent = `${marked.size} / ${need}`;
-    if (submit) submit.disabled = marked.size !== need;
-    app.querySelectorAll(".choices > .choice").forEach((b, i) =>
-      b.classList.toggle("x", marked.has(i)));
+  /* 消したことを、その行の上で見せる */
+  const flash = (i, text, ok) => {
+    const row = app.querySelector(`.row[data-r="${i}"]`);
+    if (!row) return;
+    const tag = document.createElement("span");
+    tag.className = "cutgain" + (ok ? "" : " ng");
+    tag.textContent = text;
+    row.appendChild(tag);
+    setTimeout(() => tag.remove(), 1200);
   };
-  app.querySelectorAll(".choices > .choice").forEach(b => {
+
+  app.querySelectorAll(".cut[data-c]").forEach(b => {
+    b.onclick = () => {
+      if (S.run.picked !== null) return;
+      const i = Number(b.dataset.c);
+      if (cuts().includes(i)) return;
+
+      if (i === q.answer) {                 // 正解を消した。ここで終わり
+        flash(i, "✕", false);
+        return onPick(q.answer, false);
+      }
+      const gain = CUT_SCORE[cuts().length] || 0;
+      cuts().push(i);
+      if (!S.run.noReward) S.score += gain;   // その場で入る。外しても取り返されない
+      flash(i, `＋${gain}`, true);
+
+      const row = app.querySelector(`.row[data-r="${i}"]`);
+      if (row) row.classList.add("gone");
+      const band = app.querySelector(".band");
+      if (band) band.outerHTML = modeBand(q, "elimination");
+
+      // 残り1つになったら、それが答え。＋の表示は浮いて出るので、間を置かずに判定する
+      if (left().length === 1) onPick(q.answer, true);
+    };
+  });
+
+  app.querySelectorAll(".choices .choice").forEach(b => {
     b.onclick = () => {
       if (S.run.picked !== null) return;
       const i = Number(b.dataset.i);
-      if (marked.has(i)) marked.delete(i);          // 押し直しで戻せる
-      else if (marked.size < need) marked.add(i);
-      paint();
+      if (cuts().includes(i)) return;       // 消した行はもう押せない
+      onPick(i);
     };
   });
-  if (submit) submit.onclick = () => {
-    if (S.run.picked !== null || marked.size !== need) return;
-    onPick(q.answer, !marked.has(q.answer));        // 正解を消していたら不正解
-  };
-  const down = document.getElementById("tochoice");
-  if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
-  paint();
-}
-
-/**
- * 絞り込み。**4つを2つまで削ってから、残った2つのうち1つを選ぶ。**
- *
- * 消去法との違いは手数と終わり方。消去法は誤りを3つ潰して決定で終わるが、
- * 絞り込みは2つ潰したあと**必ず二択が来る**。迷って決めるところが、
- * いちばん面白いところなので、そこを毎回作る。タップは1回少ない。
- *
- * 選択肢が長い問題をこちらに回している（`answerMode`）。文の形の選択肢を
- * 3つ読んで潰すのは、手数のわりに手ごたえが薄いため。
- *
- * 潰した2つに正解が混ざっていたら、そこで不正解。消去法と同じ線。
- */
-function wireNarrow(q) {
-  const need = q.choices.length - 2;
-  const marked = new Set();
-  const btns = () => [...app.querySelectorAll(".choices > .choice")];
-
-  const paint = () => {
-    const cnt = document.getElementById("wcnt");
-    const submit = document.getElementById("wsubmit");
-    if (cnt) cnt.textContent = `${marked.size} / ${need}`;
-    if (submit) submit.disabled = marked.size !== need;
-    btns().forEach((b, i) => b.classList.toggle("x", marked.has(i)));
-  };
-
-  /* 2つ消したあと。残った2つだけを押せるようにして、帯を差し替える */
-  const toFinal = () => {
-    S.run.narrow = [...marked];
-    const band = app.querySelector(".band");
-    if (band) band.outerHTML = modeBand(q, "narrow");
-    const sub = document.getElementById("wsubmit");
-    if (sub) sub.remove();
-    btns().forEach((b, i) => {
-      b.classList.toggle("gone", marked.has(i));
-      b.disabled = marked.has(i);
-      b.onclick = marked.has(i) ? null : () => onPick(i);
-    });
-  };
-
-  btns().forEach(b => {
-    b.onclick = () => {
-      if (S.run.picked !== null || S.run.narrow) return;
-      const i = Number(b.dataset.i);
-      if (marked.has(i)) marked.delete(i);          // 押し直しで戻せる
-      else if (marked.size < need) marked.add(i);
-      paint();
-    };
-  });
-  const submit = document.getElementById("wsubmit");
-  if (submit) submit.onclick = () => {
-    if (S.run.picked !== null || marked.size !== need) return;
-    if (marked.has(q.answer)) return onPick(q.answer, false);   // 正解を消したら終わり
-    toFinal();
-  };
-  const down = document.getElementById("tochoice");
-  if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
-  if (S.run.narrow) { S.run.narrow.forEach(i => marked.add(i)); toFinal(); }
-  else paint();
 }
 
 function onPick(idx, forcedOk = null) {
@@ -1125,9 +1094,9 @@ function onPick(idx, forcedOk = null) {
   S.run.picked = idx;
   if (!S.run.noReward) S.seen[q.id] = 1;
 
-  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, #esubmit, #wsubmit")
+  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, .cut[data-c]")
     .forEach(b => b.disabled = true);
-  app.querySelectorAll(".choices > .choice").forEach((b, i) => {
+  app.querySelectorAll(".choices .choice").forEach((b, i) => {
     b.disabled = true;
     if (i === idx) markChoice(b, ok);
     else if (i === q.answer && !ok) { b.style.borderColor = "var(--pen)"; b.style.color = "var(--pen)"; }
@@ -1302,7 +1271,7 @@ function drawActions(q, ok) {
 }
 
 function advance() {
-  S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.narrow = null;
+  S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null;
   S.run.tipOpen = false; S.run.applied = null;
   if (S.run.i >= S.run.ids.length) finishRun();
   render(); window.scrollTo(0, 0);
