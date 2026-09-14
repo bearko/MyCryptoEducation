@@ -7,7 +7,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          titleProgress, earnedTitles, countryOf,
          shopList, canBuy, crystalPrice, crystalKinds,
          familyPoints, ANY_FAMILY, drawCrystal, crystalPoints, dropRate, familyExpect,
-         unlockedBy,
+         unlockedBy, questionOpen,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
@@ -45,7 +45,37 @@ export function mount(db, state, root) {
   Object.keys(S.exts).forEach(k => { if (!db.extensions[k]) delete S.exts[k]; });
   Object.entries(S.equip).forEach(([id, k]) => { if (k && !db.extensions[k]) delete S.equip[id]; });
 
+  // **初回はホームを出さず、いきなり小学1年の問題から始める**（決定1）
+  if (!S.introDone && !S.runs) return startIntro();
   render();
+}
+
+/* 初回起動で出す問題数。1セッション丸ごとは長いので、数問で切り上げる */
+const INTRO_LENGTH = 5;
+/* 何問目から難モードを出すか。**説明はしない。**「こっちでもいいのか」と気づかせる */
+const INTRO_PLAIN = 2;
+
+/**
+ * **無説明の初回起動**（`docs/experience-design-framework.md` 決定1）。
+ *
+ * ホームもチュートリアルも出さず、小学1年の問題をいきなり出します。
+ * 1〜2問目は4択だけ。3問目から難モードがすっと現れますが、**説明はしません。**
+ * マリオ1-1がまず「右に進める」を教えるのと同じで、基本形を先に見せてから増やします。
+ *
+ * **「教わらずにできた」という体験から始まることが、教育を題材にしたこのゲームの
+ * テーマそのものです。** ここに説明を足さないでください。
+ */
+function startIntro() {
+  const first = DB.questions.filter(q => q.grade === "e1" && questionOpen(S, q));
+  // **教科を順ぐりに取る。** 小1にあるのは国語と算数だけなので、
+  // 先頭から詰めると片方に寄る
+  const pools = SUBJECTS.map(sub => first.filter(q => q.subject === sub)).filter(a => a.length);
+  const ids = [];
+  for (let k = 0; ids.length < INTRO_LENGTH && pools.some(p => p.length > k); k++) {
+    for (const p of pools) { if (p[k] && ids.length < INTRO_LENGTH) ids.push(p[k].id); }
+  }
+  if (!ids.length) { S.introDone = true; return render(); }
+  startRun({ ids, intro: true });
 }
 
 function go(view) { S.view = view; render(); window.scrollTo(0, 0); }
@@ -425,7 +455,8 @@ function startRun(opts = {}) {
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             right: 0, wrong: 0, appliedRight: 0,
             shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
-            gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {} };
+            gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
+            intro: !!opts.intro };
   go("quiz");
 }
 
@@ -437,6 +468,7 @@ function startRun(opts = {}) {
 function finishRun() {
   if (S.run.done) return;
   S.run.done = true;
+  if (S.run.intro) S.introDone = true;   // ここを過ぎて、初めてホームが出る
   if (S.run.noReward) return;
   S.runs++;
   const k = dayKey();
@@ -608,6 +640,8 @@ const READY_MODES = new Set(["elimination", "numeric", "panel", "range", "choice
 function modeOf(q) {
   const dropped = S.run.hard?.[q.id];
   if (dropped) return dropped;
+  // 初回起動の最初の数問は4択だけ。基本形を先に見せる（決定1）
+  if (S.run.intro && S.run.ids.indexOf(q.id) < INTRO_PLAIN) return "choice";
   return READY_MODES.has(q.mode) ? q.mode : "choice";
 }
 

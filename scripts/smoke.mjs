@@ -16,7 +16,78 @@ const check = (name, cond, extra = "") => {
   if (!cond) failed++;
 };
 
+/* 難モードが既定になったので、答えるときは方式に合わせる。
+   消去法なら違うものを潰し、4択ならそのまま押す（experience-design-framework の決定2・決定4） */
+// 判定を写すとズレるので、アプリが使っている modeOf をそのまま呼ぶ
+const modeNow = () => ev(`modeOf(DB.byId[S.run.ids[S.run.i]])`);
+const answerNow = (correct = true) => {
+  const a = ev("DB.byId[S.run.ids[S.run.i]].answer");
+  const n = ev("(DB.byId[S.run.ids[S.run.i]].choices || []).length");
+  const mode = modeNow();
+  if (mode === "panel") {
+    const path = JSON.parse(ev(`JSON.stringify(DB.byId[S.run.ids[S.run.i]].panel.path)`));
+    const order = correct ? path : path.slice(0, 2).reverse();
+    order.forEach(i => d.querySelector(`.pcell[data-i="${i}"]`)?.click());
+    d.getElementById("psubmit").click();
+    return true;
+  }
+  if (mode === "numeric") {
+    const want = ev(`JSON.stringify(numericParts(DB.byId[S.run.ids[S.run.i]]))`);
+    const v = JSON.parse(want).value;
+    const typed = correct ? v : String(Number(v) + 1);
+    [...typed].forEach(c => d.querySelector(`.keypad .key[data-k="${c}"]`)?.click());
+    d.getElementById("nsubmit").click();
+    return true;
+  }
+  const btns = [...d.querySelectorAll(".choices > .choice")];
+  if (!btns.length) return false;
+  if (mode === "elimination") {
+    // 誤っているものを3つ選んでから決める。正解を選んでいたら不正解になる
+    if (!correct) { btns[a].click(); for (let i = 0, k = 1; i < n && k < n - 1; i++)
+      if (i !== a) { btns[i].click(); k++; } }
+    else for (let i = 0; i < n; i++) if (i !== a) btns[i].click();
+    d.getElementById("esubmit").click();
+  } else {
+    btns[correct ? a : (a + 1) % n].click();
+  }
+  return true;
+};
+
 await wait(200);
+
+/* ---- 決定1: 無説明の初回起動 ---- */
+// ホームもチュートリアルも出さず、いきなり小学1年の問題から始まる
+check("初回はホームを出さない", !d.getElementById("toquiz") && ev('S.view === "quiz"'),
+  txt().slice(0, 60));
+check("いきなり小学1年の問題", ev('DB.byId[S.run.ids[0]].grade') === "e1",
+  ev('DB.byId[S.run.ids[0]].gradeLabel'));
+check("説明もチュートリアルも出さない",
+  !/チュートリアル|はじめに|遊び方|使い方/.test(txt()), txt().slice(0, 80));
+check("1問目は4択だけ", modeNow() === "choice", modeNow());
+check("数問で切り上げる", ev("S.run.ids.length") === 5, `${ev("S.run.ids.length")}問`);
+// 1〜2問目は4択。3問目から難モードがすっと現れる（説明はしない）
+answerNow(); d.getElementById("next")?.click();
+check("2問目も4択", modeNow() === "choice", modeNow());
+answerNow(); d.getElementById("next")?.click();
+check("3問目から難モードが現れる", ev(`(() => {
+  const q = DB.byId[S.run.ids[S.run.i]];
+  // その問題に難モードが割り当たっていれば、もう4択には固定されない
+  return modeOf(q) === q.mode || q.mode === "choice";
+})()`) === true, modeNow());
+check("それでも4択へは降りられる",
+  modeNow() === "choice" || !!d.getElementById("tochoice"), modeNow());
+while (ev('S.view === "quiz"')) {
+  if (!answerNow()) break;
+  const n = d.getElementById("next");
+  if (n) n.click(); else await wait(900);
+}
+check("解き終わると初めてホームへ行ける", ev("S.introDone") === true && ev("S.runs") === 1,
+  `introDone=${ev("S.introDone")} runs=${ev("S.runs")}`);
+check("2回目の起動はホームから", (() => {
+  ev('S.view="home";render()');
+  return !!d.getElementById("toquiz");
+})(), txt().slice(0, 60));
+
 check("起動", !!d.getElementById("toquiz"), txt().slice(0, 60));
 
 /* ---- UI基盤: 1画面完結レイアウト ---- */
@@ -183,42 +254,6 @@ for (let i = 0; i < 20; i++) {
 }
 check("20セッション連続で重複ゼロ", dup === 0, `${dup}件`);
 
-/* 難モードが既定になったので、答えるときは方式に合わせる。
-   消去法なら違うものを潰し、4択ならそのまま押す（experience-design-framework の決定2・決定4） */
-// 判定を写すとズレるので、アプリが使っている modeOf をそのまま呼ぶ
-const modeNow = () => ev(`modeOf(DB.byId[S.run.ids[S.run.i]])`);
-const answerNow = (correct = true) => {
-  const a = ev("DB.byId[S.run.ids[S.run.i]].answer");
-  const n = ev("(DB.byId[S.run.ids[S.run.i]].choices || []).length");
-  const mode = modeNow();
-  if (mode === "panel") {
-    const path = JSON.parse(ev(`JSON.stringify(DB.byId[S.run.ids[S.run.i]].panel.path)`));
-    const order = correct ? path : path.slice(0, 2).reverse();
-    order.forEach(i => d.querySelector(`.pcell[data-i="${i}"]`)?.click());
-    d.getElementById("psubmit").click();
-    return true;
-  }
-  if (mode === "numeric") {
-    const want = ev(`JSON.stringify(numericParts(DB.byId[S.run.ids[S.run.i]]))`);
-    const v = JSON.parse(want).value;
-    const typed = correct ? v : String(Number(v) + 1);
-    [...typed].forEach(c => d.querySelector(`.keypad .key[data-k="${c}"]`)?.click());
-    d.getElementById("nsubmit").click();
-    return true;
-  }
-  const btns = [...d.querySelectorAll(".choices > .choice")];
-  if (!btns.length) return false;
-  if (mode === "elimination") {
-    // 誤っているものを3つ選んでから決める。正解を選んでいたら不正解になる
-    if (!correct) { btns[a].click(); for (let i = 0, k = 1; i < n && k < n - 1; i++)
-      if (i !== a) { btns[i].click(); k++; } }
-    else for (let i = 0; i < n; i++) if (i !== a) btns[i].click();
-    d.getElementById("esubmit").click();
-  } else {
-    btns[correct ? a : (a + 1) % n].click();
-  }
-  return true;
-};
 
 /* ---- 修正2: 解説スキップ ---- */
 // レンジ回答が混ざるようになったので、この節は4択だけで組む
@@ -914,7 +949,9 @@ check("カードを失えばまた閉じる", ev("inventory(DB, S).length")
 /* ---- カレンダー ---- */
 ev('S.view="home";render()');
 check("カレンダーは押せる", !!d.getElementById("tocal"));
-check("1セッションで回数は1だけ増える", ev("S.runs") === 1, `runs=${ev("S.runs")}`);
+// 初回起動の5問も1セッションとして数える（報酬もふつうに入るため）
+check("1セッションで回数は1だけ増える", ev("S.runs") === 2,
+  `runs=${ev("S.runs")}（初回起動 + 通しで1回）`);
 check("その日の記録が残る", ev("Object.keys(S.days).length") === 1,
   ev("JSON.stringify(Object.keys(S.days))"));
 check("記録にGUMも残る", ev("S.days[dayKey()].gum") > 0, `${ev("S.days[dayKey()].gum")} GUM`);
@@ -973,7 +1010,8 @@ check("再挑戦では知識カードが増えない", now.cards === had.cards, 
 check("再挑戦は回数に入らない", now.runs === had.runs, `${had.runs} -> ${now.runs}`);
 check("再挑戦では点が入らない", now.score === had.score, `${had.score} -> ${now.score}`);
 check("再挑戦ではGUMも増えない", now.gum === had.gum, `${had.gum} -> ${now.gum}`);
-check("再挑戦は記録を書き換えない", ev("S.days[dayKey()].runs") === 1,
+// 初回起動の5問も同じ日の記録に入るので、この日のセッションは2
+check("再挑戦は記録を書き換えない", ev("S.days[dayKey()].runs") === 2,
   `runs=${ev("S.days[dayKey()].runs")}`);
 
 /* ---- マイページと称号 ---- */
