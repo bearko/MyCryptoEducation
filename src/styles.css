@@ -623,6 +623,11 @@
 
   /* 消去法の選択肢。破線にして、選んだものに×をつける */
   .choices.elim .choice{border-style:dashed;background:#FCFAF8}
+  /* 絞り込み。2つ消したあと、残った2つだけが押せる */
+  .choices.narrow .choice{border-style:dashed;background:#FCFAF8}
+  .choice.gone{opacity:.3;border-style:solid;text-decoration:line-through;
+    text-decoration-color:var(--pen)}
+  .choices.narrow .choice:not(.gone):not(.x){border-style:solid}
   .choice.x{opacity:.6;color:var(--ink-faint);border-style:solid;border-color:var(--pen);
     text-decoration:line-through;text-decoration-color:var(--pen);text-decoration-thickness:2px}
   .choice.x::after{content:"×";position:absolute;right:12px;top:50%;transform:translateY(-50%);

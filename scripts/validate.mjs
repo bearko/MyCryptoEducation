@@ -555,14 +555,17 @@ console.table(table);
 console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ ${RUN_LENGTH}問未満 ${thinCells}` +
   `　（「−」はカリキュラムに無い組み合わせ）`);
 
-/* 難モードの内訳。reading を足すほど消去法から文字パネルへ移る */
+/* 難モードの内訳。reading を足すほど消去法から文字パネルへ、
+   選択肢が長いものは絞り込みへ回る */
 const MODE_LABEL = { elimination: "消去法", numeric: "数値入力", range: "レンジ",
-                     panel: "文字パネル", multi: "複数選択", choice: "4択" };
+                     panel: "文字パネル", multi: "複数選択", choice: "4択",
+                     narrow: "絞り込み" };
 const modeTally = {};
 questions.forEach(q => { const m = answerMode(q); modeTally[m] = (modeTally[m] || 0) + 1; });
 const JA_ANSWER = /^[ぁ-んァ-ヶ一-龥ー]{2,12}$/;
 const panelReady = questions.filter(q =>
-  answerMode(q) === "elimination" && JA_ANSWER.test(answerText(q).trim())).length;
+  (answerMode(q) === "elimination" || answerMode(q) === "narrow") &&
+  JA_ANSWER.test(answerText(q).trim())).length;
 console.log("難モードの内訳 ・ " +
   Object.entries(modeTally).sort((a, b) => b[1] - a[1])
     .map(([m, n]) => `${MODE_LABEL[m] || m} ${n}`).join(" / ") +
