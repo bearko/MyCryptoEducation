@@ -10,9 +10,26 @@
    pointerenter が飛ばない。キャプチャを放し、座標から指の下のマスを引いて直した。   */
 
 import { chromium } from "playwright";
-/* 環境によって Chromium の置き場所が違う。CHROMIUM_PATH があればそれを使う */
-const b = await chromium.launch(process.env.CHROMIUM_PATH
-  ? { executablePath: process.env.CHROMIUM_PATH } : {});
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
+/* 環境によって Chromium の置き場所が違う。CHROMIUM_PATH があればそれを使う。
+   **無ければ PLAYWRIGHT_BROWSERS_PATH の下を自分で探します。** playwright を
+   上げると期待する版番号（chromium-1243 など）が動くのに、置いてある実体は
+   古いままのことがあり、そのたびに「browsers を入れ直せ」と言われて止まります。
+   実体はあるので、見つけて渡せば動きます                                        */
+const findChromium = () => {
+  if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
+  const root = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!root || !existsSync(root)) return null;
+  for (const d of readdirSync(root).filter(x => x.startsWith("chromium-")).sort().reverse()) {
+    const exe = join(root, d, "chrome-linux", "chrome");
+    if (existsSync(exe)) return exe;
+  }
+  return null;
+};
+const exe = findChromium();
+const b = await chromium.launch(exe ? { executablePath: exe } : {});
 const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 const p = await ctx.newPage();
 const ok = [];

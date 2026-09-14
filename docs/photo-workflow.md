@@ -40,13 +40,20 @@ webp を警告します。
 node scripts/fetch-commons.mjs --list obj-pan
 ```
 
-取り込まずに候補を20件並べます。`○` が `data/images.json` の `allow` にあるライセンス、
-`×` はそうでないもの。
+取り込まずに候補を20件並べます。印は3つあります。
+
+| 印 | 意味 |
+|---|---|
+| `◎` | PD・CC0。**題名を伏せられる**ので、スワイプと絵の選択肢はここからだけ選びます |
+| `○` | 使えるが、題名の表示が要るもの（CC BY）。解説の写真なら構いません |
+| `×` | `allow` に無いライセンス（CC BY-SA・NC・ND） |
 
 ```
-  obj-pan  filetype:bitmap white bread loaf
-   ○  1. Public domain      288x188   File:Sliced bread bag2.jpg
-   ×  2. CC BY-SA 2.0      2048x1536  File:Sliced banana bread.jpg
+  obj-pan  filetype:bitmap bread loaf
+   ◎  1. Public domain      288x188   File:Sliced bread bag2.jpg
+   ○  2. CC BY 2.0         1024x768   File:No-Knead Bread - Finished Loaf.jpg
+   ×  3. CC BY-SA 2.0      2048x1536  File:Sliced banana bread.jpg
+      ※ この行は題名を伏せる用（titleFree）です。◎ からだけ選んでください
 ```
 
 **日用品はこれを必ず通してください。** 検索して1件目を採る作りは、人物では効きますが
@@ -137,10 +144,9 @@ git reset --hard origin/main
 - 使えるライセンスは **PD・CC0・CC BY** だけ（`data/images.json` の `allow`）。
   **CC BY-SA・NC・ND は使いません**
 - **写真はクレジットとセットでしか出しません。** 作者・ライセンス・出典を必ず表示します
-- **スワイプの写真は PD・CC0 に限ります。** この2つだけ、出題中に題名を伏せられます
-  （題名が被写体の名前そのものなので、出すと答えになります）
-- **絵の選択肢（`choiceArt`）は、題名の要るライセンスにだけ題名を付けます。**
-  CC BY 1.0〜3.0 が条件、4.0 で外れました
+- **スワイプと絵の選択肢（`choiceArt`）の写真は PD・CC0 に限ります。** この2つだけ、
+  出題中に題名を伏せられます（題名が被写体の名前そのものなので、出すと答えになります）。
+  台帳のその行に `"titleFree": true` と書いておくと、**取り込みのほうが CC BY を採りません**
 - **`alt` は問題ごとに書きます。** 台帳の `alt` は被写体を名指ししているので、
   そのまま出すと答えになります
 - CI では走らせません（相手先のサーバに負荷をかけないため）。1件ごとに1.2秒待ちます
