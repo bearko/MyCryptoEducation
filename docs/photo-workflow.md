@@ -8,18 +8,27 @@ Wikimedia に出られないため）。毎回の手順をここに置いてお�
 ## 毎回やること
 
 ```powershell
+# ① 先に手元を GitHub にそろえる（取り込みの前に、ここまで済ませておく）
 git fetch origin
-git reset --hard origin/main          # 手元を GitHub にそろえる
+git reset --hard origin/main
+
+# ② 取り込む
 node scripts/fetch-commons.mjs        # file が空の行だけを取りに行く
-npm run validate                      # 通ることを確かめる
+
+# ③ 確かめて送る
+npm run validate
 git add -A
 git commit -m "◯◯の写真を取り込む"
 git push
 ```
 
-**`git reset --hard` は手元の変更を元に戻せない形で捨てます。** 取り込んだ webp と
-`data/images.json` は**まだコミットしていないと消えます**。走らせるのは、
-取り込みの前だけにしてください。
+**①と②の順番を入れかえないでください。**
+
+`git reset --hard` は**追跡されていないファイルを消しません。** 取り込んだあとに
+走らせると、`data/images.json` に書き戻された欄だけが元に戻り、**webp だけが
+残ります。**作者もライセンスも分からない画像になるので、その写真は使えません
+（実際に `obj-pan` でこれが起きました）。`npm run validate` が、台帳に載っていない
+webp を警告します。
 
 ---
 
