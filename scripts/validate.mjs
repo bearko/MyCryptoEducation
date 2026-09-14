@@ -65,10 +65,16 @@ for (const q of questions) {
   const id = q.id || `(id未設定 in ${q._file})`;
 
   const format = q.format || "choice";
-  if (!["choice", "range"].includes(format)) err(id, `未知の出題形式 "${format}"`);
+  if (!["choice", "range", "swipe"].includes(format)) err(id, `未知の出題形式 "${format}"`);
 
   const common = ["id","chapter","grade","gradeLabel","subject","unit","prompt","hints","lesson","tip","card"];
-  const needed = format === "range" ? [...common, "year"] : [...common, "choices", "answer"];
+  /* **スワイプにヒントと Tips は要りません。** 途中で何も挟まないのがこの形式の芯で、
+     出す場所が無いものを必須にすると、書けない欄を埋めるためだけの文が増えます */
+  const needed = format === "range" ? [...common, "year"]
+    : format === "swipe"
+      ? ["id","chapter","grade","gradeLabel","subject","unit","prompt","lesson","card",
+         "choices","answer","image","alt"]
+      : [...common, "choices", "answer"];
   for (const k of needed) {
     if (q[k] === undefined || q[k] === null || q[k] === "") err(id, `必須項目 ${k} がありません`);
   }
@@ -104,7 +110,7 @@ for (const q of questions) {
     if (h.only !== undefined && !HINT_GROUPS.includes(h.only))
       err(id, `ヒントの only は "choice" か "hidden" です（いま ${JSON.stringify(h.only)}）`);
   }
-  for (const g of HINT_GROUPS) {
+  if (format !== "swipe") for (const g of HINT_GROUPS) {
     const n = hintsFor(q.hints || [], g).length;
     if (n < HINT_MIN)
       err(id, `${g} で使えるヒントが ${n}本しかありません（${HINT_MIN}本必要）`);
@@ -159,7 +165,8 @@ for (const q of questions) {
     }
   }
 
-  if (!Array.isArray(q.hints) || q.hints.length < 3) err(id, "ヒントは3つ以上必要です");
+  if (format !== "swipe" && (!Array.isArray(q.hints) || q.hints.length < 3))
+    err(id, "ヒントは3つ以上必要です");
   else if (format === "range") {
     // 第3ヒントが年をそのまま書いていないか
     if (hints[2]?.text && hints[2].text.includes(String(q.year)))
@@ -218,6 +225,70 @@ for (const q of questions) {
   if (cardOwner.has(q.card) && cardOwner.get(q.card) !== q.id)
     warn(`${id}: 知識カード「${q.card}」が ${cardOwner.get(q.card)} と重複しています`);
   else cardOwner.set(q.card, q.id);
+}
+
+/* ---- スワイプ（2択・テンポ優先）---- */
+/**
+ * **スワイプは、写真1枚と2択だけで成り立たせます。**
+ *
+ * 途中に解説もヒントも挟まないので、画面に出るのは「問い・写真・左右の答え」だけ。
+ * そこに入り込む抜け道を3つ塞ぎます。
+ *
+ * 1. **題名から答えが割れないか。** コモンズの題名は被写体の名前そのものです
+ *    （"Dmitri Mendeleev 1890s"）。PD と CC0 は表示義務が無いので出題中は題名を
+ *    伏せられますが、CC BY は作者・ライセンス・出典に加えて題名も出すのが条件なので
+ *    伏せられません。**CC BY を使うなら、題名を見ても答えにならない問いにしてください**
+ * 2. **alt から答えが割れないか。** 台帳の alt は被写体を名指ししているので、
+ *    スワイプでは問題ごとに書き直した alt を使います
+ * 3. **左右の偏り。** いつも同じ側が正解だと、読まずに払えてしまいます
+ */
+{
+  const swipes = questions.filter(q => (q.format || "choice") === "swipe");
+  const titleFree = p => /^(public domain|pdm|cc0)/i.test(p?.license || "");
+
+  for (const q of swipes) {
+    const id = q.id;
+    if (Array.isArray(q.choices) && q.choices.length !== 2)
+      err(id, `スワイプは2択にしてください（いま ${q.choices.length}つ）`);
+    for (const k of ["hints", "tip", "applied", "reading", "accept", "hardMode", "imageAt", "figure", "needs"]) {
+      if (q[k] !== undefined && q[k] !== null)
+        err(id, `スワイプに ${k} は置けません（途中で何も挟まない形式です）`);
+    }
+    const p = imageBook.images?.[q.image];
+    if (p && !titleFree(p))
+      warn(`${id}: 写真「${q.image}」は ${p.license} なので、出題中も題名「${p.title}」が出ます。` +
+           `題名から答えが割れないか確かめてください`);
+    // alt が答えをそのまま言っていないか。写真の説明で答えを配ってしまうと 2択が消える
+    const alt = squash(q.alt || "");
+    (q.choices || []).forEach((c, i) => {
+      const t = squash(c);
+      if (t.length >= 2 && alt.includes(t))
+        err(id, `alt が選択肢「${c}」をそのまま含んでいます: ${q.alt}`);
+    });
+    if (String(q.prompt || "").length > 30)
+      warn(`${id}: スワイプの問いが ${q.prompt.length}文字あります。短いほうがテンポに乗ります`);
+  }
+
+  // 左右の偏り
+  if (swipes.length >= 10) {
+    const d = [0, 0];
+    swipes.forEach(q => { if (q.answer === 0 || q.answer === 1) d[q.answer]++; });
+    const top = Math.max(...d);
+    if (top / swipes.length > 0.7)
+      err("スワイプ", `正解が ${(top / swipes.length * 100).toFixed(0)}% 同じ側に寄っています（左 ${d[0]} / 右 ${d[1]}）`);
+  }
+
+  /* **最初から遊べるか。** 第3章（世界）は英雄の解放で開くので、
+     開いていない状態でも1セッションぶん（10問）そろっているかを見る */
+  const openNow = swipes.filter(q => q.chapter <= 1).length;
+  if (swipes.length && openNow < RUN_LENGTH)
+    warn(`スワイプの在庫が、解放前の範囲では ${openNow}問しかありません（1セッション ${RUN_LENGTH}問）`);
+  if (swipes.length) {
+    const bySub = {};
+    swipes.forEach(q => { bySub[q.subject] = (bySub[q.subject] || 0) + 1; });
+    console.log(`\nスワイプ ・ 全${swipes.length}問（解放前 ${openNow}問） ・ ` +
+      Object.entries(bySub).map(([k, v]) => `${k} ${v}`).join(" / "));
+  }
 }
 
 /* ---- 写真の台帳 ---- */
@@ -507,14 +578,17 @@ for (const c of crystals.crystals || []) {
 }
 
 /* ---- 在庫（同じ問題が繰り返し出る原因になる） ---- */
-const stock = (band, subject) => questions.filter(q =>
+/* **スワイプはふつうのセッションに出てこないので、マス目の数には入れません。**
+   入れると、表の数字と実際に出題される数がずれます（engine.inventory が分けています）*/
+const normal = questions.filter(q => (q.format || "choice") !== "swipe");
+const stock = (band, subject) => normal.filter(q =>
   (band === "auto" || BANDS[band].includes(q.grade)) &&
   (subject === "auto" || q.subject === subject)).length;
 
 const GRADE_LABEL = { e1: "小1", e2: "小2", e3: "小3", e4: "小4", e5: "小5", e6: "小6",
                       j1: "中1", j2: "中2", j3: "中3", w: "世界" };
 const cell = {};
-questions.forEach(q => { cell[q.subject + "|" + q.grade] = (cell[q.subject + "|" + q.grade] || 0) + 1; });
+normal.forEach(q => { cell[q.subject + "|" + q.grade] = (cell[q.subject + "|" + q.grade] || 0) + 1; });
 
 /* 教科 × 学年のマス目。「−」はカリキュラムに存在しない組み合わせ */
 const table = [];
@@ -549,7 +623,7 @@ for (const s of SUBJECTS) {
 }
 
 /* ---- 出力 ---- */
-console.log(`\n問題 ${questions.length}問 / 英雄 ${heroes.length}体 / エクステンション ${curated.length}種（${
+console.log(`\n問題 ${questions.length}問（うちスワイプ ${questions.length - normal.length}問） / 英雄 ${heroes.length}体 / エクステンション ${curated.length}種（${
   RANKS.map(r => `${r}${byRank[r].length}`).join("・")}） / クリスタル ${(crystals.crystals || []).length}種\n`);
 console.table(table);
 console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ ${RUN_LENGTH}問未満 ${thinCells}` +
@@ -557,7 +631,7 @@ console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ ${RUN_LENGTH
 
 /* 難モードの内訳。reading を足すほど消去法から文字パネルへ移る */
 const MODE_LABEL = { elimination: "消去法", numeric: "数値入力", range: "レンジ",
-                     panel: "文字パネル", multi: "複数選択", choice: "4択" };
+                     panel: "文字パネル", multi: "複数選択", choice: "4択", swipe: "スワイプ" };
 const modeTally = {};
 questions.forEach(q => { const m = answerMode(q); modeTally[m] = (modeTally[m] || 0) + 1; });
 const JA_ANSWER = /^[ぁ-んァ-ヶ一-龥ー]{2,12}$/;

@@ -87,10 +87,11 @@ function render() {
   app.classList.toggle("home", home);
   document.body.classList.toggle("home", home);
 
-  ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
+  ({ home: vHome, select: vSelect, quiz: vQuiz, swipe: vSwipe, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
      calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop, map: vMap }[S.view])();
   drawToast();
+  if (S.view !== "swipe") unbindSwipe();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
 }
@@ -398,6 +399,8 @@ function vSelect() {
   const n = inventory(DB, S, S.select.band, S.select.subject).length;
   const worldLocked = !unlockedChapters(DB, S).has(3);
   const short = n > 0 && n < RUN_LENGTH;
+  // スワイプは在庫が別。混ぜるとテンポの設計が成り立たないので、入口も分ける
+  const sw = inventory(DB, S, S.select.band, S.select.subject, "swipe").length;
 
   app.innerHTML = `
   <header><div class="hbar"><div class="place">出題を選ぶ</div>
@@ -438,6 +441,21 @@ function vSelect() {
 
     <div class="stack"><button class="btn" id="start" ${n ? "" : "disabled"}>
       ${n ? `${Math.min(n, RUN_LENGTH)}問を始める` : "問題がありません"}</button></div>
+
+    <div class="panel swp-entry">
+      <div class="phead"><h2>スワイプで解く</h2></div>
+      <p class="fine">写真を見て、<b>正しいと思うほうへカードをはらう</b>2択です。
+        ${Math.min(sw, RUN_LENGTH)}問ぜんぶ同じ形で、<b>途中に解説もヒントも挟みません。</b>
+        解説はセッションの終わりにまとめて出ます（外した問題は開いた状態で並びます）。
+        もらえる GUM も知識カードもクリスタルも、ふつうに解いたときと同じです。</p>
+      ${sw === 0
+        ? `<p class="fine lock">この範囲にはスワイプの問題がまだありません。</p>`
+        : sw < RUN_LENGTH
+          ? `<p class="fine lock">この範囲のスワイプは現在 ${sw}問です。${sw}問だけ出題します。</p>`
+          : ""}
+      <div class="stack"><button class="btn ghost" id="startswipe" ${sw ? "" : "disabled"}>
+        ${sw ? `スワイプで ${Math.min(sw, RUN_LENGTH)}問` : "スワイプの問題がありません"}</button></div>
+    </div>
   </div>`;
 
   document.getElementById("back").onclick = () => go("home");
@@ -449,16 +467,19 @@ function vSelect() {
     S.settings.showExplanationOnCorrect = e.target.checked; render();
   };
   document.getElementById("start").onclick = () => startRun();
+  const sws = document.getElementById("startswipe");
+  if (sws) sws.onclick = () => startRun({ swipe: true });
 }
 
 function startRun(opts = {}) {
-  const ids = opts.ids || buildRun(DB, S);
+  const swipe = !!opts.swipe;
+  const ids = opts.ids || buildRun(DB, S, swipe ? { kind: "swipe" } : {});
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             right: 0, wrong: 0, appliedRight: 0,
             shortage: opts.ids ? 0 : Math.max(0, RUN_LENGTH - ids.length),
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
-            cut: null, intro: !!opts.intro };
-  go("quiz");
+            cut: null, intro: !!opts.intro, swipe };
+  go(swipe ? "swipe" : "quiz");
 }
 
 /**
@@ -483,9 +504,7 @@ function finishRun() {
  * クレジットを省くと条件を満たさない。台帳に欄が欠けていたら何も出さない。
  * どこに出すかは問題データの imageAt（prompt / hint / lesson）で決める。
  */
-function photoHTML(key, cls = "") {
-  const p = DB.photos?.[key];
-  if (!p || !p.file || !p.license) return "";
+function creditLine(p, withTitle = true) {
   const by = p.author ? `${esc(p.author)} ・ ` : "";
   const lic = p.licenseUrl
     ? `<a href="${esc(p.licenseUrl)}" target="_blank" rel="noopener noreferrer">${esc(p.license)}</a>`
@@ -493,10 +512,16 @@ function photoHTML(key, cls = "") {
   const src = p.source
     ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>`
     : "Wikimedia Commons";
+  return `${withTitle && p.title ? esc(p.title) + " ・ " : ""}${by}${lic} ・ ${src}`;
+}
+
+function photoHTML(key, cls = "") {
+  const p = DB.photos?.[key];
+  if (!p || !p.file || !p.license) return "";
   return `<figure class="photo ${cls}">
     <img src="${assetPath.photo(p.file)}" alt="${esc(p.alt || "")}" loading="lazy"
       ${p.width ? `width="${p.width}" height="${p.height}"` : ""}>
-    <figcaption>${esc(p.title || "")} ・ ${by}${lic} ・ ${src}</figcaption></figure>`;
+    <figcaption>${creditLine(p)}</figcaption></figure>`;
 }
 
 /* その問題の画像を、置き場所ごとに取り出す */
@@ -1267,8 +1292,193 @@ function drawActions(q, ok) {
 function advance() {
   S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null;
   S.run.tipOpen = false; S.run.applied = null;
-  if (S.run.i >= S.run.ids.length) finishRun();
+  if (S.run.i >= S.run.ids.length) { finishRun(); S.view = "result"; }
   render(); window.scrollTo(0, 0);
+}
+
+/* ---------- スワイプ（2択・テンポ優先） ---------- */
+
+/**
+ * **カードを、正しいと思うほうへはらう。**
+ *
+ * 中央に写真、上に短い問い、左右に2つの答え。10問ぜんぶがこの形で、
+ * **途中に解説もヒントも挟みません。**○✕ だけをその場で出して、すぐ次へ行きます。
+ * ここだけ他の方式と混ぜないのは、混ぜた時点でテンポの設計が成り立たないからです
+ * （在庫の段階で分けてあります・`engine.isSwipe`）。
+ *
+ * **解説を捨てたわけではありません。** 原則3（不正解でも解説は必ず出す）は、
+ * セッションの終わりの「ふりかえり」で守ります。外した問題は開いた状態で並びます。
+ *
+ * **はらう・押す・矢印キー、どれでも同じです。** はらう向きがそのまま答えなので、
+ * 押す意味を取りちがえようがありません（だから1手で決まってかまわない画面です）。
+ */
+/* **PD と CC0 は表示義務そのものが無いので、出題中だけ題名を伏せられます。**
+   CC BY は題名も表示の条件なので伏せません。伏せた瞬間に条件を満たさなくなります */
+const titleFree = p => /^(public domain|pdm|cc0)/i.test(p?.license || "");
+
+const SWIPE_THROW = 56;    // これだけ横に動かしたら確定。届かなければ戻る
+const SWIPE_HOLD = 900;    // ○✕ を見せている時間（ミリ秒）
+
+/* 画面をまたいで残る listener は、毎回まとめて外す（文字パネルと同じ手当て）*/
+let swipeBound = null;
+function unbindSwipe() {
+  if (!swipeBound) return;
+  document.removeEventListener("pointermove", swipeBound.move);
+  document.removeEventListener("pointerup", swipeBound.up);
+  document.removeEventListener("pointercancel", swipeBound.up);
+  document.removeEventListener("keydown", swipeBound.key);
+  swipeBound = null;
+}
+
+function vSwipe() {
+  if (S.run.i >= S.run.ids.length) return go("result");
+  const q = currentQ();
+  const p = DB.photos?.[q.image];
+  const place = q.country ? `<b>${esc(q.country)}</b>` : `日本 <b>${esc(q.gradeLabel)}</b>`;
+
+  app.innerHTML = `
+  <header><div class="hbar">
+    <div class="place">${place} ・ ${esc(q.subject)}</div>
+    <div class="score">${S.run.i + 1} / ${S.run.ids.length}</div></div>
+    <div class="track"><i style="width:${Math.round(S.run.i / S.run.ids.length * 100)}%"></i></div></header>
+  <div class="pad swp">
+    <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
+      <span class="unit">${esc(q.unit)}</span></div>
+    <div class="swp-q">${esc(q.prompt)}</div>
+    <div class="swp-picks">
+      <button class="swp-pick l" data-s="0"><i aria-hidden="true">←</i>
+        <span>${esc(q.choices[0])}</span></button>
+      <button class="swp-pick r" data-s="1"><span>${esc(q.choices[1])}</span>
+        <i aria-hidden="true">→</i></button>
+    </div>
+    <div class="swp-stage">
+      <div class="swp-card" id="swpcard" tabindex="0"
+        role="group" aria-label="${esc(q.prompt)}">
+        ${p && p.file ? `<img src="${assetPath.photo(p.file)}" alt="${esc(q.alt || "")}"
+          ${p.width ? `width="${p.width}" height="${p.height}"` : ""} draggable="false">` : ""}
+        <div class="swp-seal" id="swpseal" aria-live="polite"></div>
+      </div>
+    </div>
+    <p class="swp-cred" id="swpcred">${p ? creditLine(p, !titleFree(p)) : ""}</p>
+    <p class="fine swp-how">カードを、正しいと思うほうへはらう。左右のボタンや矢印キーでも答えられます。</p>
+  </div>`;
+
+  wireSwipe(q);
+}
+
+function wireSwipe(q) {
+  unbindSwipe();
+  const card = document.getElementById("swpcard");
+  const picks = [...app.querySelectorAll(".swp-pick")];
+  if (!card || picks.length !== 2) return;
+  let pid = null, x0 = 0, dx = 0, dragging = false;
+
+  const lean = d => {
+    const t = Math.max(-1, Math.min(1, d / (SWIPE_THROW * 2)));
+    card.style.transform = `translateX(${d}px) rotate(${(t * 7).toFixed(2)}deg)`;
+    picks[0].classList.toggle("on", d <= -10);
+    picks[1].classList.toggle("on", d >= 10);
+  };
+  const settle = () => {
+    card.style.transform = "";
+    picks.forEach(b => b.classList.remove("on"));
+  };
+
+  const move = e => {
+    if (!dragging || S.view !== "swipe" || e.pointerId !== pid) return;
+    dx = e.clientX - x0;
+    lean(dx);
+  };
+  const up = e => {
+    if (!dragging || S.view !== "swipe") return;
+    if (e.pointerId != null && e.pointerId !== pid) return;
+    dragging = false;
+    card.classList.remove("held");
+    const thrown = dx;
+    dx = 0;
+    if (Math.abs(thrown) >= SWIPE_THROW) onSwipe(q, thrown < 0 ? 0 : 1);
+    else settle();
+  };
+  const key = e => {
+    if (S.view !== "swipe") return;
+    if (e.key === "ArrowLeft") { e.preventDefault(); onSwipe(q, 0); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); onSwipe(q, 1); }
+  };
+
+  card.onpointerdown = e => {
+    if (S.run.picked !== null) return;
+    /* タッチでは pointerdown した要素にポインタが暗黙にキャプチャされる。
+       放しておかないと、指がカードの外へ出た瞬間に追えなくなる（文字パネルと同じ）*/
+    if (card.hasPointerCapture?.(e.pointerId)) card.releasePointerCapture(e.pointerId);
+    dragging = true; pid = e.pointerId; x0 = e.clientX; dx = 0;
+    card.classList.add("held");
+  };
+  picks.forEach(b => b.onclick = () => onSwipe(q, Number(b.dataset.s)));
+
+  swipeBound = { move, up, key };
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", up);
+  document.addEventListener("pointercancel", up);
+  document.addEventListener("keydown", key);
+}
+
+/**
+ * はらった先で答える。**○✕ だけをその場で見せて、すぐ次へ行きます。**
+ *
+ * 報酬は他の方式とまったく同じです（原則3-2）。GUM も知識カードもクリスタルの抽選も、
+ * 4択で答えたときと1つも変わりません。**出す情報だけを削っています。**
+ */
+function onSwipe(q, side) {
+  if (S.run.picked !== null) return;
+  S.run.picked = side;
+  if (!S.run.noReward) S.seen[q.id] = 1;
+  const ok = side === q.answer;
+  grantAnswer(q, ok);
+
+  const card = document.getElementById("swpcard");
+  const seal = document.getElementById("swpseal");
+  const picks = [...app.querySelectorAll(".swp-pick")];
+  picks.forEach((b, i) => {
+    b.disabled = true;
+    b.classList.toggle("on", i === side);
+    b.classList.toggle("miss", i === side && !ok);
+    b.classList.toggle("right", i === q.answer && !ok);
+  });
+  if (seal) { seal.textContent = ok ? "○" : "✕"; seal.className = "swp-seal " + (ok ? "ok" : "ng"); }
+  if (card) {
+    card.classList.add("thrown");
+    card.style.transform = `translateX(${side ? 42 : -42}%) rotate(${side ? 9 : -9}deg)`;
+  }
+  // 題名まで含めたクレジットは、答えたあとに出す。ここが「誰だったのか」の答え合わせになる
+  const cred = document.getElementById("swpcred");
+  const p = DB.photos?.[q.image];
+  if (cred && p) cred.innerHTML = creditLine(p, true);
+
+  setTimeout(() => { if (S.view === "swipe") { unbindSwipe(); advance(); } }, SWIPE_HOLD);
+}
+
+/**
+ * セッションの終わりの「ふりかえり」。**原則3はここで守ります。**
+ * 外した問題は開いた状態で並べます（解説スキップ設定に関わらず出します）。
+ */
+function swipeReview() {
+  const rows = S.run.ids.map((id, n) => {
+    const q = DB.byId[id];
+    if (!q) return "";
+    const ok = S.run.results[id] === "ok";
+    return `<details class="rv ${ok ? "ok" : "ng"}"${ok ? "" : " open"}>
+      <summary><span class="rvmark">${ok ? "○" : "✕"}</span>
+        <b>${n + 1}</b><span class="rvq">${esc(q.prompt)}</span>
+        <i>${esc(q.choices?.[q.answer] ?? "")}</i></summary>
+      <div class="rvbody"><p>${esc(q.lesson)}</p>
+        ${q.note ? `<p class="qnote">${esc(q.note)}</p>` : ""}
+        ${photoHTML(q.image, "rvpic")}
+        <div class="gain"><span class="seal">✓</span>
+          <span>知識カード ・ <em>${esc(q.card)}</em></span></div></div></details>`;
+  }).join("");
+  return `<div class="panel"><div class="phead"><h2>${S.run.ids.length}問のふりかえり</h2></div>
+    <p class="fine">テンポを切らさないために、解説はここへまとめました。
+      <b>外した問題は開いてあります。</b></p>${rows}</div>`;
 }
 
 /* ---------- リザルト ---------- */
@@ -1291,6 +1501,7 @@ function vResult() {
       <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
       ${S.run.noReward ? "" : `<div><b>${S.run.gum}</b><span>GUM</span></div>`}</div>
     ${S.run.shortage ? `<p class="cue">この範囲は在庫が ${S.run.ids.length}問だったので、${S.run.ids.length}問で終わりました。</p>` : ""}
+    ${S.run.swipe ? swipeReview() : ""}
     ${S.run.noReward ? `<p class="cue">記録からの再挑戦なので、クリスタルも知識カードも増えていません。</p>`
     : `<div class="panel">
       <div class="phead"><h2>今回出会ったもの</h2></div>
@@ -1310,14 +1521,16 @@ function vResult() {
     ${next ? `<p class="cue">次に挑めるのは ${esc(next.name)}（${next.rarity}）。いまの知識での到達度は ${
       nextGauge.percent}% です。</p>` : ""}
     <div class="stack">
-      <button class="btn" id="again">もう${RUN_LENGTH}問 ・ ${S.select.band === "auto" ? "おまかせ" : "同じ範囲"}</button>
+      <button class="btn" id="again">もう${RUN_LENGTH}問 ・ ${
+        S.run.swipe ? "スワイプ" : S.select.band === "auto" ? "おまかせ" : "同じ範囲"}</button>
       <button class="btn ghost" id="change">範囲を変えて解く</button>
       ${craftable ? `<button class="btn ghost" id="craft">クラフトする</button>` : ""}
       ${next ? `<button class="btn stretch" id="chal">${esc(next.name)}に挑む</button>` : ""}
       <button class="btn ghost" id="home">ホームへ</button></div>
   </div></div>`;
 
-  document.getElementById("again").onclick = startRun;
+  const swipeAgain = !!S.run.swipe;
+  document.getElementById("again").onclick = () => startRun(swipeAgain ? { swipe: true } : {});
   document.getElementById("change").onclick = () => go("select");
   document.getElementById("home").onclick = () => go("home");
   const c = document.getElementById("craft"); if (c) c.onclick = () => go("craft");

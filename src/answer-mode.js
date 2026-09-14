@@ -34,8 +34,18 @@ export function sameNumber(input, expected) {
   return Number.isFinite(a) && Number.isFinite(b) && a === b;
 }
 
+/**
+ * **2択スワイプ。** カードを、正しいと思うほうへはらう。
+ *
+ * ここだけは難モードの梯子に乗りません。降りる先の4択が、そのまま同じ2択に
+ * なってしまうからです（降ろす意味がありません）。テンポのために、
+ * ヒントも解説も途中では出しません（解説はセッションの終わりにまとめて出します）。
+ */
+export const isSwipeFormat = q => (q?.format || "choice") === "swipe";
+
 /** 難モードでどの方式を使うか */
 export function answerMode(q) {
+  if (isSwipeFormat(q)) return "swipe";
   if (q.hardMode) return q.hardMode;
   if (q.format === "range") return "range";          // 既にレンジ回答の問題はそのまま
   if (!Array.isArray(q.choices)) return "elimination";
@@ -62,7 +72,7 @@ export const cutScore = n => CUT_SCORE.slice(0, n).reduce((a, b) => a + b, 0);
 
 /** その方式で選択肢が画面に見えるか */
 export function isChoiceVisible(mode) {
-  return mode === "elimination" || mode === "choice";
+  return mode === "elimination" || mode === "choice" || mode === "swipe";
 }
 
 /** ヒントの表示グループ。"choice" | "hidden" */

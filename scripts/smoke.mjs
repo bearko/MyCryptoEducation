@@ -463,6 +463,173 @@ check("難モードでも4択でも報酬は同じ", ev(`(() => {
   return String(gumFor(a));
 })()`));
 
+/* ---- スワイプ（2択・テンポ優先） ---- */
+/* 中央に写真、上に問い、左右に2つの答え。**10問ぜんぶ同じ形で、途中に何も挟まない。**
+   解説は終わりの「ふりかえり」でまとめて出す（原則3はそこで守る）           */
+check("スワイプの問題がある", ev("DB.questions.filter(q => q.mode === 'swipe').length") >= 10,
+  String(ev("DB.questions.filter(q => q.mode === 'swipe').length")));
+// **ふつうのセッションには1問も混ざらない。** 混ざった時点でテンポの設計が壊れる
+check("スワイプはふつうの在庫に入らない",
+  ev("inventory(DB, S, 'auto', 'auto').filter(q => q.mode === 'swipe').length") === 0);
+check("スワイプの在庫はスワイプ側にだけ出る",
+  ev("inventory(DB, S, 'auto', 'auto', 'swipe').every(q => q.mode === 'swipe')") === true &&
+  ev("inventory(DB, S, 'auto', 'auto', 'swipe').length") >= 10);
+check("ふつうの出題にスワイプは1問も来ない", ev(`(() => {
+  for (let k = 0; k < 20; k++) {
+    if (buildRun(DB, S).some(id => DB.byId[id].mode === "swipe")) return false;
+  }
+  return true;
+})()`) === true);
+
+ev('S.view="select";S.select.band="auto";S.select.subject="auto";render()');
+check("出題を選ぶ画面にスワイプの入口がある", !!d.getElementById("startswipe"),
+  txt().slice(-160));
+check("入口に、解説をまとめて出すと書いてある", txt().includes("まとめて出ます"));
+
+const swKeep = `window.__keep = JSON.stringify({ score: S.score, gum: S.gum, cards: S.cards,
+  points: S.points, crystals: S.crystals, seen: S.seen, cells: S.cells, days: S.days,
+  totalRight: S.totalRight, crossRight: S.crossRight, countries: S.countries, runs: S.runs });`;
+ev(`(() => { ${swKeep} })()`);
+d.getElementById("startswipe").click();
+
+check("押すとスワイプの画面になる", ev('S.view === "swipe"') && !!d.getElementById("swpcard"));
+check("10問ぜんぶがスワイプ",
+  ev("S.run.ids.length") === 10 &&
+  ev("S.run.ids.every(id => DB.byId[id].mode === 'swipe')") === true,
+  `${ev("S.run.ids.length")}問`);
+check("左右に2つだけ並ぶ", d.querySelectorAll(".swp-pick").length === 2,
+  String(d.querySelectorAll(".swp-pick").length));
+check("中央に写真が出る", !!d.querySelector(".swp-card img"));
+// **途中には何も挟まない。** ヒントも英雄の解説も出さない
+check("ヒントは出さない", !d.getElementById("hint") && !d.querySelector(".hints"));
+check("解説の枠も無い", !d.getElementById("verdict"));
+
+/* **写真の alt は、台帳のものではなく問題ごとのもの。**
+   台帳の alt は被写体を名指ししているので、そのまま出すと2択が消える */
+check("alt は問題ごとに書いたもの", (() => {
+  const id = ev("S.run.ids[S.run.i]");
+  const qAlt = ev(`DB.byId["${id}"].alt`);
+  const bookAlt = ev(`(DB.photos[DB.byId["${id}"].image] || {}).alt`);
+  return d.querySelector(".swp-card img").getAttribute("alt") === qAlt && qAlt !== bookAlt;
+})());
+
+/* **クレジットは必ず出す。** ただし PD と CC0 は表示義務が無いので、
+   出題中だけ題名を伏せる（題名が被写体の名前そのものになっている） */
+check("出題中もクレジットは出ている", (() => {
+  const c = d.getElementById("swpcred");
+  const id = ev("S.run.ids[S.run.i]");
+  const lic = ev(`(DB.photos[DB.byId["${id}"].image] || {}).license`);
+  return !!c && c.textContent.includes(lic);
+})(), d.getElementById("swpcred")?.textContent);
+check("PD・CC0 の写真は、出題中だけ題名を伏せる", ev(`(() => {
+  const free = DB.questions.filter(q => q.mode === "swipe" &&
+    /^(public domain|pdm|cc0)/i.test((DB.photos[q.image] || {}).license || ""));
+  return free.length >= 8;
+})()`) === true && (() => {
+  const id = ev("S.run.ids[S.run.i]");
+  const p = JSON.parse(ev(`JSON.stringify(DB.photos[DB.byId["${id}"].image])`));
+  const shown = d.getElementById("swpcred").textContent;
+  return /^(public domain|pdm|cc0)/i.test(p.license)
+    ? !shown.includes(p.title) : shown.includes(p.title);
+})(), d.getElementById("swpcred")?.textContent);
+
+/* 左を押せば左の答え、右を押せば右の答え。**はらう向きがそのまま答えになる** */
+const swQ = JSON.parse(ev(`(() => {
+  const q = DB.byId[S.run.ids[S.run.i]];
+  return JSON.stringify({ id: q.id, answer: q.answer, gum: gumFor(q), card: q.card });
+})()`));
+const gumBefore = ev("S.gum");
+d.querySelector(`.swp-pick[data-s="${swQ.answer}"]`).click();
+check("押した側が答えになる", ev(`S.run.results['${swQ.id}']`) === "ok",
+  ev(`S.run.results['${swQ.id}']`));
+check("○ をその場で出す", d.getElementById("swpseal")?.textContent === "○" &&
+  d.getElementById("swpseal").classList.contains("ok"));
+// **報酬は他の方式とまったく同じ**（原則3-2）。答え方で量を変えない
+check("GUM は学年なりに入る", ev("S.gum") - gumBefore === swQ.gum,
+  `${ev("S.gum") - gumBefore} / 正 ${swQ.gum}`);
+check("知識カードも入る", ev(`!!S.cards[${JSON.stringify(swQ.card)}]`) === true);
+check("解説はその場では出さない", !txt().includes(ev(`DB.byId['${swQ.id}'].lesson`).slice(0, 12)));
+
+check("勝手に次へ進む", await (async () => {
+  await wait(1100);
+  return ev("S.run.i") === 1 && ev('S.view === "swipe"');
+})(), `i=${ev("S.run.i")} / view=${ev("S.view")}`);
+
+// 外したときは ✕。**問題はそこで終わるが、罰は無い**（原則3）
+const swQ2 = JSON.parse(ev(`(() => {
+  const q = DB.byId[S.run.ids[S.run.i]];
+  return JSON.stringify({ id: q.id, answer: q.answer });
+})()`));
+d.querySelector(`.swp-pick[data-s="${1 - swQ2.answer}"]`).click();
+check("外すと ✕ が出る", d.getElementById("swpseal")?.textContent === "✕" &&
+  ev(`S.run.results['${swQ2.id}']`) === "ng");
+check("外しても知識カードは入る（原則3）",
+  ev(`!!S.cards[${JSON.stringify(ev(`DB.byId['${swQ2.id}'].card`))}]`) === true);
+check("外したほうと正解のほうを塗り分ける",
+  d.querySelector(".swp-pick.miss") !== null && d.querySelector(".swp-pick.right") !== null);
+check("答えたあとは題名まで出す", (() => {
+  const p = JSON.parse(ev(`JSON.stringify(DB.photos[DB.byId['${swQ2.id}'].image])`));
+  return !p?.title || d.getElementById("swpcred").textContent.includes(p.title);
+})(), d.getElementById("swpcred")?.textContent);
+await wait(1100);
+
+// 矢印キーでも答えられる（はらう向きと同じ意味）
+const swQ3 = JSON.parse(ev(`(() => {
+  const q = DB.byId[S.run.ids[S.run.i]];
+  return JSON.stringify({ id: q.id, answer: q.answer });
+})()`));
+d.dispatchEvent(new w.KeyboardEvent("keydown",
+  { key: swQ3.answer === 0 ? "ArrowLeft" : "ArrowRight", bubbles: true }));
+check("矢印キーでも答えられる", ev(`S.run.results['${swQ3.id}']`) === "ok",
+  ev(`S.run.results['${swQ3.id}']`));
+await wait(1100);
+
+// 残りを流して、ふりかえりまで行く
+const swWrong = [];
+while (ev('S.view === "swipe"')) {
+  const q = JSON.parse(ev(`(() => {
+    const x = DB.byId[S.run.ids[S.run.i]];
+    return JSON.stringify({ id: x.id, answer: x.answer });
+  })()`));
+  const miss = ev("S.run.i") === 5;          // 1問だけわざと外す
+  if (miss) swWrong.push(q.id);
+  d.querySelector(`.swp-pick[data-s="${miss ? 1 - q.answer : q.answer}"]`).click();
+  await wait(1000);
+}
+check("10問終わるとリザルトへ", ev('S.view === "result"'), ev("S.view"));
+
+/* **原則3はここで守る。** 途中で解説を挟まないぶん、終わりに全問ぶんを出す */
+check("ふりかえりに10問ぜんぶ並ぶ", d.querySelectorAll(".rv").length === 10,
+  String(d.querySelectorAll(".rv").length));
+check("外した問題は開いてある", (() => {
+  const ng = [...d.querySelectorAll(".rv.ng")];
+  return ng.length >= 1 && ng.every(e => e.hasAttribute("open"));
+})(), String(d.querySelectorAll(".rv.ng").length));
+check("正解した問題は畳んである",
+  [...d.querySelectorAll(".rv.ok")].every(e => !e.hasAttribute("open")));
+check("ふりかえりに解説そのものが載る", (() => {
+  const id = ev("S.run.ids[0]");
+  return txt().includes(ev(`DB.byId["${id}"].lesson`).slice(0, 14));
+})());
+check("ふりかえりの写真にはクレジットが付く",
+  d.querySelectorAll(".rv .photo figcaption").length === d.querySelectorAll(".rv .photo").length &&
+  d.querySelectorAll(".rv .photo.rvpic").length >= 1);
+check("もう一度もスワイプで始まる", (() => {
+  const b = d.getElementById("again");
+  if (!b) return false;
+  b.click();
+  const ok = ev('S.view === "swipe"') && ev("S.run.swipe") === true;
+  return ok;
+})(), ev("S.view"));
+
+// 借りた状態を返す
+ev(`(() => { Object.assign(S, JSON.parse(window.__keep)); delete window.__keep;
+  S.run = { ids: [], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+            right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, found: [], cut: null,
+            results: {}, noReward: false, done: false, hard: {} };
+  S.view = "home"; render(); })()`);
+check("スワイプの listener を残さない", ev("swipeBound") === null);
+
 /* ---- 文字パネル（難モード） ---- */
 const pan = JSON.parse(ev(`(() => {
   S.settings.showExplanationOnCorrect = true;
@@ -953,9 +1120,12 @@ check("持ち帰るカードはその英雄の関連カードだけ", ev(`(() =>
 // 解放すると出題範囲が広がる
 ev('S.owned["4007"]=1;S.owned["5016"]=1;S.view="select";S.select.subject="auto";render()');
 const gatedCount = ev("DB.questions.filter(q => q.needs).length");
+/* **スワイプはふつうのセッションの在庫に入りません**（engine.inventory が分ける）。
+   在庫の数を見るときは、スワイプを引いたほうと比べる */
+const normalCount = ev("DB.questions.filter(q => q.format !== 'swipe').length");
 check("章を全部開いても、needs の問題はまだ出てこない",
-  new RegExp(`おまかせ\\s*${ev("DB.questions.length") - gatedCount}`).test(txt()),
-  `全 ${ev("DB.questions.length")}問 / 閉じ ${gatedCount}問 / ${txt().slice(0, 120)}`);
+  new RegExp(`おまかせ\\s*${normalCount - gatedCount}`).test(txt()),
+  `通常 ${normalCount}問 / 閉じ ${gatedCount}問 / ${txt().slice(0, 120)}`);
 
 /* ---- 正解の位置と、別表記・注釈 ---- */
 // 正解がいつも同じ位置にあると、読まずに当てられる
@@ -1039,11 +1209,11 @@ check("カードを手に入れると、その問題が開く", (() => {
   return after === before + gatedCount;
 })(), `閉じ ${gatedCount}問`);
 check("開いたぶんが在庫の数字にも出る",
-  new RegExp(`おまかせ\\s*${ev("DB.questions.length")}`).test(txt()),
+  new RegExp(`おまかせ\\s*${normalCount}`).test(txt()),
   txt().slice(0, 120));
 ev(`S.cards=${keptForNeeds};render()`);
 check("カードを失えばまた閉じる", ev("inventory(DB, S).length")
-  === ev("DB.questions.length") - gatedCount);
+  === normalCount - gatedCount);
 
 /* ---- カレンダー ---- */
 ev('S.view="home";render()');
