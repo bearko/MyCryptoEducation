@@ -217,6 +217,20 @@ for (const q of questions) {
       warn(`${id}: ヒントに写真を置いています。それだけで答えが割れないか確かめてください`);
   }
   if (q.imageAt && !q.image) err(id, "imageAt があるのに image がありません");
+  /* **出題中に題名を伏せる指定。** 応用編が「この人の名前は?」を問うとき、
+     クレジットの題名がそのまま答えになります。伏せられるのは表示義務の無い
+     PD と CC0 だけです（スワイプ・絵の選択肢と同じ線）。 */
+  if (q.hideTitle) {
+    if (!q.image) err(id, "hideTitle があるのに image がありません");
+    else {
+      const p = imageBook.images?.[q.image];
+      if (p && p.license && !titleFree(p))
+        err(id, `hideTitle を付けていますが、写真「${q.image}」は ${p.license} です。` +
+                `題名の表示が条件なので伏せられません（PD・CC0 だけ）`);
+    }
+    if ((q.imageAt || "lesson") === "lesson")
+      warn(`${id}: hideTitle を付けていますが、写真は解説の中なので出題中に出ていません`);
+  }
 
   if (q.applied) {
     const a = q.applied;

@@ -406,6 +406,14 @@
       "width": 640,
       "height": 747
     },
+    "gauss-portrait": {
+      "entity": "カール・フリードリヒ・ガウス",
+      "wikipedia": "カール・フリードリヒ・ガウス",
+      "alt": "年配の男性の肖像画。画中に名前は書かれていない",
+      "titleFree": true,
+      "use": "sansu-105（応用編が名前を問うので、名前の写っていない肖像が要る）",
+      "where": "prompt"
+    },
     "eniac": {
       "search": "ENIAC",
       "insource": "PD-USGov",

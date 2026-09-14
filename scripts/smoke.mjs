@@ -1098,6 +1098,37 @@ check("クレジットに作者とライセンスと出典を出す", (() => {
 check("ライセンスと出典はリンクになる",
   d.querySelectorAll(".photo figcaption a").length === 2,
   String(d.querySelectorAll(".photo figcaption a").length));
+/* **応用編が「この人の名前は?」を問うとき、題名が答えになる。**
+   クレジットの題名は被写体の名前そのもの（"…Carl Friedrich Gauß"）なので、
+   `hideTitle` を付けた問題では出題中だけ伏せる。伏せられるのは PD・CC0 だけ */
+check("hideTitle なら出題中は題名を伏せる", ev(`(() => {
+  const q = DB.byId[window.__photoBackup.q];
+  DB.photos.__t.license = "Public domain"; DB.photos.__t.title = "ヒミツの題名";
+  q.hideTitle = true; S.run.picked = null; render();
+  return !(document.querySelector(".photo figcaption").textContent || "").includes("ヒミツの題名");
+})()`) === true, d.querySelector(".photo figcaption")?.textContent);
+// 作者・ライセンス・出典は伏せない。**外すとライセンス条件を満たさなくなる**
+check("題名を伏せてもクレジットは出す", (() => {
+  const c = d.querySelector(".photo figcaption")?.textContent || "";
+  return c.includes("撮影者") && c.includes("Wikimedia Commons");
+})(), d.querySelector(".photo figcaption")?.textContent);
+// **題名の要る写真は伏せない。** 伏せた瞬間に CC BY の条件を満たさなくなる
+check("題名の要る写真は伏せない", ev(`(() => {
+  DB.photos.__t.license = "CC BY 4.0"; S.run.picked = null; render();
+  return (document.querySelector(".photo figcaption").textContent || "").includes("ヒミツの題名");
+})()`) === true, d.querySelector(".photo figcaption")?.textContent);
+// **解説の中では伏せない。** そこまで来れば答えは済んでいる
+check("解説の中では題名を伏せない", ev(`(() => {
+  const q = DB.byId[window.__photoBackup.q];
+  DB.photos.__t.license = "Public domain"; q.imageAt = "lesson";
+  S.run.picked = null; render();
+  const before = document.querySelectorAll(".photo").length;
+  return before === 0;   // まだ答えていないので解説そのものが出ていない
+})()`) === true);
+ev(`(() => { const q = DB.byId[window.__photoBackup.q];
+  q.imageAt = "prompt"; delete q.hideTitle; DB.photos.__t.license = "CC BY 4.0";
+  delete DB.photos.__t.title; S.run.picked = null; render(); })()`);
+
 // クレジットの欄が欠けた画像は出さない（CC BY の条件を満たせないため）
 ev('DB.photos.__t.author = ""; DB.photos.__t.license = ""; render();');
 check("ライセンス不明の写真は出さない", d.querySelectorAll(".photo").length === 0,

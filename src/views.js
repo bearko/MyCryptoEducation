@@ -542,18 +542,29 @@ function creditLine(p, withTitle = true) {
   return `${withTitle && p.title ? esc(p.title) + " ・ " : ""}${by}${lic} ・ ${src}`;
 }
 
-function photoHTML(key, cls = "") {
+function photoHTML(key, cls = "", hideTitle = false) {
   const p = DB.photos?.[key];
   if (!p || !p.file || !p.license) return "";
   return `<figure class="photo ${cls}">
     <img src="${assetPath.photo(p.file)}" alt="${esc(p.alt || "")}" loading="lazy"
       ${p.width ? `width="${p.width}" height="${p.height}"` : ""}>
-    <figcaption>${creditLine(p)}</figcaption></figure>`;
+    <figcaption>${creditLine(p, !(hideTitle && titleFree(p)))}</figcaption></figure>`;
 }
 
-/* その問題の画像を、置き場所ごとに取り出す */
+/**
+ * その問題の画像を、置き場所ごとに取り出す。
+ *
+ * **問題に `hideTitle: true` があると、出題中は題名を伏せます。**
+ * 応用編が「この人の名前は?」を問うとき、クレジットの題名
+ * （"DBP 1955 204 Carl Friedrich Gauß"）がそのまま答えになるためです。
+ * 伏せられるのは PD と CC0 だけ（表示義務が無いもの）で、`npm run validate` が
+ * それ以外に `hideTitle` を付けたらエラーにします。
+ *
+ * **解説の中では伏せません。** そこまで来れば答えは済んでいますし、
+ * 題名は写真をたどり直すときの手がかりになります。
+ */
 const photoAt = (q, where) => (q.image && (q.imageAt || "lesson") === where)
-  ? photoHTML(q.image, where) : "";
+  ? photoHTML(q.image, where, !!q.hideTitle && where !== "lesson") : "";
 
 /* ---------- クイズ ---------- */
 
