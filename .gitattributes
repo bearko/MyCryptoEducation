@@ -1,0 +1,16 @@
+# 改行コードはリポジトリの中では LF にそろえる。
+#
+# Windows で core.autocrlf が効いていると、チェックアウトのたびに CRLF へ変換され、
+# 中身が同じでも git が「変更あり」と見なすことがある。実際に、`git diff` が
+# 何も出さないのに `git pull` が「local changes would be overwritten」で止まった。
+#
+# scripts/*.mjs が JSON を書き戻すときも LF で書くので、ここでそろえておく。
+* text=auto eol=lf
+
+# 画像は絶対に触らせない。1バイトでも変換されると壊れる
+*.webp binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
