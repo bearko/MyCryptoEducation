@@ -259,7 +259,27 @@ for (const q of questions) {
       continue;
     }
     q.choiceArt.forEach(k => {
-      if (!figures[k]) err(id, `choiceArt の図版 "${k}" が figures.json にありません`);
+      const photo = imageBook.images?.[k];
+      if (photo) {
+        // **写真はクレジットとセットでしか出せません**（原則どおり）
+        if (!photo.file) err(id, `choiceArt の写真 "${k}" はまだ取り込まれていません（node scripts/fetch-commons.mjs）`);
+        else {
+          if (!existsSync(join(ROOT, `public/commons/${photo.file}.webp`)))
+            err(id, `choiceArt の写真の実体がありません: public/commons/${photo.file}.webp`);
+          for (const f of ["author", "license", "source"])
+            if (!photo[f]) err(id, `choiceArt の写真 "${k}" に ${f} がありません（クレジットを出せません）`);
+          if (photo.license && !ALLOWED_LICENSES.includes(String(photo.license).toLowerCase()))
+            err(id, `choiceArt の写真 "${k}" のライセンス "${photo.license}" は使えません`);
+          /* **絵の選択肢は PD と CC0 だけ。** 4枚ぶんの題名まで並べると選択肢より
+             背が高くなるので、クレジットを 作者・ライセンス・出典 に畳んでいます。
+             題名を落とせるのは、表示義務そのものが無いこの2つに限るからです */
+          else if (!/^(public domain|pdm|cc0)/i.test(String(photo.license)))
+            err(id, `choiceArt の写真 "${k}" は ${photo.license} です。` +
+                    `絵の選択肢に使えるのは PD と CC0 だけです（クレジットを畳んでいるため）`);
+        }
+      } else if (!figures[k]) {
+        err(id, `choiceArt の "${k}" が figures.json にも images.json にもありません`);
+      }
     });
     let mode = answerMode(q);
     if (mode === "panel" && !panelLayout(q.reading, q.id)) mode = "elimination";

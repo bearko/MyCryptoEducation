@@ -411,6 +411,29 @@ check("答えると語が出る", (() => {
   return q.c.every(c => t.includes(c)) &&
     d.querySelectorAll(".choices .choice.art .cword").length === q.n;
 })(), txt().slice(0, 160));
+
+/* **イメージ画は写真で出す**（線だけで描くと、たまごが「楕円」に読まれる）。
+   ここは台帳の写真を借りて、写真の経路が通ることだけを見る               */
+check("絵の選択肢に写真も使える", ev(`(() => {
+  const q = DB.byId["${artQ}"];
+  window.__art = JSON.stringify(q.choiceArt);
+  const pd = Object.keys(DB.photos).filter(k => DB.photos[k].file &&
+    /^(public domain|pdm|cc0)/i.test(DB.photos[k].license || ""));
+  q.choiceArt = pd.slice(0, q.choices.length);
+  S.run.picked = null; render();
+  return document.querySelectorAll(".choice.art .cart img").length === q.choices.length;
+})()`) === true);
+// **写真はクレジットとセットでしか出さない。** 作者・ライセンス・出典が要る
+check("写真のクレジットが出る", (() => {
+  const c = d.querySelector(".cartcred");
+  if (!c) return false;
+  const t = c.textContent;
+  return t.includes("Wikimedia Commons") && c.querySelectorAll("a[href]").length >= 1
+    && /Public domain|CC0|PDM/i.test(t);
+})(), d.querySelector(".cartcred")?.textContent?.slice(0, 120));
+ev(`(() => { DB.byId["${artQ}"].choiceArt = JSON.parse(window.__art);
+  delete window.__art; S.run.picked = null; render(); })()`);
+
 // 借りた画面を片づける。ここで残る保留中のタイマーが、あとの検査を動かしてしまう
 await wait(120);
 check("先へ進むタイマーを残さない", ev("S.run.i") === 0, `i=${ev("S.run.i")}`);
