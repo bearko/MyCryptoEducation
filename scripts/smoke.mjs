@@ -402,6 +402,36 @@ check("消した行は答えにも使えない", (() => {
   d.querySelector(`.choice[data-i="${other}"]`).click();
   return ev("S.run.picked") === null;
 })());
+/* **増えるのは点だけ。** 深く削っても GUM・クリスタル・知識カードは動かない（原則3-2）*/
+check("削った数で GUM は変わらない", ev(`(() => {
+  const id = DB.questions.find(q => q.mode === "elimination").id;
+  const q = DB.byId[id];
+  const run = cuts => {
+    S.gum = 0; S.score = 0; S.cards = {}; S.points = {}; S.crystals = {};
+    startRun({ ids: [id] });
+    const wrong = q.choices.map((_, i) => i).filter(i => i !== q.answer);
+    for (let k = 0; k < cuts; k++) {
+      document.querySelector('.cut[data-c="' + wrong[k] + '"]').click();
+    }
+    if (cuts < 3) document.querySelector('.choice[data-i="' + q.answer + '"]').click();
+    return { gum: S.gum, score: S.score, cards: Object.keys(S.cards).length,
+             points: Object.values(S.points).reduce((a, b) => a + b, 0) };
+  };
+  const deep = run(3), none = run(0);
+  window.__cutcmp = JSON.stringify({ deep, none });
+  return deep.gum === none.gum && deep.gum === gumFor(q)
+      && deep.cards === none.cards
+      && deep.score > none.score;          // 点だけが増える
+})()`) === true, ev("window.__cutcmp"));
+check("削った数でクリスタルの入り方も変わらない", ev(`(() => {
+  const c = JSON.parse(window.__cutcmp);
+  delete window.__cutcmp;
+  // 抽選は確率なので個数は揃わない。**確率そのもの**が削った数に依らないことを見る
+  const q = DB.questions.find(x => x.mode === "elimination");
+  const f = DB.subjectToFamily[q.subject];
+  return dropRate(DB, f, gumFor(q)) === dropRate(DB, f, gumFor(q)) && c.deep.gum === c.none.gum;
+})()`) === true);
+
 // 借りた状態を返す。ここで得た GUM やカードを残すと、あとの検査がずれる
 ev(`(() => { Object.assign(S, JSON.parse(window.__keep)); delete window.__keep; })()`);
 
