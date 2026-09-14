@@ -424,28 +424,60 @@
       "insource": "PD-USGov",
       "alt": "雪の残る高い山が、青空を背にそびえている写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-yama",
+      "title": "Kings Canyon-Junction Peak Aah11",
+      "author": "Ansel Adams",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AKings%20Canyon-Junction%20Peak%20Aah11.jpg",
+      "width": 640,
+      "height": 485
     },
     "obj-pan": {
       "search": "sliced bread loaf",
       "alt": "食パンが一斤と、切り分けられた数枚が並んでいる写真",
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson",
-      "insource": "Cc-zero"
+      "insource": "Cc-zero",
+      "file": "obj-pan",
+      "title": "Yudane bread",
+      "author": "Eviatar Bach",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3AYudane%20bread.JPG",
+      "width": 640,
+      "height": 425
     },
     "obj-tamago": {
       "search": "chicken egg white",
       "alt": "白いにわとりの卵が写っている写真",
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson",
-      "insource": "Cc-zero"
+      "insource": "Cc-zero",
+      "file": "obj-tamago",
+      "title": "Mayonnaise",
+      "author": "Miansari66",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3AMayonnaise.JPG",
+      "width": 640,
+      "height": 480
     },
     "obj-inu": {
       "search": "dog sitting portrait",
       "alt": "犬が座って正面を向いている写真",
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson",
-      "insource": "Cc-zero"
+      "insource": "Cc-zero",
+      "file": "obj-inu",
+      "title": "Cairns Cafe",
+      "author": "DogTwo",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3ACairns%20Cafe.jpg",
+      "width": 617,
+      "height": 479
     }
   }
 }
