@@ -848,6 +848,21 @@ check("別表記の文字は盤面にある", ev(`(() => {
   const q = DB.byId["joho-022"];
   return q.accept.every(a => [...a].every(c => [...q.reading].includes(c)));
 })()`) === true);
+check("語尾の長音符がDB全体でそろっている", ev(`(() => {
+  const words = ["コンピュータ","センサ","サーバ","ブラウザ","プリンタ","ルータ",
+    "アクチュエータ","パラメータ","モニタ","ユーザ","フォルダ","ドライバ"];
+  const bare = new RegExp("(" + words.join("|") + ")(?!ー)", "g");
+  // accept と note は短い形をわざと引き合いに出す欄なので外す
+  return DB.questions.every(q => {
+    const { accept, note, ...rest } = q;
+    return !bare.test(JSON.stringify(rest));
+  });
+})()`) === true, "長音符の抜けが残っている");
+check("答えが長音符つきの語は、注釈を持つ", ev(`(() => {
+  const words = ["コンピューター","センサー","サーバー","ブラウザー","プリンター","ルーター"];
+  return DB.questions.filter(q => q.choices && words.some(w => q.choices[q.answer].includes(w)))
+    .every(q => !!q.note);
+})()`) === true);
 check("注釈はJISの改正に触れている",
   /JIS Z 8301/.test(ev(`DB.byId["joho-022"].note`)),
   ev(`DB.byId["joho-022"].note`)?.slice(0, 40));
