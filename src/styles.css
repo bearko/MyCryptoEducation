@@ -187,6 +187,9 @@
   .fnd img{width:26px;height:26px}
   .fnd b{font-weight:600;color:var(--ink)}
   .fnd i{font-style:normal;font-size:11px;color:var(--ink-faint)}
+  .gain.open{color:var(--moss)}
+  .gain.open em{font-weight:600}
+  .mini.ask{display:inline-block;width:auto;margin-left:6px}
   .gain.found img{width:26px;height:26px;flex:none}
   .gain.found{align-items:center}
 

@@ -709,8 +709,24 @@ ev(`(() => {
     .forEach(([c]) => S.cards[c] = true));
   render();
 })()`);
-check("奥伝は、3教科すべてそろえば作れる", !d.querySelector('.mini[data-k="5016"]').disabled,
+/* **奥伝には由来カードも要る。** 素材と教科の広さだけでは届かない */
+check("教科がそろっても、由来を知らなければ作れない",
+  d.querySelector('.mini[data-k="5016"]').disabled,
+  `由来 ${ev('craftCheck(DB, S, "5016").origin.card')}`);
+check("由来はクラフト画面から直接たずねられる",
+  !!d.querySelector('.mini.ask[data-q]'),
+  d.querySelector('.mini.ask')?.dataset.q);
+check("たずねる先は、そのカードを配る問題", ev(`(() => {
+  const o = craftCheck(DB, S, "5016").origin;
+  return DB.byId[o.qid] && DB.byId[o.qid].card === o.card;
+})()`) === true, ev('craftCheck(DB, S, "5016").origin.qid'));
+ev(`S.cards[craftCheck(DB, S, "5016").origin.card] = true; render()`);
+check("由来を知れば、奥伝が作れる", !d.querySelector('.mini[data-k="5016"]').disabled,
   `社会 ${ev('subjectCardCount(DB, S, "社会")')} / 国語 ${ev('subjectCardCount(DB, S, "国語")')} / 外国語 ${ev('subjectCardCount(DB, S, "外国語")')}`);
+check("由来カードは奥伝だけが持つ", ev(`(() => {
+  return Object.values(DB.extensions).every(e =>
+    !!e.originCard === (e.rank === "奥伝"));
+})()`) === true);
 check("奥伝は4種だけ", ev(`Object.values(DB.extensions).filter(e => e.rank === "奥伝").length`) === 4);
 
 // 108種あるので、作れるものが先に並ばないと見つけられない
@@ -802,8 +818,36 @@ check("持ち帰るカードはその英雄の関連カードだけ", ev(`(() =>
 
 // 解放すると出題範囲が広がる
 ev('S.owned["4007"]=1;S.owned["5016"]=1;S.view="select";S.select.subject="auto";render()');
-check("解放で在庫が増える", new RegExp(`おまかせ\\s*${ev("DB.questions.length")}`).test(txt()),
-  `全 ${ev("DB.questions.length")}問 / ${txt().slice(0, 120)}`);
+const gatedCount = ev("DB.questions.filter(q => q.needs).length");
+check("章を全部開いても、needs の問題はまだ出てこない",
+  new RegExp(`おまかせ\\s*${ev("DB.questions.length") - gatedCount}`).test(txt()),
+  `全 ${ev("DB.questions.length")}問 / 閉じ ${gatedCount}問 / ${txt().slice(0, 120)}`);
+
+/* ---- 報酬が開く問い（docs/reward-economy.md §7）---- */
+check("鍵になるカードは needs で閉じていない", ev(`(() => {
+  const keys = new Set(DB.questions.filter(q => q.needs).map(q => q.needs));
+  return [...keys].every(c => {
+    const src = DB.questions.find(q => q.card === c);
+    return src && !src.needs;
+  });
+})()`) === true);
+const keptForNeeds = ev("JSON.stringify(S.cards)");
+check("カードを手に入れると、その問題が開く", (() => {
+  const before = ev("inventory(DB, S).length");
+  ev(`(() => {
+    new Set(DB.questions.filter(q => q.needs).map(q => q.needs))
+      .forEach(c => S.cards[c] = true);
+    render();
+  })()`);
+  const after = ev("inventory(DB, S).length");
+  return after === before + gatedCount;
+})(), `閉じ ${gatedCount}問`);
+check("開いたぶんが在庫の数字にも出る",
+  new RegExp(`おまかせ\\s*${ev("DB.questions.length")}`).test(txt()),
+  txt().slice(0, 120));
+ev(`S.cards=${keptForNeeds};render()`);
+check("カードを失えばまた閉じる", ev("inventory(DB, S).length")
+  === ev("DB.questions.length") - gatedCount);
 
 /* ---- カレンダー ---- */
 ev('S.view="home";render()');

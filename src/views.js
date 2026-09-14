@@ -7,6 +7,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          titleProgress, earnedTitles, countryOf,
          shopList, canBuy, crystalPrice, crystalKinds,
          familyPoints, ANY_FAMILY, drawCrystal, crystalPoints, dropRate, familyExpect,
+         unlockedBy,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
@@ -581,7 +582,7 @@ function onRange(q) {
   const ok = score > 0;
 
   S.run.picked = { lo: Math.min(lo, hi), hi: Math.max(lo, hi), score, width };
-  const { gum, found } = grantAnswer(q, ok, score >= RANGE_BONUS_SCORE ? 1 : 0);
+  const { gum, found, opened } = grantAnswer(q, ok, score >= RANGE_BONUS_SCORE ? 1 : 0);
 
   document.getElementById("ra").disabled = true;
   document.getElementById("rb").disabled = true;
@@ -592,7 +593,7 @@ function onRange(q) {
 
   drawHints(q, h);
   S.run.tipOpen = false; S.run.applied = null;
-  drawVerdict(q, h, ok, gum, score, found);
+  drawVerdict(q, h, ok, gum, score, found, opened);
 }
 
 /**
@@ -686,6 +687,7 @@ function crystalGainHTML(id) {
 
 function grantAnswer(q, ok, bonusRoll = 0) {
   const reward = !S.run.noReward;
+  const isNew = !S.cards[q.card];
   let gum = 0, found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
   if (!reward) S.seen[q.id] = S.seen[q.id];   // 再挑戦では出題履歴も動かさない
@@ -711,7 +713,7 @@ function grantAnswer(q, ok, bonusRoll = 0) {
     if (reward && !S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
   }
   if (reward) S.cards[q.card] = true;
-  return { gum, found };
+  return { gum, found, opened: reward && isNew ? unlockedBy(DB, q.card) : [] };
 }
 
 
@@ -1025,6 +1027,7 @@ function onPick(idx, forcedOk = null) {
   });
 
   const reward = !S.run.noReward;
+  const isNew = !S.cards[q.card];
   let found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
   let gum = 0;
@@ -1046,6 +1049,7 @@ function onPick(idx, forcedOk = null) {
     S.run.wrong++;
     if (reward && !S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
   }
+  const opened = reward && isNew ? unlockedBy(DB, q.card) : [];
   if (reward) S.cards[q.card] = true;
   drawHints(q, h);
 
@@ -1060,10 +1064,10 @@ function onPick(idx, forcedOk = null) {
   }
 
   S.run.tipOpen = false; S.run.applied = null;
-  drawVerdict(q, h, ok, gum, null, found);
+  drawVerdict(q, h, ok, gum, null, found, opened);
 }
 
-function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null) {
+function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null, opened = []) {
   const head = ok
     ? (rangeScore !== null
         ? (rangeScore === 1000 ? "言い切って、当てた。" : "その幅の中にある。")
@@ -1080,6 +1084,9 @@ function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null) {
       ${gum ? `<div class="gain alt"><img src="${assetPath.icon("gum")}" alt="GUM">
         <span>GUM × ${gum} ・ ${esc(q.gradeLabel)}の問題</span></div>` : ""}
       ${found ? crystalGainHTML(found) : ""}
+      ${opened.length ? `<div class="gain open"><span class="seal">＋</span>
+        <span><em>${opened.length}問</em>が開きました ・ ${
+          [...new Set(opened.map(x => x.subject))].map(esc).join("・")}</span></div>` : ""}
       ${rangeScore !== null && rangeScore >= RANGE_BONUS_SCORE ? `<div class="gain">
         <span class="seal">＋</span><span>精度 ${rangeScore}点 ・ 抽選がもう1回</span></div>` : ""}
     </div>
@@ -1265,7 +1272,15 @@ function vCraft() {
           ${c.cards.map(x => `<span class="${x.ok ? "" : "short"}"
             title="${esc(x.subject)}の知識カード">${esc(x.subject)}の札 ${
               x.ok ? `${x.need}枚` : `${x.have}/${x.need}枚`}</span>`).join("")}
+          ${c.origin ? `<span class="${c.origin.ok ? "" : "short"}"
+            title="この品の元になった問いを解くと手に入ります"
+            >由来 ・ ${esc(c.origin.card)}</span>` : ""}
           <button class="mini" data-k="${e.id}" ${c.ok ? "" : "disabled"}>クラフト</button></div>
+        ${c.origin && !c.origin.ok && c.origin.qid ? `
+          <p class="fine">この品の由来をまだ知りません。
+            <button class="mini ask" data-q="${c.origin.qid}">由来をたずねる</button></p>` : ""}
+        ${c.origin && c.origin.ok ? `<p class="fine">由来は確かめてあります。
+          ${unlockedBy(DB, c.origin.card).length}問がここから開きました。</p>` : ""}
         ${e.upgrade ? `<p class="fine">上位に「${esc(e.upgrade.name)}」があります。</p>` : ""}
       </div>`;
     }).join("")}
@@ -1276,6 +1291,10 @@ function vCraft() {
   document.getElementById("back").onclick = () => go(S.runs ? "result" : "home");
   app.querySelectorAll("#ranktab button").forEach(b =>
     b.onclick = () => { S.craftTab = b.dataset.r; render(); });
+  /* 由来の問いには、ここから直接挑める。**運で当たるのを待たせないため。**
+     報酬はふつうに入るので、解けばその場でカードが手に入る */
+  app.querySelectorAll(".mini.ask").forEach(b =>
+    b.onclick = () => startRun({ ids: [b.dataset.q] }));
   app.querySelectorAll(".mini[data-k]").forEach(b => b.onclick = () => {
     const id = b.dataset.k, e = DB.extensions[id];
     const c = craftCheck(DB, S, id);
