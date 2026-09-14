@@ -270,12 +270,15 @@ for (const q of questions) {
             if (!photo[f]) err(id, `choiceArt の写真 "${k}" に ${f} がありません（クレジットを出せません）`);
           if (photo.license && !ALLOWED_LICENSES.includes(String(photo.license).toLowerCase()))
             err(id, `choiceArt の写真 "${k}" のライセンス "${photo.license}" は使えません`);
-          /* **絵の選択肢は PD と CC0 だけ。** 4枚ぶんの題名まで並べると選択肢より
-             背が高くなるので、クレジットを 作者・ライセンス・出典 に畳んでいます。
-             題名を落とせるのは、表示義務そのものが無いこの2つに限るからです */
-          else if (!/^(public domain|pdm|cc0)/i.test(String(photo.license)))
+          /* **絵の選択肢は PD・CC0・CC BY 4.0 だけ。** 4枚ぶんの題名まで並べると
+             選択肢より背が高くなるので、クレジットを 作者・ライセンス・出典 に畳んで
+             います。題名を落とせるのは、PD と CC0 は表示義務そのものが無く、
+             CC BY 4.0 は題名を条件にしていないからです。
+             **CC BY 2.0 と 3.0 は題名の表示が条件なので、ここには使えません。** */
+          else if (!/^(public domain|pdm|cc0|cc by 4\.0)/i.test(String(photo.license)))
             err(id, `choiceArt の写真 "${k}" は ${photo.license} です。` +
-                    `絵の選択肢に使えるのは PD と CC0 だけです（クレジットを畳んでいるため）`);
+                    `絵の選択肢に使えるのは PD・CC0・CC BY 4.0 だけです` +
+                    `（クレジットから題名を畳んでいるため）`);
         }
       } else if (!figures[k]) {
         err(id, `choiceArt の "${k}" が figures.json にも images.json にもありません`);
