@@ -549,7 +549,7 @@ function vQuiz() {
       <div class="choices${mode === "elimination" ? " elim" : ""}">${q.choices.map((t, i) =>
       mode === "elimination"
         ? `<div class="row${(S.run.cut || []).includes(i) ? " gone" : ""}" data-r="${i}">
-             <button class="cut" data-c="${i}" aria-label="これを消す">✕</button>
+             <button class="xcut" data-c="${i}" aria-label="これを消す">✕</button>
              <button class="choice" data-i="${i}">${esc(t)}</button></div>`
         : `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
       ${mode === "elimination" ? `
@@ -1051,7 +1051,7 @@ function wireElimination(q) {
     setTimeout(() => tag.remove(), 1200);
   };
 
-  app.querySelectorAll(".cut[data-c]").forEach(b => {
+  app.querySelectorAll(".xcut[data-c]").forEach(b => {
     b.onclick = () => {
       if (S.run.picked !== null) return;
       const i = Number(b.dataset.c);
@@ -1094,7 +1094,7 @@ function onPick(idx, forcedOk = null) {
   S.run.picked = idx;
   if (!S.run.noReward) S.seen[q.id] = 1;
 
-  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, .cut[data-c]")
+  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, .xcut[data-c]")
     .forEach(b => b.disabled = true);
   app.querySelectorAll(".choices .choice").forEach((b, i) => {
     b.disabled = true;

@@ -43,8 +43,8 @@ const answerNow = (correct = true) => {
   if (!btns.length) return false;
   if (mode === "elimination") {
     // ✕ で消す。正解を消せばその場で不正解、ちがうものを全部消せば正解
-    if (!correct) { d.querySelector(`.cut[data-c="${a}"]`).click(); return true; }
-    for (let i = 0; i < n; i++) if (i !== a) d.querySelector(`.cut[data-c="${i}"]`)?.click();
+    if (!correct) { d.querySelector(`.xcut[data-c="${a}"]`).click(); return true; }
+    for (let i = 0; i < n; i++) if (i !== a) d.querySelector(`.xcut[data-c="${i}"]`)?.click();
     return true;
   }
   btns[correct ? a : (a + 1) % n].click();
@@ -331,9 +331,9 @@ check("消去法の問題がある", e1.n === 4, JSON.stringify(e1));
 check("消去法では選択肢が出る", d.querySelectorAll(".choices.elim .choice").length === 4,
   String(d.querySelectorAll(".choices .choice").length));
 // **消すのと答えるのを、押す場所で分ける。** 同じ場所で意味が変わると取りちがえる
-check("消すボタンと答えるボタンが別", d.querySelectorAll(".cut[data-c]").length === 4 &&
+check("消すボタンと答えるボタンが別", d.querySelectorAll(".xcut[data-c]").length === 4 &&
   d.querySelectorAll(".choices.elim .row .choice").length === 4,
-  `✕${d.querySelectorAll(".cut[data-c]").length} / 文字${d.querySelectorAll(".choices.elim .row .choice").length}`);
+  `✕${d.querySelectorAll(".xcut[data-c]").length} / 文字${d.querySelectorAll(".choices.elim .row .choice").length}`);
 check("何をするかを帯で出す", (d.querySelector(".band.cut .bmain")?.textContent || "")
   .includes("✕ で消す"), d.querySelector(".band")?.textContent);
 check("次にいくつ入るかを見せる",
@@ -342,7 +342,7 @@ check("次にいくつ入るかを見せる",
 check("点は消す前は増えていない", ev("S.score") === 0, `${ev("S.score")}点`);
 
 const wrong = [0, 1, 2, 3].filter(i => i !== e1.answer);
-d.querySelector(`.cut[data-c="${wrong[0]}"]`).click();
+d.querySelector(`.xcut[data-c="${wrong[0]}"]`).click();
 check("1つ消すとその場で点が入る", ev("S.score") === 2, `${ev("S.score")}点`);
 check("消した行は打ち消される", !!d.querySelector(`.row[data-r="${wrong[0]}"].gone`));
 check("入った点をその場で出す", !!d.querySelector(".cutgain"),
@@ -351,10 +351,10 @@ check("帯が次の点に変わる", (d.getElementById("ecnt")?.textContent || "
   d.getElementById("ecnt")?.textContent);
 check("まだ答えは決まっていない", ev("S.run.picked") === null);
 
-d.querySelector(`.cut[data-c="${wrong[1]}"]`).click();
+d.querySelector(`.xcut[data-c="${wrong[1]}"]`).click();
 // **1つ目より2つ目のほうが大きい。** リスクに比例させる
 check("2つ目のほうが大きい", ev("S.score") === 5, `${ev("S.score")}点`);
-d.querySelector(`.cut[data-c="${wrong[2]}"]`).click();
+d.querySelector(`.xcut[data-c="${wrong[2]}"]`).click();
 await wait(500);
 check("3つ目はさらに大きい", ev("S.score") >= 10, `${ev("S.score")}点`);
 check("全部消せば正解になる", ev("S.run.results['" + e1.id + "']") === "ok",
@@ -368,10 +368,10 @@ const e2 = JSON.parse(ev(`(() => {
   return JSON.stringify({ id, answer: DB.byId[id].answer });
 })()`));
 const w2 = [0, 1, 2, 3].filter(i => i !== e2.answer);
-d.querySelector(`.cut[data-c="${w2[0]}"]`).click();
-d.querySelector(`.cut[data-c="${w2[1]}"]`).click();
+d.querySelector(`.xcut[data-c="${w2[0]}"]`).click();
+d.querySelector(`.xcut[data-c="${w2[1]}"]`).click();
 check("2つ消した時点で5点", ev("S.score") === 5, `${ev("S.score")}点`);
-d.querySelector(`.cut[data-c="${e2.answer}"]`).click();   // 正解を消してしまう
+d.querySelector(`.xcut[data-c="${e2.answer}"]`).click();   // 正解を消してしまう
 await wait(60);
 check("正解を消すとそこで終わる", ev("S.run.results['" + e2.id + "']") === "ng",
   ev("S.run.results['" + e2.id + "']"));
@@ -398,7 +398,7 @@ check("次の問題は4つとも生きている",
 check("消した行は答えにも使えない", (() => {
   const a = ev("DB.byId[S.run.ids[3]].answer");
   const other = [0, 1, 2, 3].find(i => i !== a);
-  d.querySelector(`.cut[data-c="${other}"]`).click();
+  d.querySelector(`.xcut[data-c="${other}"]`).click();
   d.querySelector(`.choice[data-i="${other}"]`).click();
   return ev("S.run.picked") === null;
 })());
@@ -411,7 +411,7 @@ check("削った数で GUM は変わらない", ev(`(() => {
     startRun({ ids: [id] });
     const wrong = q.choices.map((_, i) => i).filter(i => i !== q.answer);
     for (let k = 0; k < cuts; k++) {
-      document.querySelector('.cut[data-c="' + wrong[k] + '"]').click();
+      document.querySelector('.xcut[data-c="' + wrong[k] + '"]').click();
     }
     if (cuts < 3) document.querySelector('.choice[data-i="' + q.answer + '"]').click();
     return { gum: S.gum, score: S.score, cards: Object.keys(S.cards).length,
