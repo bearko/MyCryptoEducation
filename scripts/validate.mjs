@@ -455,6 +455,23 @@ for (const q of questions) {
 }
 
 /* ---- 写真の台帳 ---- */
+/* **台帳に載っていない webp が転がっていないか。**
+   `git reset --hard` は追跡されていないファイルを消さないので、取り込んだあとに
+   走らせると「画像だけ残り、作者もライセンスも台帳から消えた」状態になります。
+   クレジットを出せないので、その写真は永久に使えません。 */
+{
+  const known = new Set(Object.values(imageBook.images || {})
+    .filter(p => p.file).map(p => p.file + ".webp"));
+  let orphans = [];
+  try {
+    orphans = (await readdir(join(ROOT, "public/commons")))
+      .filter(f => f.endsWith(".webp") && !known.has(f));
+  } catch { /* ディレクトリが無ければ何もしない */ }
+  if (orphans.length)
+    warn(`台帳に載っていない写真が public/commons にあります（作者もライセンスも` +
+         `分からないので使えません）: ${orphans.join(" / ")}`);
+}
+
 // 使い先を書いたまま配線し忘れると、取り込んだ写真が誰の目にも触れない
 const usedPhotos = new Set(questions.filter(q => q.image).map(q => q.image));
 for (const [key, p] of Object.entries(imageBook.images || {})) {
