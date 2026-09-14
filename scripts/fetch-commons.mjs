@@ -66,6 +66,10 @@ const normalizeLicense = m => {
   return code || "不明";
 };
 const stripTags = s => String(s || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+/* コモンズの題名には、構造化データの多言語ラベルが続けて入っていることがある
+   （`Portrait of William Shakespeare title QS:P1476,en:"..."label QS:Lja,"..."` のように
+   700字を超える）。そのまま台帳に入れるとクレジット行が壊れるので、QS: の手前で切る */
+const cleanTitle = s => stripTags(s).replace(/\s*(?:title|label)\s+QS:.*$/s, "").trim();
 /* コモンズの Artist 欄は、テンプレートの都合で同じ語が二度続くことがある
    （"Unknown authorUnknown author"）。繰り返しを1回に畳む */
 const dedupe = s => {
@@ -139,7 +143,7 @@ for (const [key, entry] of wanted) {
     const m = hit.info.extmetadata || {};
     Object.assign(entry, {
       file,
-      title: stripTags(m.ObjectName?.value) || hit.page.title.replace(/^File:/, ""),
+      title: cleanTitle(m.ObjectName?.value) || hit.page.title.replace(/^File:/, ""),
       author: dedupe(m.Artist?.value) || "作者不明",
       license: hit.license,
       licenseUrl: m.LicenseUrl?.value || "",

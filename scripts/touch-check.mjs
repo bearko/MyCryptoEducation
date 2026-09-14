@@ -243,10 +243,26 @@ await p.waitForTimeout(120);
 ok.push(["逆へはらえば ✕ になる",
   await p.evaluate(`document.getElementById("swpseal")?.textContent === "✕"`)]);
 
+/* **はらったカードは、わざと画面の外へ飛ばしています**（`.swp-stage` が
+   `overflow:hidden` で切る）。要素の矩形だけを見ると、この演出まで
+   「はみ出し」と数えてしまう。見るべきは**ページが横に動くかどうか**のほう。
+   前はたまたま最初のスワイプ問題の正解が右側で、カードが左へ飛んでいたので通っていた */
+const swScroll = async label => {
+  const r = await p.evaluate(`({
+    scrollable: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    w: document.documentElement.scrollWidth + "/" + document.documentElement.clientWidth,
+  })`);
+  ok.push([`スワイプの画面は横に動かない（${label}）`, !r.scrollable, r.w]);
+};
+await swScroll("はらったあと");
+// 出題中の画面に戻して、切り取られていない要素のはみ出しも見る
+await swipeSetup();
+await swScroll("出題中");
 const swOver = await p.evaluate(`(() => {
   const w = document.documentElement.clientWidth;
   return [...document.querySelectorAll("#app *")]
     .filter(e => e.getBoundingClientRect().right > w + 1)
+    .filter(e => !e.closest(".swp-stage"))   // 演出で飛ばす場所は除く
     .slice(0, 3).map(e => e.className || e.tagName);
 })()`);
 ok.push(["スワイプの画面も横にはみ出さない", swOver.length === 0, swOver.join(" / ")]);
