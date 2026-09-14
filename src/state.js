@@ -12,7 +12,8 @@ export function capName(name) {
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
 const PERSISTED = ["settings", "profile", "gum", "points", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score", "days",
-                   "totalRight", "crossRight", "countries", "crystals", "introDone"];
+                   "totalRight", "crossRight", "countries", "crystals", "introDone",
+                   "modeLevel"];
 
 function defaults() {
   return {
@@ -36,6 +37,9 @@ function defaults() {
     cells: {},
     seen: {},
     runs: 0,
+    /* 出題形式ごとの段（Lv.1〜Lv.3）。**上がるだけで下がらない**（engine.levelUps）。
+       学年が「どの教育課程か」で、段は同じ学年の中での踏みこみ方 */
+    modeLevel: {},
     // 無説明の初回起動（決定1）を終えたか。終えるまでホームは出さない
     introDone: false,
     score: 0,

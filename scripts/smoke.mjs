@@ -365,6 +365,104 @@ check("スワイプは束としてだけ出る", runs.every(r => {
   return n === 0 || n === ev(`blockSize("swipe")`);
 }), JSON.stringify(runs.map(r => r.modes.filter(m => m === "swipe").length)));
 
+/* ---- 形式ごとの段（Lv.1〜Lv.3）---- */
+/* **学年は「どの教育課程か」、段は「同じ学年の中でどれだけ踏みこむか」。**
+   段は形式ごとに別で持ち、**上がるだけで下がらない**（原則3と揃える）      */
+check("段の既定は Lv.1", ev(`modeLevel(S, "elimination")`) === 1 &&
+  ev(`modeLevel(S, "panel")`) === 1, ev("JSON.stringify(S.modeLevel)"));
+check("問題は段を持っている",
+  ev("DB.questions.every(q => q.level >= 1 && q.level <= MAX_LEVEL)") === true);
+
+/* **その段の問題が先に来る。** ただし白いマスの優先は崩さない
+   （崩すと、段が上がった人は知識マップを埋められなくなる）                  */
+check("段を上げると、出る問題がその段に寄る", ev(`(() => {
+  const keep = JSON.stringify({ lv: S.modeLevel, seen: S.seen, cells: S.cells, owned: S.owned });
+  DB.heroes.forEach(h => S.owned[h.id] = 1);
+  // 白いマスの優先が先なので、マスはすべて埋まった状態にしてから見る
+  DB.questions.forEach(q => { S.cells[q.subject + "|" + q.grade] = "ok"; });
+  const avg = lv => {
+    S.modeLevel = { elimination: lv };
+    let sum = 0, n = 0;
+    for (let k = 0; k < 40; k++) {
+      const pool = inventory(DB, S, "auto", "auto").filter(q => q.mode === "elimination");
+      const ids = planRun(DB, S, { subject: "auto" }).ids
+        .filter(id => DB.byId[id].mode === "elimination");
+      ids.forEach(id => { sum += DB.byId[id].level; n++; });
+      if (!pool.length) break;
+    }
+    return n ? sum / n : 0;
+  };
+  const lo = avg(1), hi = avg(3);
+  Object.assign(S, { modeLevel: JSON.parse(keep).lv, seen: JSON.parse(keep).seen,
+                     cells: JSON.parse(keep).cells, owned: JSON.parse(keep).owned });
+  window.__lvavg = lo.toFixed(2) + " → " + hi.toFixed(2);
+  return hi > lo + 0.4;
+})()`) === true, ev("window.__lvavg"));
+
+/* 上がり方。**その束で4分の3以上とれた回に1つだけ。** 足りなければ上がらない */
+check("4分の3とれたら一段あがる", ev(`(() => {
+  const st = { modeLevel: {} };
+  const run = { plan: [{ mode: "panel", n: 4 }], ids: ["a", "b", "c", "d"],
+                results: { a: "ok", b: "ok", c: "ok", d: "ng" } };
+  const up = levelUps(st, run);
+  return up.length === 1 && up[0].mode === "panel" && up[0].from === 1 && up[0].to === 2;
+})()`) === true);
+check("足りなければ上がらない", ev(`(() => {
+  const st = { modeLevel: {} };
+  const run = { plan: [{ mode: "panel", n: 4 }], ids: ["a", "b", "c", "d"],
+                results: { a: "ok", b: "ok", c: "ng", d: "ng" } };
+  return levelUps(st, run).length === 0;
+})()`) === true);
+check("Lv.3 で止まる", ev(`(() => {
+  const st = { modeLevel: { panel: MAX_LEVEL } };
+  const run = { plan: [{ mode: "panel", n: 3 }], ids: ["a", "b", "c"],
+                results: { a: "ok", b: "ok", c: "ok" } };
+  return levelUps(st, run).length === 0;
+})()`) === true);
+// **下がる道は持たせない。** 外した回が「降格」として画面に出ることになる（原則3）
+check("下がる道はどこにもない", ev(`(() => {
+  const st = { modeLevel: { panel: 3 } };
+  const run = { plan: [{ mode: "panel", n: 4 }], ids: ["a", "b", "c", "d"],
+                results: { a: "ng", b: "ng", c: "ng", d: "ng" } };
+  return levelUps(st, run).every(u => u.to > u.from) && levelUps(st, run).length === 0;
+})()`) === true);
+check("束が短すぎる回では上がらない", ev(`(() => {
+  const st = { modeLevel: {} };
+  const run = { plan: [{ mode: "panel", n: 2 }], ids: ["a", "b"],
+                results: { a: "ok", b: "ok" } };
+  return levelUps(st, run).length === 0;
+})()`) === true);
+check("記録からの再挑戦では動かない", ev(`(() => {
+  const st = { modeLevel: {} };
+  const run = { noReward: true, plan: [{ mode: "panel", n: 3 }], ids: ["a", "b", "c"],
+                results: { a: "ok", b: "ok", c: "ok" } };
+  return levelUps(st, run).length === 0;
+})()`) === true);
+/* **段は報酬を変えない**（原則3-2）。GUM は学年だけで決まる */
+check("段で報酬は変わらない", ev(`(() => {
+  const a = DB.questions.filter(q => q.grade === "j1" && q.level === 1);
+  const b = DB.questions.filter(q => q.grade === "j1" && q.level === 3);
+  return a.length && b.length && gumFor(a[0]) === gumFor(b[0]);
+})()`) === true);
+/* jsdom の localStorage は about:blank だと触れないので、置きかえて確かめる */
+check("段は保存される（次に開いたときも残る）", ev(`(() => {
+  const keep = JSON.stringify(S.modeLevel);
+  const box = {};
+  const real = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: {
+    getItem: k => (k in box ? box[k] : null),
+    setItem: (k, v) => { box[k] = String(v); },
+    removeItem: k => { delete box[k]; },
+  }});
+  S.modeLevel = { panel: 2 };
+  const wrote = saveState(S);
+  const raw = JSON.parse(box["sekai-no-kyoushitsu/v1"] || "{}");
+  if (real) Object.defineProperty(globalThis, "localStorage", real);
+  else delete globalThis.localStorage;
+  S.modeLevel = JSON.parse(keep);
+  return wrote && raw.modeLevel && raw.modeLevel.panel === 2;
+})()`) === true);
+
 /* ---- 消去法（難モード）・何個まで削るかを選ぶ ---- */
 // ✕ で1つずつ消す。消すほど点が増え、まちがえて消すとそこで終わる。
 // **外しても、消せたぶんの点は残る**

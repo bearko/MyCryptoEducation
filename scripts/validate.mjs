@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 /* 回答方式の判定はここに集約する。アプリと2箇所に分けると必ずズレる */
 import { answerMode, hintGroup, hintsFor, normalizeHints, answerText, numericParts }
   from "../src/answer-mode.js";
-import { panelLayout } from "../src/engine.js";
+import { panelLayout, MAX_LEVEL, levelOf, blockSize } from "../src/engine.js";
 /* 釣り合いはアプリと同じ式から導く。2箇所に分けると必ずズレる */
 import { buildExtensions } from "../src/data.js";
 
@@ -18,6 +18,10 @@ const RUN_LENGTH = 10;
 const SUBJECTS = ["国語", "算数・数学", "理科", "社会", "外国語", "情報"];
 const GRADES = ["e1","e2","e3","e4","e5","e6","j1","j2","j3","w"];
 const BANDS = { e: ["e1","e2","e3","e4","e5","e6"], j: ["j1","j2","j3"], w: ["w"] };
+
+/* 画面と同じ形式名。出力にだけ使う */
+const MODE_LABEL_V = { elimination: "消去法", numeric: "数値入力", range: "レンジ",
+                       panel: "文字パネル", multi: "複数選択", choice: "4択", swipe: "スワイプ" };
 
 /* 写真に使えるライセンス。CC BY-SA は改変物に波及するので入れない */
 const ALLOWED_LICENSES = [];
@@ -225,6 +229,67 @@ for (const q of questions) {
   if (cardOwner.has(q.card) && cardOwner.get(q.card) !== q.id)
     warn(`${id}: 知識カード「${q.card}」が ${cardOwner.get(q.card)} と重複しています`);
   else cardOwner.set(q.card, q.id);
+}
+
+/* ---- 形式ごとの段（Lv.1〜Lv.3）---- */
+/**
+ * **学年は「どの教育課程の問題か」、段は「同じ学年の中でどれだけ踏みこむか」。**
+ * 別の軸なので、どちらか一方だけでは難易度の梯子になりません。
+ *
+ * 目安：
+ *   Lv.1 … 用語と定義が1対1。基本の計算。教科書の見出しに出る語をそのまま問う
+ *   Lv.2 … 似たものを見分ける。条件がひとつ付く。公式を当てはめる
+ *   Lv.3 … 複数の知識を結ぶ。理由・例外・境界を問う。逆向きに問う
+ *
+ * 出題は**形式ごとの束**で組むので、在庫は 形式 × 段 で見ます。
+ * ここが空だと、その段に上がった人の束が組めません。
+ */
+{
+  for (const q of questions) {
+    if (q.level === undefined) continue;
+    if (!Number.isInteger(q.level) || q.level < 1 || q.level > MAX_LEVEL)
+      err(q.id, `level は 1〜${MAX_LEVEL} の整数にしてください（いま ${JSON.stringify(q.level)}）`);
+  }
+
+  const grid = {};
+  questions.forEach(q => {
+    const m = answerMode(q);
+    (grid[m] ??= {})[levelOf(q)] = (grid[m][levelOf(q)] || 0) + 1;
+  });
+  const rows = [];
+  for (const [m, d] of Object.entries(grid)) {
+    const row = { 形式: MODE_LABEL_V[m] || m, 束: blockSize(m) };
+    let total = 0;
+    for (let l = 1; l <= MAX_LEVEL; l++) { row[`Lv.${l}`] = d[l] || 0; total += d[l] || 0; }
+    row.計 = total;
+    rows.push(row);
+    for (let l = 1; l <= MAX_LEVEL; l++) {
+      const n = d[l] || 0;
+      // **その段に上がった人は、その形式の束をこの段から組みます。**
+      // 束1つぶん無いと、すぐ下の段に落ちて段が意味を失う
+      /* **Lv.1 が空なのは壊れています。**みんなそこから始まるので、
+         その形式の束が最初から組めません。上の段が空なのは、**梯子がまだ短いだけ**
+         （`engine.rankPool` が一段ずつ下りて拾うので、出題は成立します）*/
+      if (n === 0 && l === 1) err("段", `${MODE_LABEL_V[m] || m} に Lv.1 の問題がありません`);
+      else if (n === 0)
+        warn(`${MODE_LABEL_V[m] || m} に Lv.${l} の問題がありません（そこまで梯子が伸びていません）`);
+      else if (n < blockSize(m))
+        warn(`${MODE_LABEL_V[m] || m} の Lv.${l} は ${n}問しかありません（1束 ${blockSize(m)}問）`);
+    }
+  }
+  console.log("\n形式 × 段の在庫");
+  console.table(rows);
+
+  // マス（教科×学年）の中に段の差があるか。無いと「同じ学年の中の梯子」にならない
+  const cellLv = {};
+  questions.forEach(q => {
+    const k = q.subject + "|" + q.grade;
+    (cellLv[k] ??= new Set()).add(levelOf(q));
+  });
+  const flat = Object.entries(cellLv).filter(([, set]) => set.size < 2).map(([k]) => k);
+  if (flat.length)
+    warn(`段が1つしか無いマスが ${flat.length}あります（同じ学年の中の梯子になりません）: ` +
+         flat.slice(0, 8).join(" / ") + (flat.length > 8 ? " ほか" : ""));
 }
 
 /* ---- スワイプ（2択・テンポ優先）---- */
@@ -630,8 +695,7 @@ console.log(`実在マス ${realCells} ・ 空き ${emptyCells} ・ ${RUN_LENGTH
   `　（「−」はカリキュラムに無い組み合わせ）`);
 
 /* 難モードの内訳。reading を足すほど消去法から文字パネルへ移る */
-const MODE_LABEL = { elimination: "消去法", numeric: "数値入力", range: "レンジ",
-                     panel: "文字パネル", multi: "複数選択", choice: "4択", swipe: "スワイプ" };
+const MODE_LABEL = MODE_LABEL_V;
 const modeTally = {};
 questions.forEach(q => { const m = answerMode(q); modeTally[m] = (modeTally[m] || 0) + 1; });
 const JA_ANSWER = /^[ぁ-んァ-ヶ一-龥ー]{2,12}$/;
