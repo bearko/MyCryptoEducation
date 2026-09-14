@@ -271,19 +271,10 @@
       "height": 371
     },
     "shakespeare": {
-      "search": "Shakespeare Chandos portrait",
-      "insource": "PD-old",
-      "alt": "シェイクスピアの肖像画。あごひげをたくわえ、襟の開いた黒い服を着ている",
+      "alt": "えり元の開いた黒い服を着て、左耳に輪の飾りをつけた男性の肖像画",
       "use": "（外国語・これから書く）",
       "where": "lesson",
-      "file": "shakespeare",
-      "title": "The Chandos Portrait of Georg Friedrich Händeltitle QS:P1476,en:\"The Chandos Portrait of Georg Friedrich Händel\"label QS:Len,\"The Chandos Portrait of Georg Friedrich Händel\"label QS:Les,\"El Retrato Chandos de Georg Friedrich Händel\"label QS:Lfr,\"Le Portrait Chandos de Georg Friedrich Händel\"label QS:Lde,\"Das Chandos Malerei des Georg Friedrich Händels\"label QS:Lnl,\"Het Chandos Portret van Georg Friedrich Händel\"",
-      "author": "Formerly attributed to James Thornhill",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AGeorg%20Friedrich%20H%C3%A4ndel%203.jpg",
-      "width": 640,
-      "height": 755
+      "commons": "File:Shakespeare.jpg"
     },
     "hopper": {
       "search": "Grace Hopper portrait Navy",
@@ -301,7 +292,7 @@
       "height": 606
     },
     "lovelace": {
-      "search": "Ada Lovelace portrait Carpenter",
+      "search": "Ada Lovelace portrait",
       "insource": "PD-old",
       "alt": "エイダ・ラブレスの肖像画。白いドレスを着て椅子にかけている",
       "use": "（情報・これから書く）",
@@ -336,21 +327,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AAbraham%20Lincoln%20head%20on%20shoulders%20photo%20portrait.jpg",
       "width": 640,
       "height": 840
-    },
-    "nightingale": {
-      "search": "Florence Nightingale photograph",
-      "insource": "PD-old",
-      "alt": "ナイチンゲールの写真。白い頭巾をかぶっている",
-      "use": "（社会・これから書く）",
-      "where": "lesson",
-      "file": "nightingale",
-      "title": "Unknown woman, formerly known as Florence Nightingale label QS:Len,\"Unknown woman, formerly known as Florence Nightingale\"",
-      "author": "Augustus Egg",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AFlorence%20Nightingale%20by%20Augustus%20Egg.jpg",
-      "width": 640,
-      "height": 993
     },
     "curie": {
       "search": "Marie Curie portrait laboratory",
@@ -411,6 +387,13 @@
       "source": "https://commons.wikimedia.org/wiki/File%3ADBP%201955%20204%20Carl%20Friedrich%20Gau%C3%9F.jpg",
       "width": 640,
       "height": 747
+    },
+    "eniac": {
+      "search": "ENIAC",
+      "insource": "PD-USGov",
+      "alt": "大きな配線盤が並ぶ部屋で、人がケーブルを差し替えている写真",
+      "use": "（情報・これから書く）",
+      "where": "lesson"
     }
   }
 }
