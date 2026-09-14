@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>三層で見る世界の教室</title>
+<style>
+  /* 配色は docs/research-edtech.html から引き継ぐ。2枚で1組に読めるように。
+     直感=緑 / 驚き=臙脂 / 物語=藍 という対応も、あちらと同じ。 */
+  :root{
+    --paper:#EEF1F2;
+    --card:#FFFFFF;
+    --sunk:#E4E9EB;
+    --ink:#22303C;
+    --ink-mid:#5B6B78;
+    --ink-thin:#93A2AC;
+    --rule:#D3DBDF;
+    --hair:#E2E8EA;
+    --c1:#2E6F5E;   /* 直感 */
+    --c2:#8C3A52;   /* 驚き */
+    --c3:#3B5A8C;   /* 物語 */
+    /* 判定の色。アクセント3色とは別系統にして、混ざらないようにする */
+    --ok:#3F7A55;   --ok-bg:#E6EFE8;
+    --thin:#9A6B22; --thin-bg:#F6EEDD;
+    --gone:#A63A3A; --gone-bg:#F7E7E5;
+    --mincho:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif;
+    --gothic:"Hiragino Sans","Yu Gothic",YuGothic,"Noto Sans JP",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#161D23; --card:#1D262E; --sunk:#222C35;
+      --ink:#E3E9ED; --ink-mid:#A6B4BE; --ink-thin:#78878F;
+      --rule:#33404A; --hair:#2A343D;
+      --c1:#5FAE93; --c2:#D68299; --c3:#8BAADD;
+      --ok:#79BE92;   --ok-bg:#1E2C24;
+      --thin:#D4A75A; --thin-bg:#2E2718;
+      --gone:#E08A84; --gone-bg:#301F1E;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#161D23; --card:#1D262E; --sunk:#222C35;
+    --ink:#E3E9ED; --ink-mid:#A6B4BE; --ink-thin:#78878F;
+    --rule:#33404A; --hair:#2A343D;
+    --c1:#5FAE93; --c2:#D68299; --c3:#8BAADD;
+    --ok:#79BE92;   --ok-bg:#1E2C24;
+    --thin:#D4A75A; --thin-bg:#2E2718;
+    --gone:#E08A84; --gone-bg:#301F1E;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--gothic);font-size:15px;line-height:1.85;
+    -webkit-font-smoothing:antialiased;
+    padding-inline:18px;
+    padding-block:0 calc(72px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:740px;margin:0 auto}
+  a{color:var(--c3)}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--c3);outline-offset:3px}
+  p{margin:0 0 14px}
+  strong{font-weight:700}
+
+  /* ---------- 冒頭 ---------- */
+  .masthead{padding-block:52px 26px;border-bottom:2px solid var(--ink)}
+  .eyebrow{
+    font-family:var(--mincho);font-size:12px;letter-spacing:.22em;
+    color:var(--ink-thin);margin:0 0 14px;
+  }
+  h1{
+    font-family:var(--mincho);font-weight:600;
+    font-size:clamp(26px,6.6vw,40px);line-height:1.36;letter-spacing:.03em;
+    margin:0 0 16px;text-wrap:balance;
+  }
+  .standfirst{font-size:15.5px;color:var(--ink-mid);margin:0;max-width:34em}
+  .meta{
+    margin-top:22px;font-size:12.5px;color:var(--ink-thin);line-height:1.9;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- 見出し ---------- */
+  h2{
+    font-family:var(--mincho);font-weight:600;letter-spacing:.03em;
+    font-size:clamp(19px,4.4vw,24px);line-height:1.5;
+    margin:52px 0 6px;text-wrap:balance;
+  }
+  h2 .num{
+    font-size:12px;letter-spacing:.18em;color:var(--ink-thin);
+    display:block;margin-bottom:5px;font-family:var(--gothic);
+  }
+  h3{
+    font-family:var(--gothic);font-weight:700;font-size:14px;letter-spacing:.02em;
+    margin:26px 0 8px;
+  }
+  .lede{color:var(--ink-mid);font-size:14.5px;margin:0 0 18px;max-width:34em}
+
+  /* ---------- 層のパネル ---------- */
+  .layer{
+    background:var(--card);border:1px solid var(--rule);
+    padding:22px 20px;margin-top:18px;
+  }
+  .layer.l1{border-top:3px solid var(--c1)}
+  .layer.l2{border-top:3px solid var(--c2)}
+  .layer.l3{border-top:3px solid var(--c3)}
+  .l1 .accent{color:var(--c1)} .l2 .accent{color:var(--c2)} .l3 .accent{color:var(--c3)}
+
+  .layerhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:4px}
+  .layerhead .name{
+    font-family:var(--mincho);font-size:21px;font-weight:600;letter-spacing:.06em;
+  }
+  .layerhead .q{font-size:13px;color:var(--ink-mid)}
+
+  /* 輪の図と、3拍の表を横に並べる */
+  .loop{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;margin-top:16px}
+  .ring{flex:0 0 186px;max-width:100%}
+  .ring svg{display:block;width:186px;max-width:100%;height:auto}
+  /* 輪の図。塗りと線はクラスで当てる（属性に var() を書かない） */
+  .ring .arc{fill:none;stroke-width:1.6}
+  .ring .arc.weak{stroke-width:1.2;stroke-dasharray:4 4}
+  .ring .arc.cut{stroke-width:1.2;stroke-dasharray:3 6}
+  .ring .node{fill:var(--card);stroke-width:1.6}
+  .ring .node.cut{stroke:var(--gone);stroke-dasharray:3 4}
+  .ring text{font-family:var(--gothic)}
+  .ring .lab{font-family:var(--mincho);font-size:13px}
+  .ring .foot{font-size:10.5px;fill:var(--ink-thin)}
+  .ring .foot.cut{fill:var(--gone)}
+  .l1 .ring .arc,.l1 .ring .node{stroke:var(--c1)}
+  .l1 .ring .head,.l1 .ring .lab{fill:var(--c1)}
+  .l2 .ring .arc,.l2 .ring .node{stroke:var(--c2)}
+  .l2 .ring .head,.l2 .ring .lab{fill:var(--c2)}
+  .l3 .ring .arc,.l3 .ring .node{stroke:var(--c3)}
+  .l3 .ring .head,.l3 .ring .lab{fill:var(--c3)}
+  .ring .node.cut{stroke:var(--gone)}
+  .ring .lab.gone{fill:var(--gone)}
+  .beats{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:1px;
+    background:var(--hair);border:1px solid var(--hair)}
+  .beat{background:var(--card);padding:11px 13px}
+  .beat .bt{
+    display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px;
+  }
+  .beat .bname{font-family:var(--mincho);font-size:15px;letter-spacing:.08em}
+  .beat .bwhat{font-size:13.5px;color:var(--ink-mid);line-height:1.75}
+  .beat .bwhat code{
+    font-family:var(--gothic);font-size:12px;background:var(--sunk);
+    padding:1px 5px;border-radius:2px;color:var(--ink-mid);
+  }
+
+  /* 判定のピル。アクセントとは別系統 */
+  .v{
+    flex:none;font-size:11px;line-height:1;letter-spacing:.04em;
+    padding:4px 7px;border-radius:2px;white-space:nowrap;font-weight:700;
+  }
+  .v.ok{color:var(--ok);background:var(--ok-bg)}
+  .v.thin{color:var(--thin);background:var(--thin-bg)}
+  .v.gone{color:var(--gone);background:var(--gone-bg)}
+
+  .verdict{
+    margin-top:16px;padding:13px 15px;background:var(--sunk);
+    font-size:13.5px;line-height:1.8;
+  }
+  .verdict b{display:block;font-size:12px;letter-spacing:.1em;color:var(--ink-thin);
+    margin-bottom:4px;font-weight:700}
+
+  /* ---------- 5段階 → 3層 の対応表 ---------- */
+  .mwrap{overflow-x:auto;margin-inline:-18px;padding-inline:18px;-webkit-overflow-scrolling:touch}
+  table.m{
+    border-collapse:collapse;width:100%;min-width:540px;
+    font-size:13.5px;background:var(--card);
+  }
+  table.m th,table.m td{
+    padding:10px 12px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top;
+  }
+  table.m thead th{
+    font-size:11.5px;letter-spacing:.1em;color:var(--ink-thin);font-weight:700;
+    border-bottom:1.5px solid var(--ink);white-space:nowrap;
+  }
+  table.m td.stage{font-family:var(--mincho);white-space:nowrap}
+  table.m td.n{font-variant-numeric:tabular-nums;color:var(--ink-thin);width:1%}
+  .tag{font-size:11px;letter-spacing:.06em;font-weight:700;white-space:nowrap}
+  .tag.t1{color:var(--c1)} .tag.t2{color:var(--c2)} .tag.t3{color:var(--c3)}
+
+  /* ---------- 数字の帯 ---------- */
+  .figs{display:flex;flex-wrap:wrap;gap:1px;background:var(--hair);
+    border:1px solid var(--hair);margin:18px 0 4px}
+  .fig{flex:1 1 104px;background:var(--card);padding:11px 12px}
+  .fig b{
+    display:block;font-family:var(--mincho);font-size:22px;line-height:1.25;
+    font-variant-numeric:tabular-nums;
+  }
+  .fig span{display:block;font-size:11.5px;color:var(--ink-thin);letter-spacing:.03em}
+
+  /* ---------- 切れているところ ---------- */
+  .gaps{list-style:none;padding:0;margin:16px 0 0;
+    display:flex;flex-direction:column;gap:12px}
+  .gaps li{
+    background:var(--card);border:1px solid var(--rule);
+    border-left:3px solid var(--gone);padding:14px 16px;
+  }
+  .gaps .gh{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:5px}
+  .gaps .gh b{font-size:14.5px}
+  .gaps .gw{font-size:13.5px;color:var(--ink-mid);line-height:1.8;margin:0}
+  .gaps .gw + .gw{margin-top:7px}
+
+  .note{
+    border-left:2px solid var(--rule);padding-left:13px;margin:22px 0;
+    font-size:13.5px;color:var(--ink-mid);line-height:1.8;
+  }
+  footer{
+    margin-top:54px;padding-top:18px;border-top:1px solid var(--rule);
+    font-size:12px;color:var(--ink-thin);line-height:1.9;
+  }
+
+  @media (max-width:520px){
+    .ring{flex-basis:100%;display:flex;justify-content:center}
+    .layer{padding:18px 15px}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .gaps li{transition:border-left-color .2s}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">設計の点検 ・ 2026年9月</p>
+    <h1>三層で見る<br>世界の教室</h1>
+    <p class="standfirst">
+      いまの実装を、<strong>直感・驚き・物語</strong>の3つの輪に置き直してみる。
+      それぞれの輪は3拍で回る。回っているのはどれで、どこで切れているのか。
+      遊びながら確かめるための地図。
+    </p>
+    <p class="meta">
+      508問 ・ 48マス ・ 回答方式6 ・ 英雄12体 ・ エクステンション108種 ・ クリスタル100種 ・ 称号6<br>
+      対応するコードは <code>src/views.js</code> / <code>src/engine.js</code>、
+      設計の線は <code>CLAUDE.md</code>
+    </p>
+  </header>
+
+  <h2><span class="num">読み方</span>3つの輪は、直列ではなく入れ子</h2>
+  <p class="lede">
+    直感が回らないと驚きは起きず、驚きが積まれないと物語にならない。
+    下の輪ほど1周が長い。直感は1問、驚きは1セッション、物語は数十セッションで回る。
+  </p>
+
+  <div class="figs">
+    <div class="fig"><b>1問</b><span>直感の1周</span></div>
+    <div class="fig"><b>9–18問</b><span>驚きの1周（1セッション）</span></div>
+    <div class="fig"><b>4章</b><span>物語の1周</span></div>
+  </div>
+
+  <!-- ============ 直感 ============ -->
+  <h2><span class="num">第1の輪</span>直感のデザイン</h2>
+  <p class="lede">
+    説明を読まずに「たぶんこうすればいい」と思え、やってみたら当たる。
+    この輪が回らないと、そもそも2問目に進まない。
+  </p>
+
+  <section class="layer l1">
+    <div class="layerhead">
+      <span class="name accent">直感</span>
+      <span class="q">仮説 → 試行 → 歓喜</span>
+    </div>
+
+    <div class="loop">
+      <div class="ring">
+        <svg viewBox="0 0 200 190" role="img" aria-label="直感の輪。仮説・試行・歓喜の3拍が一周つながっている">
+          <g>
+            <path class="arc" d="M100 34 A62 62 0 0 1 153.7 126" />
+            <path class="arc" d="M146.3 130 A62 62 0 0 1 53.7 130" />
+            <path class="arc" d="M46.3 126 A62 62 0 0 1 92 34.6" />
+          </g>
+          <g class="head">
+            <path d="M0 -4.5 L9 0 L0 4.5 Z" transform="translate(152.7 65.3) rotate(60)" />
+            <path d="M0 -4.5 L9 0 L0 4.5 Z" transform="translate(100 157) rotate(180)" />
+            <path d="M0 -4.5 L9 0 L0 4.5 Z" transform="translate(47.3 65.2) rotate(-60)" />
+          </g>
+          <g>
+            <circle class="node" cx="100" cy="34" r="21" />
+            <circle class="node" cx="153" cy="126" r="21" />
+            <circle class="node" cx="47" cy="126" r="21" />
+          </g>
+          <g class="lab" text-anchor="middle">
+            <text x="100" y="39">仮説</text>
+            <text x="153" y="131">試行</text>
+            <text x="47" y="131">歓喜</text>
+          </g>
+          <text class="foot" x="100" y="178" text-anchor="middle">1問で1周</text>
+        </svg>
+      </div>
+
+      <div class="beats">
+        <div class="beat">
+          <div class="bt"><span class="bname accent">仮説</span><span class="v ok">効いている</span></div>
+          <p class="bwhat">
+            初めて開くとホームもチュートリアルも出ず、<strong>いきなり小学1年の問題</strong>が出る。
+            1〜2問目は4択だけなので「押せばいい」としか読めない
+            （<code>views.startIntro</code>・決定1）。
+          </p>
+        </div>
+        <div class="beat">
+          <div class="bt"><span class="bname accent">試行</span><span class="v ok">効いている</span></div>
+          <p class="bwhat">
+            押す・✕で消す・はらう・なぞる・打つ。<strong>どれも1手で反応が返る。</strong>
+            外しても問題は終わらない方式（数値入力）や、途中で放せば戻る方式（スワイプ）がある。
+          </p>
+        </div>
+        <div class="beat">
+          <div class="bt"><span class="bname accent">歓喜</span><span class="v thin">弱い</span></div>
+          <p class="bwhat">
+            ○が出て、知識カードとGUMが入り、ときどきクリスタルが落ちる。
+            ただし<strong>手ごたえが数字と文章に寄っている。</strong>
+            「解けた」の身体的な快は、消去法の ＋2 / ＋3 / ＋5 とスワイプの ○ にしか無い。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <b>いちばんの穴</b>
+      仮説が要るのは初回だけではない。<strong>回答方式が6つあり、束の頭がそれぞれ「はじめての1問」になる。</strong>
+      4択には最初の2問という助走があるが、消去法・文字パネル・スワイプ・数値入力・レンジには無い。
+      束にしたことで「同じ形式が続く」ようにはなったので、
+      <strong>束の1問目に仮説を立たせる余地がここにできた。</strong>
+    </div>
+  </section>
+
+  <!-- ============ 驚き ============ -->
+  <h2><span class="num">第2の輪</span>驚きのデザイン</h2>
+  <p class="lede">
+    知っているつもりで踏み出して、外す。そこで初めて見える。
+    この輪は<strong>誤解が要る</strong>ので、やさしくしすぎると回らない。
+  </p>
+
+  <section class="layer l2">
+    <div class="layerhead">
+      <span class="name accent">驚き</span>
+      <span class="q">誤解 → 試行 → 驚愕</span>
+    </div>
+
+    <div class="loop">
+      <div class="ring">
+        <svg viewBox="0 0 200 190" role="img" aria-label="驚きの輪。誤解から試行への弧は細い破線で、まだ弱いことを示している">
+          <g>
+            <path class="arc weak" d="M100 34 A62 62 0 0 1 153.7 126" />
+            <path class="arc" d="M146.3 130 A62 62 0 0 1 53.7 130" />
+            <path class="arc" d="M46.3 126 A62 62 0 0 1 92 34.6" />
+          </g>
+          <g class="head">
+            <path d="M0 -4.5 L9 0 L0 4.5 Z" transform="translate(152.7 65.3) rotate(60)" />
+            <path d="M0 -4.5 L9 0 L0 4.5 Z" transform="translate(100 157) rotate(180)" />
+            <path d="M0 -4.5 L9 0 L0 4.5 Z" transform="translate(47.3 65.2) rotate(-60)" />
+          </g>
+          <g>
+            <circle class="node" cx="100" cy="34" r="21" />
+            <circle class="node" cx="153" cy="126" r="21" />
+            <circle class="node" cx="47" cy="126" r="21" />
+          </g>
+          <g class="lab" text-anchor="middle">
+            <text x="100" y="39">誤解</text>
+            <text x="153" y="131">試行</text>
+            <text x="47" y="131">驚愕</text>
+          </g>
+          <text class="foot" x="100" y="178" text-anchor="middle">1セッションで1周</text>
+        </svg>
+      </div>
+
+      <div class="beats">
+        <div class="beat">
+          <div class="bt"><span class="bname accent">誤解</span><span class="v thin">弱い</span></div>
+          <p class="bwhat">
+            <strong>「知っているつもり」を作る仕掛けが薄い。</strong>
+            知識マップの白いマスは「知らない」を見せるが、
+            <strong>「知っているつもりだった」を見せる装置は無い。</strong>
+            いま誤解が生まれるのは、たまたま自信のある単元に当たったときだけ。
+          </p>
+        </div>
+        <div class="beat">
+          <div class="bt"><span class="bname accent">試行</span><span class="v ok">効いている</span></div>
+          <p class="bwhat">
+            難モードが既定で、4択へ降りるのは常にプレイヤーの手。
+            消去法は<strong>何個まで削るかを自分で決める</strong>ので、踏みこんだぶんが自分の判断になる。
+          </p>
+        </div>
+        <div class="beat">
+          <div class="bt"><span class="bname accent">驚愕</span><span class="v ok">効いている</span></div>
+          <p class="bwhat">
+            外しても<strong>「面白い単元に当たった」</strong>としか書かない。知識カードも解説も必ず入る。
+            別の英雄のTipsが492問、応用編が38問。由来カード4枚がさらに8問を開く。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <b>いちばんの穴</b>
+      驚愕が<strong>「文章を読む」に寄っている。</strong>読み飛ばせてしまう。
+      写真つきは32問、図版つきは7問しかなく、残りは文字だけ。
+      スワイプでは解説を最後のふりかえりへ送ったので、<strong>テンポと引き換えに驚きが遅れて届く。</strong>
+      ここが原則3（失敗は罰されない）と正面からぶつかっていないのは、
+      <strong>出す場所を動かしただけで、出さない選択はしていない</strong>から。
+    </div>
+  </section>
+
+  <!-- ============ 物語 ============ -->
+  <h2><span class="num">第3の輪</span>物語のデザイン</h2>
+  <p class="lede">
+    翻弄され、成長し、最後に<strong>「自分はこれをやりたい」</strong>に変わる。
+    3つの輪でいちばん長く、いちばん記憶に残る。
+  </p>
+
+  <section class="layer l3">
+    <div class="layerhead">
+      <span class="name accent">物語</span>
+      <span class="q">翻弄 → 成長 → 意志</span>
+    </div>
+
+    <div class="loop">
+      <div class="ring">
+        <svg viewBox="0 0 200 190" role="img" aria-label="物語の輪。成長から意志への弧が切れていて、輪が閉じていない">
+          <g>
+            <path class="arc" d="M100 34 A62 62 0 0 1 153.7 126" />
+            <path class="arc cut" d="M146.3 130 A62 62 0 0 1 53.7 130" />
+            <path class="arc cut" d="M46.3 126 A62 62 0 0 1 92 34.6" />
+          </g>
+          <g class="head">
+            <path d="M0 -4.5 L9 0 L0 4.5 Z" transform="translate(152.7 65.3) rotate(60)" />
+          </g>
+          <g>
+            <circle class="node" cx="100" cy="34" r="21" />
+            <circle class="node" cx="153" cy="126" r="21" />
+          </g>
+          <circle class="node cut" cx="47" cy="126" r="21" />
+          <g class="lab" text-anchor="middle">
+            <text x="100" y="39">翻弄</text>
+            <text x="153" y="131">成長</text>
+            <text class="gone" x="47" y="131">意志</text>
+          </g>
+          <text class="foot cut" x="100" y="178" text-anchor="middle">輪が閉じていない</text>
+        </svg>
+      </div>
+
+      <div class="beats">
+        <div class="beat">
+          <div class="bt"><span class="bname accent">翻弄</span><span class="v ok">効いている</span></div>
+          <p class="bwhat">
+            <strong>1セッションの最後の1問は、必ずいまの範囲の外から出る。</strong>
+            第3章はブラジル・ロシア・南アフリカの教室の問題で、母語話者の数も憲法の公用語も出てくる。
+            現行課程の新単元も混ざる。
+          </p>
+        </div>
+        <div class="beat">
+          <div class="bt"><span class="bname accent">成長</span><span class="v ok">効いている</span></div>
+          <p class="bwhat">
+            知識マップが埋まる。形式ごとの段が上がる（Lv.1→3）。英雄への到達度が伸びる。
+            エジソンを解放すると第2章、クレオパトラで第3章が開く。
+            <strong>成長の見え方が4系統あるのは強い。</strong>
+          </p>
+        </div>
+        <div class="beat">
+          <div class="bt"><span class="bname accent">意志</span><span class="v gone">まだ無い</span></div>
+          <p class="bwhat">
+            <strong>「次はこれを埋めたい」とプレイヤーが自分で決める入口が無い。</strong>
+            いま自律性が置かれているのは報酬側（何を作るか・誰に装備させるか・誰に挑むか）だけで、
+            <strong>学習そのものの矛先を自分で決める場所が無い。</strong>
+            おまかせが白いマスを選んでくれるぶん、選ぶ必要が消えている。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <b>いちばんの穴</b>
+      <code>docs/research-edtech.md</code> の結論は
+      <strong>「意志を実装できているサービスは無かった」</strong>だった。
+      いまの「世界の教室」も同じところで止まっている。
+      翻弄と成長は動いているので、<strong>残っているのは最後の1拍だけ</strong>。
+    </div>
+  </section>
+
+  <!-- ============ 対応表 ============ -->
+  <h2><span class="num">突き合わせ</span>もともと狙っていた5段階との対応</h2>
+  <p class="lede">
+    <code>CLAUDE.md</code> の冒頭に書いた「目指している体験」を、3つの輪に置き直すとこうなる。
+    <strong>5段階のうち4つまでは、もともと三層の言葉で書かれていた。</strong>
+  </p>
+
+  <div class="mwrap">
+    <table class="m">
+      <thead>
+        <tr><th></th><th>目指している体験</th><th>層</th><th>いまの実装</th><th>判定</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="n">1</td>
+          <td class="stage">解ける爽快感</td>
+          <td><span class="tag t1">直感・歓喜</span></td>
+          <td>小1から駆け上がる。無説明の初回5問</td>
+          <td><span class="v ok">効いている</span></td>
+        </tr>
+        <tr>
+          <td class="n">2</td>
+          <td class="stage">空白の自覚</td>
+          <td><span class="tag t2">驚き・誤解</span></td>
+          <td>知識マップの白いマス。ホームの一等地に置いた</td>
+          <td><span class="v thin">弱い</span></td>
+        </tr>
+        <tr>
+          <td class="n">3</td>
+          <td class="stage">翻弄</td>
+          <td><span class="tag t3">物語・翻弄</span></td>
+          <td>最後の1問は範囲の外。第3・4章／新単元</td>
+          <td><span class="v ok">効いている</span></td>
+        </tr>
+        <tr>
+          <td class="n">4</td>
+          <td class="stage">発見</td>
+          <td><span class="tag t2">驚き・驚愕</span></td>
+          <td>英雄の解説・Tips 492問・応用編38問</td>
+          <td><span class="v ok">効いている</span></td>
+        </tr>
+        <tr>
+          <td class="n">5</td>
+          <td class="stage">成長</td>
+          <td><span class="tag t3">物語・成長</span></td>
+          <td>知識マップ／段／到達度／章の解放</td>
+          <td><span class="v ok">効いている</span></td>
+        </tr>
+        <tr>
+          <td class="n">—</td>
+          <td class="stage">（書いていない）</td>
+          <td><span class="tag t3">物語・意志</span></td>
+          <td>—</td>
+          <td><span class="v gone">まだ無い</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">
+    5段階に<strong>「意志」だけが書かれていない。</strong>
+    抜けていたというより、<strong>まだ言葉にしていなかった</strong>と読むほうが近い。
+    三層に置き直して初めて、そこが空いていることが見えた。
+  </p>
+
+  <!-- ============ 切れているところ ============ -->
+  <h2><span class="num">やること</span>切れている3か所</h2>
+  <p class="lede">
+    輪のどこが切れているかで並べた。上から順に、直感・驚き・物語。
+  </p>
+
+  <ol class="gaps">
+    <li>
+      <div class="gh"><b>束の1問目に、仮説を立たせる</b><span class="tag t1">直感</span></div>
+      <p class="gw">
+        4択には最初の2問という助走があるのに、ほかの5方式には無い。
+        <strong>説明を足すのではなく、1問目の作りで分からせる。</strong>
+        消去法なら誤答が明らかに1つだけの問題を先頭に置く、
+        文字パネルなら3文字の読みから始める、といった並べ替えで足りるかもしれない。
+      </p>
+      <p class="gw">
+        いまの <code>engine.planRun</code> は束の中を
+        「白いマス → 未出題 → 既出」で並べている。ここに<strong>「その形式の入門になる1問」</strong>
+        という優先順を1段だけ足せる場所がある。
+      </p>
+    </li>
+    <li>
+      <div class="gh"><b>「知っているつもり」を作る</b><span class="tag t2">驚き</span></div>
+      <p class="gw">
+        白いマスは「知らない」を見せるが、驚きに要るのは<strong>「知っていると思っていた」</strong>のほう。
+        いちばん近い材料は<strong>一度正解したマス</strong>で、そこに
+        <code>level</code> の高い問題をぶつけると「同じ単元なのに解けない」が起きる。
+        段の仕組みはもう入っているので、<strong>見せ方だけの問題</strong>。
+      </p>
+      <p class="gw">
+        ただし原則3-2（報酬をプレイスタイルで差別化しない）があるので、
+        <strong>「できていない」を統計で突きつける形にはできない。</strong>
+        出すなら問いの側で。
+      </p>
+    </li>
+    <li>
+      <div class="gh"><b>意志を置く場所を決める</b><span class="tag t3">物語</span></div>
+      <p class="gw">
+        いま自律性は報酬側にしか無い。学習の矛先をプレイヤーが決める入口が要る。
+        <strong>おまかせが白いマスを選んでくれるほど、選ぶ必要は消えていく。</strong>
+      </p>
+      <p class="gw">
+        原則4（カレンダーは記録装置であって報酬装置ではない）と原則7（報酬系に有能感を担わせない）が
+        効いているので、<strong>目標設定をノルマにはできない。</strong>
+        「今日はここを埋める」と宣言させる形は、達成できなかった日に罰になる。
+        <strong>ここは書いていない論点なので、決める前に話したい。</strong>
+      </p>
+    </li>
+  </ol>
+
+  <h2><span class="num">ひとこと</span>いま強いのは、いちばん外側の輪</h2>
+  <p>
+    三層に置き直してみると、<strong>強いのは物語（翻弄と成長）で、弱いのは中の2拍</strong>だと分かる。
+    ふつうは逆で、直感と驚きが先にできていて物語が薄い。
+    このゲームは<strong>教材としての構造を先に積んだぶん、外側の輪から埋まっている。</strong>
+  </p>
+  <p>
+    つまり残っているのは、<strong>1問の手ざわり</strong>（直感の歓喜）と、
+    <strong>思いこみを崩す瞬間</strong>（驚きの誤解）と、
+    <strong>自分で矛先を決める場所</strong>（物語の意志）の3つ。
+    どれも作り足すというより、<strong>すでにある部品の見せ方</strong>で届く範囲にある。
+  </p>
+
+  <footer>
+    枠組みは玉樹真一郎『「ついやってしまう」体験のつくりかた』（ダイヤモンド社, 2019）の
+    直感・驚き・物語の三層。<br>
+    同じ枠組みで他サービスを見た調査は <code>docs/research-edtech.html</code>。
+    設計の線そのものは <code>CLAUDE.md</code>、却下した案は <code>docs/design-decisions.md</code>。<br>
+    数字は 2026年9月時点の <code>npm run validate</code> の出力による。
+  </footer>
+
+</div>
+</body>
+</html>
