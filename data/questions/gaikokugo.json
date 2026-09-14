@@ -2390,5 +2390,49 @@
     "tip": "音を運ぶか、意味を運ぶか。どちらも訳だ。捨てるものが違うだけでな。",
     "card": "transliteration",
     "level": 3
+  },
+  {
+    "id": "gaikokugo-082",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "イギリス",
+    "subject": "外国語",
+    "unit": "英文学",
+    "country": "イギリス / English Literature（Key Stage 3, 11–14歳）",
+    "newCurriculum": false,
+    "format": "swipe",
+    "image": "shakespeare",
+    "alt": "白い折り襟の黒い服を着て、左耳に輪の飾りをつけた男性の肖像画",
+    "prompt": "この劇作家が書いた悲劇は?",
+    "choices": [
+      "『ハムレット』",
+      "『ドン・キホーテ』"
+    ],
+    "answer": 0,
+    "lesson": "デンマークの王子が父の死の真相を知り、迷いながら復讐へ向かう劇です。『ドン・キホーテ』はスペインのセルバンテスの小説で、ほぼ同じころに書かれ、二人は同じ年に世を去ったと伝えられています。どちらも近代の文学の出発点に置かれる作品です。",
+    "card": "『ハムレット』と悲劇",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-083",
+    "chapter": 3,
+    "grade": "w",
+    "gradeLabel": "イギリス",
+    "subject": "外国語",
+    "unit": "英文学",
+    "country": "イギリス / English Literature（Key Stage 3, 11–14歳）",
+    "newCurriculum": false,
+    "format": "swipe",
+    "image": "shakespeare",
+    "alt": "暗い背景に、ひげをたくわえた男性が半身で描かれた古い油彩の肖像",
+    "prompt": "この人の劇が上演された劇場は?",
+    "choices": [
+      "オペラ座",
+      "グローブ座"
+    ],
+    "answer": 1,
+    "lesson": "ロンドンのテムズ川の南岸に建てられた円形の劇場で、屋根のない中庭に立ち見の客が入りました。入場料は一日の稼ぎのごく一部で、身分を問わず観客が集まったといわれます。オペラ座はパリに19世紀に建てられたもので、時代も国も違います。",
+    "card": "円形の劇場と観客",
+    "level": 2
   }
 ]
