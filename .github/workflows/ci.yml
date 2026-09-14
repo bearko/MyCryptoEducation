@@ -25,6 +25,11 @@ jobs:
           npm install --no-save jsdom
           node scripts/smoke.mjs
 
+      # 写真を選ぶ画面。**外へは出ません**（--selftest は作り物の候補で、
+      # 画面の組み立てと書き戻しの道だけを通す）。取り込みそのものは手動のまま
+      - name: 写真を選ぶ画面の自己テスト
+        run: node scripts/pick-commons.mjs --selftest
+
       - name: ビルド成果物を保存
         uses: actions/upload-artifact@v4
         with:

@@ -1,5 +1,6 @@
 {
   "_note": "Wikimedia Commons から取り込む写真の台帳。実体は public/commons/ に置く。scripts/fetch-commons.mjs が commons（File:名）か search を手がかりに探し、ライセンスを確かめてから file 以下の欄を埋める。search で使えるライセンスが見つからないときは、コモンズで自分で選んで commons に File:名を書く。見せたいものが部位の数や向きなら、search に side のような画角の語も入れる。被写体名だけでは顔の接写が来ることがある。",
+  "_how": "候補の集め方は4つあり、この順に見る。commons（File:名の名指し）→ entity（日本語の語。ウィキデータで項目に解決して P18『画像』を読む）→ wikipedia（記事名。先頭の代表画像。英語なら \"en:Title\"）→ category（コモンズのカテゴリ）→ search（全文検索）。**entity と wikipedia は人が『これがその物の代表画像だ』と決めたものなので、全文検索より桁違いに当たる。** 全文検索はファイル解説ページの全文が対象で、投稿者名にも当たるため最後に見る（dog で投稿者 DogTwo のカフェ写真、chicken egg でマヨネーズの皿が来た）。写真のまま見て選ぶなら npm run pick:commons。",
   "_license": "許すのは PD・CC0・CC BY だけ。CC BY-SA は改変物に同じライセンスが波及するので使わない。NC と ND も使わない。fetch-commons.mjs が allow に無いライセンスの画像を弾く。",
   "_titleFree": "titleFree: true は「被写体の名前を伏せたまま出す写真」の印。コモンズの題名は被写体の名前そのものなので（\"Labrador Retriever snow\"）、題名が出た時点で答えが割れる使い方——絵の選択肢（choiceArt）——ではこの印を付ける。表示義務を持たないのは PD と CC0 だけなので、印の付いた行はfetch-commons.mjs がその2つからしか採らず、--list も ◎ で区別する。スワイプも同じ理由で題名を伏せるが、あちらは問いによっては題名が答えにならないので、validate は警告に留めて人が確かめる。",
   "_where": "prompt=問題文の下 / hint=第3ヒントの横 / lesson=解説の中。hint に置くときは、その画像だけで答えが割れないものに限る（原則5）。",
@@ -436,7 +437,8 @@
       "height": 427
     },
     "obj-pan": {
-      "search": "bread loaf",
+      "entity": "食パン",
+      "wikipedia": "食パン",
       "alt": "パンがひとかたまり、そのまま置かれている写真",
       "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
@@ -458,7 +460,8 @@
       "height": 480
     },
     "obj-inu": {
-      "search": "dog standing",
+      "entity": "イヌ",
+      "wikipedia": "イヌ",
       "alt": "犬が一匹、全身が見える向きで立っている写真",
       "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
