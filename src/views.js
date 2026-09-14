@@ -573,45 +573,52 @@ const MODE_LABEL = { swipe: "スワイプ", choice: "4択", elimination: "消去
  *
  * 答えたあとは、4つとも語を出します。**何だったのかが分からないまま終わらせない**ためです。
  */
+/**
+ * **出題中に題名を伏せられる写真か。**
+ *
+ * コモンズの題名は被写体の名前そのものです（"Dmitri Mendeleev 1890s"）。
+ * PD と CC0 は表示義務が無いので伏せられますが、CC BY は題名も表示の条件なので
+ * 伏せられません。**被写体を言い当てることが問いの中身になる形式
+ * （スワイプ・絵の選択肢）では、この2つしか使えません。**
+ */
+const titleFree = p => /^(public domain|pdm|cc0)/i.test(p?.license || "");
+
 function choiceArtHTML(q, i) {
   const key = q.choiceArt?.[i];
   if (!key) return null;
   const n = [...String(q.choices[i] ?? "")].length;
   const dots = `<span class="cdots" role="img" aria-label="${n}文字">${"<i></i>".repeat(n)}</span>`;
   /* **イメージは写真、図形は線画。** 台帳（images.json）にあれば写真、
-     無ければ図版（figures.json）。alt は空にする——名前を書けばそこが答えになる */
+     無ければ図版（figures.json）。alt は空にする——名前を書けばそこが答えになる。
+     **題名の要る写真は使いません**（validate がエラーにするので、ここへは来ない）。
+     来てしまったときに黙って題名を伏せるとライセンス条件を満たさないので、
+     写真そのものを出さず図版へ落とします */
   const photo = DB.photos?.[key];
-  if (photo?.file && photo.license)
+  if (photo?.file && photo.license && titleFree(photo))
     return `<span class="cart"><img src="${assetPath.photo(photo.file)}" alt="" loading="lazy"></span>${dots}`;
   const svg = DB.figures?.[key];
   return svg ? `<span class="cart">${svg}</span>${dots}` : null;
 }
 
 /**
- * **題名の表示が条件になっているライセンスか。**
- *
- * CC BY は 1.0〜3.0 が「題名があれば表示する」を条件にしています。4.0 で外れました。
- * PD と CC0 はそもそも表示義務がありません。
- * **この見分けがつくので、要るものにだけ題名を付けられます。**
- */
-const needsTitle = p => /^cc by [123](\.|$)/i.test(String(p?.license || ""));
-
-/**
  * 絵の選択肢に写真を使ったときのクレジット。
- * **写真はクレジットとセットでしか出しません**（原則どおり）。ただし4枚ぶんの
- * 題名まで並べると選択肢より背が高くなるので、**題名は要るものにだけ付けます。**
+ * **写真はクレジットとセットでしか出しません**（原則どおり）。
  * 作者の名前が、その写真の出典ページへのリンクになります。
+ *
+ * **題名は出しません。出さなくてよい写真しか使わないからです。**
+ * 題名は被写体の名前そのもの（"No-Knead Bread"）で、どの絵が何のことかを
+ * 言い当てるのがこの形式の中身です。題名が出た時点で問いが消えます。
  */
 function choiceArtCredit(q) {
   const list = (q.choiceArt || []).map(k => DB.photos?.[k])
-    .filter(p => p && p.file && p.license);
+    .filter(p => p && p.file && p.license && titleFree(p));
   if (!list.length) return "";
   const who = list.map(p => {
     const name = esc(p.author || "作者不明");
     const link = p.source
       ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">${name}</a>`
       : name;
-    return needsTitle(p) && p.title ? `${esc(p.title)}（${link}）` : link;
+    return link;
   }).join(" ／ ");
   const lic = [...new Set(list.map(p => p.license))].map(esc).join("・");
   return `<p class="cartcred">写真 ${who} ・ ${lic} ・ Wikimedia Commons</p>`;
@@ -1459,7 +1466,6 @@ function advance() {
  */
 /* **PD と CC0 は表示義務そのものが無いので、出題中だけ題名を伏せられます。**
    CC BY は題名も表示の条件なので伏せません。伏せた瞬間に条件を満たさなくなります */
-const titleFree = p => /^(public domain|pdm|cc0)/i.test(p?.license || "");
 
 const SWIPE_THROW = 56;    // これだけ横に動かしたら確定。届かなければ戻る
 const SWIPE_HOLD = 900;    // ○✕ を見せている時間（ミリ秒）

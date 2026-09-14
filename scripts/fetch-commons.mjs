@@ -51,6 +51,11 @@ const bookPath = join(ROOT, "data/images.json");
 const bookBefore = await readFile(bookPath, "utf8");
 const book = JSON.parse(bookBefore);
 const allow = book.allow.map(s => s.toLowerCase());
+/* **出題中に題名を伏せられるライセンスか。**
+   コモンズの題名は被写体の名前そのものなので、スワイプと絵の選択肢では
+   題名を出せません。PD と CC0 だけが表示義務を持ちません。
+   台帳の行に `"titleFree": true` と書いておくと、この2つからしか採りません。 */
+const isTitleFree = lic => /^(public domain|pdm|cc0)/i.test(String(lic || ""));
 const entries = Object.entries(book.images);
 const args = process.argv.slice(2);
 const LIST = args.includes("--list");           // 取り込まずに候補を並べるだけ
@@ -130,11 +135,16 @@ for (const [key, entry] of wanted) {
     if (LIST) {
       console.log(`\n  ${key}  ${asked}`);
       cands.slice(0, 20).forEach((c, i) => {
-        const mark = allow.includes(c.license.toLowerCase()) ? "○" : "×";
+        /* ◎ は題名を伏せられるもの（PD・CC0）。**スワイプと絵の選択肢はここからしか
+           選べません。** ○ は使えるが題名の出るもの、× は allow に無いもの */
+        const mark = !allow.includes(c.license.toLowerCase()) ? "×"
+                   : isTitleFree(c.license) ? "◎" : "○";
         const w = c.info.width, h = c.info.height;
         console.log(`   ${mark} ${String(i + 1).padStart(2)}. ${c.license.padEnd(16)}` +
                     ` ${String(w).padStart(5)}x${String(h).padEnd(5)} ${c.page.title}`);
       });
+      if (entry.titleFree)
+        console.log(`      ※ この行は題名を伏せる用（titleFree）です。◎ からだけ選んでください`);
       console.log(`      → 決めたら images.json の "${key}" に "commons": "File:〜" を書いて、`);
       console.log(`        node scripts/fetch-commons.mjs ${key}`);
       listed++;
@@ -142,13 +152,18 @@ for (const [key, entry] of wanted) {
       continue;
     }
 
-    const hit = cands.find(c => allow.includes(c.license.toLowerCase()));
+    /* **題名を伏せる行（titleFree）は、PD・CC0 からしか採りません。**
+       CC BY を採ってしまうと、題名が表示の条件になり、その題名が答えになります */
+    const usable = c => allow.includes(c.license.toLowerCase())
+                     && (!entry.titleFree || isTitleFree(c.license));
+    const hit = cands.find(usable);
 
     if (!hit) {
       // どれも使えないときは、見えたものを並べる。ここから選んで
       // 台帳の commons に File:名を書けば、次の実行で確実にそれを採る
       const seen = [...new Set(cands.map(c => c.license))];
-      console.warn(`  ${key}: 使えるライセンスの候補がありません（見えたもの: ${seen.join(" / ")}）`);
+      console.warn(`  ${key}: 使えるライセンスの候補がありません（見えたもの: ${seen.join(" / ")}）` +
+                   (entry.titleFree ? "。この行は題名を伏せる用なので PD・CC0 だけです" : ""));
       cands.slice(0, 6).forEach(c =>
         console.warn(`      ${c.license.padEnd(16)} ${c.page.title}`));
       console.warn(`      → コモンズで探し直して、images.json の "${key}" に`);

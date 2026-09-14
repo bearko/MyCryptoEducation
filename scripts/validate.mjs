@@ -59,6 +59,16 @@ for (const bad of ALLOWED_LICENSES)
   if (bad.includes("-sa") || bad.includes("nc") || bad.includes("nd"))
     err("images.json", `allow に "${bad}" が入っています。SA・NC・ND は使いません`);
 
+/**
+ * **出題中に題名を伏せられる写真か。**
+ *
+ * コモンズの題名は被写体の名前そのものです（"Labrador Retriever snow"）。
+ * PD と CC0 は表示義務が無いので伏せられますが、CC BY は題名も表示の条件なので
+ * 伏せられません。**被写体を言い当てることが問いの中身になる形式
+ * （スワイプ・絵の選択肢）では、この2つしか使えません。**
+ */
+const titleFree = p => /^(public domain|pdm|cc0)/i.test(p?.license || "");
+
 /* ---- 1問ごとの検証 ---- */
 const seenIds = new Set();
 const promptsBySubject = {};
@@ -270,13 +280,15 @@ for (const q of questions) {
             if (!photo[f]) err(id, `choiceArt の写真 "${k}" に ${f} がありません（クレジットを出せません）`);
           if (photo.license && !ALLOWED_LICENSES.includes(String(photo.license).toLowerCase()))
             err(id, `choiceArt の写真 "${k}" のライセンス "${photo.license}" は使えません`);
-          /* **題名は、要るものにだけ付けます。** CC BY 1.0〜3.0 は「題名があれば
-             表示する」が条件で、4.0 で外れました。PD と CC0 は表示義務そのものが
-             ありません。4枚ぶんの題名を全部並べると選択肢より背が高くなるので、
-             `views.needsTitle` がこの見分けをして、要るものにだけ付けています */
-          else if (/^cc by [123](\.|$)/i.test(String(photo.license)) && !photo.title)
-            err(id, `choiceArt の写真 "${k}" は ${photo.license} なので題名の表示が要りますが、` +
-                    `台帳に title がありません`);
+          /* **絵の選択肢に使えるのは PD・CC0 だけです。** CC BY は題名も表示の
+             条件なので伏せられず、その題名が被写体の名前そのものです
+             （"No-Knead Bread"・"Labrador Retriever snow"）。**どの絵が何のことかを
+             言い当てるのがこの形式の中身なので、題名が出た時点で問いが消えます。**
+             スワイプと同じ線です */
+          else if (!titleFree(photo))
+            err(id, `choiceArt の写真 "${k}" は ${photo.license} です。題名の表示が要る` +
+                    `ライセンスなので、題名「${photo.title || ""}」から答えが割れます。` +
+                    `絵の選択肢に使えるのは PD・CC0 だけです`);
         }
       } else if (!figures[k]) {
         err(id, `choiceArt の "${k}" が figures.json にも images.json にもありません`);
@@ -407,7 +419,6 @@ for (const q of questions) {
  */
 {
   const swipes = questions.filter(q => (q.format || "choice") === "swipe");
-  const titleFree = p => /^(public domain|pdm|cc0)/i.test(p?.license || "");
 
   for (const q of swipes) {
     const id = q.id;
@@ -470,6 +481,18 @@ for (const q of questions) {
   if (orphans.length)
     warn(`台帳に載っていない写真が public/commons にあります（作者もライセンスも` +
          `分からないので使えません）: ${orphans.join(" / ")}`);
+}
+
+/* **題名を伏せる用の行に、題名の要る写真が入っていないか。**
+   `titleFree: true` は「この写真は、被写体の名前を伏せたまま出す」という宣言です。
+   絵の選択肢がそれにあたります——**どの絵が何のことかを言い当てるのが問いの中身**
+   なので、題名（"No-Knead Bread"）が出た時点で問いが消えます。
+   PD と CC0 だけが題名の表示義務を持たないので、この行はその2つしか採れません。
+   `scripts/fetch-commons.mjs` も同じ印を見て、CC BY を採りません。 */
+for (const [key, p] of Object.entries(imageBook.images || {})) {
+  if (p.titleFree && p.license && !titleFree(p))
+    err("images.json", `写真「${key}」は題名を伏せる用（titleFree）ですが ${p.license} です。` +
+        `題名「${p.title || ""}」の表示が条件なので伏せられません。PD・CC0 を採り直してください`);
 }
 
 // 使い先を書いたまま配線し忘れると、取り込んだ写真が誰の目にも触れない

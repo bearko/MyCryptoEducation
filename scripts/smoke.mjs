@@ -431,6 +431,22 @@ check("写真のクレジットが出る", (() => {
   return t.includes("Wikimedia Commons") && c.querySelectorAll("a[href]").length >= 1
     && /Public domain|CC0|PDM/i.test(t);
 })(), d.querySelector(".cartcred")?.textContent?.slice(0, 120));
+/* **題名の要る写真は、絵の選択肢には出しません。** コモンズの題名は被写体の
+   名前そのもの（"No-Knead Bread"）で、どの絵が何のことかを言い当てるのが
+   この形式の中身です。題名が出た時点で問いが消えます。CC BY は題名も表示の
+   条件なので伏せられず、写真そのものを出しません                              */
+check("題名の要る写真は絵の選択肢に出ない", ev(`(() => {
+  const q = DB.byId["${artQ}"];
+  const by = Object.keys(DB.photos).filter(k => DB.photos[k].file &&
+    /^cc by/i.test(DB.photos[k].license || ""));
+  if (!by.length) return "skip";
+  q.choiceArt = [by[0], ...JSON.parse(window.__art).slice(1)];
+  S.run.picked = null; render();
+  const cred = document.querySelector(".cartcred")?.textContent || "";
+  return document.querySelectorAll(".choice.art .cart img").length === 0
+      && !/cc by/i.test(cred);
+})()`) !== false);
+
 ev(`(() => { DB.byId["${artQ}"].choiceArt = JSON.parse(window.__art);
   delete window.__art; S.run.picked = null; render(); })()`);
 

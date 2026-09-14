@@ -1,6 +1,7 @@
 {
   "_note": "Wikimedia Commons から取り込む写真の台帳。実体は public/commons/ に置く。scripts/fetch-commons.mjs が commons（File:名）か search を手がかりに探し、ライセンスを確かめてから file 以下の欄を埋める。search で使えるライセンスが見つからないときは、コモンズで自分で選んで commons に File:名を書く。見せたいものが部位の数や向きなら、search に side のような画角の語も入れる。被写体名だけでは顔の接写が来ることがある。",
   "_license": "許すのは PD・CC0・CC BY だけ。CC BY-SA は改変物に同じライセンスが波及するので使わない。NC と ND も使わない。fetch-commons.mjs が allow に無いライセンスの画像を弾く。",
+  "_titleFree": "titleFree: true は「被写体の名前を伏せたまま出す写真」の印。コモンズの題名は被写体の名前そのものなので（\"Labrador Retriever snow\"）、題名が出た時点で答えが割れる使い方——絵の選択肢（choiceArt）——ではこの印を付ける。表示義務を持たないのは PD と CC0 だけなので、印の付いた行はfetch-commons.mjs がその2つからしか採らず、--list も ◎ で区別する。スワイプも同じ理由で題名を伏せるが、あちらは問いによっては題名が答えにならないので、validate は警告に留めて人が確かめる。",
   "_where": "prompt=問題文の下 / hint=第3ヒントの横 / lesson=解説の中。hint に置くときは、その画像だけで答えが割れないものに限る（原則5）。",
   "allow": [
     "Public domain",
@@ -421,6 +422,7 @@
     },
     "obj-yama": {
       "alt": "雪をいただいた円すい形の山を、赤く大きく描いた浮世絵",
+      "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson",
       "commons": "File:Red Fuji southern wind clear morning.jpg",
@@ -434,22 +436,16 @@
       "height": 427
     },
     "obj-pan": {
-      "search": "white bread loaf",
-      "alt": "白い食パンが切り分けられて並んでいる写真",
+      "search": "bread loaf",
+      "alt": "パンがひとかたまり、そのまま置かれている写真",
+      "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson",
-      "file": "obj-pan",
-      "title": "No-Knead Bread - Finished Loaf (294068096)",
-      "author": "daisybush",
-      "license": "CC BY 2.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3ANo-Knead%20Bread%20-%20Finished%20Loaf%20(294068096).jpg",
-      "width": 640,
-      "height": 480
+      "where": "lesson"
     },
     "obj-tamago": {
       "search": "chicken eggs",
       "alt": "白い殻のたまごが3つ、うすいピンクの面に置かれている写真",
+      "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson",
       "file": "obj-tamago",
@@ -462,18 +458,11 @@
       "height": 480
     },
     "obj-inu": {
-      "search": "Labrador Retriever",
-      "alt": "黄色い毛の犬が、雪の上に立って正面を向いている写真",
+      "search": "dog standing",
+      "alt": "犬が一匹、全身が見える向きで立っている写真",
+      "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson",
-      "file": "obj-inu",
-      "title": "Labrador Retriever snow",
-      "author": "Original author Hand, edit by Pharaoh Hound",
-      "license": "CC BY 2.5",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
-      "source": "https://commons.wikimedia.org/wiki/File%3ALabrador%20Retriever%20snow.jpg",
-      "width": 640,
-      "height": 548
+      "where": "lesson"
     }
   }
 }
