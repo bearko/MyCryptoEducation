@@ -423,7 +423,15 @@
       "alt": "雪をいただいた円すい形の山を、赤く大きく描いた浮世絵",
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson",
-      "commons": "File:Red Fuji southern wind clear morning.jpg"
+      "commons": "File:Red Fuji southern wind clear morning.jpg",
+      "file": "obj-yama",
+      "title": "凱風快晴（South Wind, Clear Sky）",
+      "author": "Katsushika Hokusai",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ARed%20Fuji%20southern%20wind%20clear%20morning.jpg",
+      "width": 640,
+      "height": 427
     },
     "obj-pan": {
       "search": "white bread loaf",
@@ -433,15 +441,31 @@
     },
     "obj-tamago": {
       "search": "chicken eggs",
-      "alt": "白い殻のたまごが並んでいる写真",
+      "alt": "白い殻のたまごが3つ、うすいピンクの面に置かれている写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-tamago",
+      "title": "Chicken eggs 20101113",
+      "author": "Batholith (talk)",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChicken%20eggs%2020101113.jpg",
+      "width": 640,
+      "height": 480
     },
     "obj-inu": {
       "search": "Labrador Retriever",
-      "alt": "犬が草の上にすわって正面を向いている写真",
+      "alt": "黄色い毛の犬が、雪の上に立って正面を向いている写真",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-inu",
+      "title": "Labrador Retriever snow",
+      "author": "Original author Hand, edit by Pharaoh Hound",
+      "license": "CC BY 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+      "source": "https://commons.wikimedia.org/wiki/File%3ALabrador%20Retriever%20snow.jpg",
+      "width": 640,
+      "height": 548
     }
   }
 }

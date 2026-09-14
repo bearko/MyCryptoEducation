@@ -588,11 +588,18 @@ function choiceArtHTML(q, i) {
 }
 
 /**
+ * **題名の表示が条件になっているライセンスか。**
+ *
+ * CC BY は 1.0〜3.0 が「題名があれば表示する」を条件にしています。4.0 で外れました。
+ * PD と CC0 はそもそも表示義務がありません。
+ * **この見分けがつくので、要るものにだけ題名を付けられます。**
+ */
+const needsTitle = p => /^cc by [123](\.|$)/i.test(String(p?.license || ""));
+
+/**
  * 絵の選択肢に写真を使ったときのクレジット。
  * **写真はクレジットとセットでしか出しません**（原則どおり）。ただし4枚ぶんの
- * 題名まで並べると選択肢より背が高くなるので、**作者・ライセンス・出典**に畳みます。
- * 題名を落とせるのは、**絵の選択肢に使える写真を PD と CC0 に限ってある**ためです
- * （この2つは表示義務そのものが無く、作者と出典を出している時点で条件より厚い）。
+ * 題名まで並べると選択肢より背が高くなるので、**題名は要るものにだけ付けます。**
  * 作者の名前が、その写真の出典ページへのリンクになります。
  */
 function choiceArtCredit(q) {
@@ -601,9 +608,10 @@ function choiceArtCredit(q) {
   if (!list.length) return "";
   const who = list.map(p => {
     const name = esc(p.author || "作者不明");
-    return p.source
+    const link = p.source
       ? `<a href="${esc(p.source)}" target="_blank" rel="noopener noreferrer">${name}</a>`
       : name;
+    return needsTitle(p) && p.title ? `${esc(p.title)}（${link}）` : link;
   }).join(" ／ ");
   const lic = [...new Set(list.map(p => p.license))].map(esc).join("・");
   return `<p class="cartcred">写真 ${who} ・ ${lic} ・ Wikimedia Commons</p>`;
