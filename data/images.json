@@ -245,28 +245,60 @@
       "insource": "PD-old",
       "alt": "夏目漱石の肖像写真。口ひげをたくわえ、和装で椅子に座っている",
       "use": "（国語・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "soseki",
+      "title": "Natsume Soseki photo",
+      "author": "Ogawa Kazumasa",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ANatsume%20Soseki%20photo.jpg",
+      "width": 640,
+      "height": 873
     },
     "murasaki": {
       "search": "Murasaki Shikibu Ishiyama",
       "insource": "PD-old",
       "alt": "紫式部を描いた絵。十二単をまとい、文机に向かっている",
       "use": "（国語・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "murasaki",
+      "title": "Murasaki Shikibu at Ishiyama-dera",
+      "author": "Tosa Mitsuoki November 21, 1617 – November 14, 1691.",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AMurasaki%20Shikibu%20at%20Ishiyama-dera.png",
+      "width": 492,
+      "height": 371
     },
     "shakespeare": {
       "search": "Shakespeare Chandos portrait",
       "insource": "PD-old",
       "alt": "シェイクスピアの肖像画。あごひげをたくわえ、襟の開いた黒い服を着ている",
       "use": "（外国語・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "shakespeare",
+      "title": "The Chandos Portrait of Georg Friedrich Händeltitle QS:P1476,en:\"The Chandos Portrait of Georg Friedrich Händel\"label QS:Len,\"The Chandos Portrait of Georg Friedrich Händel\"label QS:Les,\"El Retrato Chandos de Georg Friedrich Händel\"label QS:Lfr,\"Le Portrait Chandos de Georg Friedrich Händel\"label QS:Lde,\"Das Chandos Malerei des Georg Friedrich Händels\"label QS:Lnl,\"Het Chandos Portret van Georg Friedrich Händel\"",
+      "author": "Formerly attributed to James Thornhill",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AGeorg%20Friedrich%20H%C3%A4ndel%203.jpg",
+      "width": 640,
+      "height": 755
     },
     "hopper": {
       "search": "Grace Hopper portrait Navy",
       "insource": "PD-USGov",
       "alt": "グレース・ホッパーの写真。海軍の制服を着ている",
       "use": "（情報・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "hopper",
+      "title": "Grace Hopper",
+      "author": "James S. Davis",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AGrace%20Hopper.jpg",
+      "width": 517,
+      "height": 606
     },
     "lovelace": {
       "search": "Ada Lovelace portrait Carpenter",
@@ -280,49 +312,105 @@
       "insource": "PD-old",
       "alt": "織田信長を描いた肖像画。正装して座している",
       "use": "（社会・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "nobunaga",
+      "title": "Oda Nobunaga Portrait Sanpoji Temple c1582-1586",
+      "author": "Unknown artist",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AOda%20Nobunaga%20Portrait%20Sanpoji%20Temple%20c1582-1586.jpg",
+      "width": 640,
+      "height": 777
     },
     "lincoln": {
       "search": "Abraham Lincoln 1863 portrait photograph",
       "insource": "PD-old",
       "alt": "リンカーンの肖像写真。ひげをたくわえ、正面を向いている",
       "use": "（社会・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "lincoln",
+      "title": "Abraham Lincoln head on shoulders photo portrait",
+      "author": "Alexander Gardner",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AAbraham%20Lincoln%20head%20on%20shoulders%20photo%20portrait.jpg",
+      "width": 640,
+      "height": 840
     },
     "nightingale": {
       "search": "Florence Nightingale photograph",
       "insource": "PD-old",
       "alt": "ナイチンゲールの写真。白い頭巾をかぶっている",
       "use": "（社会・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "nightingale",
+      "title": "Unknown woman, formerly known as Florence Nightingale label QS:Len,\"Unknown woman, formerly known as Florence Nightingale\"",
+      "author": "Augustus Egg",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AFlorence%20Nightingale%20by%20Augustus%20Egg.jpg",
+      "width": 640,
+      "height": 993
     },
     "curie": {
       "search": "Marie Curie portrait laboratory",
       "insource": "PD-old",
       "alt": "マリ・キュリーの写真。実験器具の並ぶ机に向かっている",
       "use": "（理科・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "curie",
+      "title": "Marie et Pierre Curie",
+      "author": "Unknown author",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AMarie%20et%20Pierre%20Curie.jpg",
+      "width": 640,
+      "height": 705
     },
     "darwin": {
       "search": "Charles Darwin photograph beard",
       "insource": "PD-old",
       "alt": "ダーウィンの写真。長く白いあごひげをたくわえている",
       "use": "（理科・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "darwin",
+      "title": "Charles Darwin 01",
+      "author": "Julia Margaret Cameron",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ACharles%20Darwin%2001.jpg",
+      "width": 640,
+      "height": 822
     },
     "newton": {
       "search": "Isaac Newton Kneller portrait",
       "insource": "PD-old",
       "alt": "ニュートンの肖像画。長い巻き毛で、赤い上着を着ている",
       "use": "（算数・数学・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "newton",
+      "title": "GodfreyKneller-IsaacNewton-1689",
+      "author": "James Thronill after Sir Godfrey Kneller",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AGodfreyKneller-IsaacNewton-1689.jpg",
+      "width": 640,
+      "height": 899
     },
     "gauss": {
       "search": "Carl Friedrich Gauss Jensen portrait",
       "insource": "PD-old",
       "alt": "ガウスの肖像画。黒い帽子をかぶった年配の男性",
       "use": "（算数・数学・これから書く）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "gauss",
+      "title": "DBP 1955 204 Carl Friedrich Gauß",
+      "author": "scanned by NobbiP",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ADBP%201955%20204%20Carl%20Friedrich%20Gau%C3%9F.jpg",
+      "width": 640,
+      "height": 747
     }
   }
 }
