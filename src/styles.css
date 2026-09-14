@@ -625,7 +625,10 @@
   /* 消去法。✕ で消す／文字で答える。押す場所で意味が分かれる */
   .choices.elim{gap:9px}
   .choices.elim .row{display:flex;align-items:stretch;gap:7px;position:relative}
-  .choices.elim .row .choice{flex:1;min-width:0}
+  /* 消去法の文字は押せない。ボタンに見えないよう、影も当たりも持たせない */
+  .choices.elim .row .choice{flex:1;min-width:0;cursor:default;
+    display:flex;align-items:center}
+  .choices.elim .row .choice:hover{border-color:var(--line)}
   /* **`.cut` にしない。** 帯が `class="band cut"` なので、width が帯にも当たって崩れる */
   .xcut{flex:none;width:46px;border:1px solid var(--pen);background:#FDF4F2;color:var(--pen);
     font:inherit;font-size:17px;line-height:1;border-radius:3px;cursor:pointer}
