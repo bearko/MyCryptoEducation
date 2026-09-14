@@ -561,6 +561,28 @@ const MODE_LABEL = { swipe: "スワイプ", choice: "4択", elimination: "消去
                      numeric: "数値入力", range: "レンジ", panel: "文字パネル" };
 
 /**
+ * **語のかわりに絵と ◯ を出す選択肢**（`choiceArt`）。
+ *
+ * 「かたかなで書く言葉はどれ?」を語のまま並べると、**カタカナの語が1つだけ
+ * 見た目で浮いてしまい、読まずに当てられます。** 絵にすると、その語が
+ * かなで書くものか外来語かは、見ただけでは分かりません。
+ *
+ * ◯ の数はその語の文字数です（パン＝◯◯、たまご＝◯◯◯）。
+ * **どの絵が何のことかを言い当てるための手がかりで、答えの手がかりではありません。**
+ * 文字数が答えを教えてしまう問いには使わないでください。
+ *
+ * 答えたあとは、4つとも語を出します。**何だったのかが分からないまま終わらせない**ためです。
+ */
+function choiceArtHTML(q, i) {
+  const key = q.choiceArt?.[i];
+  const svg = key && DB.figures?.[key];
+  if (!svg) return null;
+  const n = [...String(q.choices[i] ?? "")].length;
+  return `<span class="cart">${svg}</span>
+    <span class="cdots" role="img" aria-label="${n}文字">${"<i></i>".repeat(n)}</span>`;
+}
+
+/**
  * その問題の段。**学年の隣に置きます。**
  *
  * 学年は「どの教育課程の問題か」、段は「同じ学年の中でどれだけ踏みこむか」。
@@ -642,12 +664,15 @@ function vQuiz() {
         <p class="fine">狭く答えるほど高い点になります。紀元前はマイナスで書いてください（例 −221）。</p>
       </div>`
     : `${modeBand(q, mode)}
-      <div class="choices${mode === "elimination" ? " elim" : ""}">${q.choices.map((t, i) =>
-      mode === "elimination"
+      <div class="choices${mode === "elimination" ? " elim" : ""}">${q.choices.map((t, i) => {
+      const art = choiceArtHTML(q, i);
+      const cls = "choice" + (art ? " art" : "");
+      return mode === "elimination"
         ? `<div class="row${(S.run.cut || []).includes(i) ? " gone" : ""}" data-r="${i}">
              <button class="xcut" data-c="${i}" aria-label="これを消す">✕</button>
-             <div class="choice" data-i="${i}">${esc(t)}</div></div>`
-        : `<button class="choice" data-i="${i}">${esc(t)}</button>`).join("")}</div>
+             <div class="${cls}" data-i="${i}">${art || esc(t)}</div></div>`
+        : `<button class="${cls}" data-i="${i}">${art || esc(t)}</button>`;
+      }).join("")}</div>
       ${mode === "elimination" ? `
         <p class="fine"><b>1つ目より2つ目、2つ目より3つ目のほうが点は大きくなります。</b>
           まちがえて消すとそこで終わりますが、消せたぶんの点は残ります。</p>
@@ -1178,6 +1203,16 @@ function wireElimination(q) {
   if (down) down.onclick = () => { S.run.hard[q.id] = "choice"; render(); };
 }
 
+/** 絵の選択肢だったときだけ、判定と同時に4つとも語を見せる */
+function revealChoiceWords(q) {
+  if (!q.choiceArt) return;
+  app.querySelectorAll(".choices .choice.art").forEach(b => {
+    if (b.querySelector(".cword")) return;
+    const i = Number(b.dataset.i);
+    b.insertAdjacentHTML("beforeend", `<span class="cword">${esc(q.choices[i] ?? "")}</span>`);
+  });
+}
+
 function onPick(idx, forcedOk = null) {
   if (S.run.picked !== null) return;
   const q = currentQ(), h = heroFor(q);
@@ -1188,6 +1223,7 @@ function onPick(idx, forcedOk = null) {
 
   app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, .xcut[data-c]")
     .forEach(b => b.disabled = true);
+  revealChoiceWords(q);
   app.querySelectorAll(".choices .choice").forEach((b, i) => {
     b.disabled = true;
     if (i === idx) markChoice(b, ok);

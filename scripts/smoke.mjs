@@ -365,6 +365,56 @@ check("スワイプは束としてだけ出る", runs.every(r => {
   return n === 0 || n === ev(`blockSize("swipe")`);
 }), JSON.stringify(runs.map(r => r.modes.filter(m => m === "swipe").length)));
 
+/* ---- 絵の選択肢（choiceArt）---- */
+/* **語のまま並べると、カタカナの語が1つだけ見た目で浮いて読まずに当てられる。**
+   絵にすると、かなで書く語か外来語かは見ただけでは分からない。
+   ◯ の数はその語の文字数で、どの絵が何のことかを言い当てるための手がかり     */
+check("絵の選択肢を持つ問題がある",
+  ev("DB.questions.filter(q => q.choiceArt).length") >= 1);
+const artQ = ev("DB.questions.find(q => q.choiceArt).id");
+/* **解説を出す設定にしてから答える。** OFF のままだと正解が「トースト → 0.75秒後に
+   次の問題へ」の経路に入り、**あとの検査の最中にそのタイマーが発火して問題が進む。**
+   実際にこれで、消去法の検査が3件こけた */
+ev(`(() => {
+  S.settings.showExplanationOnCorrect = true;
+  S.run = { ids: ["${artQ}"], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+            found: [], cut: null, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0,
+            results: {}, noReward: true, done: false, hard: {}, plan: [] };
+  S.view = "quiz"; render();
+})()`);
+check("語のかわりに絵が出る",
+  d.querySelectorAll(".choices .choice.art svg").length ===
+  ev(`DB.byId["${artQ}"].choices.length`),
+  String(d.querySelectorAll(".choices .choice.art svg").length));
+// **語は1文字も画面に出ていない。** 出た時点で、絵にした意味が消える
+check("答える前は語がどこにも出ていない", ev(`(() => {
+  const t = document.getElementById("app").textContent;
+  return DB.byId["${artQ}"].choices.every(c => !t.includes(c));
+})()`) === true, txt().slice(0, 140));
+check("◯ の数はその語の文字数", ev(`(() => {
+  const q = DB.byId["${artQ}"];
+  return [...document.querySelectorAll(".choices .choice.art .cdots")]
+    .every((e, i) => e.querySelectorAll("i").length === [...q.choices[i]].length);
+})()`) === true);
+// **◯ の数だけで当てられないこと**（正解の文字数が1つだけ他と違うと絵を見ずに済む）
+check("◯ の数では当てられない", ev(`(() => {
+  const q = DB.byId["${artQ}"];
+  const len = q.choices.map(c => [...c].length);
+  return len.filter(n => n === len[q.answer]).length > 1;
+})()`) === true);
+/* **答えたあとは4つとも語を出す。** 何だったのか分からないまま終わらせない */
+check("答えると語が出る", (() => {
+  const q = JSON.parse(ev(`JSON.stringify({ a: DB.byId["${artQ}"].answer,
+    n: DB.byId["${artQ}"].choices.length, c: DB.byId["${artQ}"].choices })`));
+  for (let i = 0; i < q.n; i++) if (i !== q.a) d.querySelector(`.xcut[data-c="${i}"]`)?.click();
+  const t = txt();
+  return q.c.every(c => t.includes(c)) &&
+    d.querySelectorAll(".choices .choice.art .cword").length === q.n;
+})(), txt().slice(0, 160));
+// 借りた画面を片づける。ここで残る保留中のタイマーが、あとの検査を動かしてしまう
+await wait(120);
+check("先へ進むタイマーを残さない", ev("S.run.i") === 0, `i=${ev("S.run.i")}`);
+
 /* ---- 形式ごとの段（Lv.1〜Lv.3）---- */
 /* **学年は「どの教育課程か」、段は「同じ学年の中でどれだけ踏みこむか」。**
    段は形式ごとに別で持ち、**上がるだけで下がらない**（原則3と揃える）      */
