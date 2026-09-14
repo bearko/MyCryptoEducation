@@ -239,6 +239,90 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AParthenon%20from%20west.jpg",
       "width": 640,
       "height": 480
+    },
+    "soseki": {
+      "search": "Natsume Soseki portrait",
+      "insource": "PD-old",
+      "alt": "夏目漱石の肖像写真。口ひげをたくわえ、和装で椅子に座っている",
+      "use": "（国語・これから書く）",
+      "where": "lesson"
+    },
+    "murasaki": {
+      "search": "Murasaki Shikibu Ishiyama",
+      "insource": "PD-old",
+      "alt": "紫式部を描いた絵。十二単をまとい、文机に向かっている",
+      "use": "（国語・これから書く）",
+      "where": "lesson"
+    },
+    "shakespeare": {
+      "search": "Shakespeare Chandos portrait",
+      "insource": "PD-old",
+      "alt": "シェイクスピアの肖像画。あごひげをたくわえ、襟の開いた黒い服を着ている",
+      "use": "（外国語・これから書く）",
+      "where": "lesson"
+    },
+    "hopper": {
+      "search": "Grace Hopper portrait Navy",
+      "insource": "PD-USGov",
+      "alt": "グレース・ホッパーの写真。海軍の制服を着ている",
+      "use": "（情報・これから書く）",
+      "where": "lesson"
+    },
+    "lovelace": {
+      "search": "Ada Lovelace portrait Carpenter",
+      "insource": "PD-old",
+      "alt": "エイダ・ラブレスの肖像画。白いドレスを着て椅子にかけている",
+      "use": "（情報・これから書く）",
+      "where": "lesson"
+    },
+    "nobunaga": {
+      "search": "Oda Nobunaga portrait",
+      "insource": "PD-old",
+      "alt": "織田信長を描いた肖像画。正装して座している",
+      "use": "（社会・これから書く）",
+      "where": "lesson"
+    },
+    "lincoln": {
+      "search": "Abraham Lincoln 1863 portrait photograph",
+      "insource": "PD-old",
+      "alt": "リンカーンの肖像写真。ひげをたくわえ、正面を向いている",
+      "use": "（社会・これから書く）",
+      "where": "lesson"
+    },
+    "nightingale": {
+      "search": "Florence Nightingale photograph",
+      "insource": "PD-old",
+      "alt": "ナイチンゲールの写真。白い頭巾をかぶっている",
+      "use": "（社会・これから書く）",
+      "where": "lesson"
+    },
+    "curie": {
+      "search": "Marie Curie portrait laboratory",
+      "insource": "PD-old",
+      "alt": "マリ・キュリーの写真。実験器具の並ぶ机に向かっている",
+      "use": "（理科・これから書く）",
+      "where": "lesson"
+    },
+    "darwin": {
+      "search": "Charles Darwin photograph beard",
+      "insource": "PD-old",
+      "alt": "ダーウィンの写真。長く白いあごひげをたくわえている",
+      "use": "（理科・これから書く）",
+      "where": "lesson"
+    },
+    "newton": {
+      "search": "Isaac Newton Kneller portrait",
+      "insource": "PD-old",
+      "alt": "ニュートンの肖像画。長い巻き毛で、赤い上着を着ている",
+      "use": "（算数・数学・これから書く）",
+      "where": "lesson"
+    },
+    "gauss": {
+      "search": "Carl Friedrich Gauss Jensen portrait",
+      "insource": "PD-old",
+      "alt": "ガウスの肖像画。黒い帽子をかぶった年配の男性",
+      "use": "（算数・数学・これから書く）",
+      "where": "lesson"
     }
   }
 }
