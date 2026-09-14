@@ -420,13 +420,13 @@
       "height": 489
     },
     "obj-yama": {
-      "search": "Mount Fuji",
-      "alt": "雪をかぶった円すい形の山が、青空を背にそびえている写真",
+      "alt": "雪をいただいた円すい形の山を、赤く大きく描いた浮世絵",
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "commons": "File:Red Fuji southern wind clear morning.jpg"
     },
     "obj-pan": {
-      "search": "sliced bread",
+      "search": "white bread loaf",
       "alt": "白い食パンが切り分けられて並んでいる写真",
       "use": "kokugo-012（絵の選択肢）",
       "where": "lesson"
