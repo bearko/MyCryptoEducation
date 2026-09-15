@@ -479,6 +479,32 @@ for (const q of questions) {
   }
 }
 
+/* ---- 画面ID ---- */
+/* **番号は使い回しません。** 途中に差しこむと、過去のレビューの番号が別の画面を
+   指すようになります。抜けと重なりをここで止めます。絵そのものの撮り直しは
+   `npm run shots`（playwright が要るので CI では走らせない）。 */
+{
+  const { SCREENS } = await import("./screens.mjs");
+  const seen = new Set();
+  SCREENS.forEach((s, i) => {
+    if (!/^S-\d\d$/.test(s.id)) err("screens.mjs", `画面IDの形が違います: ${s.id}（S-01 の形）`);
+    if (seen.has(s.id)) err("screens.mjs", `画面IDが重なっています: ${s.id}`);
+    seen.add(s.id);
+    const want = `S-${String(i + 1).padStart(2, "0")}`;
+    if (s.id !== want) err("screens.mjs", `画面IDが飛んでいます: ${s.id}（${want} のはず）`);
+    if (!s.name || !s.note) err("screens.mjs", `${s.id} に name か note がありません`);
+    if (typeof s.go !== "function") err("screens.mjs", `${s.id} に go がありません`);
+  });
+  const shots = existsSync(join(ROOT, "docs/screens"))
+    ? (await readdir(join(ROOT, "docs/screens"))).filter(f => f.endsWith(".webp")).map(f => f.slice(0, -5))
+    : [];
+  const missing = SCREENS.filter(s => !shots.includes(s.id)).map(s => s.id);
+  const extra = shots.filter(id => !seen.has(id));
+  if (missing.length) warn(`画面の絵がまだありません（npm run shots）: ${missing.join(" / ")}`);
+  if (extra.length) warn(`一覧に無い画面の絵が残っています: ${extra.join(" / ")}`);
+  console.log(`\n画面 ・ ${SCREENS.length}面（絵 ${shots.length}枚） ・ docs/screens/index.html`);
+}
+
 /* ---- 写真の台帳 ---- */
 /* **台帳に載っていない webp が転がっていないか。**
    `git reset --hard` は追跡されていないファイルを消さないので、取り込んだあとに
