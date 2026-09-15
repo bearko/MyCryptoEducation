@@ -82,6 +82,55 @@ function startIntro() {
 
 function go(view) { S.view = view; render(); window.scrollTo(0, 0); }
 
+/**
+ * **画面ごとのID。** レビューで「どの画面の話か」を指すための番号です。
+ *
+ * レビューの単位は**ビューではなく状態**にしてあります。クイズは1つのビューですが、
+ * 4択・消去法・文字パネル・数値入力・レンジ・スワイプで見た目が別物なので、
+ * 「クイズ画面が変」と言われても直す先が決まりません。
+ *
+ * **番号は使い回しません。** 画面を足すときは末尾に足してください。途中に
+ * 差しこむと、過去のレビューの番号が別の画面を指すようになります。
+ *
+ * 一覧と、その画面の出し方は `scripts/screens.mjs` にあります。
+ * `npm run shots` が全画面を実際に開いて撮り、`docs/screens/` に並べます。
+ * **撮る側はここを呼んで照合するので、2つがズレたら撮影が落ちます。**
+ */
+function screenId() {
+  const v = S.view;
+  if (v === "quiz") {
+    const q = currentQ();
+    if (S.run.applied) return "S-12";
+    if (q && S.run.results[q.id] !== undefined) return "S-11";
+    if (S.run.intro) return "S-01";
+    return { choice: "S-05", elimination: "S-06", panel: "S-07",
+             numeric: "S-08", range: "S-09", swipe: "S-10" }[q ? modeOf(q) : "choice"] || "S-05";
+  }
+  if (v === "result") return S.run.swipe ? "S-13" : "S-14";
+  if (v === "heroes") return S.heroesTab === "codex" ? "S-16" : "S-15";
+  return { home: "S-02", map: "S-03", select: "S-04", hero: "S-17", target: "S-18",
+           challenge: "S-19", craft: "S-20", shop: "S-21", calendar: "S-22",
+           day: "S-23", mypage: "S-24" }[v] || "S-??";
+}
+
+/**
+ * **`#review` を付けて開くと、画面IDと設問IDが隅に出ます。**
+ * ふだんの画面には出しません——遊ぶ人に要らないものだからです。
+ * 実機で見ていて「ここが変」と思ったとき、その場で番号が読めます。
+ */
+function drawReviewTag() {
+  const on = location.hash.includes("review");
+  let el = document.getElementById("revtag");
+  if (!on) { el?.remove(); return; }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "revtag";
+    document.body.appendChild(el);
+  }
+  const q = S.view === "quiz" ? currentQ() : null;
+  el.textContent = [screenId(), q?.id].filter(Boolean).join(" ・ ");
+}
+
 function render() {
   // ホームだけ 100dvh の3層固定。それ以外は方眼紙のまま縦に流す
   const home = S.view === "home";
@@ -92,6 +141,7 @@ function render() {
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
      calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop, map: vMap }[S.view])();
   drawToast();
+  drawReviewTag();
   if (!(S.view === "quiz" && currentQ() && modeOf(currentQ()) === "swipe")) unbindSwipe();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);

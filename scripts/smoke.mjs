@@ -2006,6 +2006,44 @@ check("外せば元に戻る", (() => {
 })(), d.querySelector(".rnum b")?.textContent);
 ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
 
+/* ---- 画面ID ---- */
+/**
+ * **レビューで「どの画面の話か」を指すための番号。**
+ * `scripts/screens.mjs` の表と `views.screenId()` が同じことを言っているか、
+ * `npm run shots` が撮るたびに突き合わせます。ここでは、番号そのものが
+ * 画面ごとに分かれていることを見ます（1つでも取り違えると、指摘先がずれます）。
+ */
+{
+  const { SCREENS } = await import("./screens.mjs");
+  check("画面IDは24面ぶんある", SCREENS.length === 24, String(SCREENS.length));
+  check("画面IDは重なっていない", new Set(SCREENS.map(s => s.id)).size === SCREENS.length);
+  const at = (view, patch = "") => ev(`(() => { S.view = ${JSON.stringify(view)}; ${patch} return screenId(); })()`);
+  check("ホームは S-02", at("home") === "S-02", at("home"));
+  check("知識マップは S-03", at("map") === "S-03", at("map"));
+  check("ショップは S-21", at("shop") === "S-21", at("shop"));
+  check("ヒーローはタブで分かれる",
+    at("heroes", 'S.heroesTab = "own";') === "S-15" && at("heroes", 'S.heroesTab = "codex";') === "S-16");
+  // **出題は形式ごとに別の番号。** 見た目が別物なので、まとめると直す先が決まらない
+  const quizAt = mode => ev(`(() => {
+    const q = DB.questions.find(q => q.mode === ${JSON.stringify(mode)});
+    S.run = { ...S.run, ids: [q.id], i: 0, intro: false, hard: {}, results: {}, applied: null };
+    S.view = "quiz"; return screenId();
+  })()`);
+  check("4択は S-05", quizAt("choice") === "S-05", quizAt("choice"));
+  check("消去法は S-06", quizAt("elimination") === "S-06", quizAt("elimination"));
+  check("文字パネルは S-07", quizAt("panel") === "S-07", quizAt("panel"));
+  check("数値入力は S-08", quizAt("numeric") === "S-08", quizAt("numeric"));
+  check("レンジは S-09", quizAt("range") === "S-09", quizAt("range"));
+  check("スワイプは S-10", quizAt("swipe") === "S-10", quizAt("swipe"));
+  // 答えたあとは解説、そこから応用編。**同じビューでも別の画面として数える**
+  check("答えたあとは S-11", ev(`(() => {
+    const id = S.run.ids[0]; S.run.results[id] = "ok"; return screenId(); })()`) === "S-11");
+  check("応用編は S-12", ev(`(() => { S.run.applied = { picked: null }; return screenId(); })()`) === "S-12");
+  ev('S.run.applied = null; S.run.results = {}; S.view = "home";');
+  // **`#review` を付けたときだけ番号を出す。** ふだんの画面には出さない
+  check("ふだんは画面IDを出さない", d.getElementById("revtag") === null);
+}
+
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));
 console.log(failed ? `\n${failed}件 失敗\n` : "\nすべて通過\n");
 process.exit(failed ? 1 : 0);

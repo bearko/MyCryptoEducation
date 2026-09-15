@@ -835,3 +835,9 @@
     .choice.art .cart,.choice.art .cart svg{width:72px}
     .choice.art .cart img{width:72px;height:56px}
   }
+
+/* レビュー用の画面ID。`#review` を付けて開いたときだけ出る。
+   ふだんの画面には出さない（遊ぶ人に要らないもの） */
+#revtag{position:fixed;right:6px;bottom:6px;z-index:9999;pointer-events:none;
+  font:600 10px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em;
+  background:rgba(23,36,63,.86);color:#fff;border-radius:5px;padding:3px 7px}
