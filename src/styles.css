@@ -841,3 +841,35 @@
 #revtag{position:fixed;right:6px;bottom:6px;z-index:9999;pointer-events:none;
   font:600 10px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em;
   background:rgba(23,36,63,.86);color:#fff;border-radius:5px;padding:3px 7px}
+
+  /* ---- 初回起動（決定1）---- */
+  /* **問題と解答だけにする。** 学年も段もヒントも出さない。
+     難しくなっていくことは、解いていれば分かる */
+
+  /* **上は空けたままにしておく。** あとでここに演出が入るので、
+     いま別のものを置くと、入れるときに動かすことになる */
+  .introtop{height:clamp(72px,16dvh,150px)}
+
+  .pad.intro{display:flex;flex-direction:column;min-height:calc(100dvh - clamp(72px,16dvh,150px))}
+  /* 設問は上下の真ん中に置く。読む場所が毎問そこに決まる */
+  .pad.intro .qstem,.pad.intro .qtext{text-align:center}
+  .pad.intro .qtext{font-size:19px;margin:0 0 26px}
+  /* 穴のあいた文のほうを大きく出す。問いかけは添えるだけ */
+  .pad.intro .qstem{font-size:29px;margin:0 0 14px;line-height:1.6}
+  /* **余白は上下に分ける。** 設問だけを上に寄せると、真ん中が大きく空いて
+     「まだ何かあるのか」と下を探すことになる。auto を2つ置くと、
+     空いたぶんが設問の上と下へ均等に割れる */
+  .pad.intro > :first-child{margin-top:auto}
+  .pad.intro .choices,.pad.intro .numbox,.pad.intro .pgrid,
+  .pad.intro .rangebox{margin-top:auto;padding-bottom:8px}
+  .pad.intro .hints:empty{display:none}
+
+  /* **短い選択肢は2×2。** 縦に4つ積むと目が上から下へ流れるが、
+     碁盤に置くと4つが一度に目に入る */
+  .choices.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choices.grid2 .choice{text-align:center;font-family:var(--mincho);font-size:30px;
+    padding:26px 10px;line-height:1.2}
+  @media (max-height:700px){
+    .choices.grid2 .choice{font-size:25px;padding:18px 10px}
+    .pad.intro .qstem{font-size:25px}
+  }
