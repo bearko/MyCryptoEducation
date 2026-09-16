@@ -413,7 +413,15 @@
       "alt": "年配の男性の肖像画。画中に名前は書かれていない",
       "titleFree": true,
       "use": "sansu-105（応用編が名前を問うので、名前の写っていない肖像が要る）",
-      "where": "prompt"
+      "where": "prompt",
+      "file": "gauss-portrait",
+      "title": "Portrait of Carl Friedrich Gauß (1777-1855)",
+      "author": "Christian Albrecht Jensen",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ACarl%20Friedrich%20Gauss%201840%20by%20Jensen.jpg",
+      "width": 640,
+      "height": 815
     },
     "eniac": {
       "search": "ENIAC",
@@ -452,7 +460,15 @@
       "alt": "パンがひとかたまり、そのまま置かれている写真",
       "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-pan",
+      "title": "Loaf of sourdough bread cooling",
+      "author": "Nutrition, Food Safety &amp; Health",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3ALoaf%20of%20sourdough%20bread%20cooling.jpg",
+      "width": 640,
+      "height": 533
     },
     "obj-tamago": {
       "search": "chicken eggs",
@@ -476,7 +492,15 @@
       "alt": "犬が一匹、全身が見える向きで立っている写真",
       "titleFree": true,
       "use": "kokugo-012（絵の選択肢）",
-      "where": "lesson"
+      "where": "lesson",
+      "file": "obj-inu",
+      "title": "Dog-2617516 1920",
+      "author": "Joanna Malinowska",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3ADog-2617516%201920.jpg",
+      "width": 640,
+      "height": 427
     }
   }
 }
