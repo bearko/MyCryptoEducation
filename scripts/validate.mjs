@@ -542,8 +542,10 @@ for (const [key, p] of Object.entries(imageBook.images || {})) {
         `題名「${p.title || ""}」の表示が条件なので伏せられません。PD・CC0 を採り直してください`);
 }
 
-// 使い先を書いたまま配線し忘れると、取り込んだ写真が誰の目にも触れない
-const usedPhotos = new Set(questions.filter(q => q.image).map(q => q.image));
+/* 使い先を書いたまま配線し忘れると、取り込んだ写真が誰の目にも触れない。
+   **`choiceArt` も数えます** —— `image` だけ見ていたので、絵の選択肢に使っている
+   4枚が「参照されていません」と出ていました */
+const usedPhotos = new Set(questions.flatMap(q => [q.image, ...(q.choiceArt || [])]).filter(Boolean));
 for (const [key, p] of Object.entries(imageBook.images || {})) {
   if (p.use && p.file && !usedPhotos.has(key))
     warn(`写真「${key}」は取り込み済みですが、どの問題からも参照されていません（使い先: ${p.use}）`);

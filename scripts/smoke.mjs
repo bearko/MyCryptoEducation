@@ -406,10 +406,12 @@ ev(`(() => {
             results: {}, noReward: true, done: false, hard: {}, plan: [] };
   S.view = "quiz"; render();
 })()`);
+/* **絵は図版でも写真でもよい。** `svg` で数えていたので、写真に差し替えた
+   とたんに 0 になりました。包み（`.cart`）で数えれば、どちらでも通ります */
 check("語のかわりに絵が出る",
-  d.querySelectorAll(".choices .choice.art svg").length ===
+  d.querySelectorAll(".choices .choice.art .cart").length ===
   ev(`DB.byId["${artQ}"].choices.length`),
-  String(d.querySelectorAll(".choices .choice.art svg").length));
+  String(d.querySelectorAll(".choices .choice.art .cart").length));
 // **語は1文字も画面に出ていない。** 出た時点で、絵にした意味が消える
 check("答える前は語がどこにも出ていない", ev(`(() => {
   const t = document.getElementById("app").textContent;
@@ -464,7 +466,9 @@ check("題名の要る写真は絵の選択肢に出ない", ev(`(() => {
   const by = Object.keys(DB.photos).filter(k => DB.photos[k].file &&
     /^cc by/i.test(DB.photos[k].license || ""));
   if (!by.length) return "skip";
-  q.choiceArt = [by[0], ...JSON.parse(window.__art).slice(1)];
+  /* **4枠とも題名の要る写真にして見る。** 1枠だけ差し替えると、残りの枠に
+     入っている使える写真が数に混ざって、判定にならない */
+  q.choiceArt = q.choices.map(() => by[0]);
   S.run.picked = null; render();
   const cred = document.querySelector(".cartcred")?.textContent || "";
   return document.querySelectorAll(".choice.art .cart img").length === 0
