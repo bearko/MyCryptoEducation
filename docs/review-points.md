@@ -910,3 +910,38 @@ run を畳んでから調べるようにしましたが、**この式は他の�
       他にもあるので、揃えるかどうかは未決です**
 - [ ] validate の「同じ問題文」の検査は `stem` と `prompt` を合わせて見るようにしました。
       これをしないと、`stem` が広まったとき `○に入るのは?` だらけになって衝突します
+
+## 18. 画像取得の分担が確定しました ← 新規
+
+**私はコモンズから取れません。** 推測ではなく、proxy のログで確認しました。
+
+```
+commons.wikimedia.org:443 - gateway answered 403 to CONNECT (policy denial)
+upload.wikimedia.org:443  - 同上
+ja.wikipedia.org:443      - 同上
+www.wikidata.org:443      - 同上
+```
+
+`WebFetch` も同じ理由で弾かれます（`EGRESS_BLOCKED`）。**ただし `WebSearch` は通ります。**
+
+| | できること | できないこと |
+|---|---|---|
+| Claude | コモンズを検索して **File 名を決める** | 画像を取ってくること |
+| あなた | 取ってくること・**目で見ること** | — |
+
+**これで往復が1回になります。** 台帳の `commons` に File 名が入っていれば、
+手元での作業は `node scripts/fetch-commons.mjs` だけです。
+
+- [x] 残っていた3枚の File 名を書き込みました
+  - `obj-pan` → `File:Loaf of sourdough bread cooling.jpg`（CC0）
+  - `obj-inu` → `File:Dog-2617516 1920.jpg`（CC0）
+  - `gauss-portrait` → `File:Carl Friedrich Gauss 1840 by Jensen.jpg`（PD）
+- [ ] **3枚とも、私は見ていません。** ライセンスは検索結果の記載で、
+      **本当の判定は取り込み時に機械が見ます**（`allow` に無ければ採らない）。
+      写っているものが適切かは、採ったあと目で確かめてください
+- [ ] 外れていたときの差し替え候補（どれも CC0）
+  - パン … `File:French Boule Bread.jpg` / `File:Loaf of Bread (Unsplash tm3Diid694Y).jpg`
+  - 犬 … `File:Dog (Unsplash).jpg` / `File:Goldendoodle standing.jpg`
+- [ ] **`npm run pick:commons` は作りすぎでした。** 「私が探せない」という前提で
+      組んだものです。前提が変わったので、いまは**自分で選びたいときの道具**に
+      格下げしています。消してはいません（実体引きはこちらにも効くため）

@@ -407,6 +407,7 @@
       "height": 747
     },
     "gauss-portrait": {
+      "commons": "File:Carl Friedrich Gauss 1840 by Jensen.jpg",
       "entity": "カール・フリードリヒ・ガウス",
       "wikipedia": "カール・フリードリヒ・ガウス",
       "alt": "年配の男性の肖像画。画中に名前は書かれていない",
@@ -445,6 +446,7 @@
       "height": 427
     },
     "obj-pan": {
+      "commons": "File:Loaf of sourdough bread cooling.jpg",
       "entity": "食パン",
       "wikipedia": "食パン",
       "alt": "パンがひとかたまり、そのまま置かれている写真",
@@ -468,6 +470,7 @@
       "height": 480
     },
     "obj-inu": {
+      "commons": "File:Dog-2617516 1920.jpg",
       "entity": "イヌ",
       "wikipedia": "イヌ",
       "alt": "犬が一匹、全身が見える向きで立っている写真",
