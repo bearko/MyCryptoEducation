@@ -3250,10 +3250,10 @@
     "newCurriculum": false,
     "figure": null,
     "format": "choice",
-    "image": "gauss",
+    "image": "gauss-portrait",
     "imageAt": "prompt",
     "hideTitle": true,
-    "alt": "緑色の古い切手に刷られた、年配の男性の横顔ぎみの肖像",
+    "alt": "黒い帽子をかぶった年配の男性の肖像画",
     "prompt": "この人が少年のころ使ったとされる、「1から100までの和を速く出す」足し方は?",
     "choices": [
       "小さい順に1つずつ足す",

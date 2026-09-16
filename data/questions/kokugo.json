@@ -414,10 +414,10 @@
     "card": "かたかなで書く言葉",
     "level": 1,
     "choiceArt": [
-      "ja-yama",
-      "ja-pan",
-      "ja-tamago",
-      "ja-inu"
+      "obj-yama",
+      "obj-pan",
+      "obj-tamago",
+      "obj-inu"
     ]
   },
   {

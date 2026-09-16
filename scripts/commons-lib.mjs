@@ -61,7 +61,20 @@ export const usability = (license, { allow, titleFree }) => {
 
 /* ---- 文字列の掃除 ---- */
 
-const stripTags = s => String(s || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+/* **タグを外したら、実体参照も戻します。** コモンズの Artist 欄は HTML なので
+   `&amp;` がそのまま残り、画面には「Nutrition, Food Safety &amp; Health」と出ます
+   （views の esc がもう一度エスケープするため）。実際にそうなりました */
+const ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", "#39": "'" };
+const decode = s => String(s || "").replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (m, e) => {
+  const k = e.toLowerCase();
+  if (k in ENTITIES) return ENTITIES[k];
+  if (k[0] === "#") {
+    const n = k[1] === "x" ? parseInt(k.slice(2), 16) : parseInt(k.slice(1), 10);
+    return Number.isFinite(n) ? String.fromCodePoint(n) : m;
+  }
+  return m;
+});
+const stripTags = s => decode(String(s || "").replace(/<[^>]*>/g, "")).replace(/\s+/g, " ").trim();
 /** 題名に構造化データの多言語ラベルが続くことがある（700字超）。QS: の手前で切る */
 export const cleanTitle = s => stripTags(s).replace(/\s*(?:title|label)\s+QS:.*$/s, "").trim();
 /** Artist 欄が同じ語を二度返すことがある（"Unknown authorUnknown author"） */
