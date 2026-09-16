@@ -239,8 +239,15 @@ for (const q of questions) {
       err(id, "応用編の answer が範囲外です");
   }
 
+  /* **`stem` は穴のあいた文のほう。** 問題文の上に大きく出て、`prompt` は
+     「○に入るのは?」のような短い問いかけになる。**同一判定には両方入れる** ——
+     stem を使うほど prompt が短く似てくるので、prompt だけで見ると
+     別の問題が「同じ問題文」に見える */
+  if (q.stem !== undefined && (typeof q.stem !== "string" || !q.stem.trim()))
+    err(id, "stem は空でない文字列にしてください");
+
   (promptsBySubject[q.subject] ??= new Map());
-  const key = q.prompt.replace(/\s/g, "");
+  const key = `${q.stem || ""}${q.prompt}`.replace(/\s/g, "");
   if (promptsBySubject[q.subject].has(key))
     err(id, `同じ教科に同一の問題文があります（${promptsBySubject[q.subject].get(key)}）`);
   promptsBySubject[q.subject].set(key, q.id);

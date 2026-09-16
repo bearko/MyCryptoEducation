@@ -731,15 +731,28 @@ function vQuiz() {
   // スワイプは画面ごと別。束で出るので、ふつうのセッションの途中にも現れる
   if (mode === "swipe") return vSwipe();
   const place = q.country ? `<b>${esc(q.country)}</b>` : `日本 <b>${esc(q.gradeLabel)}</b>`;
+  /**
+   * **初回起動は、問題と解答だけにします**（決定1）。
+   *
+   * 国・学年・教科・進み具合・単元・段・ヒント——どれも出しません。
+   * **難しくなっていくことは、解いていれば分かります。** 先に数字で言うと、
+   * 「教わらずにできた」で始めるという狙いが崩れます。
+   *
+   * 画面の上は**空けたままにしてあります**（`.introtop`）。あとでここに
+   * 演出が入るので、いま別のものを置くと、入れるときに動かすことになります。
+   */
+  const intro = !!S.run.intro;
 
   app.innerHTML = `
+  ${intro ? `<div class="introtop"></div>` : `
   <header><div class="hbar">
     <div class="place">${place} ・ ${esc(q.subject)}</div>
     <div class="score">${S.run.i + 1} / ${S.run.ids.length}</div></div>
-    ${planStrip()}</header>
-  <div class="pad">
-    <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
-      <span class="unit">${esc(q.unit)}</span>${levelChip(q, mode)}</div>
+    ${planStrip()}</header>`}
+  <div class="pad${intro ? " intro" : ""}">
+    ${intro ? "" : `<div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
+      <span class="unit">${esc(q.unit)}</span>${levelChip(q, mode)}</div>`}
+    ${q.stem ? `<div class="qstem">${esc(q.stem)}</div>` : ""}
     <div class="qtext">${esc(q.prompt)}</div>
     ${photoAt(q, "prompt")}
     ${q.figure ? `<div class="figure">${DB.figures[q.figure]}</div>` : ""}
@@ -766,8 +779,11 @@ function vQuiz() {
         <button class="btn" id="rsubmit" disabled>この幅で答える</button>
         <p class="fine">狭く答えるほど高い点になります。紀元前はマイナスで書いてください（例 −221）。</p>
       </div>`
-    : `${modeBand(q, mode)}
-      <div class="choices${mode === "elimination" ? " elim" : ""}">${q.choices.map((t, i) => {
+    : `${intro && mode === "choice" ? "" : modeBand(q, mode)}
+      <div class="choices${mode === "elimination" ? " elim" : ""}${
+        /* **短い選択肢は2×2に並べます。** 「は・を・わ・に」を縦に4つ積むと、
+           読む前に目が上から下へ流れます。碁盤に置くと4つが一度に目に入ります */
+        intro && mode === "choice" && q.choices.every(c => [...String(c)].length <= 6) ? " grid2" : ""}">${q.choices.map((t, i) => {
       const art = choiceArtHTML(q, i);
       const cls = "choice" + (art ? " art" : "");
       return mode === "elimination"
@@ -782,16 +798,17 @@ function vQuiz() {
           まちがえて消すとそこで終わりますが、消せたぶんの点は残ります。</p>
         <div class="elimbar">
           <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
-    <div class="hero-row">
+    ${intro ? "" : `<div class="hero-row">
       <img class="ava" src="${assetPath.hero(h.id)}" alt="">
       <div><div class="hero-name">${esc(h.name)}</div>
         <div class="hero-fit ${fit ? "good" : ""}">${fit
           ? "この分野が得意 ・ ヒント3段階" : "専門外 ・ ヒントは2段階まで"}</div></div>
-      <button class="hintbtn" id="hint">ヒント</button></div>
+      <button class="hintbtn" id="hint">ヒント</button></div>`}
     <div class="hints" id="hints"></div><div id="verdict"></div>
   </div>`;
 
-  document.getElementById("hint").onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
+  const hintBtn = document.getElementById("hint");
+  if (hintBtn) hintBtn.onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
   if (mode === "elimination") wireElimination(q);
   else if (mode === "panel") wirePanel(q);
   else if (mode === "numeric") wireNumeric(q);

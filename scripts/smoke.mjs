@@ -63,10 +63,34 @@ check("説明もチュートリアルも出さない",
   !/チュートリアル|はじめに|遊び方|使い方/.test(txt()), txt().slice(0, 80));
 check("1問目は4択だけ", modeNow() === "choice", modeNow());
 check("数問で切り上げる", ev("S.run.ids.length") === 5, `${ev("S.run.ids.length")}問`);
+
+/* **問題と解答だけにする。** 学年も段も単元も進み具合もヒントも出さない。
+   難しくなっていくことは解いていれば分かるので、先に数字で言うと
+   「教わらずにできた」で始めるという狙いが崩れる */
+check("初回に学年チップを出さない", !d.querySelector(".qmeta"), txt().slice(0, 60));
+check("初回に段（Lv.）を出さない", !/Lv\./.test(txt()), txt().slice(0, 60));
+check("初回に進み具合を出さない", !d.querySelector(".score"), d.querySelector(".score")?.textContent);
+check("初回にヒントを出さない", !d.getElementById("hint") && !d.querySelector(".hero-row"));
+check("初回の4択に帯を出さない", !d.querySelector(".band"), d.querySelector(".band")?.textContent);
+// **上は空けておく。** あとで演出が入る場所なので、いま別のものを置かない
+check("上に場所を空けてある", !!d.querySelector(".introtop"));
+check("空けた場所には何も入れない", (d.querySelector(".introtop")?.textContent || "") === "");
+// **短い選択肢は2×2。** 縦に4つ積むと、読む前に目が上から下へ流れる
+check("短い選択肢は2×2に並べる", !!d.querySelector(".choices.grid2"),
+  d.querySelector(".choices")?.className);
+// 穴のあいた文は、問いかけと分けて大きく出す
+check("穴のあいた文は別に大きく出す", !!d.querySelector(".qstem"), txt().slice(0, 50));
+check("その文と問いかけは別のもの",
+  ev('DB.byId[S.run.ids[0]].stem') !== ev('DB.byId[S.run.ids[0]].prompt'));
+
 // 1〜2問目は4択。3問目から難モードがすっと現れる（説明はしない）
 answerNow(); d.getElementById("next")?.click();
 check("2問目も4択", modeNow() === "choice", modeNow());
 answerNow(); d.getElementById("next")?.click();
+/* **消去法の帯だけは出す。** ✕ が何をするものかは、そこにしか書いていない。
+   ここで帯が初めて現れることが、難モードが来た合図にもなる */
+check("難モードの帯は初回でも出す", !!d.querySelector(".band.cut"),
+  d.querySelector(".band")?.textContent);
 check("3問目から難モードが現れる", ev(`(() => {
   const q = DB.byId[S.run.ids[S.run.i]];
   // その問題に難モードが割り当たっていれば、もう4択には固定されない

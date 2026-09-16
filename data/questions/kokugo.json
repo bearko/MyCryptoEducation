@@ -366,7 +366,8 @@
     "newCurriculum": false,
     "figure": null,
     "format": "choice",
-    "prompt": "「ぼく□がっこうへいく。」の□に入るのはどれ?",
+    "stem": "ぼく○がっこうへいく。",
+    "prompt": "○に入るのは?",
     "choices": [
       "は",
       "を",
