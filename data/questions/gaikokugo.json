@@ -3075,5 +3075,122 @@
     "tip": "文の組み立て方が違うと、考えを並べる順番まで変わる。翻訳は、並べ直す作業でもあるのだ。",
     "card": "because と語順",
     "level": 2
+  },
+  {
+    "id": "gaikokugo-105",
+    "chapter": 0,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "複数形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「box」の複数形は?",
+    "choices": [
+      "boxs",
+      "boxes",
+      "boxies",
+      "box"
+    ],
+    "answer": 1,
+    "hints": [
+      "語尾が x で終わる名詞だ。",
+      "s・x・ch・sh で終わる語には、決まった形を付ける。",
+      "そのまま s を付けると発音しにくい。"
+    ],
+    "lesson": "box → **boxes**。s・x・ch・sh で終わる語には **-es** を付ける（bus→buses, watch→watches）。子音が続いて発音しにくいので母音をはさむ、という理由による。y で終わる語は y→ies（city→cities）だ。**つづりの決まりは、たいてい言いやすさから来ている。**",
+    "tip": "書き方の決まりの多くは、音の都合が先にある。読み上げてみると、理由が分かることが多い。",
+    "card": "複数形の -es",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-106",
+    "chapter": 0,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "受け身",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "stem": "This book ___ by many people.",
+    "prompt": "「この本は多くの人に読まれています」の ___ に入るのは?",
+    "choices": [
+      "reads",
+      "is read",
+      "is reading",
+      "has read"
+    ],
+    "answer": 1,
+    "hints": [
+      "本は「読む」側ではなく「読まれる」側だ。",
+      "受け身は be動詞 + 過去分詞 で表す。",
+      "read の過去分詞は、つづりが原形と同じである。"
+    ],
+    "lesson": "This book **is read** by many people. 受け身は **be動詞 + 過去分詞**。read は原形・過去形・過去分詞がすべて read とつづりが同じだが、発音は過去形・過去分詞が「レッド」になる。**行為をする側ではなく、される側を主語にしたいとき**に受け身を使う。",
+    "tip": "誰がしたかを言わずに済むのが受け身の便利さであり、こわさでもある。主語を隠せてしまうのだ。",
+    "card": "受け身（be + 過去分詞）",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-107",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "自己紹介",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「わたしはサッカーが好きです」を英語で言うと?",
+    "choices": [
+      "I like soccer.",
+      "I am soccer.",
+      "I play soccer.",
+      "I have soccer."
+    ],
+    "answer": 0,
+    "hints": [
+      "「好きだ」という気持ちを表す動詞を使う。",
+      "play は「する」、have は「持っている」だ。",
+      "like のあとに、好きなものを置く。"
+    ],
+    "lesson": "I like soccer. **like は「好む」という動作を表す動詞**なので、be動詞は使わない。I am soccer. だと「わたしはサッカーです」になってしまう。**日本語の「です」につられて be動詞を使う**のは、いちばん多い間違いのひとつだ。",
+    "tip": "日本語の「〜です」は、英語の be動詞 とは重ならない。訳ではなく、文の役割で選ぶ必要がある。",
+    "card": "like と be動詞の使い分け",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-108",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "道案内",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「まっすぐ行ってください」を英語で言うと?",
+    "choices": [
+      "Turn right.",
+      "Go straight.",
+      "Stop here.",
+      "Come back."
+    ],
+    "answer": 1,
+    "hints": [
+      "曲がらずに、そのまま進むように伝える。",
+      "straight は「まっすぐ」という意味だ。",
+      "turn は「曲がる」ときに使う。"
+    ],
+    "lesson": "Go straight. が「まっすぐ行く」。道案内では Turn right / Turn left（右・左に曲がる）、at the corner（角で）、on your right（右手に）などを組み合わせる。**命令形は主語を置かずに動詞から始める**——相手に向けた指示だと分かっているためだ。",
+    "tip": "道案内は、相手の立場から言い直す練習になる。自分の右と相手の右は、向かい合えば逆になる。",
+    "card": "道案内の言い方",
+    "level": 1
   }
 ]
