@@ -97,7 +97,10 @@ for (const s of targets) {
       await page.evaluate(() => { window.scrollTo(0, 0); render(); });
       await page.waitForTimeout(350);
     }
-    const png = await page.screenshot({ fullPage: !cut });
+    /* **`position:fixed` のものは、全面撮りだと写りません**（つなぎ合わせる
+       ときに描き直されないため）。カットインのように画面に重なるものは、
+       表示領域のぶんだけ撮ります（`viewport: true`） */
+    const png = await page.screenshot({ fullPage: !cut && !s.viewport });
     const webp = await sharp(png).webp({ quality: 82 }).toBuffer();
     const meta = await sharp(webp).metadata();
     await writeFile(join(OUT, `${s.id}.webp`), webp);

@@ -11,6 +11,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          unlockedBy, questionOpen,
          subjectGrade, subjectLabel, drawSubjects, enemyOf,
          heroHit, heroMaxHp, foeMaxHp, foeHit, battleBonus, ATTACK_RATE,
+         skillChance, skillHit, skillName,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
@@ -137,6 +138,9 @@ function screenId() {
   const v = S.view;
   if (v === "quiz") {
     const q = currentQ();
+    /* 必殺技は、下に何があっても見た目がそちらに変わるので別の番号にする */
+    if (document.querySelector(".skcut")) return "S-33";
+    if (S.run.skill === "offer") return "S-32";
     /* ポップアップは、下の画面が何であれ見た目がそれに変わるので別の番号にする */
     if (S.run.hintOpen) return "S-27";
     if (S.run.settingOpen) return "S-28";
@@ -619,7 +623,7 @@ function startRun(opts = {}) {
             shortage: opts.ids || built.plan.length >= BLOCKS || swipe ? 0 : 1,
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
             cut: null, intro: !!opts.intro, swipe, plan: built.plan, verdict: null,
-            hintOpen: false, gate: null, mark: null,
+            hintOpen: false, gate: null, mark: null, skill: null,
             waves: [], countedKills: 0, battle: null, settingOpen: false };
   /* 初回起動は問題と解答だけにするので、バトルを立てません（決定1） */
   if (!opts.intro && ids.length) startBattle();
@@ -1036,6 +1040,19 @@ function vWaveEnd(rec) {
         <div><b>${w.appliedRight}</b><span>応用も突破</span></div>
         <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
       </div>
+      ${w.cleared ? "" : `
+      <!-- 逃げられたときだけ、手の打ち方を言う。**罰ではなく道順です**（原則3） -->
+      <div class="wv-tip">
+        <img src="${assetPath.navi("navi_ain_07_talk")}" alt="マイちゃん">
+        <div>
+          <b>エネミーを倒すには</b>
+          <ul>
+            <li>・ヒーローのレベルを上げて強化</li>
+            <li>・応用問題に挑戦して追加攻撃</li>
+          </ul>
+          <p>を試してみよう!</p>
+        </div>
+      </div>`}
       ${S.run.noReward ? `<p class="fine">記録からの再挑戦なので、何も増えていません。</p>`
       : `<div class="wv-loot">
         ${found.length ? [...new Set(found)].map(id => `<span class="fnd sm">
@@ -1200,6 +1217,7 @@ function vQuiz() {
 function replayVerdict(q, h) {
   const v = S.run.verdict;
   if (!v || v.qid !== q.id) return;
+  if (v.skill) return S.run.skill === "offer" ? drawSkillOffer(q, h) : drawSkillPanel(q, h);
   if (v.note) return drawNoteOnly(q, h);
   drawVerdict(q, h, v.ok, v.gum, v.rangeScore ?? null, v.found, v.opened || [], true);
 }
@@ -1804,6 +1822,15 @@ function onPick(idx, forcedOk = null) {
    * **ただし注釈（`note`）は飛ばしません。** 表記のゆれのように、
    * 知らないと次にぶつかったとき迷うものを置く欄なので、解説を省く設定でも出します。
    */
+  /* **解説を省いていても、隙を見せた問題では必殺技の入口を出します。**
+     応用編は解説の中にしか置いていなかったので、テンポ優先モードの人は
+     いつまでも挑めませんでした（`docs/review-points.md` §24） */
+  if (ok && !S.settings.showExplanationOnCorrect && skillOpen(q)) {
+    S.run.tipOpen = false; S.run.applied = null;
+    S.run.skill = "offer"; S.run.verdict = { qid: q.id, skill: true };
+    drawSkillOffer(q, h);
+    return;
+  }
   if (ok && !S.settings.showExplanationOnCorrect && q.note) {
     S.run.tipOpen = false; S.run.applied = null;
     drawNoteOnly(q, h);
@@ -1820,6 +1847,97 @@ function onPick(idx, forcedOk = null) {
 
   S.run.tipOpen = false; S.run.applied = null;
   drawVerdict(q, h, ok, gum, null, found, opened);
+}
+
+/* ---------- 必殺技（英雄のパッシブスキル） ---------- */
+
+/**
+ * **この問題で敵が隙を見せるか。**
+ *
+ * 解説を省く設定だと、応用編にたどり着く道がありませんでした
+ * （応用編のボタンは解説の中にしか無いため）。そこを開ける入口です。
+ *
+ * **サイコロは振りません**（`engine.skillChance`）。問題IDと英雄から
+ * 決まるので、出るまで引き直すことはできません。初回起動では出しません
+ * （決定1・バトルそのものを立てないため）。
+ */
+const skillOpen = q => !S.run.intro && !!S.run.battle &&
+  skillChance(q, S.run.battle.heroId);
+
+/** 「必殺技発動チャンス!」。**押さずに進むこともできます** */
+function drawSkillOffer(q, h) {
+  const b = S.run.battle;
+  const slot = document.getElementById("verdict");
+  if (!slot) return;
+  slot.innerHTML = `
+  <div class="skmodal" id="skmodal"><div class="msheet sksheet">
+    <img class="bt-ch skface" src="${assetPath.hero(b.heroId)}" alt="">
+    <b class="sktitle">必殺技発動チャンス!</b>
+    <p class="skwhy">敵が隙を見せた! 応用問題を解いて必殺技を発動しよう!</p>
+    <button class="btn" id="skgo">応用問題にチャレンジ!</button>
+    <button class="btn ghost" id="skskip">つぎへ</button>
+  </div></div>`;
+  document.getElementById("skgo").onclick = () => {
+    S.run.skill = "open";
+    S.run.applied = { picked: null, ok: false, hint: false };
+    drawSkillPanel(q, h);
+  };
+  document.getElementById("skskip").onclick = () => { S.run.skill = null; advance(); };
+}
+
+/**
+ * 応用編だけを出す小さい判定。**解説は出しません** —— 解説を省く設定の
+ * 人に向けた画面なので、ここで本文を出すと設定を裏切ることになります。
+ */
+function drawSkillPanel(q, h) {
+  document.getElementById("verdict").innerHTML = `
+  <div class="verdict"><div class="vhead ok">正解。敵が隙を見せた。</div>
+    <div class="lesson">
+      <div class="speaker"><img class="ava sm" src="${assetPath.hero(h.id)}" alt="">
+        <span>${esc(h.name)}</span></div>
+      <p>応用編を抜けると、${esc(skillName(DB.battle, S.run.battle.heroId) || "必殺技")}が出る。</p>
+    </div>
+    <div id="tipslot"></div><div id="exslot"></div><div class="stack" id="acts"></div></div>`;
+  drawApplied(q, true); drawActions(q, true);
+}
+
+/**
+ * **必殺技のカットイン。** MCH の `Style/Cutins/passive_skill_cutin.css` を
+ * 写したものです（斜めの帯・色ドッジの光・2倍のドット絵・縁取りの技名）。
+ * 帯が流れきってから、敵に `SKILL_POWER` 倍の一撃が入ります。
+ */
+const SKILL_CUT_MS = 1200;
+
+/**
+ * 帯を出すところだけ。**消すのは呼ぶ側です** —— 絵として撮りたいときに、
+ * 1.2秒の勝負をしなくて済みます（`npm run shots` が S-33 でそうします）。
+ *
+ * **`app` の下に置かないでください。** カットインの最中に `render()` が
+ * 走ると、`app.innerHTML` ごと消えます（実際に消えました）。
+ * `position:fixed` なので、body に置いても見た目は変わりません。
+ */
+function skillCutIn(heroId, name) {
+  const el = document.createElement("div");
+  el.className = "skcut";
+  el.innerHTML = `<div class="skcut-band"><span class="skcut-shine"></span></div>
+    <div class="skcut-unit"><img src="${assetPath.hero(heroId)}" alt="">
+      <p>${esc(name)}</p></div>`;
+  document.body.appendChild(el);
+  return el;
+}
+
+function fireSkill() {
+  const b = S.run.battle;
+  if (!b || S.run.skill === "fired") return;
+  S.run.skill = "fired";
+  const hit = skillHit(DB.battle, b.heroId);
+  const el = skillCutIn(b.heroId, skillName(DB.battle, b.heroId));
+  setTimeout(() => {
+    el.remove();
+    if (!b.down) { b.foeHp = Math.max(0, b.foeHp - hit); if (b.foeHp === 0) b.kills++; }
+    b.fx = "foe"; drawBattle();
+    setTimeout(() => { b.fx = null; drawBattle(); }, 460);
+  }, SKILL_CUT_MS);
 }
 
 /**
@@ -1925,6 +2043,9 @@ function onAppliedPick(q, ok, idx) {
     S.cells[cellKey(q)] = "st";
     S.cards[q.card + "（応用）"] = true;
     if (!S.run.noReward) rollCrystal(q, gumFor(q));   // 応用を抜けたら抽選がもう1回
+    /* **応用編を抜けると必殺技が出ます。** 動くのは敵の体力だけで、
+       GUM も知識カードも増えません（原則3-2・原則6） */
+    if (S.run.battle && skillOpen(q)) fireSkill();
   }
   drawApplied(q, ok); drawActions(q, ok);
 }
@@ -1974,7 +2095,7 @@ function advance() {
   }
   S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null;
   S.run.tipOpen = false; S.run.applied = null; S.run.settingOpen = false;
-  S.run.verdict = null; S.run.hintOpen = false;
+  S.run.verdict = null; S.run.hintOpen = false; S.run.skill = null;
   battleStep();
   const done = S.run.i >= S.run.ids.length;
   if (done) finishRun();

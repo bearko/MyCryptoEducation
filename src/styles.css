@@ -1003,6 +1003,49 @@
     background:none;border:1px solid var(--line);border-radius:4px;color:var(--ink-soft)}
   .gear:hover{border-color:var(--ink-faint)}
 
+  /* ---- 必殺技（英雄のパッシブスキル）--------------------------------
+     入口のポップアップと、発動のカットイン。カットインは MCH の
+     `Style/Cutins/passive_skill_cutin.css` を写したもの——斜めの帯、
+     色ドッジの光、2倍のドット絵、四方に縁を付けた技名                  */
+  .skmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;
+    justify-content:center;background:rgba(23,36,63,.35);padding:22px}
+  .sksheet{align-items:center;text-align:center;gap:12px}
+  .skface{width:96px;height:96px;image-rendering:pixelated;transform:scaleX(-1);
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,.28))}
+  .sktitle{font:700 19px/1.3 var(--mincho);color:var(--brass);letter-spacing:.04em}
+  .skwhy{margin:0;font-size:13.5px;line-height:1.7}
+  .sksheet .btn{width:100%}
+
+  .skcut{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
+  .skcut-band{position:absolute;left:0;top:50%;width:100%;height:132px;
+    transform:translateY(-50%) skewY(-10deg);
+    background:linear-gradient(to right bottom,#609da8 0,#609da8 50%,#282b33 0,#282b33);
+    box-shadow:0 1px 2px rgba(0,0,0,.5);
+    animation:skBand 1.2s cubic-bezier(.2,.8,.3,1) both}
+  .skcut-shine{position:absolute;inset:0;mix-blend-mode:color-dodge;
+    background:linear-gradient(180deg,#024,#059 20%,#059 80%,#024);
+    animation:skShine .6s linear infinite alternate}
+  @keyframes skShine{0%{opacity:0}100%{opacity:.8}}
+  @keyframes skBand{
+    0%{opacity:0;transform:translate(100%,-50%) skewY(-10deg)}
+    16%{opacity:1;transform:translateY(-50%) skewY(-10deg)}
+    76%{opacity:1;transform:translateY(-50%) skewY(-10deg)}
+    100%{opacity:0;transform:translate(-100%,-50%) skewY(-10deg)}}
+  .skcut-unit{position:absolute;left:0;top:50%;width:100%;
+    display:flex;align-items:center;justify-content:center;gap:26px;
+    transform:translateY(-50%) skewY(-10deg);
+    animation:skBand 1.2s cubic-bezier(.2,.8,.3,1) both}
+  .skcut-unit img{width:64px;height:64px;image-rendering:pixelated;
+    transform:scale(1.7) skewY(10deg) scaleX(-1)}
+  .skcut-unit p{margin:0;font:700 25px/1.1 var(--mincho);color:#fff;opacity:.92;
+    transform:skewY(10deg);
+    text-shadow:2px 2px 0 #333,-2px 2px 0 #333,-2px -2px 0 #333,2px -2px 0 #333}
+  @media (prefers-reduced-motion:reduce){
+    .skcut-band,.skcut-unit{animation:skHold 1.2s step-end both}
+    .skcut-shine{animation:none;opacity:.5}
+    @keyframes skHold{0%{opacity:1}100%{opacity:0}}
+  }
+
   /* ---- 何年生から始める?（S-31）--------------------------------------
      **聞くのは1つ、答えるのは1タップ。** 説明も遊び方も置かない          */
   .gp{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
@@ -1030,9 +1073,10 @@
   .wv-stage::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.34)}
   .wv-hero,.wv-foe{position:absolute;bottom:16%;z-index:1;
     display:flex;flex-direction:column;align-items:center;gap:4px}
-  .wv-hero{left:10%}
-  .wv-foe{right:8%}
-  .wv .bt-ch{width:76px;height:76px}
+  .wv-hero{left:6%}
+  .wv-foe{right:4%}
+  /* **128px（原本の2倍）。** ここは英雄と敵を見せる画面なので、大きく出す */
+  .wv .bt-ch{width:128px;height:128px}
   /* 英雄は左に立って右を向く。敵の絵は元から左向きなので、そのまま */
   .wv-hero .bt-ch{transform:scaleX(-1);animation:wvIn .5s cubic-bezier(.2,.9,.3,1) both}
   @keyframes wvIn{from{transform:scaleX(-1) translateX(180px);opacity:0}
@@ -1041,11 +1085,11 @@
   @keyframes wvFoeIn{from{transform:translateX(-90px);opacity:0}
     to{transform:translateX(0);opacity:1}}
   /* **接敵してから体力が満ちる。** 0 から 100% へ、遅れて伸びる */
-  .wv-hp{width:92px;height:8px;background:rgba(216,220,228,.9);border-radius:99px;overflow:hidden}
+  .wv-hp{width:128px;height:8px;background:rgba(216,220,228,.9);border-radius:99px;overflow:hidden}
   .wv-hp i{display:block;height:100%;background:var(--moss);
     width:100%;animation:wvCharge .7s .5s ease-out both}
   @keyframes wvCharge{from{width:0}to{width:100%}}
-  .wv-foe .bt-num{width:92px;text-shadow:0 1px 2px rgba(255,255,255,.9)}
+  .wv-foe .bt-num{width:128px;text-shadow:0 1px 2px rgba(255,255,255,.9)}
   /* 戦果のほうは、満ちる演出をしない（結果の数字がそのまま出る） */
   .wv-stage.end .wv-hp i{animation:none}
   .wv-stage.end .wv-hero .bt-ch{animation:none;transform:scaleX(-1)}
@@ -1059,6 +1103,16 @@
   .wv-cry.lose{color:var(--ink-soft)}
   @keyframes wvCry{from{transform:translate(-50%,-50%) scale(.6);opacity:0}
     to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  /* 逃げられたときだけ、マイちゃんが手の打ち方を言う。**罰ではなく道順です** */
+  .wv-tip{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;
+    padding:11px 13px;background:#FBF7EC;border-left:2px solid var(--brass);border-radius:0 3px 3px 0}
+  .wv-tip img{width:42px;height:56px;flex:none;image-rendering:pixelated;align-self:center}
+  .wv-tip div{min-width:0}
+  .wv-tip b{display:block;font-size:13px;color:var(--brass);margin-bottom:3px}
+  .wv-tip p{margin:0;font-size:13px;line-height:1.7}
+  .wv-tip li{font-size:13px;line-height:1.7;list-style:none}
+  .wv-tip ul{margin:2px 0 0;padding:0}
+
   .wv-body{padding:14px 18px 0}
   .wv-body .stat{margin:0}
   .wv-loot{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}

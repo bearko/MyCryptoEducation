@@ -1128,3 +1128,33 @@ export const battleBonus = (kills, cleared) => ({
   gum: kills * KILL_GUM + (cleared ? CLEAR_GUM : 0),
   score: kills * KILL_SCORE + (cleared ? CLEAR_SCORE : 0),
 });
+
+/* ---------- 必殺技（英雄のパッシブスキル） ---------- */
+
+/** 隙を見せる割合。**問題IDから決まるので、引き直しはできません** */
+export const SKILL_RATE = 0.45;
+/** 必殺技の倍率。ふつうの一撃の3倍を与える */
+export const SKILL_POWER = 3;
+
+/**
+ * **この問題で敵が隙を見せるか。**
+ *
+ * 正解したときに「必殺技発動チャンス!」を出すかどうかを返します。
+ * **サイコロは振りません** —— 問題IDと英雄から決まるので、同じ問題なら
+ * いつでも同じ答えになります。運で出るようにすると、**出るまで
+ * 引き直す遊び方**ができてしまい、原則2（ランダム報酬を入れない）と
+ * 正面からぶつかります。**割合としては `SKILL_RATE` ですが、
+ * 1問ごとに見れば決まっています。**
+ *
+ * `applied`（応用編）を持たない問題では出しません——挑む先がありません。
+ */
+export const skillChance = (q, heroId) =>
+  !!(q && q.applied) && hash(String(q.id) + "|" + heroId) % 1000 < SKILL_RATE * 1000;
+
+/** 必殺技の一撃。ふつうの攻撃力の `SKILL_POWER` 倍 */
+export const skillHit = (stats, heroId) =>
+  Math.max(1, heroHit(stats, heroId) * SKILL_POWER);
+
+/** カットインに出す技の名前。MCH の `passive.name.ja` そのもの */
+export const skillName = (stats, heroId) =>
+  stats?.heroes?.[String(heroId)]?.skill || "";

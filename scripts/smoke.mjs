@@ -2111,7 +2111,7 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
  */
 {
   const { SCREENS } = await import("./screens.mjs");
-  check("画面IDは31面ぶんある", SCREENS.length === 31, String(SCREENS.length));
+  check("画面IDは33面ぶんある", SCREENS.length === 33, String(SCREENS.length));
   check("画面IDは重なっていない", new Set(SCREENS.map(s => s.id)).size === SCREENS.length);
   const at = (view, patch = "") => ev(`(() => { S.view = ${JSON.stringify(view)}; ${patch} return screenId(); })()`);
   check("ホームは S-02", at("home") === "S-02", at("home"));
@@ -2254,6 +2254,73 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
   check("その束ぶりの GUM が出る", txt().includes(`×${wrec.gum}`), String(wrec.gum));
   ev('document.getElementById("wvnext").click()');
   check("NEXT でリザルトへ", ev('S.view === "result"'), ev("S.view"));
+
+  /* ---- 必殺技（英雄のパッシブスキル）--------------------------------
+     解説を省く設定だと、応用編にたどり着く道がありませんでした。
+     隙を見せた問題では、そこを開ける入口が出ます                        */
+  {
+    /* 「隙を見せる」問題は、IDと英雄から決まる。**サイコロは振らない** */
+    const pickSkill = ev(`(() => {
+      const hero = DB.subjectArt["国語"].hero;
+      const q = DB.questions.find(x => x.applied && x.subject === "国語" &&
+        x.mode === "elimination" && skillChance(x, hero));
+      return q ? q.id : null;
+    })()`);
+    check("隙を見せる問題がある（応用編を持つ問題の一部）", !!pickSkill, String(pickSkill));
+    check("同じ問題なら、いつでも同じ答えになる", ev(`(() => {
+      const hero = DB.subjectArt["国語"].hero, q = DB.byId["${pickSkill}"];
+      return skillChance(q, hero) && skillChance(q, hero) && skillChance(q, hero);
+    })()`));
+    check("応用編を持たない問題では出さない", ev(`(() => {
+      const hero = DB.subjectArt["国語"].hero;
+      return DB.questions.filter(q => !q.applied).every(q => !skillChance(q, hero));
+    })()`));
+
+    const openSkill = () => ev(`(() => {
+      S.settings.showExplanationOnCorrect = false;      // テンポ優先モード
+      S.select.subject = "国語"; S.select.seed = 3;
+      startRun({ built: { ids: ["${pickSkill}"],
+        plan: [{ mode: "elimination", n: 1, level: 1 }] } });
+      document.getElementById("wvgo").click();
+      const q = DB.byId["${pickSkill}"];
+      for (let i = 0; i < q.choices.length; i++)
+        if (i !== q.answer) document.querySelector('.xcut[data-c="' + i + '"]').click();
+    })()`);
+    openSkill();
+    check("解説を省いていても必殺技の入口が出る", !!d.getElementById("skmodal"),
+      txt().slice(0, 60));
+    check("入口に英雄と説明とボタンが並ぶ",
+      !!d.querySelector(".skface") && txt().includes("敵が隙を見せた") &&
+      !!d.getElementById("skgo") && !!d.getElementById("skskip"));
+    check("押さずに進むこともできる", !!d.getElementById("skskip"));
+
+    const hpBefore = ev("S.run.battle.foeHp");
+    ev('document.getElementById("skgo").click()');
+    check("チャレンジすると応用編が出る", !!d.getElementById("exch"),
+      txt().slice(0, 80));
+    check("ここでは解説そのものを出さない",
+      !txt().includes(ev(`DB.byId["${pickSkill}"].lesson`).slice(0, 14)));
+    /* 応用編に正解 → カットイン → 大ダメージ */
+    ev(`(() => { const a = DB.byId["${pickSkill}"].applied;
+      document.querySelectorAll("#exch > .choice")[a.answer].click(); })()`);
+    check("必殺技のカットインが出る", !!d.querySelector(".skcut"),
+      d.querySelector(".skcut-unit p")?.textContent);
+    check("カットインに技の名前が出る",
+      (d.querySelector(".skcut-unit p")?.textContent || "").length > 1,
+      d.querySelector(".skcut-unit p")?.textContent);
+    await wait(1500);
+    const hpAfter = ev("S.run.battle.foeHp");
+    check("必殺技は大ダメージ（ふつうの3倍）",
+      hpBefore - hpAfter === ev("heroHit(DB.battle, S.run.battle.heroId)") * 3 ||
+      hpAfter === 0, `${hpBefore} → ${hpAfter}`);
+    /* **動くのは敵の体力だけ**（原則3-2・原則6） */
+    check("必殺技で GUM も知識カードも増えない", ev(`(() => {
+      const g = S.run.gum, n = Object.keys(S.cards).length;
+      fireSkill();                       // 2度目は撃たない
+      return S.run.gum === g && Object.keys(S.cards).length === n;
+    })()`));
+    ev("S.settings.showExplanationOnCorrect = true");
+  }
 
   /* **初回起動には挟みません**（決定1・バトルそのものを立てない） */
   ev(`(() => { Object.assign(S, { introDone: false, runs: 0 }); startIntro(); })()`);

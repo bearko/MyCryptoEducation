@@ -259,4 +259,39 @@ export const SCREENS = [
       });
       await page.waitForTimeout(200);
     } },
+
+  /* 必殺技（英雄のパッシブスキル）。**解説を省く設定でも応用編に挑める** */
+  { id: "S-32", name: "必殺技発動チャンス", note: "解説を省いていても、隙を見せた問題では応用編に挑める",
+    go: async page => {
+      await setup(page);
+      await page.evaluate(() => {
+        const hero = DB.subjectArt["国語"].hero;
+        const q = DB.questions.find(x => x.applied && x.subject === "国語" &&
+          x.mode === "elimination" && skillChance(x, hero));
+        S.settings.showExplanationOnCorrect = false;
+        S.select.subject = "国語"; S.select.seed = 3;
+        startRun({ built: { ids: [q.id], plan: [{ mode: "elimination", n: 1, level: 1 }] } });
+        document.getElementById("wvgo").click();
+        for (let i = 0; i < q.choices.length; i++)
+          if (i !== q.answer) document.querySelector(`.xcut[data-c="${i}"]`)?.click();
+      });
+      await page.waitForTimeout(250);
+    } },
+
+  { id: "S-33", name: "必殺技のカットイン", note: "応用編を抜けると出る。MCH のパッシブスキル演出を写したもの",
+    viewport: true,          // 画面に重なるものなので、表示領域のぶんだけ撮る
+    go: async page => {
+      await SCREENS.find(s => s.id === "S-32").go(page);
+      await page.evaluate(() => {
+        document.getElementById("skgo").click();
+        const q = DB.byId[S.run.ids[0]];
+        document.querySelectorAll("#exch > .choice")[q.applied.answer].click();
+        /* **帯だけを出し直して撮ります。** 本物は 1.2 秒で消えるので、
+           待っていると撮るころには終わっています（一度そうなりました）。
+           出しているものは本物とまったく同じです（`views.skillCutIn`） */
+        document.querySelector(".skcut")?.remove();
+        skillCutIn(S.run.battle.heroId, skillName(DB.battle, S.run.battle.heroId));
+      });
+      await page.waitForTimeout(150);
+    } },
 ];
