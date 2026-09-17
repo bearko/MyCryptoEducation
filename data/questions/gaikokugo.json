@@ -3016,5 +3016,64 @@
     "tip": "短い語ほど語尾を変え、長い語ほど別の語を足す。言いやすさが、文法の形を決めている。",
     "card": "比較級（more）",
     "level": 2
+  },
+  {
+    "id": "gaikokugo-103",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "月の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「8月」を英語で言うと?",
+    "choices": [
+      "April",
+      "July",
+      "August",
+      "October"
+    ],
+    "answer": 2,
+    "hints": [
+      "夏の終わりごろの月だ。",
+      "ローマ皇帝アウグストゥスの名にちなむ。",
+      "英語では A で始まる。"
+    ],
+    "lesson": "8月は **August**。ローマ皇帝アウグストゥスにちなむ名で、7月の July はユリウス・カエサルにちなむ。**September（第7の月）以降が2つずれている**のは、もともと3月が年の初めだった名残りだ。月の名前には、暦が変わった歴史がそのまま残っている。",
+    "tip": "名前と番号がずれたまま2000年使われている。整理しないまま動き続けるものは、世の中に案外多い。",
+    "card": "月の名前の由来",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-104",
+    "chapter": 0,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "接続詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "stem": "I stayed home ___ it was raining.",
+    "prompt": "「雨が降っていたので、家にいました」の ___ に入るのは?",
+    "choices": [
+      "but",
+      "because",
+      "if",
+      "when"
+    ],
+    "answer": 1,
+    "hints": [
+      "理由を表す接続詞が入る。",
+      "「〜なので」という意味になる。",
+      "but は逆のことをつなぐときに使う。"
+    ],
+    "lesson": "because は理由を表す接続詞。I stayed home **because** it was raining. 英語では**理由があとに来る**のに対し、日本語は「雨が降っていたので」と理由を先に言う。**語順が逆になる**ので、訳すときは組み立て直す必要がある。",
+    "tip": "文の組み立て方が違うと、考えを並べる順番まで変わる。翻訳は、並べ直す作業でもあるのだ。",
+    "card": "because と語順",
+    "level": 2
   }
 ]
