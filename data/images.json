@@ -568,20 +568,6 @@
       "width": 640,
       "height": 365
     },
-    "obj-tsukue": {
-      "alt": "机が1つ置いてある",
-      "titleFree": true,
-      "wikipedia": "ja:机",
-      "category": "Desks",
-      "file": "obj-tsukue",
-      "title": "Armoire deskside",
-      "author": "wikipedia:en:user:AlainV",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AArmoire%20deskside.png",
-      "width": 408,
-      "height": 392
-    },
     "obj-isu": {
       "wikipedia": "en:Chair",
       "category": "Chairs",
@@ -629,20 +615,6 @@
       "wikipedia": "ja:船",
       "category": "Ships"
     },
-    "obj-jitensha": {
-      "alt": "自転車が1台、横から写っている",
-      "titleFree": true,
-      "wikipedia": "ja:自転車",
-      "category": "Bicycles",
-      "file": "obj-jitensha",
-      "title": "9734Baliuag, Bulacan Province Proper 19",
-      "author": "Judgefloro",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3A9734Baliuag%2C%20Bulacan%20Province%20Proper%2019.jpg",
-      "width": 640,
-      "height": 480
-    },
     "obj-mikan": {
       "entity": "ウンシュウミカン",
       "alt": "みかんが写っている",
@@ -655,20 +627,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3ACitrus%20unshiu%2020101127%20c.jpg",
       "width": 640,
       "height": 480
-    },
-    "obj-ichigo": {
-      "alt": "いちごの実",
-      "titleFree": true,
-      "wikipedia": "ja:イチゴ",
-      "category": "Strawberries",
-      "file": "obj-ichigo",
-      "title": "Blendi speldje",
-      "author": "Alf van Beem",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ABlendi%20speldje.JPG",
-      "width": 640,
-      "height": 1425
     },
     "obj-ninjin": {
       "entity": "ニンジン",
@@ -697,34 +655,6 @@
       "width": 528,
       "height": 960
     },
-    "obj-randoseru": {
-      "alt": "ランドセルが1つ",
-      "titleFree": true,
-      "wikipedia": "ja:ランドセル",
-      "category": "Randoseru",
-      "file": "obj-randoseru",
-      "title": "RIKEN VITAMIN",
-      "author": "理化学研究所",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ARIKEN%20VITAMIN.png",
-      "width": 640,
-      "height": 862
-    },
-    "obj-supuun": {
-      "alt": "スプーンが1本",
-      "titleFree": true,
-      "wikipedia": "ja:スプーン",
-      "category": "Spoons",
-      "file": "obj-supuun",
-      "title": "1000 Cucharita para inalar polvos",
-      "author": "Museo Soumaya",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3A1000%20Cucharita%20para%20inalar%20polvos.jpg",
-      "width": 640,
-      "height": 343
-    },
     "obj-teeburu": {
       "alt": "テーブルが1台",
       "titleFree": true,
@@ -743,20 +673,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AChinon%20CP%209%20AF%20BW%201.JPG",
       "width": 640,
       "height": 426
-    },
-    "obj-terebi": {
-      "alt": "テレビが1台",
-      "titleFree": true,
-      "wikipedia": "ja:テレビ受像機",
-      "category": "Television sets",
-      "file": "obj-terebi",
-      "title": "3 inch TV set",
-      "author": "Unknown author",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3A3%20inch%20TV%20set.jpg",
-      "width": 364,
-      "height": 261
     },
     "obj-piano": {
       "entity": "ピアノ",
@@ -818,20 +734,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3A20140912%20154835%20Jpg%20(218976059).jpeg",
       "width": 640,
       "height": 853
-    },
-    "obj-kawa": {
-      "alt": "川が流れている",
-      "_use": "理科の解説に置く（流れる水）",
-      "wikipedia": "ja:河川",
-      "category": "Rivers of Japan",
-      "file": "obj-kawa",
-      "title": "Memories of travel 4",
-      "author": "SiciliasVV",
-      "license": "CC BY 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3AMemories%20of%20travel%204.JPG",
-      "width": 640,
-      "height": 480
     },
     "obj-kumo": {
       "wikipedia": "en:Cloud",
@@ -956,19 +858,6 @@
       "width": 640,
       "height": 480
     },
-    "rika-batta": {
-      "alt": "バッタを横から写した写真。後ろあしが長い",
-      "wikipedia": "ja:トノサマバッタ",
-      "category": "Locusta migratoria",
-      "file": "rika-batta",
-      "title": "BioAcoustica 576 15 Locusta migratoria migratorioides 253b",
-      "author": "作者不明",
-      "license": "CC BY 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3ABioAcoustica%20576%2015%20Locusta%20migratoria%20migratorioides%20253b.flac",
-      "width": 120,
-      "height": 120
-    },
     "rika-tentou": {
       "alt": "テントウムシの背中。黒い星が見える",
       "wikipedia": "ja:ナナホシテントウ",
@@ -1051,19 +940,6 @@
       "alt": "乾電池が1本",
       "wikipedia": "ja:乾電池",
       "category": "Dry cell batteries"
-    },
-    "rika-mamedenkyuu": {
-      "alt": "小さな電球",
-      "wikipedia": "ja:白熱電球",
-      "category": "Incandescent light bulbs",
-      "file": "rika-mamedenkyuu",
-      "title": "Edison & Swan price list 1893",
-      "author": "Edison and Swan Electric Light Company",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AEdison%20%26%20Swan%20price%20list%201893.jpg",
-      "width": 640,
-      "height": 850
     },
     "rika-chisou": {
       "alt": "がけに横じまが重なって見える地層",
@@ -1171,19 +1047,6 @@
       "wikipedia": "ja:国会議事堂",
       "category": "National Diet Building"
     },
-    "shakai-kinkakuji": {
-      "alt": "金色の建物が池に映っている",
-      "wikipedia": "ja:金閣寺",
-      "category": "Kinkaku-ji",
-      "file": "shakai-kinkakuji",
-      "title": "Japan 2010 IMG 2014 (5373010453)",
-      "author": "Marko Kudjerski from Toronto, Canada",
-      "license": "CC BY 2.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3AJapan%202010%20IMG%202014%20(5373010453).jpg",
-      "width": 640,
-      "height": 427
-    },
     "shakai-nara": {
       "entity": "東大寺",
       "alt": "大きな木造の建物",
@@ -1219,32 +1082,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3A%E6%A1%9C%E3%83%B6%E4%B8%9814%E5%8F%B7%E9%8A%85%E9%90%B8.JPG",
       "width": 640,
       "height": 963
-    },
-    "shakai-jomon": {
-      "alt": "縄の文様が付いた土器",
-      "wikipedia": "ja:縄文土器",
-      "category": "Jōmon pottery",
-      "file": "shakai-jomon",
-      "title": "British Museum Jomon pot",
-      "author": "作者不明",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3ABritish%20Museum%20Jomon%20pot.jpg",
-      "width": 640,
-      "height": 405
-    },
-    "shakai-toudai": {
-      "alt": "海のそばに立つ灯台",
-      "wikipedia": "ja:灯台",
-      "category": "Lighthouses in Japan",
-      "file": "shakai-toudai",
-      "title": "A view out to sea from on shore, with trees and a tall",
-      "author": "作者不明",
-      "license": "CC BY 4.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3AA%20view%20out%20to%20sea%20from%20on%20shore%2C%20with%20trees%20and%20a%20tall%20Wellcome%20V0043827.jpg",
-      "width": 640,
-      "height": 565
     },
     "obj-kawa2": {
       "wikipedia": "ja:河川",
@@ -1564,6 +1401,54 @@
     "obj-kame": {
       "alt": "カメが1匹",
       "why": "街並みの写真が来た"
+    },
+    "obj-tsukue": {
+      "alt": "机が1つ置いてある",
+      "why": "机の寸法図（写真ではない）"
+    },
+    "obj-ichigo": {
+      "alt": "いちごの実",
+      "why": "いちごの絵のバッジ"
+    },
+    "obj-randoseru": {
+      "alt": "ランドセルが1つ",
+      "why": "B&Wの街頭写真"
+    },
+    "obj-supuun": {
+      "alt": "スプーンが1本",
+      "why": "木彫りの置物"
+    },
+    "obj-terebi": {
+      "alt": "テレビが1台",
+      "why": "B&Wの機材写真"
+    },
+    "obj-kawa": {
+      "alt": "川が流れている",
+      "why": "森の中の子ども"
+    },
+    "obj-jitensha": {
+      "alt": "自転車が1台、横から写っている",
+      "why": "街の風景（自転車は小さい）"
+    },
+    "rika-batta": {
+      "alt": "バッタを横から写した写真。後ろあしが長い",
+      "why": "金属の半球"
+    },
+    "rika-mamedenkyuu": {
+      "alt": "小さな電球",
+      "why": "電球の価格表（古い印刷物）"
+    },
+    "shakai-kinkakuji": {
+      "alt": "金色の建物が池に映っている",
+      "why": "遊歩道の写真"
+    },
+    "shakai-jomon": {
+      "alt": "縄の文様が付いた土器",
+      "why": "縄目の見えない壺"
+    },
+    "shakai-toudai": {
+      "alt": "海のそばに立つ灯台",
+      "why": "判別しにくい古い絵"
     }
   }
 }
