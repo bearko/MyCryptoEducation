@@ -573,14 +573,7 @@
       "category": "Umbrellas",
       "alt": "開いた傘が1本",
       "titleFree": true,
-      "file": "obj-kasa",
-      "title": "...rispolvero questa immagine, oggi piove a dirotto (33560116084)",
-      "author": "Ontheway Advice",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3A...rispolvero%20questa%20immagine%2C%20oggi%20piove%20a%20dirotto%20(33560116084).jpg",
-      "width": 640,
-      "height": 475
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-tsukue": {
       "entity": "机",
@@ -606,14 +599,7 @@
       "category": "Alarm clocks",
       "alt": "壁掛けの時計。数字の文字盤",
       "titleFree": true,
-      "file": "obj-tokei",
-      "title": "Biarritz- Cloche d'alarme",
-      "author": "Eugène Trutat",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ABiarritz%20-%20Cloche%20d'alarme%20-%20MHNT%20PHa%20912%20B022.jpg",
-      "width": 640,
-      "height": 489
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-kuruma": {
       "wikipedia": "en:Car",
@@ -652,14 +638,7 @@
       "category": "Airliners in flight",
       "alt": "飛行機が1機",
       "titleFree": true,
-      "file": "obj-hikouki",
-      "title": "ANT-20",
-      "author": "nevermore",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AANT-20.jpg",
-      "width": 400,
-      "height": 255
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-jitensha": {
       "entity": "自転車",
@@ -671,42 +650,21 @@
       "category": "Shoes",
       "alt": "靴が1足ならんでいる",
       "titleFree": true,
-      "file": "obj-kutsu",
-      "title": "2015 06 16 Ramadan Preparations-1 (18704262050)",
-      "author": "AMISOM Public Information",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3A2015%2006%2016%20Ramadan%20Preparations-1%20(18704262050).jpg",
-      "width": 640,
-      "height": 426
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-boushi": {
       "wikipedia": "en:Hat",
       "category": "Hats",
       "alt": "帽子が1つ",
       "titleFree": true,
-      "file": "obj-boushi",
-      "title": "Altes Museum-Tanagra-lady with fan",
-      "author": "Unknown artist",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AAltes%20Museum-Tanagra-lady%20with%20fan.jpg",
-      "width": 640,
-      "height": 853
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-ringo": {
       "wikipedia": "en:Apple",
       "category": "Apples",
       "alt": "赤いリンゴ",
       "titleFree": true,
-      "file": "obj-ringo",
-      "title": "Apfe-auf-Naehrboden",
-      "author": "Scott Bauer / USDA ARS",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AApfe-auf-Naehrboden.jpg",
-      "width": 640,
-      "height": 961
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-mikan": {
       "entity": "ウンシュウミカン",
@@ -726,14 +684,7 @@
       "category": "Grapes",
       "alt": "ぶどうのふさ",
       "titleFree": true,
-      "file": "obj-budou",
-      "title": "De-at-Weintraube",
-      "author": "Priwo",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ADe-at-Weintraube.ogg",
-      "width": 120,
-      "height": 120
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-ichigo": {
       "entity": "イチゴ",
@@ -772,56 +723,28 @@
       "category": "Glasses of milk",
       "alt": "コップに入った牛乳",
       "titleFree": true,
-      "file": "obj-gyuunyuu",
-      "title": "Doodh Soda",
-      "author": "Miansari66",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ADoodh%20Soda.JPG",
-      "width": 640,
-      "height": 427
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-enpitsu": {
       "wikipedia": "en:Pencil",
       "category": "Pencils",
       "alt": "鉛筆が1本",
       "titleFree": true,
-      "file": "obj-enpitsu",
-      "title": "Arabia Steamboat Museum - Kansas City, MO - DSC07319",
-      "author": "Daderot",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AArabia%20Steamboat%20Museum%20-%20Kansas%20City%2C%20MO%20-%20DSC07319.JPG",
-      "width": 640,
-      "height": 480
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-hasami": {
       "wikipedia": "en:Scissors",
       "category": "Scissors",
       "alt": "はさみが1丁",
       "titleFree": true,
-      "file": "obj-hasami",
-      "title": "Scissors for trimming candle wicks.",
-      "author": "Creator:Hans Marttelius",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3AMarttelius%20Scissors%20for%20trimming%20candle%20wicks.jpg",
-      "width": 640,
-      "height": 371
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-hon": {
       "wikipedia": "en:Book",
       "category": "Books",
       "alt": "本が1冊置いてある",
       "titleFree": true,
-      "file": "obj-hon",
-      "title": "17. Service d'aide intellectuelle aux prisonniers de guerre (1939-45), (",
-      "author": "International Bureau of Education Archives",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3A17.%20Service%20d'aide%20intellectuelle%20aux%20prisonniers%20de%20guerre%20(1939-45)%2C%20(.jpg",
-      "width": 640,
-      "height": 473
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-randoseru": {
       "entity": "ランドセル",
@@ -833,14 +756,7 @@
       "category": "Cups",
       "alt": "コップが1つ",
       "titleFree": true,
-      "file": "obj-koppu",
-      "title": "Cup with Poppies",
-      "author": "Fernand Thesmar",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AAndr%C3%A9%20Fernand%20Thesmar%20-%20Cup%20with%20Poppies%20-%20Walters%2044573%20-%20Profile.jpg",
-      "width": 640,
-      "height": 441
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-supuun": {
       "entity": "スプーン",
@@ -959,14 +875,7 @@
       "category": "Elephants",
       "alt": "ゾウが1頭立っている",
       "titleFree": true,
-      "file": "obj-zou",
-      "title": "A contribution to the anatomy of the elephant's ear",
-      "author": "Buck, Albert H. (Albert Henry), 1842-1922",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AA%20contribution%20to%20the%20anatomy%20of%20the%20elephant's%20ear%20(IA%20101279122.nlm.nih.gov).pdf",
-      "width": 500,
-      "height": 873
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-kirin": {
       "entity": "キリン",
@@ -996,14 +905,7 @@
       "category": "Frogs",
       "alt": "カエルが1匹",
       "titleFree": true,
-      "file": "obj-kaeru",
-      "title": "A raven scavenges a frog",
-      "author": "Jacob W. Frank",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AA%20raven%20scavenges%20a%20frog%20(707bca95-008b-41b8-9941-1705e98fa582).jpg",
-      "width": 640,
-      "height": 427
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "obj-hitsuji": {
       "entity": "ヒツジ",
@@ -1135,14 +1037,7 @@
       "wikipedia": "en:Pendulum",
       "category": "Pendulums",
       "alt": "糸におもりを下げた振り子",
-      "file": "rika-furiko",
-      "title": "Big Brass Balls",
-      "author": "作者不明",
-      "license": "CC BY 2.5",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
-      "source": "https://commons.wikimedia.org/wiki/File%3ABig%20Brass%20Balls.png",
-      "width": 240,
-      "height": 418
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "rika-ondokei": {
       "entity": "温度計",
@@ -1274,14 +1169,7 @@
       "wikipedia": "ja:姫路城",
       "category": "Himeji Castle",
       "alt": "白い天守閣",
-      "file": "shakai-himeji",
-      "title": "Another Roof (2855208283)",
-      "author": "alisdair",
-      "license": "CC BY 2.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3AAnother%20Roof%20(2855208283).jpg",
-      "width": 640,
-      "height": 853
+      "_note": "2便とも別のものが来た。次は commons: で File 名を名指しする"
     },
     "shakai-nara": {
       "entity": "東大寺",
@@ -1326,6 +1214,186 @@
     "shakai-toudai": {
       "entity": "灯台",
       "alt": "海のそばに立つ灯台"
+    },
+    "obj-kawa2": {
+      "wikipedia": "ja:河川",
+      "category": "Rivers",
+      "alt": "川が曲がりながら流れている",
+      "titleFree": true
+    },
+    "obj-taiyou": {
+      "wikipedia": "en:Sun",
+      "category": "Sun",
+      "alt": "太陽が輝いている",
+      "titleFree": true
+    },
+    "obj-me": {
+      "wikipedia": "en:Human eye",
+      "category": "Human eyes",
+      "alt": "人の目を近くから写した写真",
+      "titleFree": true
+    },
+    "obj-te": {
+      "wikipedia": "en:Hand",
+      "category": "Human hands",
+      "alt": "開いた手のひら",
+      "titleFree": true
+    },
+    "obj-uma2": {
+      "wikipedia": "en:Horse",
+      "category": "Horses",
+      "alt": "ウマが1頭、横向きに立っている",
+      "titleFree": true
+    },
+    "obj-ame": {
+      "wikipedia": "en:Rain",
+      "category": "Rain",
+      "alt": "雨が降っているようす",
+      "titleFree": true
+    },
+    "obj-fude": {
+      "wikipedia": "ja:筆",
+      "category": "Calligraphy brushes",
+      "alt": "習字に使う筆",
+      "titleFree": true
+    },
+    "obj-suzuri": {
+      "wikipedia": "ja:硯",
+      "category": "Inkstones",
+      "alt": "墨をする すずり",
+      "titleFree": true
+    },
+    "obj-take": {
+      "wikipedia": "en:Bamboo",
+      "category": "Bamboo forests",
+      "alt": "竹がまっすぐ並んで生えている",
+      "titleFree": true
+    },
+    "obj-kai": {
+      "wikipedia": "en:Seashell",
+      "category": "Seashells",
+      "alt": "貝がらが1つ",
+      "titleFree": true
+    },
+    "chi-tanada": {
+      "wikipedia": "ja:棚田",
+      "category": "Rice terraces in Japan",
+      "alt": "山の斜面に段々に作られた田"
+    },
+    "chi-chabatake": {
+      "wikipedia": "ja:茶畑",
+      "category": "Tea plantations in Japan",
+      "alt": "畝がうねる茶畑"
+    },
+    "chi-ringoen": {
+      "wikipedia": "ja:リンゴ",
+      "category": "Apple orchards",
+      "alt": "実のなったりんごの木が並ぶ果樹園"
+    },
+    "chi-gyokou": {
+      "wikipedia": "ja:漁港",
+      "category": "Fishing ports in Japan",
+      "alt": "漁船がとまっている港"
+    },
+    "chi-seitetsu": {
+      "wikipedia": "ja:製鉄所",
+      "category": "Steel mills",
+      "alt": "大きな煙突と設備が並ぶ製鉄所"
+    },
+    "chi-kuruma-koujou": {
+      "wikipedia": "ja:自動車工場",
+      "category": "Automobile factories",
+      "alt": "自動車を組み立てる工場の内部"
+    },
+    "chi-fuuryoku": {
+      "wikipedia": "ja:風力発電",
+      "category": "Wind turbines in Japan",
+      "alt": "風車が並ぶ風力発電所"
+    },
+    "chi-taiyoukou": {
+      "wikipedia": "ja:太陽光発電",
+      "category": "Photovoltaic power stations",
+      "alt": "太陽光パネルが並んでいる"
+    },
+    "chi-dam": {
+      "wikipedia": "ja:ダム",
+      "category": "Dams in Japan",
+      "alt": "谷をせき止めた大きなダム"
+    },
+    "chi-kuukou": {
+      "wikipedia": "ja:空港",
+      "category": "Airports in Japan",
+      "alt": "旅客機がとまる空港"
+    },
+    "chi-container": {
+      "wikipedia": "ja:コンテナ",
+      "category": "Container ports",
+      "alt": "コンテナが積まれた港"
+    },
+    "chi-taue": {
+      "wikipedia": "ja:田植え",
+      "category": "Rice planting",
+      "alt": "水をはった田に苗を植えている"
+    },
+    "chi-hausu": {
+      "wikipedia": "ja:ビニールハウス",
+      "category": "Greenhouses in Japan",
+      "alt": "ビニールハウスが並ぶ畑"
+    },
+    "chi-rakunou": {
+      "wikipedia": "ja:酪農",
+      "category": "Dairy farming",
+      "alt": "牧場で草を食べる牛の群れ"
+    },
+    "chi-shinrin": {
+      "wikipedia": "ja:林業",
+      "category": "Forestry in Japan",
+      "alt": "手入れされたスギの人工林"
+    },
+    "chi-yuki-country": {
+      "wikipedia": "ja:豪雪地帯",
+      "category": "Snow in Japan",
+      "alt": "雪におおわれた家なみ"
+    },
+    "sek-banri": {
+      "wikipedia": "ja:万里の長城",
+      "category": "Great Wall of China",
+      "alt": "尾根づたいに続く長い城壁"
+    },
+    "sek-pyramid": {
+      "wikipedia": "ja:ギザの大ピラミッド",
+      "category": "Pyramids of Giza",
+      "alt": "砂漠に立つ四角すいの建造物"
+    },
+    "sek-jiyuu": {
+      "wikipedia": "ja:自由の女神像",
+      "category": "Statue of Liberty",
+      "alt": "たいまつをかかげる像"
+    },
+    "sek-eiffel": {
+      "wikipedia": "ja:エッフェル塔",
+      "category": "Eiffel Tower",
+      "alt": "鉄でできた塔"
+    },
+    "sek-taj": {
+      "wikipedia": "ja:タージ・マハル",
+      "category": "Taj Mahal",
+      "alt": "白い大理石の廟"
+    },
+    "sek-savanna": {
+      "wikipedia": "ja:サバナ気候",
+      "category": "Savanna",
+      "alt": "まばらに木の生えた草原"
+    },
+    "sek-sabaku": {
+      "wikipedia": "ja:砂漠",
+      "category": "Sand dunes",
+      "alt": "砂の丘が続く砂漠"
+    },
+    "sek-hyouga": {
+      "wikipedia": "ja:氷河",
+      "category": "Glaciers",
+      "alt": "谷を流れ下る氷河"
     }
   }
 }
