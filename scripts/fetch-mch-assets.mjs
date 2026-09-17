@@ -19,8 +19,26 @@ const reps = heroes.filter(h => !h.own).map(h => String(Number(h.id) + 10000));
 /* ホームのボタンに重ねる英雄。ロスターには入らないが画像だけ使う */
 const UI_HEROES = ["2023", "3037"];   // クラフト（ミケランジェロ）/ ショップ
 
-const BACKGROUNDS = ["1006", "1038", "1046", "1030", "1004"];
+/* 背景。1030 が既定で、1001〜1004 と 1010 が「出題を選ぶ」の教科ごとの絵。
+   **外国語は 1005 のつもりでしたが、その番号は存在しません**（404）。
+   代わりの 1006 は国語の 1001 とほぼ同じ絵なので、赤系の 1010 を当てています */
+const BACKGROUNDS = ["1006", "1038", "1046", "1030",
+                     "1001", "1002", "1003", "1004", "1010"];
 const ICONS = ["mai_sd", "gum", "mch_icon"];
+
+/* 「出題を選ぶ」で教科の札に乗せる英雄。**ロスターとは別**で、絵だけ借ります */
+const SUBJECT_HEROES = ["4056", "10006", "5027", "10004", "3030"];
+
+/* **マインちゃん**（`navi_ain`）。読み上げ役として画面に立ちます。
+   原本は 96x128 のドット絵なので、大きく出すときは image-rendering: pixelated を
+   付けてください（英雄と同じ理由）。表情は用途ごとに使い分けます */
+const NAVI = ["navi_ain_11_idle", "navi_ain_12_blink",
+              "navi_ain_03_wave", "navi_ain_07_talk", "navi_ain_08_sparkle",
+              "navi_ain_02_both_arms_up", "navi_ain_06_smile"];
+
+/* エネミー。IDの並びが教科に対応しています（310国語 / 320算数・数学 / 330理科 /
+   340社会 / 350外国語）。**在るものだけ採ります** —— 番号が飛んでいても止めません */
+const ENEMIES = Array.from({ length: 50 }, (_, i) => String(310 + i));
 /* エクステンションは data/extensions-curated.json の108種。
    ここに列挙せず台帳から読むので、品を足したら取り込みも自動で追いつく */
 const curated = JSON.parse(await readFile(join(ROOT, "data/extensions-curated.json"), "utf8"));
@@ -29,7 +47,7 @@ const EXTENSIONS = curated.map(e => e.id);
 /* 上限サイズ。withoutEnlargement なので、これより小さい原本はそのまま通る。
    MCH の英雄・エクステンション画像は原本が 64x64 なので、実際には拡大されない。
    ホームの主役層で Rep. を出すときは、この解像度を前提に表示サイズを決めること */
-const SIZE = { hero: 128, ext: 128, icon: 128, bg: 1080 };
+const SIZE = { hero: 128, ext: 128, icon: 128, bg: 1080, navi: 256 };
 
 /* 単一ファイル版（dist/index.html）に data URI で畳む用の縮小コピー。
    1080px のまま base64 にすると1枚で数百KBになり、配布ファイルが実用外の大きさになる */
@@ -55,6 +73,8 @@ for (const id of reps)
   await count(`${RAW}/Image/Heroes/${id}.png`, `public/heroes/${id}.webp`, SIZE.hero);
 for (const id of UI_HEROES)
   await count(`${RAW}/Image/Heroes/${id}.png`, `public/heroes/${id}.webp`, SIZE.hero);
+for (const id of SUBJECT_HEROES)
+  await count(`${RAW}/Image/Heroes/${id}.png`, `public/heroes/${id}.webp`, SIZE.hero);
 
 await mkdir(join(ROOT, "public/extensions"), { recursive: true });
 for (const id of EXTENSIONS)
@@ -69,6 +89,14 @@ for (const id of BACKGROUNDS) {
     await sharp(src).resize(BG_EMBED.size, BG_EMBED.size, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: BG_EMBED.quality }).toBuffer());
 }
+
+await mkdir(join(ROOT, "public/enemies"), { recursive: true });
+for (const id of ENEMIES)
+  await count(`${RAW}/Image/Enemies/${id}.png`, `public/enemies/${id}.webp`, SIZE.hero);
+
+await mkdir(join(ROOT, "public/characters"), { recursive: true });
+for (const name of NAVI)
+  await count(`${RAW}/Image/Characters/${name}.png`, `public/characters/${name}.webp`, SIZE.navi);
 
 await mkdir(join(ROOT, "public/icons"), { recursive: true });
 for (const name of ICONS)
