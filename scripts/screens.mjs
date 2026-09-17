@@ -198,4 +198,23 @@ export const SCREENS = [
           if (i !== q.answer) document.querySelector(`.xcut[data-c="${i}"]`)?.click(); });
       await page.waitForTimeout(400);
     } },
+
+  /* ポップアップは2つとも、下の画面を動かさずに重なる。**元の画面が
+     動かないことがこの形の目的**なので、絵でも確かめられるようにしておく */
+  { id: "S-27", name: "ヒント（ポップアップ）", note: "元の画面は動かない。もう一段でだけ本数が増える",
+    go: async page => {
+      await quizOf(page, "elimination");
+      await page.evaluate(() => {
+        document.getElementById("hint")?.click();
+        document.getElementById("hintmore")?.click();
+      });
+      await page.waitForTimeout(200);
+    } },
+
+  { id: "S-28", name: "設定（ポップアップ）", note: "正解した問題の解説を見るかどうか",
+    go: async page => {
+      await quizOf(page, "elimination");
+      await page.evaluate(() => { document.getElementById("gear")?.click(); });
+      await page.waitForTimeout(200);
+    } },
 ];

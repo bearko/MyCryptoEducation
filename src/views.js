@@ -102,6 +102,9 @@ function screenId() {
   const v = S.view;
   if (v === "quiz") {
     const q = currentQ();
+    /* ポップアップは、下の画面が何であれ見た目がそれに変わるので別の番号にする */
+    if (S.run.hintOpen) return "S-27";
+    if (S.run.settingOpen) return "S-28";
     if (S.run.applied) return "S-12";
     if (q && S.run.results[q.id] !== undefined) return S.run.battle ? "S-26" : "S-11";
     if (S.run.intro) return "S-01";
@@ -579,6 +582,7 @@ function startRun(opts = {}) {
             shortage: opts.ids || built.plan.length >= BLOCKS || swipe ? 0 : 1,
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
             cut: null, intro: !!opts.intro, swipe, plan: built.plan, verdict: null,
+            hintOpen: false,
             waves: [], countedKills: 0, battle: null, settingOpen: false };
   /* 初回起動は問題と解答だけにするので、バトルを立てません（決定1） */
   if (!opts.intro && ids.length) startBattle();
@@ -923,6 +927,12 @@ function vQuiz() {
   const w = waveAt(S.run.i);
   const bg = DB.subjectArt[q.subject]?.bg || DB.defaultBg;
 
+  /* **ヒントはポップアップで出します**（`#hintmodal`）。流れの中に置くと、
+     開いた瞬間に解答エリアが下へ押し出されてスクロールが要りました。
+     中身は `drawHints` が入れます——空のあいだは何も描かないので、
+     場所も取りません。**HTMLコメントをテンプレートリテラルの中に書くときは
+     バッククォートを入れないでください**（そこで文字列が閉じます）。 */
+
   app.innerHTML = `
   ${intro ? `<div class="introtop"></div>` : `
   <div class="bt-bg" style="background-image:url('${assetPath.bg(bg)}')"></div>
@@ -945,7 +955,6 @@ function vQuiz() {
       <button class="hintbtn sm" id="hint">ヒント</button>
       <button class="gear" id="gear" aria-label="設定">⚙</button>
     </div>`}
-    <div class="hints" id="hints"></div>
     ${mode === "panel" ? panelHTML(q)
     : mode === "numeric" ? `
       <div class="numbox">
@@ -997,10 +1006,17 @@ function vQuiz() {
       <span class="lbl">正解した問題の解説を見る</span>
     </label>
     <button class="btn ghost" id="setclose">とじる</button>
-  </div></div>` : ""}`;
+  </div></div>` : ""}
+  <div id="hintmodal"></div>`;
 
+  /* **1本も見ていないときだけ、開くと同時に1本目が出ます。**
+     2回目からは読み直すだけなので、本数は増えません（点が勝手に減りません） */
   const hintBtn = document.getElementById("hint");
-  if (hintBtn) hintBtn.onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
+  if (hintBtn) hintBtn.onclick = () => {
+    if (S.run.hintsUsed === 0) S.run.hintsUsed++;
+    S.run.hintOpen = true;
+    drawHints(q, h);
+  };
   /* 設定は⚙から。**ヒントの隣に置くと押し間違えます**が、どちらも小さく畳んで
      あるので、解答エリアの邪魔にはなりません */
   const gear = document.getElementById("gear");
@@ -1113,6 +1129,17 @@ function modeOf(q) {
   return READY_MODES.has(q.mode) ? q.mode : "choice";
 }
 
+/**
+ * ヒントは**ポップアップ**で出します。
+ *
+ * **元の画面を動かしません。** 流れの中に置いていたころは、開いた瞬間に
+ * 解答エリアが下へ押し出されて、答えるのにスクロールが要りました。
+ * ポップアップなら、読んで閉じれば元の位置のままです。
+ *
+ * **段を増やすのはポップアップの中の「もう一段」だけです。** 開き直しでは
+ * 増えません——点はヒントの本数で決まるので（`10 − 本数×2`）、読み返した
+ * だけで減るのは筋が通りません。
+ */
 function drawHints(q, h) {
   const max = fitOf(q, h) ? 3 : 2;
   // 選択肢が見えているかでヒントの系統が変わる。選択肢を潰す型のヒントは、
@@ -1121,14 +1148,32 @@ function drawHints(q, h) {
   // 画像つきのヒントは最後の一段に添える。ヒントは答えの直前で止めるので、
   // ここに置く画像もそれだけで答えが割れないものに限る（原則5・validate が形だけ見る）
   const withPhoto = q.imageAt === "hint" ? Math.min(list.length, max) : -1;
-  document.getElementById("hints").innerHTML = list.slice(0, S.run.hintsUsed)
-    .map((t, i) => `<div class="hint"><b>ヒント ${i + 1}</b>${esc(t.text)}` +
-      (i + 1 === withPhoto ? photoHTML(q.image, "hint") : "") + `</div>`).join("");
+  const used = Math.min(S.run.hintsUsed, max);
+  const slot = document.getElementById("hintmodal");
   const b = document.getElementById("hint");
+
+  if (slot) {
+    slot.innerHTML = !S.run.hintOpen || !used ? "" : `
+      <div class="modal" id="hintmodal-bg"><div class="msheet hintsheet">
+        <div class="hintlist">${list.slice(0, used)
+          .map((t, i) => `<div class="hint"><b>ヒント ${i + 1}</b>${esc(t.text)}` +
+            (i + 1 === withPhoto ? photoHTML(q.image, "hint") : "") + `</div>`).join("")}</div>
+        ${used < max && S.run.picked === null
+          ? `<button class="hintbtn" id="hintmore">もう一段 (${used}/${max})</button>`
+          : `<p class="fine hintend">${used >= max ? "ヒントはここまで。" : ""}</p>`}
+        <button class="btn" id="hintclose">とじる</button>
+      </div></div>`;
+    const more = document.getElementById("hintmore");
+    if (more) more.onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
+    const close = document.getElementById("hintclose");
+    if (close) close.onclick = () => { S.run.hintOpen = false; drawHints(q, h); };
+  }
+
   if (!b) return;
-  b.disabled = S.run.hintsUsed >= max || S.run.picked !== null;
-  b.textContent = S.run.hintsUsed === 0 ? "ヒント"
-    : (S.run.hintsUsed >= max ? "ヒントなし" : `もう一段 (${S.run.hintsUsed}/${max})`);
+  /* **使い切っても押せるままにします。** 中身を読み返すための入口なので、
+     ここで閉じると、一度見たヒントに戻れなくなります */
+  b.disabled = S.run.picked !== null;
+  b.textContent = used === 0 ? "ヒント" : `ヒント (${used}/${max})`;
 }
 
 function markChoice(btn, ok) {
@@ -1450,7 +1495,9 @@ function drawRetry(q, head) {
   const bar = app.querySelector(".numbox .elimbar, .panelbox .elimbar");
   if (bar) bar.hidden = true;   // 同じ導線が2つ並ばないようにする
   const rh = document.getElementById("rhint");
-  if (rh) rh.onclick = () => { S.run.hintsUsed++; drawHints(q, h); drawRetry(q, head); };
+  if (rh) rh.onclick = () => {
+    S.run.hintsUsed++; S.run.hintOpen = true; drawHints(q, h); drawRetry(q, head);
+  };
   document.getElementById("rdown").onclick = () => { S.run.hard[q.id] = "choice"; render(); };
 }
 
@@ -1597,6 +1644,7 @@ function onPick(idx, forcedOk = null) {
   }
   const opened = reward && isNew ? unlockedBy(DB, q.card) : [];
   if (reward) S.cards[q.card] = true;
+  S.run.hintOpen = false;   // 解説と重ねない。答えたらヒントは引っこめる
   drawHints(q, h);
 
   /**
@@ -1763,7 +1811,7 @@ function advance() {
   }
   S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null;
   S.run.tipOpen = false; S.run.applied = null; S.run.settingOpen = false;
-  S.run.verdict = null;
+  S.run.verdict = null; S.run.hintOpen = false;
   battleStep();
   if (S.run.i >= S.run.ids.length) { finishRun(); S.view = "result"; }
   render(); window.scrollTo(0, 0);

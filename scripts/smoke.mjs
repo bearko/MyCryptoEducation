@@ -2073,7 +2073,7 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
  */
 {
   const { SCREENS } = await import("./screens.mjs");
-  check("画面IDは26面ぶんある", SCREENS.length === 26, String(SCREENS.length));
+  check("画面IDは28面ぶんある", SCREENS.length === 28, String(SCREENS.length));
   check("画面IDは重なっていない", new Set(SCREENS.map(s => s.id)).size === SCREENS.length);
   const at = (view, patch = "") => ev(`(() => { S.view = ${JSON.stringify(view)}; ${patch} return screenId(); })()`);
   check("ホームは S-02", at("home") === "S-02", at("home"));
