@@ -569,9 +569,10 @@
       "height": 365
     },
     "obj-tsukue": {
-      "entity": "机",
       "alt": "机が1つ置いてある",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:机",
+      "category": "Desks"
     },
     "obj-isu": {
       "wikipedia": "en:Chair",
@@ -615,14 +616,16 @@
       "height": 815
     },
     "obj-fune": {
-      "entity": "船",
       "alt": "船が1隻、水に浮かんでいる",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:船",
+      "category": "Ships"
     },
     "obj-jitensha": {
-      "entity": "自転車",
       "alt": "自転車が1台、横から写っている",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:自転車",
+      "category": "Bicycles"
     },
     "obj-mikan": {
       "entity": "ウンシュウミカン",
@@ -638,9 +641,10 @@
       "height": 480
     },
     "obj-ichigo": {
-      "entity": "イチゴ",
       "alt": "いちごの実",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:イチゴ",
+      "category": "Strawberries"
     },
     "obj-ninjin": {
       "entity": "ニンジン",
@@ -670,19 +674,22 @@
       "height": 960
     },
     "obj-randoseru": {
-      "entity": "ランドセル",
       "alt": "ランドセルが1つ",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:ランドセル",
+      "category": "Randoseru"
     },
     "obj-supuun": {
-      "entity": "スプーン",
       "alt": "スプーンが1本",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:スプーン",
+      "category": "Spoons"
     },
     "obj-teeburu": {
-      "entity": "テーブル",
       "alt": "テーブルが1台",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:テーブル",
+      "category": "Tables (furniture)"
     },
     "obj-kamera": {
       "entity": "カメラ",
@@ -698,9 +705,10 @@
       "height": 426
     },
     "obj-terebi": {
-      "entity": "テレビ受像機",
       "alt": "テレビが1台",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:テレビ受像機",
+      "category": "Television sets"
     },
     "obj-piano": {
       "entity": "ピアノ",
@@ -730,9 +738,10 @@
       "height": 942
     },
     "obj-booru": {
-      "entity": "サッカーボール",
       "alt": "ボールが1つ",
-      "titleFree": true
+      "titleFree": true,
+      "wikipedia": "ja:サッカーボール",
+      "category": "Footballs"
     },
     "obj-tsuki": {
       "wikipedia": "en:Moon",
@@ -763,9 +772,10 @@
       "height": 853
     },
     "obj-kawa": {
-      "entity": "川",
       "alt": "川が流れている",
-      "_use": "理科の解説に置く（流れる水）"
+      "_use": "理科の解説に置く（流れる水）",
+      "wikipedia": "ja:河川",
+      "category": "Rivers of Japan"
     },
     "obj-kumo": {
       "wikipedia": "en:Cloud",
@@ -800,22 +810,10 @@
       "height": 568
     },
     "obj-usagi": {
-      "entity": "アナウサギ",
       "alt": "ウサギが1羽すわっている",
-      "_use": "理科・国語の解説に置く（この生きもの）"
-    },
-    "obj-kame": {
-      "entity": "カメ",
-      "alt": "カメが1匹",
       "_use": "理科・国語の解説に置く（この生きもの）",
-      "file": "obj-kame",
-      "title": "Sacramento, California skyline in 2023",
-      "author": "Quintin Soloviev",
-      "license": "CC BY 4.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3ASacramento%2C%20California%20skyline%20in%202023.jpg",
-      "width": 640,
-      "height": 317
+      "wikipedia": "ja:アナウサギ",
+      "category": "Oryctolagus cuniculus"
     },
     "obj-hitsuji": {
       "entity": "ヒツジ",
@@ -844,9 +842,10 @@
       "height": 480
     },
     "obj-uma": {
-      "entity": "ウマ",
       "alt": "ウマが1頭立っている",
-      "_use": "国語の解説に置く（漢字の成り立ち）"
+      "_use": "国語の解説に置く（漢字の成り立ち）",
+      "wikipedia": "ja:ウマ",
+      "category": "Equus caballus"
     },
     "obj-buta": {
       "entity": "ブタ",
@@ -862,9 +861,10 @@
       "height": 397
     },
     "obj-niwatori": {
-      "entity": "ニワトリ",
       "alt": "ニワトリが1羽立っている",
-      "_use": "理科・国語の解説に置く（この生きもの）"
+      "_use": "理科・国語の解説に置く（この生きもの）",
+      "wikipedia": "ja:ニワトリ",
+      "category": "Gallus gallus domesticus"
     },
     "obj-panda": {
       "entity": "ジャイアントパンダ",
@@ -880,20 +880,24 @@
       "height": 426
     },
     "rika-monshirocho": {
-      "entity": "モンシロチョウ",
-      "alt": "モンシロチョウが葉にとまっている"
+      "alt": "モンシロチョウが葉にとまっている",
+      "wikipedia": "ja:モンシロチョウ",
+      "category": "Pieris rapae"
     },
     "rika-batta": {
-      "entity": "トノサマバッタ",
-      "alt": "バッタを横から写した写真。後ろあしが長い"
+      "alt": "バッタを横から写した写真。後ろあしが長い",
+      "wikipedia": "ja:トノサマバッタ",
+      "category": "Locusta migratoria"
     },
     "rika-tentou": {
-      "entity": "ナナホシテントウ",
-      "alt": "テントウムシの背中。黒い星が見える"
+      "alt": "テントウムシの背中。黒い星が見える",
+      "wikipedia": "ja:ナナホシテントウ",
+      "category": "Coccinella septempunctata"
     },
     "rika-kabutomushi": {
-      "entity": "カブトムシ",
-      "alt": "カブトムシを横から写した写真。角が前に出ている"
+      "alt": "カブトムシを横から写した写真。角が前に出ている",
+      "wikipedia": "ja:カブトムシ",
+      "category": "Trypoxylus dichotomus"
     },
     "rika-housenka": {
       "entity": "ホウセンカ",
@@ -956,16 +960,19 @@
       "height": 960
     },
     "rika-kandenchi": {
-      "entity": "乾電池",
-      "alt": "乾電池が1本"
+      "alt": "乾電池が1本",
+      "wikipedia": "ja:乾電池",
+      "category": "Dry cell batteries"
     },
     "rika-mamedenkyuu": {
-      "entity": "白熱電球",
-      "alt": "小さな電球"
+      "alt": "小さな電球",
+      "wikipedia": "ja:白熱電球",
+      "category": "Incandescent light bulbs"
     },
     "rika-chisou": {
-      "entity": "地層",
-      "alt": "がけに横じまが重なって見える地層"
+      "alt": "がけに横じまが重なって見える地層",
+      "wikipedia": "ja:地層",
+      "category": "Strata"
     },
     "rika-niji": {
       "entity": "虹",
@@ -1016,8 +1023,9 @@
       "height": 439
     },
     "shakai-patokaa": {
-      "entity": "パトカー",
-      "alt": "パトカーが1台"
+      "alt": "パトカーが1台",
+      "wikipedia": "ja:パトカー",
+      "category": "Police cars in Japan"
     },
     "shakai-yuubin": {
       "wikipedia": "ja:郵便ポスト",
@@ -1033,8 +1041,9 @@
       "height": 853
     },
     "shakai-tanbo": {
-      "entity": "水田",
-      "alt": "水をはった田んぼ"
+      "alt": "水をはった田んぼ",
+      "wikipedia": "ja:水田",
+      "category": "Rice paddies in Japan"
     },
     "shakai-shinkansen": {
       "entity": "新幹線",
@@ -1062,12 +1071,14 @@
       "height": 427
     },
     "shakai-kokkai": {
-      "entity": "国会議事堂",
-      "alt": "国会議事堂の正面"
+      "alt": "国会議事堂の正面",
+      "wikipedia": "ja:国会議事堂",
+      "category": "National Diet Building"
     },
     "shakai-kinkakuji": {
-      "entity": "金閣寺",
-      "alt": "金色の建物が池に映っている"
+      "alt": "金色の建物が池に映っている",
+      "wikipedia": "ja:金閣寺",
+      "category": "Kinkaku-ji"
     },
     "shakai-nara": {
       "entity": "東大寺",
@@ -1106,12 +1117,14 @@
       "height": 963
     },
     "shakai-jomon": {
-      "entity": "縄文土器",
-      "alt": "縄の文様が付いた土器"
+      "alt": "縄の文様が付いた土器",
+      "wikipedia": "ja:縄文土器",
+      "category": "Jōmon pottery"
     },
     "shakai-toudai": {
-      "entity": "灯台",
-      "alt": "海のそばに立つ灯台"
+      "alt": "海のそばに立つ灯台",
+      "wikipedia": "ja:灯台",
+      "category": "Lighthouses in Japan"
     },
     "obj-kawa2": {
       "wikipedia": "ja:河川",
@@ -1427,6 +1440,10 @@
     "sek-hyouga": {
       "alt": "谷を流れ下る氷河",
       "why": "黒枠の中の細い帯"
+    },
+    "obj-kame": {
+      "alt": "カメが1匹",
+      "why": "街並みの写真が来た"
     }
   }
 }
