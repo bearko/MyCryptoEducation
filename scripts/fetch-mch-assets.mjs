@@ -128,7 +128,10 @@ if (heroRows && foeRows) {
   for (const h of heroRows) {
     if (!want.has(h.id)) continue;
     const st = h.max_level_stats || h.initial_stats || {};
+    /* **パッシブスキルの名前も持ちます。** 必殺技のカットインに出す1行で、
+       MCH の `passive.name.ja` そのものです（こちらで付けません） */
     stats.heroes[String(h.id)] = { name: h.name?.ja || String(h.id),
+      skill: h.passive?.name?.ja || "", 
       hp: st.hp | 0, phy: st.phy | 0, int: st.int | 0, agi: st.agi | 0 };
   }
   for (const e of foeRows) {
