@@ -3192,5 +3192,121 @@
     "tip": "道案内は、相手の立場から言い直す練習になる。自分の右と相手の右は、向かい合えば逆になる。",
     "card": "道案内の言い方",
     "level": 1
+  },
+  {
+    "id": "gaikokugo-109",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "果物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "くだものの「いちご」を英語で言うと?",
+    "choices": [
+      "peach",
+      "grape",
+      "strawberry",
+      "cherry"
+    ],
+    "answer": 2,
+    "hints": [
+      "赤くて、表面につぶつぶが付いている。",
+      "ケーキの上によくのっている。",
+      "二つの語がくっついてできた、つづりの長い言葉だ。"
+    ],
+    "lesson": "いちごは **strawberry**。straw（わら）+ berry（実）からできた語で、わらをしいて育てたから、という説がある。**berry の付く仲間**には blueberry（ブルーベリー）、raspberry（ラズベリー）があり、**語の後ろ半分を見ると仲間が分かる**。",
+    "tip": "言葉の中に、育て方の記憶が残っていることがある。語源は小さな歴史だ。",
+    "card": "くだものの英語",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-110",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "体の部分",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「hand」が指すのは、体のどこ?",
+    "choices": [
+      "あし",
+      "手",
+      "耳",
+      "目"
+    ],
+    "answer": 1,
+    "hints": [
+      "あくしゅをするときに、相手に差し出す。",
+      "指が五本ついている。",
+      "「Hands up!」は、これを上げなさいという意味だ。"
+    ],
+    "lesson": "**hand** は手。体の部分は英語でも短い語が多い（eye、ear、foot、leg）。**hand は「手わたす」という動詞にもなる**（Hand me the pen.）。体の部分の語は、そこから動きや気持ちを表す言葉へ広がっていく。",
+    "tip": "手、足、目。どの言語でも、体の言葉がいちばん古くて短い。",
+    "card": "体の部分の英語",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-111",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "家族の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「sister」が表すのはどれ?",
+    "choices": [
+      "兄または弟",
+      "姉または妹",
+      "おじ",
+      "いとこ"
+    ],
+    "answer": 1,
+    "hints": [
+      "男女で呼び名が分かれている語だ。",
+      "brother と対になる語にあたる。",
+      "英語では、年上か年下かを区別しない。"
+    ],
+    "lesson": "**sister** は姉と妹の両方を指す。英語は**年の上下を区別しない**ので、区別したいときは older sister / younger sister と付け足す。日本語の「姉・妹」のように**一語で上下が分かるほうがめずらしい** ——どこを言い分けるかは、言語によってちがう。",
+    "tip": "言葉が何を区別するかは、その文化が何を大事にしてきたかを映している。",
+    "card": "家族を表す英語",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-112",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "持っているものを言う",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「私はねこを2ひき飼っています」を英語で言うと?",
+    "choices": [
+      "I have two cats.",
+      "I am two cats.",
+      "I like two cats.",
+      "I can two cats."
+    ],
+    "answer": 0,
+    "hints": [
+      "「持っている・飼っている」を表す動詞を使う。",
+      "be動詞ではなく、一般動詞のほうを使う。",
+      "二ひき以上なので、後ろの名詞の形も変わる。"
+    ],
+    "lesson": "**have** は「持っている・飼っている」。I have a cat.（1ぴき）→ I have two cats.（2ひき）と、**二つ以上のときは名詞に s を付ける**。日本語では「ねこ」の形が変わらないので、**英語を書くときに落としやすいのがこの s** だ。",
+    "tip": "数が形に出る言語と、出ない言語がある。どちらが便利かではなく、どこに注意を向けるかのちがいだ。",
+    "card": "have の使い方",
+    "level": 2
   }
 ]
