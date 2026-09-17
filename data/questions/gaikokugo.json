@@ -2897,5 +2897,64 @@
     "tip": "英語は主語に合わせて動詞の形を変える。日本語には無い決まりなので、意識して確かめるほかない。",
     "card": "現在形と3人称単数のs",
     "level": 2
+  },
+  {
+    "id": "gaikokugo-099",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "色の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「むらさき」を英語で言うと?",
+    "choices": [
+      "orange",
+      "purple",
+      "brown",
+      "yellow"
+    ],
+    "answer": 1,
+    "hints": [
+      "赤と青を混ぜてできる色だ。",
+      "英語では p で始まる。",
+      "むかしは高価な染料だったため、王の色とされた。"
+    ],
+    "lesson": "purple はむらさき。古代、この色の染料は貝から少量しか取れず非常に高価だったため、王や皇帝の色とされた。英語の born in the purple（高貴な生まれ）はその名残りだ。**色の名前には、その色を作る難しさの記憶が残っている。**",
+    "tip": "色の名前は、たいてい染料か自然物から来ている。orange が果物の名から来たのも同じだ。",
+    "card": "purple と色の名前",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-100",
+    "chapter": 0,
+    "grade": "j1",
+    "gradeLabel": "中学1年",
+    "subject": "外国語",
+    "unit": "be動詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "stem": "We ___ students.",
+    "prompt": "「わたしたちは学生です」の ___ に入るのは?",
+    "choices": [
+      "am",
+      "is",
+      "are",
+      "be"
+    ],
+    "answer": 2,
+    "hints": [
+      "主語は We（わたしたち）で、複数だ。",
+      "am は I のときだけ使う。",
+      "複数の主語には、決まった形が対応する。"
+    ],
+    "lesson": "We are students. be動詞は主語によって形が変わる——I は am、he / she / it は is、you と複数は are。**日本語の「です」は形が変わらない**ので、ここは意識して覚えるところになる。主語が複数なら名詞にも s が付く点も合わせて確かめたい。",
+    "tip": "主語に合わせて形を変えることを「一致」という。英語の文の骨格は、この一致で支えられている。",
+    "card": "be動詞の使い分け",
+    "level": 1
   }
 ]
