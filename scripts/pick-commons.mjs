@@ -22,7 +22,7 @@ import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gather, describe, adopt, usability, sleep, WAIT } from "./commons-lib.mjs";
+import { gather, describe, adopt, usability, normalizeLicense, sleep, WAIT } from "./commons-lib.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = "public/commons";
@@ -267,6 +267,22 @@ if (SELFTEST) {
   const gone = await pick("__no_such_key__", "File:A.jpg");
   t("台帳にない行は断る", gone.ok === false, JSON.stringify(gone));
   t("台帳を書き換えていない", await readFile(bookPath, "utf8") === bookBefore);
+
+  /* **短縮名の言い方をそろえているか。**
+     コモンズは同じパブリックドメインでも根拠ごとに別の名前を返してくる
+     （PD-old-70／PD-US-expired／PD-self／PD-USGov）。ここをそのまま
+     `allow` と突き合わせていたので、中身はPDなのに全部落ちていた */
+  const lic = v => normalizeLicense({ LicenseShortName: { value: v } });
+  t("PDの言い方はどれも Public domain になる",
+    ["PD-old-70", "PD-US-expired", "PD-self", "PD-USGov", "PDM 1.0"]
+      .every(v => lic(v) === "Public domain"),
+    ["PD-old-70", "PD-self"].map(lic).join(" / "));
+  t("CC0 の版番号は落とす", lic("CC0 1.0") === "CC0", lic("CC0 1.0"));
+  t("CC BY は版番号を残す", lic("CC-BY-2.0") === "CC BY 2.0", lic("CC-BY-2.0"));
+  /* **ここを取りちがえると、使ってはいけないものを通します** */
+  t("CC BY-SA を CC BY として拾わない", lic("CC BY-SA 4.0") === "CC BY-SA 4.0", lic("CC BY-SA 4.0"));
+  t("NC・ND も素通ししない",
+    lic("CC BY-NC 3.0").includes("NC") && lic("CC BY-ND 4.0").includes("ND"));
   server.close();
   console.log(out.every(Boolean) ? "\nすべて通過" : `\n${out.filter(x => !x).length}件 失敗`);
   process.exit(out.every(Boolean) ? 0 : 1);
