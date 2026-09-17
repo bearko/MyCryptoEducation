@@ -501,6 +501,381 @@
       "source": "https://commons.wikimedia.org/wiki/File%3ADog-2617516%201920.jpg",
       "width": 640,
       "height": 427
+    },
+    "obj-neko": {
+      "entity": "ネコ",
+      "alt": "ネコが1匹こちらを向いて座っている",
+      "titleFree": true
+    },
+    "obj-suzume": {
+      "entity": "スズメ",
+      "alt": "スズメが1羽とまっている",
+      "titleFree": true
+    },
+    "obj-sakana": {
+      "entity": "サケ",
+      "alt": "魚が1匹、横向きに写っている",
+      "titleFree": true
+    },
+    "obj-hana": {
+      "entity": "ヒマワリ",
+      "alt": "ヒマワリの花が1輪咲いている",
+      "titleFree": true
+    },
+    "obj-ki": {
+      "entity": "サクラ",
+      "alt": "花をつけた木が1本立っている",
+      "titleFree": true
+    },
+    "obj-kasa": {
+      "entity": "傘",
+      "alt": "開いた傘が1本",
+      "titleFree": true
+    },
+    "obj-tsukue": {
+      "entity": "机",
+      "alt": "机が1つ置いてある",
+      "titleFree": true
+    },
+    "obj-isu": {
+      "entity": "椅子",
+      "alt": "椅子が1脚置いてある",
+      "titleFree": true
+    },
+    "obj-tokei": {
+      "entity": "掛時計",
+      "alt": "壁掛けの時計。数字の文字盤",
+      "titleFree": true
+    },
+    "obj-kuruma": {
+      "entity": "自動車",
+      "alt": "自動車が1台、横から写っている",
+      "titleFree": true
+    },
+    "obj-densha": {
+      "entity": "電車",
+      "alt": "電車が1両、線路の上にいる",
+      "titleFree": true
+    },
+    "obj-fune": {
+      "entity": "船",
+      "alt": "船が1隻、水に浮かんでいる",
+      "titleFree": true
+    },
+    "obj-hikouki": {
+      "entity": "飛行機",
+      "alt": "飛行機が1機",
+      "titleFree": true
+    },
+    "obj-jitensha": {
+      "entity": "自転車",
+      "alt": "自転車が1台、横から写っている",
+      "titleFree": true
+    },
+    "obj-kutsu": {
+      "entity": "靴",
+      "alt": "靴が1足ならんでいる",
+      "titleFree": true
+    },
+    "obj-boushi": {
+      "entity": "帽子",
+      "alt": "帽子が1つ",
+      "titleFree": true
+    },
+    "obj-ringo": {
+      "entity": "リンゴ",
+      "alt": "赤いリンゴ",
+      "titleFree": true
+    },
+    "obj-mikan": {
+      "entity": "ウンシュウミカン",
+      "alt": "みかんが写っている",
+      "titleFree": true
+    },
+    "obj-budou": {
+      "entity": "ブドウ",
+      "alt": "ぶどうのふさ",
+      "titleFree": true
+    },
+    "obj-ichigo": {
+      "entity": "イチゴ",
+      "alt": "いちごの実",
+      "titleFree": true
+    },
+    "obj-ninjin": {
+      "entity": "ニンジン",
+      "alt": "にんじんが写っている",
+      "titleFree": true
+    },
+    "obj-tomato": {
+      "entity": "トマト",
+      "alt": "赤いトマト",
+      "titleFree": true
+    },
+    "obj-gyuunyuu": {
+      "entity": "牛乳",
+      "alt": "コップに入った牛乳",
+      "titleFree": true
+    },
+    "obj-enpitsu": {
+      "entity": "鉛筆",
+      "alt": "鉛筆が1本",
+      "titleFree": true
+    },
+    "obj-hasami": {
+      "entity": "はさみ",
+      "alt": "はさみが1丁",
+      "titleFree": true
+    },
+    "obj-hon": {
+      "entity": "本",
+      "alt": "本が1冊置いてある",
+      "titleFree": true
+    },
+    "obj-randoseru": {
+      "entity": "ランドセル",
+      "alt": "ランドセルが1つ",
+      "titleFree": true
+    },
+    "obj-koppu": {
+      "entity": "コップ",
+      "alt": "コップが1つ",
+      "titleFree": true
+    },
+    "obj-supuun": {
+      "entity": "スプーン",
+      "alt": "スプーンが1本",
+      "titleFree": true
+    },
+    "obj-teeburu": {
+      "entity": "テーブル",
+      "alt": "テーブルが1台",
+      "titleFree": true
+    },
+    "obj-kamera": {
+      "entity": "カメラ",
+      "alt": "カメラが1台",
+      "titleFree": true
+    },
+    "obj-terebi": {
+      "entity": "テレビ受像機",
+      "alt": "テレビが1台",
+      "titleFree": true
+    },
+    "obj-piano": {
+      "entity": "ピアノ",
+      "alt": "ピアノが1台",
+      "titleFree": true
+    },
+    "obj-gitaa": {
+      "entity": "ギター",
+      "alt": "ギターが1本",
+      "titleFree": true
+    },
+    "obj-booru": {
+      "entity": "サッカーボール",
+      "alt": "ボールが1つ",
+      "titleFree": true
+    },
+    "obj-tsuki": {
+      "entity": "月",
+      "alt": "夜空に出た月",
+      "titleFree": true
+    },
+    "obj-umi": {
+      "entity": "海",
+      "alt": "海が広がっている",
+      "titleFree": true
+    },
+    "obj-kawa": {
+      "entity": "川",
+      "alt": "川が流れている",
+      "titleFree": true
+    },
+    "obj-kumo": {
+      "entity": "雲",
+      "alt": "空に浮かぶ雲",
+      "titleFree": true
+    },
+    "obj-yuki": {
+      "entity": "雪",
+      "alt": "雪が積もっている",
+      "titleFree": true
+    },
+    "obj-zou": {
+      "entity": "ゾウ",
+      "alt": "ゾウが1頭立っている",
+      "titleFree": true
+    },
+    "obj-kirin": {
+      "entity": "キリン",
+      "alt": "キリンが1頭立っている",
+      "titleFree": true
+    },
+    "obj-usagi": {
+      "entity": "アナウサギ",
+      "alt": "ウサギが1羽すわっている",
+      "titleFree": true
+    },
+    "obj-kame": {
+      "entity": "カメ",
+      "alt": "カメが1匹",
+      "titleFree": true
+    },
+    "obj-kaeru": {
+      "entity": "カエル",
+      "alt": "カエルが1匹",
+      "titleFree": true
+    },
+    "obj-hitsuji": {
+      "entity": "ヒツジ",
+      "alt": "ヒツジが1頭立っている",
+      "titleFree": true
+    },
+    "obj-ushi": {
+      "entity": "ウシ",
+      "alt": "ウシが1頭立っている",
+      "titleFree": true
+    },
+    "obj-uma": {
+      "entity": "ウマ",
+      "alt": "ウマが1頭立っている",
+      "titleFree": true
+    },
+    "obj-buta": {
+      "entity": "ブタ",
+      "alt": "ブタが1頭立っている",
+      "titleFree": true
+    },
+    "obj-niwatori": {
+      "entity": "ニワトリ",
+      "alt": "ニワトリが1羽立っている",
+      "titleFree": true
+    },
+    "obj-panda": {
+      "entity": "ジャイアントパンダ",
+      "alt": "パンダが1頭",
+      "titleFree": true
+    },
+    "rika-monshirocho": {
+      "entity": "モンシロチョウ",
+      "alt": "モンシロチョウが葉にとまっている"
+    },
+    "rika-batta": {
+      "entity": "トノサマバッタ",
+      "alt": "バッタを横から写した写真。後ろあしが長い"
+    },
+    "rika-tentou": {
+      "entity": "ナナホシテントウ",
+      "alt": "テントウムシの背中。黒い星が見える"
+    },
+    "rika-kabutomushi": {
+      "entity": "カブトムシ",
+      "alt": "カブトムシを横から写した写真。角が前に出ている"
+    },
+    "rika-housenka": {
+      "entity": "ホウセンカ",
+      "alt": "ホウセンカが咲いている"
+    },
+    "rika-tanpopo": {
+      "entity": "タンポポ",
+      "alt": "タンポポの花"
+    },
+    "rika-hechima": {
+      "entity": "ヘチマ",
+      "alt": "ヘチマの実がつるにぶら下がっている"
+    },
+    "rika-medaka": {
+      "entity": "ミナミメダカ",
+      "alt": "メダカが水の中を泳いでいる"
+    },
+    "rika-furiko": {
+      "entity": "振り子",
+      "alt": "糸におもりを下げた振り子"
+    },
+    "rika-ondokei": {
+      "entity": "温度計",
+      "alt": "目もりの付いた温度計"
+    },
+    "rika-kandenchi": {
+      "entity": "乾電池",
+      "alt": "乾電池が1本"
+    },
+    "rika-mamedenkyuu": {
+      "entity": "白熱電球",
+      "alt": "小さな電球"
+    },
+    "rika-chisou": {
+      "entity": "地層",
+      "alt": "がけに横じまが重なって見える地層"
+    },
+    "rika-niji": {
+      "entity": "虹",
+      "alt": "空にかかった虹"
+    },
+    "rika-sekiran": {
+      "entity": "積乱雲",
+      "alt": "高く盛り上がった雲"
+    },
+    "rika-yousui": {
+      "entity": "顕微鏡",
+      "alt": "顕微鏡が1台"
+    },
+    "shakai-shoubousha": {
+      "entity": "消防自動車",
+      "alt": "赤い消防自動車"
+    },
+    "shakai-patokaa": {
+      "entity": "パトカー",
+      "alt": "パトカーが1台"
+    },
+    "shakai-yuubin": {
+      "entity": "郵便ポスト",
+      "alt": "赤い郵便ポスト"
+    },
+    "shakai-tanbo": {
+      "entity": "水田",
+      "alt": "水をはった田んぼ"
+    },
+    "shakai-shinkansen": {
+      "entity": "新幹線",
+      "alt": "新幹線の車両"
+    },
+    "shakai-fujisan": {
+      "entity": "富士山",
+      "alt": "雪をかぶった富士山"
+    },
+    "shakai-kokkai": {
+      "entity": "国会議事堂",
+      "alt": "国会議事堂の正面"
+    },
+    "shakai-kinkakuji": {
+      "entity": "金閣寺",
+      "alt": "金色の建物が池に映っている"
+    },
+    "shakai-himeji": {
+      "entity": "姫路城",
+      "alt": "白い天守閣"
+    },
+    "shakai-nara": {
+      "entity": "東大寺",
+      "alt": "大きな木造の建物"
+    },
+    "shakai-haniwa": {
+      "entity": "埴輪",
+      "alt": "素焼きの人の形をした焼き物"
+    },
+    "shakai-doutaku": {
+      "entity": "銅鐸",
+      "alt": "つり鐘の形をした青銅の道具"
+    },
+    "shakai-jomon": {
+      "entity": "縄文土器",
+      "alt": "縄の文様が付いた土器"
+    },
+    "shakai-toudai": {
+      "entity": "灯台",
+      "alt": "海のそばに立つ灯台"
     }
   }
 }
