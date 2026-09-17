@@ -2838,5 +2838,64 @@
     "image": "obj-tsuki",
     "imageAt": "prompt",
     "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-097",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "数の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "13 を英語で言うと?",
+    "choices": [
+      "thirty",
+      "thirteen",
+      "three",
+      "thirtieth"
+    ],
+    "answer": 1,
+    "hints": [
+      "10 より大きく、20 より小さい数だ。",
+      "13〜19 には、共通の語尾が付く。",
+      "thirty は30を表すので、まぎらわしい。"
+    ],
+    "lesson": "13 は thirteen。**13〜19 は語尾が -teen、20・30・40 は語尾が -ty** になる。thirteen と thirty は音が似ていて聞き分けにくいが、-teen のほうは後ろにアクセントが来る。数の聞き取りは、この違いを知っているかで決まる。",
+    "tip": "10代を teenager と呼ぶのは、13〜19 が -teen で終わるからだ。言葉の区切りが、年齢の区切りを作っている。",
+    "card": "-teen と -ty",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-098",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "動詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "stem": "I ___ soccer every day.",
+    "prompt": "「わたしは毎日サッカーをします」の ___ に入るのは?",
+    "choices": [
+      "play",
+      "plays",
+      "playing",
+      "played"
+    ],
+    "answer": 0,
+    "hints": [
+      "主語は I（わたし）だ。",
+      "毎日することなので、現在の習慣を表す形を使う。",
+      "3人称単数のときだけ s が付く。"
+    ],
+    "lesson": "I play soccer every day. 現在形では、**主語が3人称単数（he / she / it）のときだけ動詞に s が付く**。I や you、複数の主語には付かない。every day のような言葉があると、今している最中ではなく習慣を表していると分かる。",
+    "tip": "英語は主語に合わせて動詞の形を変える。日本語には無い決まりなので、意識して確かめるほかない。",
+    "card": "現在形と3人称単数のs",
+    "level": 2
   }
 ]
