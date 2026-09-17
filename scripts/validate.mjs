@@ -486,6 +486,47 @@ for (const q of questions) {
   }
 }
 
+/* ---- 教科の札の素材 ---- */
+/* **絵が欠けると、札が白いまま出ます。** 教科ごとの英雄・背景・エネミーが
+   実体としてあるかを見ます。エネミーは番号の並びで教科に対応しているので、
+   並びが重なっていないかも確かめます（重なると別の教科の敵が出ます）。 */
+{
+  const book = await json("data/subjects.json");
+  const art = book.subjects || {};
+  const seen = [];
+  for (const sub of SUBJECTS) {
+    const a = art[sub];
+    if (!a) { err("subjects.json", `教科「${sub}」の札の素材がありません`); continue; }
+    if (!existsSync(join(ROOT, `public/heroes/${a.hero}.webp`)))
+      err("subjects.json", `${sub}: 英雄の絵がありません public/heroes/${a.hero}.webp`);
+    if (!existsSync(join(ROOT, `public/backgrounds/${a.bg}.webp`)))
+      err("subjects.json", `${sub}: 背景がありません public/backgrounds/${a.bg}.webp`);
+    if (!Array.isArray(a.enemy) || a.enemy.length !== 2)
+      err("subjects.json", `${sub}: enemy は [先頭, 末尾] の2つで書いてください`);
+    else {
+      for (const [lo, hi, other] of seen)
+        if (a.enemy[0] <= hi && lo <= a.enemy[1])
+          err("subjects.json", `${sub} と ${other} でエネミーの番号が重なっています`);
+      seen.push([a.enemy[0], a.enemy[1], sub]);
+      let missing = 0;
+      for (let i = a.enemy[0]; i <= a.enemy[1]; i++)
+        if (!existsSync(join(ROOT, `public/enemies/${i}.webp`))) missing++;
+      if (missing === a.enemy[1] - a.enemy[0] + 1)
+        err("subjects.json", `${sub}: エネミーの絵が1体もありません（${a.enemy.join("〜")}）`);
+      else if (missing) warn(`${sub}: エネミーが ${missing}体 欠けています（${a.enemy.join("〜")}）`);
+    }
+    /* **ひらがなにするなら、いつ漢字へ変わるかも要ります。** 片方だけだと、
+       いつまでもひらがなのままか、最初から漢字のままになります */
+    if (a.kana && !a.kanjiFrom && !a.elem)
+      err("subjects.json", `${sub}: kana があるのに kanjiFrom がありません`);
+  }
+  if (!existsSync(join(ROOT, `public/backgrounds/${book.defaultBg}.webp`)))
+    err("subjects.json", `既定の背景がありません public/backgrounds/${book.defaultBg}.webp`);
+  const navi = "public/characters/navi_ain_11_idle.webp";
+  if (!existsSync(join(ROOT, navi))) err("subjects.json", `マインちゃんの絵がありません ${navi}`);
+  console.log(`\n教科の札 ・ ${SUBJECTS.length}教科（英雄・背景・エネミーの並び）`);
+}
+
 /* ---- 画面ID ---- */
 /* **番号は使い回しません。** 途中に差しこむと、過去のレビューの番号が別の画面を
    指すようになります。抜けと重なりをここで止めます。絵そのものの撮り直しは

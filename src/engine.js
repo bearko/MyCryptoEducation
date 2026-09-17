@@ -959,3 +959,75 @@ export function panelLayout(reading, key = reading, tries = 100) {
   });
   return { size, cells, path };
 }
+
+/* ---------- 教科の札（「出題を選ぶ」） ---------- */
+
+/**
+ * **その教科で、いまどこを解いているか。**
+ *
+ * 知識マップから導きます——**その教科に実在する学年を下から見て、まだ埋まって
+ * いない最初のもの**です。専用の数値を持たせないのは、進行が2つになると必ず
+ * 食い違うためです。知識マップを埋めることが、そのまま学年を上げることになります。
+ *
+ * 梯子の一番上は「世界」です。範囲の選択を画面から外したので、**海外の問題は
+ * その教科を中3まで埋めた人のところへ自然に来ます。**
+ */
+export const subjectLadder = (db, subject) =>
+  GRADES.filter(g => (db.questions || []).some(q => q.subject === subject && q.grade === g.k));
+
+export const subjectGrade = (db, state, subject) => {
+  const ladder = subjectLadder(db, subject);
+  if (!ladder.length) return null;
+  const cells = state.cells || {};
+  return ladder.find(g => cells[subject + "|" + g.k] !== "ok") || ladder[ladder.length - 1];
+};
+
+/**
+ * 画面に出す教科の名前。
+ *
+ * **その漢字を習う学年になるまでは、ひらがなで出します。** 小1に「国語」と
+ * 書いても読めません。実際に効くのは国語と算数だけで、理科・社会・外国語は
+ * 小3から、情報は中学からなので、最初から漢字です。
+ *
+ * **算数は中学から「数学」に変わります**（文科省の課程どおり）。
+ */
+export const subjectLabel = (book, subject, gradeKey) => {
+  const info = book?.subjects?.[subject];
+  if (!info) return subject;
+  const band = (GRADES.find(g => g.k === gradeKey) || {}).band;
+  if (info.elem && info.junior) return band === "e" && gradeKey !== "e1" ? info.elem
+    : band === "e" ? (info.kana || info.elem) : info.junior;
+  if (info.kana && info.kanjiFrom &&
+      (GRADE_ORDER[gradeKey] || 99) < (GRADE_ORDER[info.kanjiFrom] || 0)) return info.kana;
+  return subject;
+};
+
+/**
+ * **毎回3教科だけ引きます。**
+ *
+ * 全部並べると選ぶだけで疲れますし、同じ教科ばかり遊んで偏ります。
+ * **正答率や履歴は使いません**（形式のくじと同じ理由で、得意不得意で
+ * 偏らせないため）。在庫のある教科からだけ引きます。
+ */
+export const drawSubjects = (db, state, rng = Math.random, n = 3) => {
+  const pool = SUBJECTS.filter(s => inventory(db, state, "auto", s).length > 0);
+  const out = [];
+  const rest = pool.slice();
+  while (out.length < n && rest.length) out.push(rest.splice(Math.floor(rng() * rest.length), 1)[0]);
+  return out;
+};
+
+/** 文字列から決まる小さな整数。同じ組み合わせなら毎回同じ絵が出る */
+const hash = s => { let h = 5381; for (const c of String(s)) h = (h * 33 + c.charCodeAt(0)) | 0; return Math.abs(h); };
+
+/**
+ * その教科・その形式に割り当たるエネミー。
+ * **同じセッションのあいだは変わりません**（描き直すたびに別の敵に
+ * 化けると、倒した手ごたえが消えるため）。seed はくじを引いた回ごとの数です。
+ */
+export const enemyOf = (book, subject, mode, seed = 0) => {
+  const r = book?.subjects?.[subject]?.enemy;
+  if (!r) return null;
+  const span = r[1] - r[0] + 1;
+  return String(r[0] + hash(`${subject}/${mode}/${seed}`) % span);
+};
