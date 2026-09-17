@@ -246,6 +246,12 @@ check("小学校のあいだは「算数」", ev(`subjectLabel(DB.subjects, "算
 
 // 選ぶまで出発できない
 check("選ぶまで出発できない", d.getElementById("start").disabled);
+/* **束が3つ組める教科に固定する。** くじ引きのままだと、在庫の薄い教科を
+   引いた回だけ束が2つになって、この検査が気まぐれに落ちます（実際に落ちました） */
+ev(`(() => {
+  const rich = SUBJECTS.filter(s => planRun(DB, S, { band: "auto", subject: s }).plan.length === 3);
+  S.select.picks = rich.slice(0, 3); S.select.subject = "auto"; S.select.run = null; render();
+})()`);
 d.querySelectorAll(".scard")[0].click();
 check("選ぶと出発できる", !d.getElementById("start").disabled);
 check("選んだ札は塗りつぶす", d.querySelectorAll(".scard.on").length === 1);
@@ -2067,7 +2073,7 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
  */
 {
   const { SCREENS } = await import("./screens.mjs");
-  check("画面IDは25面ぶんある", SCREENS.length === 25, String(SCREENS.length));
+  check("画面IDは26面ぶんある", SCREENS.length === 26, String(SCREENS.length));
   check("画面IDは重なっていない", new Set(SCREENS.map(s => s.id)).size === SCREENS.length);
   const at = (view, patch = "") => ev(`(() => { S.view = ${JSON.stringify(view)}; ${patch} return screenId(); })()`);
   check("ホームは S-02", at("home") === "S-02", at("home"));
@@ -2093,12 +2099,93 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
   check("レンジは S-09", quizAt("range") === "S-09", quizAt("range"));
   check("スワイプは S-10", quizAt("swipe") === "S-10", quizAt("swipe"));
   // 答えたあとは解説、そこから応用編。**同じビューでも別の画面として数える**
+  // バトルが立っていれば S-26、立っていなければ S-11（初回起動・記録からの再挑戦）
   check("答えたあとは S-11", ev(`(() => {
-    const id = S.run.ids[0]; S.run.results[id] = "ok"; return screenId(); })()`) === "S-11");
+    const id = S.run.ids[0]; S.run.results[id] = "ok"; S.run.battle = null;
+    return screenId(); })()`) === "S-11");
   check("応用編は S-12", ev(`(() => { S.run.applied = { picked: null }; return screenId(); })()`) === "S-12");
   ev('S.run.applied = null; S.run.results = {}; S.view = "home";');
   // **`#review` を付けたときだけ番号を出す。** ふだんの画面には出さない
   check("ふだんは画面IDを出さない", d.getElementById("revtag") === null);
+}
+
+/* ---- バトル（出題画面の4層） ---- */
+/**
+ * **1つの束が1つの wave。** 正解すると敵を、外すとヒーローを殴ります。
+ * ヒーローが倒れても wave は続き、**1問ごとの報酬は変わりません**（原則3）。
+ * 変わるのは「敵を削れなくなる」ことだけで、撃破の上乗せが取れなくなります。
+ */
+{
+  const setup = n => ev(`(() => {
+    const ids = DB.questions.filter(q => q.subject === "国語" && q.mode === "elimination")
+      .slice(0, ${n}).map(q => q.id);
+    S.select.subject = "国語"; S.select.seed = 3;
+    S.settings.showExplanationOnCorrect = true;
+    startRun({ built: { ids, plan: [{ mode: "elimination", n: ${n}, level: 1 }] } });
+    return ids.length;
+  })()`);
+  const cut = right => ev(`(() => {
+    const q = DB.byId[S.run.ids[S.run.i]];
+    if (${right}) { for (let i = 0; i < q.choices.length; i++)
+      if (i !== q.answer) document.querySelector('.xcut[data-c="' + i + '"]').click(); }
+    else document.querySelector('.xcut[data-c="' + q.answer + '"]').click();
+  })()`);
+
+  setup(4);
+  check("バトルが立っている", ev("!!S.run.battle"));
+  check("英雄は教科なりで決まる",
+    ev("S.run.battle.heroId") === ev(`DB.subjectArt["国語"].hero`), ev("S.run.battle.heroId"));
+  check("敵は教科の並びから出る", ev(`(() => {
+    const r = DB.subjects.subjects["国語"].enemy, id = Number(S.run.battle.foeId);
+    return id >= r[0] && id <= r[1];
+  })()`) === true, ev("S.run.battle.foeId"));
+  // **その wave で倒せる敵しか出さない。** 全問正解しても届かないと、運任せになる
+  check("全問正解すれば必ず倒せる",
+    ev("S.run.battle.foeMax") <= ev("S.run.battle.hit") * 4,
+    `${ev("S.run.battle.foeMax")} / 一撃 ${ev("S.run.battle.hit")} × 4問`);
+
+  const foe0 = ev("S.run.battle.foeHp"), hero0 = ev("S.run.battle.heroHp");
+  cut(true);
+  check("正解すると敵が削れる", ev("S.run.battle.foeHp") < foe0,
+    `${foe0} → ${ev("S.run.battle.foeHp")}`);
+  check("正解でヒーローは減らない", ev("S.run.battle.heroHp") === hero0);
+  check("当たった側に絵が出る", ev(`S.run.battle.fx`) === "foe");
+  ev('document.getElementById("next").click()');
+  const foe1 = ev("S.run.battle.foeHp");
+  cut(false);
+  check("外すとヒーローが削れる", ev("S.run.battle.heroHp") < hero0,
+    `${hero0} → ${ev("S.run.battle.heroHp")}`);
+  check("外しても敵は減らない", ev("S.run.battle.foeHp") === foe1);
+
+  /* **倒れても wave は続く。** 問題を解く機会も、1問ごとの報酬も減らない */
+  setup(4);
+  ev("S.run.battle.heroHp = S.run.battle.foeHit;");   // あと1発で倒れるところまで
+  cut(false);
+  check("HPは0まで落ちる", ev("S.run.battle.heroHp") === 0);
+  check("倒れた印がつく", ev("S.run.battle.down") === true);
+  ev('document.getElementById("next").click()');
+  const foeDown = ev("S.run.battle.foeHp");
+  const gumBefore = ev("S.run.gum");
+  cut(true);
+  check("倒れていても問題は続く", ev('S.view === "quiz"'));
+  check("倒れていても1問ぶんのGUMは入る", ev("S.run.gum") > gumBefore,
+    `${gumBefore} → ${ev("S.run.gum")}`);
+  check("倒れているあいだは敵を削れない", ev("S.run.battle.foeHp") === foeDown,
+    `${foeDown} → ${ev("S.run.battle.foeHp")}`);
+
+  /* 倒しきると上乗せ。**動くのはここだけ** */
+  setup(3);
+  for (let k = 0; k < 3; k++) { cut(true); ev('document.getElementById("next")?.click()'); }
+  const bonus = JSON.parse(ev("JSON.stringify(S.run.battleBonus || null)"));
+  check("倒しきると上乗せがつく", !!bonus && bonus.kills >= 1 && bonus.cleared >= 1,
+    JSON.stringify(bonus));
+  check("上乗せはGUMと点だけ", !!bonus && bonus.gum > 0 && bonus.score > 0);
+  check("リザルトに倒したぶんが出る", txt().includes("たおした敵"), txt().slice(0, 120));
+
+  // **初回起動にはバトルを立てない。** 問題と解答だけにする（決定1）
+  ev('S.introDone = false; S.runs = 0; S.run.done = true; startIntro();');
+  check("初回起動にバトルは出さない", ev("S.run.battle") === null && !d.querySelector(".bt-stage"));
+  ev('S.introDone = true; S.runs = 3;');
 }
 
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));

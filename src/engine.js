@@ -1031,3 +1031,88 @@ export const enemyOf = (book, subject, mode, seed = 0) => {
   const span = r[1] - r[0] + 1;
   return String(r[0] + hash(`${subject}/${mode}/${seed}`) % span);
 };
+
+/* ---------- バトル ---------- */
+
+/**
+ * **1つの束が1つの wave です。** 3束なので、1セッションで3回たたかいます。
+ *
+ * ここの決まりは2つだけで、**パラメータより先にこちらが効きます。**
+ *
+ *   ATTACK_RATE  その wave の問題をこれだけ正答すると、敵は倒れる（平均して）
+ *   FALL_RATE    セッション全体をこれだけ外すと、ヒーローが倒れる（平均して）
+ *
+ * **パラメータは「どちらが強いか」を決め、「何割で倒れるか」は決めません。**
+ * 逆にすると、ガリレオ（HP468）の理科だけ極端に楽になります。並びの平均を
+ * 1.0 として、強い敵は平均より硬く・重く、弱い敵はその逆に振れます。
+ */
+export const ATTACK_RATE = 0.8;
+export const FALL_RATE = 0.6;
+
+/** その敵が、同じ並び（教科）の中でどれくらい強いか。平均が 1.0 */
+const foeRatio = (stats, subject, book, id, key) => {
+  const r = book?.subjects?.[subject]?.enemy;
+  const all = [];
+  if (r) for (let i = r[0]; i <= r[1]; i++) {
+    const e = stats?.enemies?.[String(i)];
+    if (e?.[key]) all.push(e[key]);
+  }
+  const me = stats?.enemies?.[String(id)]?.[key];
+  if (!me || !all.length) return 1;
+  const avg = all.reduce((a, b) => a + b, 0) / all.length;
+  return avg > 0 ? me / avg : 1;
+};
+
+/**
+ * ヒーローの一撃。**正解1問でこれだけ削ります。**
+ * 体を張る英雄（phy）も、頭で解く英雄（int）も同じように効くように平均を取ります。
+ */
+export const heroHit = (stats, heroId) => {
+  const h = stats?.heroes?.[String(heroId)];
+  if (!h) return 1;
+  return Math.max(1, Math.round(((h.phy || 0) + (h.int || 0)) / 2));
+};
+
+export const heroMaxHp = (stats, heroId) =>
+  Math.max(1, stats?.heroes?.[String(heroId)]?.hp || 1);
+
+/**
+ * 敵の体力。**その wave の残り問題数から逆算します。**
+ * `needHits` 回当てれば倒れる、を並びの中の強さで前後させます。
+ */
+export const foeMaxHp = (stats, book, subject, foeId, heroId, n) => {
+  const need = Math.max(1, Math.ceil(n * ATTACK_RATE));
+  const hit = heroHit(stats, heroId);
+  /* **その wave で倒せない敵は出しません。** 並びの中の強さで前後させますが、
+     全問正解しても届かない体力にすると、倒すことが運任せになります。
+     上は残り問題数ぶん、下は1発ぶんで止めます */
+  const tough = Math.min(1.15, Math.max(0.7, foeRatio(stats, subject, book, foeId, "hp")));
+  return Math.min(n * hit, Math.max(hit, Math.round(need * hit * tough)));
+};
+
+/**
+ * 敵の一撃。**不正解1問でヒーローがこれだけ受けます。**
+ * セッション全体の `FALL_RATE` を外すと倒れる重さを基準に、並びの中の強さで前後させます。
+ */
+export const foeHit = (stats, book, subject, foeId, heroId, total) => {
+  const hp = heroMaxHp(stats, heroId);
+  const base = hp / Math.max(1, Math.round(total * FALL_RATE));
+  return Math.max(1, Math.round(base * foeRatio(stats, subject, book, foeId, "phy")));
+};
+
+/**
+ * 倒した敵の数でつく上乗せ。
+ *
+ * **1問ごとの報酬は、倒せていても倒せていなくても変わりません**（原則3-2）。
+ * ここで動くのは「まとめて倒せた」ぶんの上乗せだけです。ヒーローが倒れている
+ * あいだは敵を削れないので、この上乗せだけが取れなくなります。
+ */
+export const KILL_GUM = 3;      // 倒した敵1体につき
+export const CLEAR_GUM = 5;     // wave の終わりに敵が残っていなければ、さらに
+export const KILL_SCORE = 20;
+export const CLEAR_SCORE = 30;
+
+export const battleBonus = (kills, cleared) => ({
+  gum: kills * KILL_GUM + (cleared ? CLEAR_GUM : 0),
+  score: kills * KILL_SCORE + (cleared ? CLEAR_SCORE : 0),
+});

@@ -10,6 +10,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          familyPoints, ANY_FAMILY, drawCrystal, crystalPoints, dropRate, familyExpect,
          unlockedBy, questionOpen,
          subjectGrade, subjectLabel, drawSubjects, enemyOf,
+         heroHit, heroMaxHp, foeMaxHp, foeHit, battleBonus, ATTACK_RATE,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
@@ -102,7 +103,7 @@ function screenId() {
   if (v === "quiz") {
     const q = currentQ();
     if (S.run.applied) return "S-12";
-    if (q && S.run.results[q.id] !== undefined) return "S-11";
+    if (q && S.run.results[q.id] !== undefined) return S.run.battle ? "S-26" : "S-11";
     if (S.run.intro) return "S-01";
     return { choice: "S-05", elimination: "S-06", panel: "S-07",
              numeric: "S-08", range: "S-09", swipe: "S-10" }[q ? modeOf(q) : "choice"] || "S-05";
@@ -577,7 +578,10 @@ function startRun(opts = {}) {
             // 束の数ぶんそろわなかったときだけ「在庫が足りない」と言う
             shortage: opts.ids || built.plan.length >= BLOCKS || swipe ? 0 : 1,
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
-            cut: null, intro: !!opts.intro, swipe, plan: built.plan };
+            cut: null, intro: !!opts.intro, swipe, plan: built.plan, verdict: null,
+            waves: [], countedKills: 0, battle: null, settingOpen: false };
+  /* 初回起動は問題と解答だけにするので、バトルを立てません（決定1） */
+  if (!opts.intro && ids.length) startBattle();
   go("quiz");
 }
 
@@ -591,6 +595,19 @@ function finishRun() {
   S.run.done = true;
   if (S.run.intro) S.introDone = true;   // ここを過ぎて、初めてホームが出る
   if (S.run.noReward) return;
+  /* **倒したぶんの上乗せ。** 1問ごとの GUM・知識カード・クリスタルは
+     倒せていても倒せていなくても同じで、動くのはここだけです。
+     ヒーローが倒れているあいだは敵を削れないので、この上乗せだけが取れません */
+  const waves = S.run.waves || [];
+  const kills = waves.reduce((a, w) => a + w.kills, 0);
+  const cleared = waves.filter(w => w.cleared).length;
+  const bonus = battleBonus(kills, false);
+  bonus.gum += cleared * (battleBonus(0, true).gum);
+  bonus.score += cleared * (battleBonus(0, true).score);
+  S.run.battleBonus = { kills, cleared, ...bonus };
+  if (bonus.gum) { S.gum += bonus.gum; S.run.gum += bonus.gum; }
+  if (bonus.score) S.score += bonus.score;
+
   /* **形式ごとの段は、その束の出来だけで決まります。**上がるだけで下がりません */
   S.run.levelUps = levelUps(S, S.run);
   S.run.levelUps.forEach(u => { (S.modeLevel ||= {})[u.mode] = u.to; });
@@ -749,6 +766,139 @@ function planStrip() {
 }
 
 
+/* ---------- バトル ---------- */
+
+/**
+ * **1つの束が1つの wave です。** 3束なので、1セッションで3回たたかいます。
+ * いま何束目の何問目かは、`S.run.plan` と `S.run.i` から毎回数えます
+ * （別に持つと、記録からの再挑戦や4択への降り方でズレます）。
+ */
+function waveAt(i) {
+  const plan = (S.run.plan || []).filter(b => b.n > 0);
+  if (!plan.length) return { index: 0, at: 0, size: S.run.ids.length || 1, mode: null };
+  let from = 0;
+  for (let w = 0; w < plan.length; w++) {
+    const to = from + plan[w].n;
+    if (i < to) return { index: w, at: i - from, size: plan[w].n, mode: plan[w].mode };
+    from = to;
+  }
+  const last = plan[plan.length - 1];
+  return { index: plan.length - 1, at: last.n, size: last.n, mode: last.mode };
+}
+
+/** その wave の教科。束の中の問題から取る（おまかせだと束ごとに教科が違うため） */
+const waveSubject = () => currentQ()?.subject || S.select.subject;
+
+/**
+ * この wave に出てくる敵を立てる。
+ *
+ * **残りの問題数から体力を決めます。** 1体目を早く倒したら2体目が出ますが、
+ * そのときは「残り何問あるか」で決め直すので、**最後の1問で満タンの敵が
+ * 湧く**ようなことになりません。
+ */
+function spawnFoe(fresh = false) {
+  const b = S.run.battle;
+  if (!b) return;
+  const w = waveAt(S.run.i);
+  const sub = waveSubject();
+  const left = Math.max(1, w.size - w.at);
+  b.foeId = enemyOf(DB.subjects, sub, w.mode || "choice", (S.select.seed || 0) + b.kills);
+  b.foeMax = foeMaxHp(DB.battle, DB.subjects, sub, b.foeId, b.heroId, left);
+  b.foeHp = b.foeMax;
+  b.foeHit = foeHit(DB.battle, DB.subjects, sub, b.foeId, b.heroId, S.run.ids.length || 1);
+  b.wave = w.index;
+  if (fresh) b.cleared = false;
+}
+
+/** セッションの始めに、英雄と最初の敵を立てる */
+function startBattle() {
+  const sub = currentQ()?.subject || S.select.subject;
+  const heroId = DB.subjectArt[sub]?.hero || DB.subjectArt["国語"]?.hero;
+  S.run.battle = {
+    heroId, heroMax: heroMaxHp(DB.battle, heroId), heroHp: heroMaxHp(DB.battle, heroId),
+    hit: heroHit(DB.battle, heroId),
+    foeId: null, foeHp: 0, foeMax: 1, foeHit: 1,
+    kills: 0, wave: 0, cleared: false, down: false, fx: null,
+  };
+  spawnFoe(true);
+}
+
+/**
+ * 答えたあとの殴り合い。**正解ならこちらが、外せば向こうが殴ります。**
+ *
+ * **ヒーローが倒れても wave は続きます**（確認済み）。1問ごとの GUM も
+ * 知識カードも解説も、倒れているかどうかで変わりません（原則3）。
+ * 変わるのは**敵を削れなくなること**だけで、撃破の上乗せが取れなくなります。
+ */
+function battleHit(ok) {
+  const b = S.run.battle;
+  if (!b || S.run.noReward) return;
+  if (ok) {
+    if (b.down) { b.fx = null; return; }   // 倒れているあいだは攻撃できない
+    b.foeHp = Math.max(0, b.foeHp - b.hit);
+    b.fx = "foe";
+    if (b.foeHp === 0) {
+      b.kills++;
+      /* **この wave にまだ問題が残っていれば、次の敵が出ます。**
+         残っていなければ、倒しきったまま wave が終わります */
+      const w = waveAt(S.run.i);
+      if (w.at + 1 < w.size) setTimeout(() => { spawnFoe(); drawBattle(); }, 700);
+      else b.cleared = true;
+    }
+  } else {
+    b.heroHp = Math.max(0, b.heroHp - b.foeHit);
+    b.fx = "hero";
+    if (b.heroHp === 0) b.down = true;
+  }
+}
+
+/** wave が変わったら、次の敵を立て、倒しきっていた記録をつける */
+function battleStep() {
+  const b = S.run.battle;
+  if (!b) return;
+  const w = waveAt(S.run.i);
+  if (w.index !== b.wave) { b.cleared = false; spawnFoe(true); }
+  b.fx = null;
+}
+
+/**
+ * バトルの層だけを描き替える。
+ *
+ * **画面ぜんぶを描き直しません。** 答えたあとの `onPick` は、選択肢に印を付けて
+ * 解説を出すところまでを DOM のまま進めます。ここで `render()` を呼ぶと、
+ * その印ごと消えてしまいます。
+ */
+function drawBattle() {
+  const el = app.querySelector(".bt-stage");
+  if (!el) return;
+  el.outerHTML = battleStage();
+}
+
+/** ヒーローと敵。**情報は最小限にします** —— 主役は設問と解答です */
+function battleStage() {
+  const b = S.run.battle;
+  if (!b) return "";
+  const pct = (hp, max) => Math.max(0, Math.round(hp / Math.max(1, max) * 100));
+  const side = (who, img, hp, max, cls) => `
+    <div class="bt-side ${who}${S.run.battle.fx === who ? " hit" : ""}${
+      (who === "hero" && b.down) || (who === "foe" && hp === 0) ? " down" : ""}">
+      <img class="bt-ch" src="${img}" alt="">
+      <div class="bt-hp ${cls}"><i style="width:${pct(hp, max)}%"></i></div>
+      <div class="bt-num"><span>${hp}/${max}</span><b>${pct(hp, max)}%</b></div>
+      ${S.run.battle.fx === who ? `<span class="bt-fx" style="background-image:url('${
+        assetPath.fx("01_single_damage")}')"></span>` : ""}
+    </div>`;
+  const flash = S.run.waveEnd;
+  if (flash) setTimeout(() => { S.run.waveEnd = null; drawBattle(); }, 1400);
+  return `<div class="bt-stage">
+    ${side("hero", assetPath.hero(b.heroId), b.heroHp, b.heroMax, "")}
+    ${b.kills > 0 ? `<span class="bt-kills">×${b.kills}</span>` : ""}
+    ${side("foe", assetPath.enemy(b.foeId), b.foeHp, b.foeMax, "foe")}
+    ${flash ? `<span class="bt-flash ${flash}">${
+      flash === "down" ? "たおした！" : "にげられた"}</span>` : ""}
+  </div>`;
+}
+
 function vQuiz() {
   if (S.run.i >= S.run.ids.length) return go("result");
   const q = currentQ(), h = heroFor(q), fit = fitOf(q, h);
@@ -768,19 +918,34 @@ function vQuiz() {
    */
   const intro = !!S.run.intro;
 
+  /* **画面は4つの層です。** 主役は設問と解答なので、バトルは上に小さく畳みます。
+     初回起動（決定1）はこの層立てに乗せません——問題と解答だけにするためです */
+  const w = waveAt(S.run.i);
+  const bg = DB.subjectArt[q.subject]?.bg || DB.defaultBg;
+
   app.innerHTML = `
   ${intro ? `<div class="introtop"></div>` : `
-  <header><div class="hbar">
-    <div class="place">${place} ・ ${esc(q.subject)}</div>
-    <div class="score">${S.run.i + 1} / ${S.run.ids.length}</div></div>
-    ${planStrip()}</header>`}
-  <div class="pad${intro ? " intro" : ""}">
-    ${intro ? "" : `<div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
-      <span class="unit">${esc(q.unit)}</span>${levelChip(q, mode)}</div>`}
+  <div class="bt-bg" style="background-image:url('${assetPath.bg(bg)}')"></div>
+  ${battleStage()}
+  <div class="bt-count">
+    <span class="bt-q">Q.${w.at + 1}</span>
+    <span class="bt-left">${w.size - w.at - 1 > 0 ? `あと${w.size - w.at - 1}問` : "この束の最後"}</span>
+  </div>
+  <!-- **3つの束と進み具合。** Q.1／あと3問 は「いまの束の中」の話なので、
+       セッション全体のどこにいるかは、この帯でしか分かりません -->
+  <div class="bt-plan">${planStrip()}</div>`}
+  <div class="pad${intro ? " intro" : " bt-pad"}">
     ${q.stem ? `<div class="qstem">${esc(q.stem)}</div>` : ""}
     <div class="qtext">${esc(q.prompt)}</div>
     ${photoAt(q, "prompt")}
     ${q.figure ? `<div class="figure">${DB.figures[q.figure]}</div>` : ""}
+    ${intro ? "" : `<div class="bt-sub">
+      <span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.subject)}</span>
+      <span class="unit">${esc(q.unit)}</span>${levelChip(q, mode)}
+      <button class="hintbtn sm" id="hint">ヒント</button>
+      <button class="gear" id="gear" aria-label="設定">⚙</button>
+    </div>`}
+    <div class="hints" id="hints"></div>
     ${mode === "panel" ? panelHTML(q)
     : mode === "numeric" ? `
       <div class="numbox">
@@ -823,17 +988,29 @@ function vQuiz() {
           まちがえて消すとそこで終わりますが、消せたぶんの点は残ります。</p>
         <div class="elimbar">
           <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
-    ${intro ? "" : `<div class="hero-row">
-      <img class="ava" src="${assetPath.hero(h.id)}" alt="">
-      <div><div class="hero-name">${esc(h.name)}</div>
-        <div class="hero-fit ${fit ? "good" : ""}">${fit
-          ? "この分野が得意 ・ ヒント3段階" : "専門外 ・ ヒントは2段階まで"}</div></div>
-      <button class="hintbtn" id="hint">ヒント</button></div>`}
-    <div class="hints" id="hints"></div><div id="verdict"></div>
-  </div>`;
+    <div id="verdict"></div>
+  </div>
+  ${S.run.settingOpen ? `<div class="modal" id="setmodal"><div class="msheet">
+    <label class="switch">
+      <input type="checkbox" id="showexp" ${S.settings.showExplanationOnCorrect ? "checked" : ""}>
+      <span class="sw"></span>
+      <span class="lbl">正解した問題の解説を見る</span>
+    </label>
+    <button class="btn ghost" id="setclose">とじる</button>
+  </div></div>` : ""}`;
 
   const hintBtn = document.getElementById("hint");
   if (hintBtn) hintBtn.onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
+  /* 設定は⚙から。**ヒントの隣に置くと押し間違えます**が、どちらも小さく畳んで
+     あるので、解答エリアの邪魔にはなりません */
+  const gear = document.getElementById("gear");
+  if (gear) gear.onclick = () => { S.run.settingOpen = true; render(); };
+  const setClose = document.getElementById("setclose");
+  if (setClose) setClose.onclick = () => { S.run.settingOpen = false; render(); };
+  const setExp = document.getElementById("showexp");
+  if (setExp) setExp.onchange = e => {
+    S.settings.showExplanationOnCorrect = e.target.checked; render();
+  };
   if (mode === "elimination") wireElimination(q);
   else if (mode === "panel") wirePanel(q);
   else if (mode === "numeric") wireNumeric(q);
@@ -841,6 +1018,22 @@ function vQuiz() {
     b.onclick = () => onPick(Number(b.dataset.i)));
   if (mode !== "numeric" && mode !== "panel" && q.format === "range") wireRange(q);
   drawHints(q, h);
+  replayVerdict(q, h);
+}
+
+/**
+ * **答えたあとの解説を、描き直しても残します。**
+ *
+ * 判定は `drawVerdict` が `#verdict` に差しこむので、`render()` が走ると
+ * 消えます。⚙（設定）を開くだけで解説が飛んでいました。控えてある
+ * `S.run.verdict` から同じものを描き直します。ヒントの続き（`tipOpen`）と
+ * 応用編（`applied`）は状態に残っているので、そのまま戻ります。
+ */
+function replayVerdict(q, h) {
+  const v = S.run.verdict;
+  if (!v || v.qid !== q.id) return;
+  if (v.note) return drawNoteOnly(q, h);
+  drawVerdict(q, h, v.ok, v.gum, v.rangeScore ?? null, v.found, v.opened || [], true);
 }
 
 /**
@@ -999,6 +1192,7 @@ function grantAnswer(q, ok, bonusRoll = 0) {
   const isNew = !S.cards[q.card];
   let gum = 0, found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
+  battleHit(ok); drawBattle();
   if (!reward) S.seen[q.id] = S.seen[q.id];   // 再挑戦では出題履歴も動かさない
 
   if (ok) {
@@ -1381,6 +1575,7 @@ function onPick(idx, forcedOk = null) {
   const isNew = !S.cards[q.card];
   let found = null;
   S.run.results[q.id] = ok ? "ok" : "ng";
+  battleHit(ok); drawBattle();
   let gum = 0;
   if (ok) {
     S.run.right++;
@@ -1432,6 +1627,7 @@ function onPick(idx, forcedOk = null) {
  * 解説（`lesson`）は出さず、注釈と知識カードだけを見せます。
  */
 function drawNoteOnly(q, h) {
+  S.run.verdict = { qid: q.id, note: true };
   document.getElementById("verdict").innerHTML = `
   <div class="verdict"><div class="vhead ok">正解。</div>
     <div class="lesson">
@@ -1444,7 +1640,13 @@ function drawNoteOnly(q, h) {
   drawActions(q, true);
 }
 
-function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null, opened = []) {
+function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null, opened = [], replay = false) {
+  /* **描いたものを控えておきます。** 判定は命令的に差しこんでいるので、
+     このあと `render()` が走ると消えます（⚙ を押しただけで解説が飛びました）。
+     `opened` は教科しか使わないので、そこだけ持ちます——問題そのものを
+     持つと localStorage が太ります */
+  S.run.verdict = { qid: q.id, ok, gum, rangeScore, found,
+                    opened: (opened || []).map(x => ({ subject: x.subject })) };
   const head = ok
     ? (rangeScore !== null
         ? (rangeScore === 1000 ? "言い切って、当てた。" : "その幅の中にある。")
@@ -1471,6 +1673,7 @@ function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null, opened 
     <div id="tipslot"></div><div id="exslot"></div><div class="stack" id="acts"></div></div>`;
   drawTip(q); drawApplied(q, ok); drawActions(q, ok);
   const v = document.getElementById("verdict");
+  if (replay) return;   // 描き直しのときは動かさない（読んでいる途中で飛びます）
   if (v && v.scrollIntoView) v.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
@@ -1545,8 +1748,23 @@ function drawActions(q, ok) {
 }
 
 function advance() {
+  /* **wave が変わる前に、倒しきっていたかを記録します。** 束の最後の問題を
+     終えた時点で敵が残っていれば「逃げられた」、残っていなければ「倒しきった」 */
+  const b = S.run.battle;
+  if (b && !S.run.noReward) {
+    const w = waveAt(S.run.i);
+    if (w.at + 1 >= w.size) {
+      const cleared = b.foeHp === 0;
+      (S.run.waves ||= []).push({ kills: b.kills - (S.run.countedKills || 0), cleared });
+      S.run.countedKills = b.kills;
+      /* **倒しきったか、逃げられたか。** 次の描画で1度だけ出す */
+      S.run.waveEnd = cleared ? "down" : "fled";
+    }
+  }
   S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null;
-  S.run.tipOpen = false; S.run.applied = null;
+  S.run.tipOpen = false; S.run.applied = null; S.run.settingOpen = false;
+  S.run.verdict = null;
+  battleStep();
   if (S.run.i >= S.run.ids.length) { finishRun(); S.view = "result"; }
   render(); window.scrollTo(0, 0);
 }
@@ -1760,6 +1978,14 @@ function vResult() {
       <div><b>${S.run.appliedRight}</b><span>応用も突破</span></div>
       <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
       ${S.run.noReward ? "" : `<div><b>${S.run.gum}</b><span>GUM</span></div>`}</div>
+    ${(() => {
+      /* **倒したぶんの上乗せ。** 1問ごとの GUM・知識カード・クリスタルは
+         倒せていても倒せていなくても同じで、動くのはここだけです */
+      const b = S.run.battleBonus;
+      if (!b || (!b.kills && !b.cleared)) return "";
+      return `<p class="fine btwin"><b>たおした敵 ${b.kills}体</b>${
+        b.cleared ? ` ・ 倒しきった束 ${b.cleared}つ` : ""} ・ GUM +${b.gum}</p>`;
+    })()}
     ${S.run.shortage ? `<p class="cue">この範囲では形式の束が ${
       (S.run.plan || []).length}つしか組めなかったので、${S.run.ids.length}問で終わりました。</p>` : ""}
     ${(S.run.plan || []).length > 1 ? `<p class="cue">今回の形式 ・ ${
