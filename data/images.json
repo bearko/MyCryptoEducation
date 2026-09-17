@@ -807,7 +807,15 @@
     "obj-kame": {
       "entity": "カメ",
       "alt": "カメが1匹",
-      "_use": "理科・国語の解説に置く（この生きもの）"
+      "_use": "理科・国語の解説に置く（この生きもの）",
+      "file": "obj-kame",
+      "title": "Sacramento, California skyline in 2023",
+      "author": "Quintin Soloviev",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3ASacramento%2C%20California%20skyline%20in%202023.jpg",
+      "width": 640,
+      "height": 317
     },
     "obj-hitsuji": {
       "entity": "ヒツジ",
@@ -1143,7 +1151,15 @@
       "wikipedia": "en:Bamboo",
       "category": "Bamboo forests",
       "alt": "竹がまっすぐ並んで生えている",
-      "_use": "国語の解説に置く（漢字の成り立ち）"
+      "_use": "国語の解説に置く（漢字の成り立ち）",
+      "file": "obj-take",
+      "title": "Untitled",
+      "author": "J Doll",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3A500px%20photo%20(140297509).jpeg",
+      "width": 640,
+      "height": 480
     },
     "chi-tanada": {
       "wikipedia": "ja:棚田",
