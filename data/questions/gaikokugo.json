@@ -2434,5 +2434,229 @@
     "lesson": "ロンドンのテムズ川の南岸に建てられた円形の劇場で、屋根のない中庭に立ち見の客が入りました。入場料は一日の稼ぎのごく一部で、身分を問わず観客が集まったといわれます。オペラ座はパリに19世紀に建てられたもので、時代も国も違います。",
     "card": "円形の劇場と観客",
     "level": 2
+  },
+  {
+    "id": "gaikokugo-084",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "動物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この生きものを英語で言うと?",
+    "choices": [
+      "horse",
+      "cow",
+      "sheep",
+      "goat"
+    ],
+    "answer": 2,
+    "hints": [
+      "毛を刈って、糸や布にする生きものだ。",
+      "群れで草を食べて暮らす。",
+      "英語では、1頭でも何頭でも形が変わらない言葉だ。"
+    ],
+    "lesson": "sheep はヒツジ。単数でも複数でも sheep のまま形が変わらない、めずらしい名詞だ（a sheep / two sheep）。同じ仲間には fish や deer がある。羊の肉は mutton、子羊は lamb と、別の言葉になるところも英語らしい。",
+    "tip": "家畜の名前はゲルマン語由来、その肉の名前はフランス語由来——というずれが英語には残っている。1066年の征服のあと、育てる人と食べる人の言葉が違ったからだ。",
+    "card": "sheep（単複同形）",
+    "level": 1,
+    "image": "obj-hitsuji",
+    "imageAt": "prompt",
+    "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-085",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "動物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この生きものの鳴き声は、英語で meow と書く。では、この生きものは?",
+    "choices": [
+      "bird",
+      "cat",
+      "fish",
+      "dog"
+    ],
+    "answer": 1,
+    "hints": [
+      "家でいっしょに暮らすことの多い生きものだ。",
+      "英語では3文字で書く。",
+      "鳴き声は英語で meow と書き表す。"
+    ],
+    "lesson": "cat はネコ。英語の鳴き声の書き表し方は日本語とずいぶん違う。ネコは meow（ミャウ）、イヌは bow-wow や woof、ニワトリは cock-a-doodle-doo だ。同じ音を聞いていても、書き表し方は言葉ごとに決まっている。",
+    "tip": "日本語の「ニャー」と英語の meow は、どちらも同じ鳴き声を写したものだ。音の写し取り方そのものが、その言葉の癖を表している。",
+    "card": "cat と鳴き声の書き表し方",
+    "level": 1,
+    "image": "obj-neko",
+    "imageAt": "prompt",
+    "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-086",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "動物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "首の長いこの生きものを英語で言うと?",
+    "choices": [
+      "zebra",
+      "elephant",
+      "giraffe",
+      "lion"
+    ],
+    "answer": 2,
+    "hints": [
+      "首がとても長い生きものだ。",
+      "アフリカのサバンナにすむ。",
+      "英語では g で始まり、7文字で書く。"
+    ],
+    "lesson": "giraffe はキリン。アラビア語の zarāfa がイタリア語をへて英語に入った言葉だ。日本語の「キリン」は、中国の伝説の動物「麒麟」の名を当てたもので、由来がまったく別のところにある。同じ動物でも、名前のたどってきた道は言葉ごとに違う。",
+    "tip": "明治のはじめ、上野動物園がこの動物を迎えるとき、伝説の麒麟の名を借りた。名づけは、知っているものに引き寄せて行われる。",
+    "card": "giraffe",
+    "level": 2,
+    "image": "obj-kirin",
+    "imageAt": "prompt",
+    "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-087",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "天気の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この天気を英語で言うと?",
+    "choices": [
+      "rain",
+      "snow",
+      "wind",
+      "cloud"
+    ],
+    "answer": 1,
+    "hints": [
+      "冬に空から降ってくる、白いものだ。",
+      "英語では4文字で書く。",
+      "「雪が降っている」は It is ____ing. と言う。"
+    ],
+    "lesson": "snow は雪。英語では天気を言うとき、主語に it を使う（It is snowing. / It is raining.）。この it は何かを指しているわけではなく、天気や時刻を言うための決まりの形だ。日本語には主語がないので、ここは英語らしい言い方になる。",
+    "tip": "It rains. の it が何なのかは、英語を学ぶ人がたいてい一度つまずくところだ。指すものが無くても主語を置く——それが英語の文の骨格なのだよ。",
+    "card": "snow と天気の it",
+    "level": 2,
+    "image": "obj-yuki",
+    "imageAt": "prompt",
+    "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-088",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "食べ物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この野菜を英語で言うと?",
+    "choices": [
+      "onion",
+      "potato",
+      "carrot",
+      "tomato"
+    ],
+    "answer": 2,
+    "hints": [
+      "土の中で育つ、細長い野菜だ。",
+      "だいだい色のものがよく知られている。",
+      "英語では c で始まり、6文字で書く。"
+    ],
+    "lesson": "carrot はニンジン。英語で野菜を数えるときは、形がはっきりしたものは a carrot / two carrots と数えられるが、水や砂糖のように形の決まらないものは数えられない名詞になる。ニンジンは1本ずつ数えられるので、複数形の s が付く。",
+    "tip": "写真のように、ニンジンはだいだい色だけではない。紫や白の品種のほうが古く、だいだい色は後から広まったものだ。",
+    "card": "carrot と数えられる名詞",
+    "level": 2,
+    "image": "obj-ninjin",
+    "imageAt": "prompt",
+    "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-089",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "動物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この生きものの肉は pork と呼ばれる。では、この生きものは?",
+    "choices": [
+      "cow",
+      "pig",
+      "sheep",
+      "goat"
+    ],
+    "answer": 1,
+    "hints": [
+      "鼻が平たく、前に突き出ている生きものだ。",
+      "英語では3文字で書く。",
+      "その肉は pork という別の言葉で呼ばれる。"
+    ],
+    "lesson": "pig はブタ。その肉は pork と呼ばれ、別の言葉になる。cow（牛）→ beef、sheep（羊）→ mutton も同じで、動物の名前は古い英語、肉の名前はフランス語からの借りものだ。だから英語では、生きものと食べものの名前がきれいに分かれている。",
+    "tip": "chicken だけは、生きものも肉も同じ言葉だ。決まりには、たいてい例外がある。",
+    "card": "pig と pork",
+    "level": 2,
+    "image": "obj-buta",
+    "imageAt": "prompt",
+    "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-090",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "食べ物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この果物を英語で言うと?",
+    "choices": [
+      "peach",
+      "lemon",
+      "apple",
+      "mandarin orange"
+    ],
+    "answer": 3,
+    "hints": [
+      "皮が手でむける、だいだい色の果物だ。",
+      "日本では冬によく食べられる。",
+      "英語では orange の仲間として、別の名で呼ばれる。"
+    ],
+    "lesson": "mandarin orange はミカンの仲間を指す言い方だ。日本のウンシュウミカンは英語で satsuma とも呼ばれる——薩摩（今の鹿児島）から苗が海を渡ったためだ。地名がそのまま果物の名前になった例で、日本語から英語に入った数少ない言葉のひとつでもある。",
+    "tip": "英語に入った日本語には tsunami・karaoke・sushi などがある。satsuma もその一つだと知ると、言葉の行き来が見えてくる。",
+    "card": "mandarin orange と satsuma",
+    "level": 3,
+    "image": "obj-mikan",
+    "imageAt": "prompt",
+    "hideTitle": true
   }
 ]
