@@ -54,11 +54,39 @@ const answerNow = (correct = true) => {
 await wait(200);
 
 /* ---- 決定1: 無説明の初回起動 ---- */
-// ホームもチュートリアルも出さず、いきなり小学1年の問題から始まる
+/* **最初に聞くのは学年だけです**（S-31）。ホームもチュートリアルも出しません。
+   聞くのは1つ、答えるのは1タップで、説明は置きません */
+check("最初に学年を聞く", ev('S.view === "grade"') && txt().includes("何年生から始める"),
+  txt().slice(0, 40));
+check("聞くのは学年だけ（9通り）", d.querySelectorAll(".gp-btn").length === 9,
+  String(d.querySelectorAll(".gp-btn").length));
+check("学年の画面にも説明を置かない",
+  !/チュートリアル|はじめに|遊び方|使い方/.test(txt()), txt().slice(0, 80));
+ev('document.querySelector(\'.gp-btn[data-g="e1"]\').click()');
+
+// 選んだら、ホームもチュートリアルも出さずにその学年の問題から始まる
 check("初回はホームを出さない", !d.getElementById("toquiz") && ev('S.view === "quiz"'),
   txt().slice(0, 60));
 check("いきなり小学1年の問題", ev('DB.byId[S.run.ids[0]].grade') === "e1",
   ev('DB.byId[S.run.ids[0]].gradeLabel'));
+check("選んだ学年が控えられる", ev("S.startGrade") === "e1", ev("S.startGrade"));
+
+/* **選んだ学年が、梯子の下端になります**（`engine.subjectGrade`）。
+   進行そのものは知識マップのままで、ここが決めるのは下端だけです */
+check("選んだ学年から下は出さない", ev(`(() => {
+  const keep = S.startGrade;
+  S.startGrade = "j2";
+  const g = subjectGrade(DB, S, "国語").k;
+  S.startGrade = keep;
+  return g;
+})()`) === "j2", "国語");
+check("その教科がもっと上からしか無ければ、そこから", ev(`(() => {
+  const keep = S.startGrade;
+  S.startGrade = "e3";                 // 情報は中学から
+  const g = subjectGrade(DB, S, "情報").k;
+  S.startGrade = keep;
+  return g;
+})()`) === "j1", "情報");
 check("説明もチュートリアルも出さない",
   !/チュートリアル|はじめに|遊び方|使い方/.test(txt()), txt().slice(0, 80));
 check("1問目は4択だけ", modeNow() === "choice", modeNow());
@@ -785,6 +813,10 @@ const swKeep = `window.__keep = JSON.stringify({ score: S.score, gum: S.gum, car
   totalRight: S.totalRight, crossRight: S.crossRight, countries: S.countries, runs: S.runs });`;
 ev(`(() => { ${swKeep} })()`);
 ev('startRun({ swipe: true })');
+/* **束があるので、まず接敵の画面（S-29）に出ます。** GO! を押して問題へ */
+check("スワイプも接敵の画面から始まる",
+  ev('S.view === "wave" && S.run.gate.kind === "start"') && !!d.getElementById("wvgo"));
+ev('document.getElementById("wvgo").click()');
 
 // 画面は「クイズ」ひとつ。スワイプの問題のときだけカードの画面になる
 check("押すとスワイプのカードが出る",
@@ -892,6 +924,11 @@ while (ev('S.view === "quiz"')) {
   d.querySelector(`.swp-pick[data-s="${miss ? 1 - q.answer : q.answer}"]`).click();
   await wait(1000);
 }
+/* **束が終わると、まず戦果の画面（S-30）です。** そこから結果へ */
+check("束が終わると戦果の画面に出る",
+  ev('S.view === "wave" && S.run.gate.kind === "end"'), ev("S.view"));
+check("倒しきったか逃げられたかが出る", /撃破！|逃げられた/.test(txt()), txt().slice(0, 60));
+ev('document.getElementById("wvnext").click()');
 check("10問終わるとリザルトへ", ev('S.view === "result"'), ev("S.view"));
 
 /* **原則3はここで守る。** 途中で解説を挟まないぶん、終わりに全問ぶんを出す */
@@ -914,6 +951,7 @@ check("もう一度もスワイプで始まる", (() => {
   const b = d.getElementById("again");
   if (!b) return false;
   b.click();
+  ev('document.getElementById("wvgo")?.click()');   // 接敵の画面をはさむ
   return ev("S.run.swipe") === true && !!d.getElementById("swpcard");
 })(), ev("S.view"));
 
@@ -2073,7 +2111,7 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
  */
 {
   const { SCREENS } = await import("./screens.mjs");
-  check("画面IDは28面ぶんある", SCREENS.length === 28, String(SCREENS.length));
+  check("画面IDは31面ぶんある", SCREENS.length === 31, String(SCREENS.length));
   check("画面IDは重なっていない", new Set(SCREENS.map(s => s.id)).size === SCREENS.length);
   const at = (view, patch = "") => ev(`(() => { S.view = ${JSON.stringify(view)}; ${patch} return screenId(); })()`);
   check("ホームは S-02", at("home") === "S-02", at("home"));
@@ -2122,6 +2160,7 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
     S.select.subject = "国語"; S.select.seed = 3;
     S.settings.showExplanationOnCorrect = true;
     startRun({ built: { ids, plan: [{ mode: "elimination", n: ${n}, level: 1 }] } });
+    document.getElementById("wvgo").click();   // 接敵の画面から問題へ
     return ids.length;
   })()`);
   const cut = right => ev(`(() => {
@@ -2176,11 +2215,50 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
   /* 倒しきると上乗せ。**動くのはここだけ** */
   setup(3);
   for (let k = 0; k < 3; k++) { cut(true); ev('document.getElementById("next")?.click()'); }
+  check("倒しきると戦果の画面が「撃破！」と出す",
+    ev('S.view === "wave"') && txt().includes("撃破！"), txt().slice(0, 60));
+  ev('document.getElementById("wvnext").click()');
   const bonus = JSON.parse(ev("JSON.stringify(S.run.battleBonus || null)"));
   check("倒しきると上乗せがつく", !!bonus && bonus.kills >= 1 && bonus.cleared >= 1,
     JSON.stringify(bonus));
   check("上乗せはGUMと点だけ", !!bonus && bonus.gum > 0 && bonus.score > 0);
   check("リザルトに倒したぶんが出る", txt().includes("たおした敵"), txt().slice(0, 120));
+
+  /* ---- 束の切れ目（S-29 接敵 / S-30 戦果）----------------------------
+     **敵に出会った → 解いて倒す → 倒せた／逃げられた**、の1本の筋。
+     途中で数えなおさず、束の始めと終わりの差で出しているかも見る       */
+  /* ここは接敵の画面そのものを見るので、GO! を押さずに立ち上げる */
+  ev(`(() => {
+    const ids = DB.questions.filter(q => q.subject === "国語" && q.mode === "elimination")
+      .slice(0, 3).map(q => q.id);
+    S.select.subject = "国語"; S.select.seed = 3;
+    startRun({ built: { ids, plan: [{ mode: "elimination", n: 3, level: 1 }] } });
+  })()`);
+  check("接敵の画面から始まる", ev('S.view === "wave" && S.run.gate.kind === "start"'));
+  check("形式と問題数が出る", txt().includes("消去法") && txt().includes("全3問"),
+    txt().slice(0, 60));
+  check("接敵では英雄と敵が1体ずつ", d.querySelectorAll(".wv-hero .bt-ch").length === 1 &&
+    d.querySelectorAll(".wv-foe .bt-ch").length === 1);
+  ev('document.getElementById("wvgo").click()');
+  check("GO! で問題が始まる", ev('S.view === "quiz" && S.run.gate === null'));
+  /* 3問中2問だけ正解 → 倒しきれずに逃げられる */
+  cut(true); ev('document.getElementById("next").click()');
+  cut(true); ev('document.getElementById("next").click()');
+  cut(false); ev('document.getElementById("next").click()');
+  check("束の終わりは戦果の画面", ev('S.view === "wave" && S.run.gate.kind === "end"'), ev("S.view"));
+  const wrec = JSON.parse(ev("JSON.stringify(S.run.waves[0])"));
+  check("その束ぶんの成績を持つ", wrec.right === 2 && wrec.wrong === 1 && wrec.size === 3,
+    JSON.stringify(wrec));
+  check("正答率はその束の中で出す", txt().includes("67"), txt().slice(0, 90));
+  check("倒した敵と英雄を控えてある", !!wrec.foeId && !!wrec.heroId, JSON.stringify(wrec));
+  check("その束ぶりの GUM が出る", txt().includes(`×${wrec.gum}`), String(wrec.gum));
+  ev('document.getElementById("wvnext").click()');
+  check("NEXT でリザルトへ", ev('S.view === "result"'), ev("S.view"));
+
+  /* **初回起動には挟みません**（決定1・バトルそのものを立てない） */
+  ev(`(() => { Object.assign(S, { introDone: false, runs: 0 }); startIntro(); })()`);
+  check("初回起動に接敵の画面は出さない",
+    ev('S.view === "quiz" && !S.run.gate && !S.run.battle'), ev("S.view"));
 
   // **初回起動にはバトルを立てない。** 問題と解答だけにする（決定1）
   ev('S.introDone = false; S.runs = 0; S.run.done = true; startIntro();');

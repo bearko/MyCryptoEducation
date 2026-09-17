@@ -975,11 +975,23 @@ export function panelLayout(reading, key = reading, tries = 100) {
 export const subjectLadder = (db, subject) =>
   GRADES.filter(g => (db.questions || []).some(q => q.subject === subject && q.grade === g.k));
 
+/**
+ * **始めた学年より下は出しません**（`state.startGrade`）。
+ *
+ * 初回に「何年生から始める?」で選んだ学年が、梯子の下端になります。
+ * **進行そのものは知識マップのままです** —— ここが足すのは下端だけで、
+ * 上がるのはこれまでどおりマスが埋まったときです（数値を2つ持つと必ず
+ * 食い違うため）。その教科がその学年より上にしか無いときは、梯子ぜんぶを
+ * 見ます（情報は中学からなので、小3から始めても中1が出ます）。
+ */
 export const subjectGrade = (db, state, subject) => {
   const ladder = subjectLadder(db, subject);
   if (!ladder.length) return null;
   const cells = state.cells || {};
-  return ladder.find(g => cells[subject + "|" + g.k] !== "ok") || ladder[ladder.length - 1];
+  const floor = GRADE_ORDER[state.startGrade] || 0;
+  const from = ladder.filter(g => GRADE_ORDER[g.k] >= floor);
+  const pool = from.length ? from : ladder;
+  return pool.find(g => cells[subject + "|" + g.k] !== "ok") || pool[pool.length - 1];
 };
 
 /**

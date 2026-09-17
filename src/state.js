@@ -12,7 +12,7 @@ export function capName(name) {
 /* 保存する項目。run / challenge / view などの一時的なものは持ち越さない */
 const PERSISTED = ["settings", "profile", "gum", "points", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score", "days",
-                   "totalRight", "crossRight", "countries", "crystals", "introDone",
+                   "totalRight", "crossRight", "countries", "crystals", "introDone", "startGrade",
                    "modeLevel"];
 
 function defaults() {
@@ -46,6 +46,7 @@ function defaults() {
     modeLevel: {},
     // 無説明の初回起動（決定1）を終えたか。終えるまでホームは出さない
     introDone: false,
+    startGrade: null,   // 初回に選んだ学年。梯子の下端になる
     score: 0,
 
     crystals: {},         // 出会ったクリスタル { "001": 個数, ... }。図鑑。減らない

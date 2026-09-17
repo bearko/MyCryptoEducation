@@ -1003,6 +1003,74 @@
     background:none;border:1px solid var(--line);border-radius:4px;color:var(--ink-soft)}
   .gear:hover{border-color:var(--ink-faint)}
 
+  /* ---- 何年生から始める?（S-31）--------------------------------------
+     **聞くのは1つ、答えるのは1タップ。** 説明も遊び方も置かない          */
+  .gp{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
+    padding:24px 20px;gap:26px}
+  .gp h1{margin:0;text-align:center;font:600 24px/1.4 var(--mincho);letter-spacing:.03em}
+  .gp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .gp-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:1px;padding:16px 4px;background:var(--card);border:1px solid var(--line);
+    border-radius:5px;color:var(--ink);cursor:pointer;font-family:inherit}
+  .gp-btn:hover{border-color:var(--ink-faint)}
+  .gp-btn b{font-size:11px;font-weight:600;color:var(--ink-soft);letter-spacing:.06em}
+  .gp-btn em{font:700 27px/1.1 var(--mincho);font-style:normal}
+  .gp-btn i{font-size:11px;font-style:normal;color:var(--ink-soft)}
+
+  /* ---- 束の切れ目（S-29 接敵 / S-30 戦果）------------------------------
+     **1画面に収める。** 上が形式の名前、真ん中が戦いの絵、下がボタン。
+     出題の画面ではバトルを小さく畳んでいるので、**戦いの手ざわりは
+     ここが受け持ちます**                                                 */
+  .wv{min-height:100dvh;display:flex;flex-direction:column}
+  .wv-head{padding:26px 18px 14px;text-align:center}
+  .wv-head h1{margin:0;font:700 34px/1.2 var(--mincho);letter-spacing:.04em}
+  .wv-head p{margin:4px 0 0;font-size:15px;color:var(--ink-soft)}
+  .wv-stage{position:relative;flex:1;min-height:210px;overflow:hidden;
+    background-size:cover;background-position:center}
+  .wv-stage::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.34)}
+  .wv-hero,.wv-foe{position:absolute;bottom:16%;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:4px}
+  .wv-hero{left:10%}
+  .wv-foe{right:8%}
+  .wv .bt-ch{width:76px;height:76px}
+  /* 英雄は左に立って右を向く。敵の絵は元から左向きなので、そのまま */
+  .wv-hero .bt-ch{transform:scaleX(-1);animation:wvIn .5s cubic-bezier(.2,.9,.3,1) both}
+  @keyframes wvIn{from{transform:scaleX(-1) translateX(180px);opacity:0}
+    to{transform:scaleX(-1) translateX(0);opacity:1}}
+  .wv-foe .bt-ch{animation:wvFoeIn .5s .18s ease-out both}
+  @keyframes wvFoeIn{from{transform:translateX(-90px);opacity:0}
+    to{transform:translateX(0);opacity:1}}
+  /* **接敵してから体力が満ちる。** 0 から 100% へ、遅れて伸びる */
+  .wv-hp{width:92px;height:8px;background:rgba(216,220,228,.9);border-radius:99px;overflow:hidden}
+  .wv-hp i{display:block;height:100%;background:var(--moss);
+    width:100%;animation:wvCharge .7s .5s ease-out both}
+  @keyframes wvCharge{from{width:0}to{width:100%}}
+  .wv-foe .bt-num{width:92px;text-shadow:0 1px 2px rgba(255,255,255,.9)}
+  /* 戦果のほうは、満ちる演出をしない（結果の数字がそのまま出る） */
+  .wv-stage.end .wv-hp i{animation:none}
+  .wv-stage.end .wv-hero .bt-ch{animation:none;transform:scaleX(-1)}
+  .wv-stage.end .wv-foe .bt-ch{animation:none}
+  .wv-foe.gone .bt-ch{filter:grayscale(1) opacity(.45);transform:rotate(-78deg)}
+  .wv-cry{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:2;
+    font:700 27px/1.2 var(--mincho);white-space:nowrap;
+    text-shadow:0 2px 6px rgba(255,255,255,.95),0 0 18px rgba(255,255,255,.9);
+    animation:wvCry .45s cubic-bezier(.2,1.5,.4,1) both}
+  .wv-cry.win{color:var(--pen)}
+  .wv-cry.lose{color:var(--ink-soft)}
+  @keyframes wvCry{from{transform:translate(-50%,-50%) scale(.6);opacity:0}
+    to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  .wv-body{padding:14px 18px 0}
+  .wv-body .stat{margin:0}
+  .wv-loot{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+  .fnd.sm{font-size:12px;padding:5px 10px}
+  .fnd.sm img{width:22px;height:22px}
+  .wv-foot{padding:18px}
+  .wv-foot .btn{width:100%}
+  @media (prefers-reduced-motion:reduce){
+    .wv-hero .bt-ch{animation:none;transform:scaleX(-1)}
+    .wv-foe .bt-ch,.wv-hp i,.wv-cry{animation:none}
+  }
+
   /* 設定のポップアップ */
   .modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
     background:rgba(23,36,63,.35);padding:22px}
@@ -1025,16 +1093,6 @@
     .bt-side.hit .bt-ch,.bt-side.hero.hit .bt-ch{animation:none}
   }
 
-  /* wave の終わりに1度だけ出る知らせ。**倒しきったか、逃げられたか** */
-  .bt-flash{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    font-family:var(--mincho);font-size:19px;font-weight:600;letter-spacing:.08em;
-    padding:6px 16px;border-radius:4px;background:rgba(255,255,255,.94);
-    border:1px solid var(--line);animation:btFlash 1.4s ease-out forwards;pointer-events:none}
-  .bt-flash.down{color:var(--moss);border-color:var(--moss)}
-  .bt-flash.fled{color:var(--ink-soft)}
-  @keyframes btFlash{0%{opacity:0;transform:translate(-50%,-38%)}
-    18%{opacity:1;transform:translate(-50%,-50%)}
-    78%{opacity:1}100%{opacity:0}}
 
   .btwin{margin-top:8px;color:var(--moss)}
 

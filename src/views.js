@@ -69,8 +69,43 @@ const INTRO_PLAIN = 2;
  * **「教わらずにできた」という体験から始まることが、教育を題材にしたこのゲームの
  * テーマそのものです。** ここに説明を足さないでください。
  */
+/**
+ * **初回だけ、どの学年から始めるかを聞きます**（S-31）。
+ *
+ * 決定1（無説明の初回起動）をひとつだけゆるめた画面です。**聞くのは1つ、
+ * 答えるのは1タップ**で、説明も遊び方も置きません。大人が小1から
+ * 駆け上がるのがこのゲームの入口ですが、**そこを選べないと「自分の話では
+ * ない」と感じる人がいます**（自律性・原則7）。
+ *
+ * 選んだ学年は `S.startGrade` に入り、**梯子の下端**になります
+ * （`engine.subjectGrade`）。進行そのものは知識マップのままです。
+ */
+function vGrade() {
+  const pick = GRADES.filter(g => g.band !== "w");
+  app.innerHTML = `
+  <div class="gp">
+    <h1>何年生から始める?</h1>
+    <div class="gp-grid">
+      ${pick.map(g => `<button class="gp-btn" data-g="${g.k}">
+        <b>${g.band === "e" ? "小学" : "中学"}</b><em>${g.l}</em><i>年</i></button>`).join("")}
+    </div>
+  </div>`;
+  app.querySelectorAll(".gp-btn").forEach(b => b.onclick = () => {
+    S.startGrade = b.dataset.g;
+    saveState(S);
+    beginIntro();
+  });
+}
+
 function startIntro() {
-  const first = DB.questions.filter(q => q.grade === "e1" && questionOpen(S, q));
+  /* **学年を聞いてから始めます。** 聞くのはここ1回だけです */
+  if (!S.startGrade) { S.view = "grade"; return render(); }
+  beginIntro();
+}
+
+function beginIntro() {
+  const from = S.startGrade || "e1";
+  const first = DB.questions.filter(q => q.grade === from && questionOpen(S, q));
   // **教科を順ぐりに取る。** 小1にあるのは国語と算数だけなので、
   // 先頭から詰めると片方に寄る
   const pools = SUBJECTS.map(sub => first.filter(q => q.subject === sub)).filter(a => a.length);
@@ -111,6 +146,8 @@ function screenId() {
     return { choice: "S-05", elimination: "S-06", panel: "S-07",
              numeric: "S-08", range: "S-09", swipe: "S-10" }[q ? modeOf(q) : "choice"] || "S-05";
   }
+  if (v === "grade") return "S-31";
+  if (v === "wave") return S.run.gate?.kind === "end" ? "S-30" : "S-29";
   if (v === "result") return S.run.swipe ? "S-13" : "S-14";
   if (v === "heroes") return S.heroesTab === "codex" ? "S-16" : "S-15";
   /* 教科を選ぶ前と後は、見た目が別物なので別の番号にする */
@@ -144,7 +181,7 @@ function render() {
   app.classList.toggle("home", home);
   document.body.classList.toggle("home", home);
 
-  ({ home: vHome, select: vSelect, quiz: vQuiz, result: vResult, craft: vCraft,
+  ({ home: vHome, grade: vGrade, select: vSelect, quiz: vQuiz, wave: vWave, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
      calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop, map: vMap }[S.view])();
   drawToast();
@@ -582,11 +619,32 @@ function startRun(opts = {}) {
             shortage: opts.ids || built.plan.length >= BLOCKS || swipe ? 0 : 1,
             gum: 0, found: [], results: {}, noReward: !!opts.noReward, done: false, hard: {},
             cut: null, intro: !!opts.intro, swipe, plan: built.plan, verdict: null,
-            hintOpen: false,
+            hintOpen: false, gate: null, mark: null,
             waves: [], countedKills: 0, battle: null, settingOpen: false };
   /* 初回起動は問題と解答だけにするので、バトルを立てません（決定1） */
   if (!opts.intro && ids.length) startBattle();
-  go("quiz");
+  /* **束があるときだけ、接敵の画面から始めます。** ID を名指しで渡す道
+     （記録からの再挑戦・由来をたずねる・検査）は1問だけのことが多く、
+     そこに wave の演出を挟むと、聞きたい1問にたどり着くのが遠くなります */
+  if (gated()) { gateStart(0); render(); } else go("quiz");
+}
+
+/** wave の演出を挟むかどうか。**束が組めているときだけです** */
+const gated = () => (S.run.plan || []).filter(b => b.n > 0).length > 0 && !S.run.intro;
+
+/**
+ * 接敵の画面をひらく。
+ *
+ * **ここで成績の目印を取ります。** wave ごとの「解けた・応用も突破・正答率・
+ * GUM・クリスタル」は、束の始めと終わりの差で出します（別に数えると、
+ * 4択への降り方や再挑戦でセッション全体とズレます）。
+ */
+function gateStart(index) {
+  S.run.gate = { kind: "start", wave: index };
+  S.run.mark = { right: S.run.right, wrong: S.run.wrong,
+                 appliedRight: S.run.appliedRight, gum: S.run.gum,
+                 found: (S.run.found || []).length };
+  S.view = "wave";
 }
 
 /**
@@ -892,15 +950,109 @@ function battleStage() {
       ${S.run.battle.fx === who ? `<span class="bt-fx" style="background-image:url('${
         assetPath.fx("01_single_damage")}')"></span>` : ""}
     </div>`;
-  const flash = S.run.waveEnd;
-  if (flash) setTimeout(() => { S.run.waveEnd = null; drawBattle(); }, 1400);
+  /* 「たおした！」「にげられた」は、**束の終わりの画面**が引き取りました
+     （`vWave`）。ここに重ねると、同じことを2回言うことになります */
   return `<div class="bt-stage">
     ${side("hero", assetPath.hero(b.heroId), b.heroHp, b.heroMax, "")}
     ${b.kills > 0 ? `<span class="bt-kills">×${b.kills}</span>` : ""}
     ${side("foe", assetPath.enemy(b.foeId), b.foeHp, b.foeMax, "foe")}
-    ${flash ? `<span class="bt-flash ${flash}">${
-      flash === "down" ? "たおした！" : "にげられた"}</span>` : ""}
   </div>`;
+}
+
+/**
+ * 束の切れ目に挟む2つの画面（S-29 / S-30）。
+ *
+ * **敵に出会った → 問題を解いて倒す → 倒せた／逃げられた**、という1本の
+ * 筋を見えるようにするための画面です。出題の画面ではバトルを上に小さく
+ * 畳んでいるので（主役は設問と解答）、**戦いの手ざわりを受け持つ場所が
+ * どこにも無いままでした。** ここがその場所です。
+ *
+ * **1問ごとの報酬は、ここでも変わりません**（原則3-2）。出しているのは
+ * すでに手に入れたものの内訳で、倒したかどうかで動くのは上乗せだけです。
+ */
+function vWave() {
+  const g = S.run.gate;
+  if (!g) return go(S.run.i >= S.run.ids.length ? "result" : "quiz");
+  return g.kind === "end" ? vWaveEnd(S.run.waves[g.wave]) : vWaveStart(g.wave);
+}
+
+/** その束の1問目から、教科の絵を引く（おまかせだと束ごとに教科が違う） */
+const waveBg = () => {
+  const q = DB.byId[S.run.ids[S.run.i]];
+  return DB.subjectArt[q?.subject]?.bg || DB.defaultBg;
+};
+
+/* 接敵（S-29）。**英雄が画面の外から入ってきて、敵の体力が満ちるまで** */
+function vWaveStart(index) {
+  const b = S.run.battle;
+  const plan = (S.run.plan || []).filter(x => x.n > 0);
+  const seg = plan[index] || { mode: "choice", n: S.run.ids.length };
+  app.innerHTML = `
+  <div class="wv">
+    <div class="wv-head">
+      <h1>${esc(MODE_LABEL[seg.mode] || seg.mode)}</h1>
+      <p>全${seg.n}問</p>
+    </div>
+    <div class="wv-stage" style="background-image:url('${assetPath.bg(waveBg())}')">
+      <div class="wv-hero"><img class="bt-ch" src="${assetPath.hero(b.heroId)}" alt=""></div>
+      <div class="wv-foe">
+        <img class="bt-ch" src="${assetPath.enemy(b.foeId)}" alt="">
+        <div class="wv-hp"><i></i></div>
+        <div class="bt-num"><span>${b.foeMax}/${b.foeMax}</span><b>100%</b></div>
+      </div>
+    </div>
+    <div class="wv-foot"><button class="btn" id="wvgo">GO!</button></div>
+  </div>`;
+  document.getElementById("wvgo").onclick = () => { S.run.gate = null; go("quiz"); };
+}
+
+/* 戦果（S-30）。**倒しきったか、逃げられたか** */
+function vWaveEnd(rec) {
+  const w = rec || { right: 0, wrong: 0, appliedRight: 0, gum: 0, found: [], cleared: false };
+  const asked = w.right + w.wrong;
+  const rate = asked ? Math.round(w.right / asked * 100) : 0;
+  const last = S.run.i >= S.run.ids.length;
+  const found = w.found || [];
+  app.innerHTML = `
+  <div class="wv">
+    <div class="wv-head">
+      <h1>${esc(MODE_LABEL[w.mode] || w.mode || "")}</h1>
+      <p>結果</p>
+    </div>
+    <div class="wv-stage end" style="background-image:url('${assetPath.bg(w.bg || waveBg())}')">
+      <div class="wv-hero"><img class="bt-ch" src="${assetPath.hero(w.heroId)}" alt=""></div>
+      <span class="wv-cry ${w.cleared ? "win" : "lose"}">${
+        w.cleared ? "撃破！" : "逃げられた……"}</span>
+      <div class="wv-foe${w.cleared ? " gone" : ""}">
+        <img class="bt-ch" src="${assetPath.enemy(w.foeId)}" alt="">
+        <div class="wv-hp"><i style="width:${w.cleared ? 0 : 100}%"></i></div>
+        <div class="bt-num"><span>${w.cleared ? 0 : w.foeMax}/${w.foeMax}</span>
+          <b>${w.cleared ? 0 : 100}%</b></div>
+      </div>
+    </div>
+    <div class="wv-body">
+      <div class="stat">
+        <div><b>${w.right}</b><span>解けた</span></div>
+        <div><b>${w.appliedRight}</b><span>応用も突破</span></div>
+        <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
+      </div>
+      ${S.run.noReward ? `<p class="fine">記録からの再挑戦なので、何も増えていません。</p>`
+      : `<div class="wv-loot">
+        ${found.length ? [...new Set(found)].map(id => `<span class="fnd sm">
+            <img src="${assetPath.crystal(id)}" alt="">
+            <b>${esc(DB.crystalById[id].name)}</b>×${found.filter(x => x === id).length}
+          </span>`).join("") : ""}
+        <span class="fnd sm"><img src="${assetPath.icon("gum")}" alt="GUM"><b>GUM</b>×${w.gum}</span>
+      </div>`}
+    </div>
+    <div class="wv-foot"><button class="btn" id="wvnext">${last ? "結果へ" : "NEXT"}</button></div>
+  </div>`;
+  document.getElementById("wvnext").onclick = () => {
+    S.run.gate = null;
+    if (last) return go("result");
+    gateStart(waveAt(S.run.i).index);
+    render(); window.scrollTo(0, 0);
+  };
 }
 
 function vQuiz() {
@@ -1796,24 +1948,38 @@ function drawActions(q, ok) {
 }
 
 function advance() {
-  /* **wave が変わる前に、倒しきっていたかを記録します。** 束の最後の問題を
-     終えた時点で敵が残っていれば「逃げられた」、残っていなければ「倒しきった」 */
+  /* **wave が変わる前に、戦果を控えます。** 束の最後の問題を終えた時点で
+     敵が残っていれば「逃げられた」、残っていなければ「倒しきった」。
+     **敵と英雄もここで控えます** —— このあとの `battleStep` が次の敵を
+     立ててしまうので、終了画面から見にいくともう別の敵になっています */
   const b = S.run.battle;
-  if (b && !S.run.noReward) {
+  let ended = false;
+  if (b) {
     const w = waveAt(S.run.i);
     if (w.at + 1 >= w.size) {
-      const cleared = b.foeHp === 0;
-      (S.run.waves ||= []).push({ kills: b.kills - (S.run.countedKills || 0), cleared });
+      const m = S.run.mark || { right: 0, wrong: 0, appliedRight: 0, gum: 0, found: 0 };
+      (S.run.waves ||= []).push({
+        kills: b.kills - (S.run.countedKills || 0), cleared: b.foeHp === 0,
+        mode: w.mode, size: w.size, heroId: b.heroId, foeId: b.foeId, foeMax: b.foeMax,
+        /* **絵も控えます。** 束の終わりでは次の設問がもう無いことがあるので、
+           そこから教科を引くと、最後だけ既定の背景に変わります */
+        bg: waveBg(),
+        right: S.run.right - m.right, wrong: S.run.wrong - m.wrong,
+        appliedRight: S.run.appliedRight - m.appliedRight,
+        gum: S.run.gum - m.gum, found: (S.run.found || []).slice(m.found),
+      });
       S.run.countedKills = b.kills;
-      /* **倒しきったか、逃げられたか。** 次の描画で1度だけ出す */
-      S.run.waveEnd = cleared ? "down" : "fled";
+      ended = true;
     }
   }
   S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null;
   S.run.tipOpen = false; S.run.applied = null; S.run.settingOpen = false;
   S.run.verdict = null; S.run.hintOpen = false;
   battleStep();
-  if (S.run.i >= S.run.ids.length) { finishRun(); S.view = "result"; }
+  const done = S.run.i >= S.run.ids.length;
+  if (done) finishRun();
+  if (ended && gated()) { S.run.gate = { kind: "end", wave: S.run.waves.length - 1 }; S.view = "wave"; }
+  else if (done) S.view = "result";
   render(); window.scrollTo(0, 0);
 }
 
