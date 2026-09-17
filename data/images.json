@@ -555,30 +555,16 @@
       "height": 853
     },
     "obj-ki": {
-      "entity": "サクラ",
+      "wikipedia": "en:Tree",
+      "category": "Trees",
       "alt": "花をつけた木が1本立っている",
-      "titleFree": true,
-      "file": "obj-ki",
-      "title": "20131118Claque Schwetzingen3",
-      "author": "AnRo0002",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3A20131118Claque%20Schwetzingen3.jpg",
-      "width": 640,
-      "height": 480
+      "titleFree": true
     },
     "obj-kasa": {
-      "entity": "傘",
+      "wikipedia": "en:Umbrella",
+      "category": "Umbrellas",
       "alt": "開いた傘が1本",
-      "titleFree": true,
-      "file": "obj-kasa",
-      "title": "Inflorescences Umbel Kwiatostan Baldach",
-      "author": "Shazz",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AInflorescences%20Umbel%20Kwiatostan%20Baldach.svg",
-      "width": 640,
-      "height": 427
+      "titleFree": true
     },
     "obj-tsukue": {
       "entity": "机",
@@ -586,43 +572,22 @@
       "titleFree": true
     },
     "obj-isu": {
-      "entity": "椅子",
+      "wikipedia": "en:Chair",
+      "category": "Chairs",
       "alt": "椅子が1脚置いてある",
-      "titleFree": true,
-      "file": "obj-isu",
-      "title": "Chairs mohassess",
-      "author": "edited by Don Rubin, Chua Soo Pong, Ravi Chaturvedi, Ramendu Majundar, Minoru Tanokura",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AChairs%20mohassess.jpg",
-      "width": 632,
-      "height": 395
+      "titleFree": true
     },
     "obj-tokei": {
-      "entity": "掛時計",
+      "wikipedia": "en:Alarm clock",
+      "category": "Alarm clocks",
       "alt": "壁掛けの時計。数字の文字盤",
-      "titleFree": true,
-      "file": "obj-tokei",
-      "title": "Longcase clock",
-      "author": "David Roentgen / Thomas Chippendale",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3ALongcase%20clock%20MET%20DP280605.jpg",
-      "width": 640,
-      "height": 856
+      "titleFree": true
     },
     "obj-kuruma": {
-      "entity": "自動車",
+      "wikipedia": "en:Car",
+      "category": "Automobiles",
       "alt": "自動車が1台、横から写っている",
-      "titleFree": true,
-      "file": "obj-kuruma",
-      "title": "Auto Mechanic",
-      "author": "User Interiot on en.wikipedia",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AAuto%20Mechanic.jpg",
-      "width": 640,
-      "height": 426
+      "titleFree": true
     },
     "obj-densha": {
       "entity": "電車",
@@ -643,17 +608,10 @@
       "titleFree": true
     },
     "obj-hikouki": {
-      "entity": "飛行機",
+      "wikipedia": "en:Airliner",
+      "category": "Airliners in flight",
       "alt": "飛行機が1機",
-      "titleFree": true,
-      "file": "obj-hikouki",
-      "title": "Boeing 720 Controlled Impact Demonstration",
-      "author": "NASA",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ABoeing%20720%20Controlled%20Impact%20Demonstration.jpg",
-      "width": 640,
-      "height": 288
+      "titleFree": true
     },
     "obj-jitensha": {
       "entity": "自転車",
@@ -661,43 +619,22 @@
       "titleFree": true
     },
     "obj-kutsu": {
-      "entity": "靴",
+      "wikipedia": "en:Shoe",
+      "category": "Shoes",
       "alt": "靴が1足ならんでいる",
-      "titleFree": true,
-      "file": "obj-kutsu",
-      "title": "Villased sokid, STM 1998",
-      "author": "Venemaa; Petseri rajoon, Põrste küla; valmistaja: Helü, Linda; fotograaf: Tuul, Toomas",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3AVillased%20sokid%2C%20STM%201998.jpg",
-      "width": 640,
-      "height": 732
+      "titleFree": true
     },
     "obj-boushi": {
-      "entity": "帽子",
+      "wikipedia": "en:Hat",
+      "category": "Hats",
       "alt": "帽子が1つ",
-      "titleFree": true,
-      "file": "obj-boushi",
-      "title": "Tam-O'-Shanter (PSF)",
-      "author": "Pearson Scott Foresman",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ATam-O'-Shanter%20(PSF).png",
-      "width": 640,
-      "height": 1004
+      "titleFree": true
     },
     "obj-ringo": {
-      "entity": "リンゴ",
+      "wikipedia": "en:Apple",
+      "category": "Apples",
       "alt": "赤いリンゴ",
-      "titleFree": true,
-      "file": "obj-ringo",
-      "title": "Tree with red apples in Barkedal 4",
-      "author": "W.carter",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3ATree%20with%20red%20apples%20in%20Barkedal%204.jpg",
-      "width": 640,
-      "height": 640
+      "titleFree": true
     },
     "obj-mikan": {
       "entity": "ウンシュウミカン",
@@ -713,17 +650,10 @@
       "height": 480
     },
     "obj-budou": {
-      "entity": "ブドウ",
+      "wikipedia": "en:Grape",
+      "category": "Grapes",
       "alt": "ぶどうのふさ",
-      "titleFree": true,
-      "file": "obj-budou",
-      "title": "Glucose 2",
-      "author": "Paul Nasca",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AGlucose%202.jpg",
-      "width": 640,
-      "height": 480
+      "titleFree": true
     },
     "obj-ichigo": {
       "entity": "イチゴ",
@@ -744,69 +674,34 @@
       "height": 1031
     },
     "obj-tomato": {
-      "entity": "トマト",
+      "wikipedia": "en:Tomato",
+      "category": "Tomatoes",
       "alt": "赤いトマト",
-      "titleFree": true,
-      "file": "obj-tomato",
-      "title": "Rajče1",
-      "author": "Karelj",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ARaj%C4%8De1.jpg",
-      "width": 600,
-      "height": 800
+      "titleFree": true
     },
     "obj-gyuunyuu": {
-      "entity": "牛乳",
+      "wikipedia": "en:Milk",
+      "category": "Glasses of milk",
       "alt": "コップに入った牛乳",
-      "titleFree": true,
-      "file": "obj-gyuunyuu",
-      "title": "Lactose(lac)",
-      "author": "Wobble",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ALactose(lac).png",
-      "width": 640,
-      "height": 293
+      "titleFree": true
     },
     "obj-enpitsu": {
-      "entity": "鉛筆",
+      "wikipedia": "en:Pencil",
+      "category": "Pencils",
       "alt": "鉛筆が1本",
-      "titleFree": true,
-      "file": "obj-enpitsu",
-      "title": "Red pencil sharpener",
-      "author": "Kaldari",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ARed%20pencil%20sharpener.jpg",
-      "width": 640,
-      "height": 480
+      "titleFree": true
     },
     "obj-hasami": {
-      "entity": "はさみ",
+      "wikipedia": "en:Scissors",
+      "category": "Scissors",
       "alt": "はさみが1丁",
-      "titleFree": true,
-      "file": "obj-hasami",
-      "title": "Fiddler crab",
-      "author": "NOAA",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AFiddler%20crab.jpg",
-      "width": 347,
-      "height": 243
+      "titleFree": true
     },
     "obj-hon": {
-      "entity": "本",
+      "wikipedia": "en:Book",
+      "category": "Books",
       "alt": "本が1冊置いてある",
-      "titleFree": true,
-      "file": "obj-hon",
-      "title": "Reims Gospel",
-      "author": "Unknown author",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AReimski%20evan%C4%91elistar.10.jpg",
-      "width": 640,
-      "height": 425
+      "titleFree": true
     },
     "obj-randoseru": {
       "entity": "ランドセル",
@@ -814,17 +709,10 @@
       "titleFree": true
     },
     "obj-koppu": {
-      "entity": "コップ",
+      "wikipedia": "en:Cup",
+      "category": "Cups",
       "alt": "コップが1つ",
-      "titleFree": true,
-      "file": "obj-koppu",
-      "title": "Cup with handles",
-      "author": "作者不明",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3ACup%20with%20handles%20MET%2069425.jpg",
-      "width": 640,
-      "height": 485
+      "titleFree": true
     },
     "obj-supuun": {
       "entity": "スプーン",
@@ -868,17 +756,10 @@
       "height": 480
     },
     "obj-gitaa": {
-      "entity": "ギター",
+      "wikipedia": "en:Guitar",
+      "category": "Guitars",
       "alt": "ギターが1本",
-      "titleFree": true,
-      "file": "obj-gitaa",
-      "title": "BhagavadGita-19th-century-Illustrated-Sanskrit-Chapter 1.20.21",
-      "author": "Unknown artist",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ABhagavadGita-19th-century-Illustrated-Sanskrit-Chapter%201.20.21.jpg",
-      "width": 640,
-      "height": 387
+      "titleFree": true
     },
     "obj-booru": {
       "entity": "サッカーボール",
@@ -886,30 +767,16 @@
       "titleFree": true
     },
     "obj-tsuki": {
-      "entity": "月",
+      "wikipedia": "en:Moon",
+      "category": "Full moon",
       "alt": "夜空に出た月",
-      "titleFree": true,
-      "file": "obj-tsuki",
-      "title": "Solar eclipse taken from Artemis II - April 2026",
-      "author": "NASA",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ASolar%20eclipse%20taken%20from%20Artemis%20II%20-%20April%202026.jpg",
-      "width": 640,
-      "height": 427
+      "titleFree": true
     },
     "obj-umi": {
-      "entity": "海",
+      "wikipedia": "en:Sea",
+      "category": "Seascapes",
       "alt": "海が広がっている",
-      "titleFree": true,
-      "file": "obj-umi",
-      "title": "Claude Debussy La mer couverture",
-      "author": "Claude Debussy (1862-1918) - édition Durand (1905)",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AClaude%20Debussy%20La%20mer%20couverture.PNG",
-      "width": 640,
-      "height": 969
+      "titleFree": true
     },
     "obj-kawa": {
       "entity": "川",
@@ -917,17 +784,10 @@
       "titleFree": true
     },
     "obj-kumo": {
-      "entity": "雲",
+      "wikipedia": "en:Cloud",
+      "category": "Cumulus clouds",
       "alt": "空に浮かぶ雲",
-      "titleFree": true,
-      "file": "obj-kumo",
-      "title": "Socrates in a basket",
-      "author": "作者不明",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ASocrates%20in%20a%20basket.jpg",
-      "width": 532,
-      "height": 470
+      "titleFree": true
     },
     "obj-yuki": {
       "entity": "雪",
@@ -943,17 +803,10 @@
       "height": 480
     },
     "obj-zou": {
-      "entity": "ゾウ",
+      "wikipedia": "en:Elephant",
+      "category": "Elephants",
       "alt": "ゾウが1頭立っている",
-      "titleFree": true,
-      "file": "obj-zou",
-      "title": "Seoul Olympic torch",
-      "author": "Ken Hackman, U.S. Air Force",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ASeoul%20Olympic%20torch.jpg",
-      "width": 640,
-      "height": 427
+      "titleFree": true
     },
     "obj-kirin": {
       "entity": "キリン",
@@ -979,17 +832,10 @@
       "titleFree": true
     },
     "obj-kaeru": {
-      "entity": "カエル",
+      "wikipedia": "en:Frog",
+      "category": "Frogs",
       "alt": "カエルが1匹",
-      "titleFree": true,
-      "file": "obj-kaeru",
-      "title": "Haeckel Batrachia",
-      "author": "Ernst Haeckel",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AHaeckel%20Batrachia.jpg",
-      "width": 640,
-      "height": 905
+      "titleFree": true
     },
     "obj-hitsuji": {
       "entity": "ヒツジ",
@@ -1118,16 +964,9 @@
       "height": 426
     },
     "rika-furiko": {
-      "entity": "振り子",
-      "alt": "糸におもりを下げた振り子",
-      "file": "rika-furiko",
-      "title": "Pendulum-242740 640",
-      "author": "Antranias",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3APendulum-242740%20640.jpg",
-      "width": 640,
-      "height": 426
+      "wikipedia": "en:Pendulum",
+      "category": "Pendulums",
+      "alt": "糸におもりを下げた振り子"
     },
     "rika-ondokei": {
       "entity": "温度計",
@@ -1206,16 +1045,9 @@
       "alt": "パトカーが1台"
     },
     "shakai-yuubin": {
-      "entity": "郵便ポスト",
-      "alt": "赤い郵便ポスト",
-      "file": "shakai-yuubin",
-      "title": "Pbalson 20060527 IMG 3615",
-      "author": "Pbalson8204 at English Wikipedia",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3APbalson%2020060527%20IMG%203615.JPG",
-      "width": 640,
-      "height": 512
+      "wikipedia": "ja:郵便ポスト",
+      "category": "Post boxes in Japan",
+      "alt": "赤い郵便ポスト"
     },
     "shakai-tanbo": {
       "entity": "水田",
@@ -1234,16 +1066,9 @@
       "height": 438
     },
     "shakai-fujisan": {
-      "entity": "富士山",
-      "alt": "雪をかぶった富士山",
-      "file": "shakai-fujisan",
-      "title": "Shogunate Warship Fujiyama",
-      "author": "Unknown author",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AShogunate%20Warship%20Fujiyama.jpg",
-      "width": 640,
-      "height": 419
+      "wikipedia": "ja:富士山",
+      "category": "Mount Fuji",
+      "alt": "雪をかぶった富士山"
     },
     "shakai-kokkai": {
       "entity": "国会議事堂",
@@ -1254,16 +1079,9 @@
       "alt": "金色の建物が池に映っている"
     },
     "shakai-himeji": {
-      "entity": "姫路城",
-      "alt": "白い天守閣",
-      "file": "shakai-himeji",
-      "title": "Himeji Koukoen32n4592",
-      "author": "663highland",
-      "license": "CC BY 2.5",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
-      "source": "https://commons.wikimedia.org/wiki/File%3AHimeji%20Koukoen32n4592.jpg",
-      "width": 640,
-      "height": 426
+      "wikipedia": "ja:姫路城",
+      "category": "Himeji Castle",
+      "alt": "白い天守閣"
     },
     "shakai-nara": {
       "entity": "東大寺",
