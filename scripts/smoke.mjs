@@ -2255,6 +2255,25 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
   ev('document.getElementById("wvnext").click()');
   check("NEXT でリザルトへ", ev('S.view === "result"'), ev("S.view"));
 
+  /* **1体でも倒していれば「撃破！」。** 2体目を残して終わっても、倒した
+     事実は消えません。逃げられたほうは名前を添えて1行で補います        */
+  ev(`(() => {
+    S.run.waves = [{ kills: 1, cleared: false, mode: "elimination", size: 4,
+      heroId: DB.subjectArt["国語"].hero, foeId: 310, foeMax: 40,
+      right: 3, wrong: 1, appliedRight: 0, gum: 12, found: [], bg: "1001" }];
+    S.run.gate = { kind: "end", wave: 0 }; S.view = "wave"; render();
+  })()`);
+  check("1体倒していれば撃破！", txt().includes("撃破！"), txt().slice(0, 50));
+  check("逃げられたほうは名前で補う",
+    txt().includes(ev('DB.battle.enemies["310"].name') + "には逃げられた"), txt().slice(0, 90));
+  check("1体でも倒していれば助言は出さない", !txt().includes("エネミーを倒すには"));
+  ev(`(() => {
+    S.run.waves[0].kills = 0;
+    S.run.gate = { kind: "end", wave: 0 }; S.view = "wave"; render();
+  })()`);
+  check("1体も倒せなければ逃げられた……", txt().includes("逃げられた……"), txt().slice(0, 50));
+  check("そのときだけ助言を出す", txt().includes("エネミーを倒すには"), txt().slice(0, 90));
+
   /* ---- 必殺技（英雄のパッシブスキル）--------------------------------
      解説を省く設定だと、応用編にたどり着く道がありませんでした。
      隙を見せた問題では、そこを開ける入口が出ます                        */

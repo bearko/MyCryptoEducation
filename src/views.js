@@ -1015,6 +1015,11 @@ function vWaveEnd(rec) {
   const w = rec || { right: 0, wrong: 0, appliedRight: 0, gum: 0, found: [], cleared: false };
   const asked = w.right + w.wrong;
   const rate = asked ? Math.round(w.right / asked * 100) : 0;
+  /* **1体でも倒していれば「撃破！」です。** 2体目を残して終わっても、
+     倒した事実は消えません。**逃げられたほうは、名前を添えて1行で補います** */
+  const won = w.cleared || w.kills > 0;
+  const fled = !w.cleared && w.foeId
+    ? (DB.battle?.enemies?.[String(w.foeId)]?.name || "エネミー") : "";
   const last = S.run.i >= S.run.ids.length;
   const found = w.found || [];
   app.innerHTML = `
@@ -1025,8 +1030,8 @@ function vWaveEnd(rec) {
     </div>
     <div class="wv-stage end" style="background-image:url('${assetPath.bg(w.bg || waveBg())}')">
       <div class="wv-hero"><img class="bt-ch" src="${assetPath.hero(w.heroId)}" alt=""></div>
-      <span class="wv-cry ${w.cleared ? "win" : "lose"}">${
-        w.cleared ? "撃破！" : "逃げられた……"}</span>
+      <span class="wv-cry ${won ? "win" : "lose"}">${
+        won ? "撃破！" : "逃げられた……"}</span>
       <div class="wv-foe${w.cleared ? " gone" : ""}">
         <img class="bt-ch" src="${assetPath.enemy(w.foeId)}" alt="">
         <div class="wv-hp"><i style="width:${w.cleared ? 0 : 100}%"></i></div>
@@ -1035,13 +1040,14 @@ function vWaveEnd(rec) {
       </div>
     </div>
     <div class="wv-body">
+      ${fled ? `<p class="wv-fled">${esc(fled)}には逃げられた</p>` : ""}
       <div class="stat">
         <div><b>${w.right}</b><span>解けた</span></div>
         <div><b>${w.appliedRight}</b><span>応用も突破</span></div>
         <div><b>${rate}<small style="font-size:15px">%</small></b><span>正答率</span></div>
       </div>
-      ${w.cleared ? "" : `
-      <!-- 逃げられたときだけ、手の打ち方を言う。**罰ではなく道順です**（原則3） -->
+      ${won ? "" : `
+      <!-- 1体も倒せなかったときだけ、手の打ち方を言う。**罰ではなく道順です**（原則3） -->
       <div class="wv-tip">
         <img src="${assetPath.navi("navi_ain_07_talk")}" alt="マイちゃん">
         <div>
