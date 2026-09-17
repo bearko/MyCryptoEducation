@@ -24,6 +24,7 @@ const db = {
   advice:     await json("data/advice.json"),
   titles:     await json("data/titles.json"),
   crystals:   await json("data/crystals.json"),
+  subjects:   await json("data/subjects.json"),
   images:     await json("data/images.json"),
 };
 
@@ -44,6 +45,8 @@ await embed("public/heroes", "h");
 await embed("public/materials/crystals", "c");
 await embed("public/icons", "i");
 await embed("public/extensions", "e");
+await embed("public/enemies", "y");
+await embed("public/characters", "n");
 /* 背景は縮小コピーのほうを畳む。1080px のまま base64 にすると配布ファイルが実用外の大きさになる */
 await embed("public/backgrounds/small", "b");
 /* コモンズの写真も縮小コピーのほう。base64 は元の1.33倍になるので、大きいままでは畳めない */

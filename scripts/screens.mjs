@@ -59,8 +59,17 @@ export const SCREENS = [
     go: async page => { await setup(page, { cells: { "国語|e1": 1, "算数・数学|e1": 1, "理科|j1": 1 } });
                         await page.evaluate(() => go("map")); } },
 
-  { id: "S-04", name: "出題を選ぶ", note: "範囲と教科。スワイプだけの入口もここ",
-    go: async page => { await setup(page); await page.evaluate(() => go("select")); } },
+  { id: "S-04", name: "出題を選ぶ", note: "毎回くじで3教科。学年は教科ごとに知識マップから決まる",
+    go: async page => {
+      await setup(page);
+      /* くじは撮るたびに変わるので、絵が毎回別ものにならないよう固定する */
+      await page.evaluate(() => {
+        S.select.picks = ["国語", "算数・数学", "理科"];
+        S.select.seed = 7; S.select.subject = "auto"; S.select.run = null;
+        go("select");
+      });
+      await page.waitForTimeout(250);
+    } },
 
   { id: "S-05", name: "出題・4択",      note: "青い帯。正しいものを1つ選ぶ", go: p => quizOf(p, "choice") },
   { id: "S-06", name: "出題・消去法",    note: "朱の帯。誤っているものを3つ消す", go: p => quizOf(p, "elimination") },
@@ -161,6 +170,15 @@ export const SCREENS = [
       });
     } },
 
-  { id: "S-24", name: "マイページ", note: "名前・アイコン・称号。未取得の称号は名前を伏せる",
+  { id: "S-24", name: "マイページ", note: "名前・アイコン・称号・設定。未取得の称号は名前を伏せる",
     go: async page => { await setup(page); await page.evaluate(() => go("mypage")); } },
+
+  /* **番号は使い回さない。** 足すときは末尾へ（途中に差しこむと、過去の
+     レビューの番号が別の画面を指すようになる） */
+  { id: "S-25", name: "出題を選ぶ・教科を選んだあと", note: "形式3つとエネミーが出て、背景がその教科の絵に変わる",
+    go: async page => {
+      await SCREENS.find(s => s.id === "S-04").go(page);
+      await page.evaluate(() => { document.querySelectorAll(".scard")[2].click(); });
+      await page.waitForTimeout(300);
+    } },
 ];

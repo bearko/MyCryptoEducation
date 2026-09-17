@@ -16,7 +16,7 @@ export async function loadDatabase(base = "./data") {
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
   const [questionSets, figures, heroes, extensions,
-         advice, titles, crystals, images] = await Promise.all([
+         advice, titles, crystals, images, subjects] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
@@ -25,9 +25,10 @@ export async function loadDatabase(base = "./data") {
     json(`${base}/titles.json`),
     json(`${base}/crystals.json`),
     json(`${base}/images.json`),
+    json(`${base}/subjects.json`),
   ]);
   return index({ questions: questionSets.flat(), figures, heroes, curated: extensions,
-                 advice, titles, crystals, images });
+                 advice, titles, crystals, images, subjects });
 }
 
 /**
@@ -96,6 +97,10 @@ function index(raw) {
   db.heroById = Object.fromEntries(db.heroes.map(h => [h.id, h]));
   db.crystalById = Object.fromEntries((db.crystals?.crystals || []).map(c => [c.id, c]));
   db.photos = db.images?.images || {};
+  /* 教科ごとの英雄・背景・エネミー。**絵の話しか入っていません** ——
+     どの学年を出すかは知識マップから導くので、ここには持たせません */
+  db.subjectArt = db.subjects?.subjects || {};
+  db.defaultBg = db.subjects?.defaultBg || "1030";
   db.extensions = buildExtensions(db.curated, db.crystals);
 
   // 教科 ↔ 族。クラフトの要求先と、どの教科を解けばその族が貯まるかを結ぶ
@@ -125,4 +130,8 @@ export const assetPath = {
   photo: file => globalThis.__ASSETS__?.["p" + file] ?? `./public/commons/${file}.webp`,
   /* 解放前の英雄を見せるための Rep.画像。原本は id + 10000 */
   rep:  id => assetPath.hero(String(Number(id) + 10000)),
+  /* 設問に割り当たるエネミー。IDの並びが教科に対応している */
+  enemy: id => globalThis.__ASSETS__?.["y" + id] ?? `./public/enemies/${id}.webp`,
+  /* マインちゃん。原本は 96x128 のドット絵なので pixelated で出す */
+  navi: name => globalThis.__ASSETS__?.["n" + name] ?? `./public/characters/${name}.webp`,
 };

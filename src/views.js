@@ -9,6 +9,7 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          shopList, canBuy, crystalPrice, crystalKinds,
          familyPoints, ANY_FAMILY, drawCrystal, crystalPoints, dropRate, familyExpect,
          unlockedBy, questionOpen,
+         subjectGrade, subjectLabel, drawSubjects, enemyOf,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
@@ -108,7 +109,9 @@ function screenId() {
   }
   if (v === "result") return S.run.swipe ? "S-13" : "S-14";
   if (v === "heroes") return S.heroesTab === "codex" ? "S-16" : "S-15";
-  return { home: "S-02", map: "S-03", select: "S-04", hero: "S-17", target: "S-18",
+  /* 教科を選ぶ前と後は、見た目が別物なので別の番号にする */
+  if (v === "select") return S.select.picks?.includes(S.select.subject) ? "S-25" : "S-04";
+  return { home: "S-02", map: "S-03", hero: "S-17", target: "S-18",
            challenge: "S-19", craft: "S-20", shop: "S-21", calendar: "S-22",
            day: "S-23", mypage: "S-24" }[v] || "S-??";
 }
@@ -452,100 +455,122 @@ function modeStock(db, state, band, subject) {
   return out;
 }
 
+/**
+ * **出題を選ぶ**（S-04）。
+ *
+ * 作り直しの柱は3つです。
+ *
+ * 1. **文字で説明しない。** 段の上がり方も束の組み方も、遊んでいれば分かります。
+ *    説明を並べるほど、読まずに飛ばす人が増えます
+ * 2. **選択肢を増やさない。** 6教科ぜんぶ並べると、選ぶだけで疲れます。
+ *    **毎回くじで3教科**だけ出します
+ * 3. **スクロールさせない。** 1画面に収めます
+ *
+ * 範囲（小学校/中学校/世界）の選択は外しました。**学年は教科ごとに決まります** ——
+ * 知識マップでまだ埋まっていない一番下の学年です（`engine.subjectGrade`）。
+ * 海外の問題は、その教科を中3まで埋めた人のところへ自然に来ます。
+ */
 function vSelect() {
-  const bands = [["auto", "おまかせ"], ["e", "小学校"], ["j", "中学校"], ["w", "世界"]];
-  const counts = inventoryBySubject(DB, S, S.select.band);
-  const total = inventory(DB, S, S.select.band, "auto").length;
-  const n = inventory(DB, S, S.select.band, S.select.subject).length;
-  const worldLocked = !unlockedChapters(DB, S).has(3);
-  const short = n > 0 && n < RUN_LENGTH;
-  // スワイプは在庫が別。混ぜるとテンポの設計が成り立たないので、入口も分ける
-  const sw = inventory(DB, S, S.select.band, S.select.subject, "swipe").length;
+  /* くじは引いたら覚えておく。**ホームへ戻って入り直しても引き直しません** ——
+     引き直せると、欲しい教科が出るまで往復することになります */
+  if (!S.select.picks?.length) {
+    S.select.picks = drawSubjects(DB, S);
+    S.select.seed = Math.floor(Math.random() * 1e9);
+    if (!S.select.picks.includes(S.select.subject)) S.select.subject = "auto";
+  }
+  const picks = S.select.picks;
+  const chosen = picks.includes(S.select.subject) ? S.select.subject : null;
+  const art = k => DB.subjectArt[k] || {};
+  const bg = chosen ? art(chosen).bg : DB.defaultBg;
+
+  /* **予告と実物を同じものにします。** ここで planRun を呼び直すと、描き直すたびに
+     形式が変わって、出発した先が予告と食い違います。教科を選んだ時点で1度だけ
+     引いて、それをそのまま出発に渡します */
+  if (chosen && S.select.run?.subject !== chosen)
+    S.select.run = { subject: chosen, ...planRun(DB, S, { band: "auto", subject: chosen }) };
+  const plan = chosen ? (S.select.run.plan || []) : [];
+
+  const naviSay = chosen
+    ? `今日の${subjectLabel(DB.subjects, chosen, subjectGrade(DB, S, chosen)?.k)}はこの3つ！ 札をおすと、くわしく出るよ。`
+    : "Guten Tag! 今日もジャンジャン問題解いていこう！";
 
   app.innerHTML = `
-  <header><div class="hbar"><div class="place">出題を選ぶ</div>
-    <button class="mapbtn" id="back">もどる</button></div></header>
-  <div class="pad">
-    <h2 style="margin-top:20px">どこを解きますか</h2>
-    <p class="fine">おまかせは知識マップの白いマスから優先して出します。最後の1問は必ずいまの範囲の外から出ます。</p>
-    <p class="fine"><b>出題形式は毎回3つ、くじで選びます。</b>形式ごとにまとめて出すので、
-      操作を覚え直す回数が減ります。束の長さは手数なりで、はらうだけのスワイプは8問、
-      なぞる文字パネルは3問。<b>何が来るかは得意不得意で変わりません。</b></p>
-    <div class="lvbar">${Object.keys(MODE_LABEL).map(m =>
-      `<span class="lvcell"><b>${esc(MODE_LABEL[m])}</b><i>Lv.${modeLevel(S, m)}</i></span>`).join("")}</div>
-    <p class="fine">段は形式ごとに別で、<b>その形式の束で4分の3以上とれた回に1つ上がります</b>
-      （Lv.3まで）。学年は変わらず、同じ学年の中で踏みこんだ問いに変わります。
-      <b>下がることはありません。</b></p>
+  <div class="sel-bg" style="background-image:url('${assetPath.bg(bg)}')"></div>
+  <div class="sel">
+    <header><div class="hbar"><div class="place">出題を選ぶ</div>
+      <button class="mapbtn" id="back">もどる</button></div></header>
 
-    <div class="seg" id="band">${bands.map(([k, l]) =>
-      `<button data-k="${k}" class="${S.select.band === k ? "on" : ""}" ${
-        (k === "w" && worldLocked) ? "disabled" : ""}>${l}</button>`).join("")}</div>
+    <!-- 右側は**知識カード**の枚数。解いた数だけ確実に入る唯一のもので、
+         難易度ゲージを削るのもこれです（原則1・原則3）。GUM は行動量の副産物、
+         クリスタルは抽選なので、「倒したら必ずこれ」とは書けません -->
+    <div class="sel-modes">${plan.map(seg => {
+      const e = enemyOf(DB.subjects, chosen, seg.mode, S.select.seed);
+      return `<button class="mcard" data-m="${esc(seg.mode)}">
+        <span class="mfoe">${e ? `<img src="${assetPath.enemy(e)}" alt="">` : ""}<i>ENEMY</i></span>
+        <span class="mname"><b>${esc(MODE_LABEL[seg.mode] || seg.mode)}</b>
+          <i>Lv.${modeLevel(S, seg.mode)}</i></span>
+        <span class="mprize"><b>${seg.n}</b><i>カード</i></span>
+      </button>`;
+    }).join("")}</div>
 
-    <div class="seg wrap" id="sub">
-      <button data-k="auto" class="${S.select.subject === "auto" ? "on" : ""}">
-        おまかせ<i>${total}</i></button>
-      ${SUBJECTS.map(s => `<button data-k="${esc(s)}" ${counts[s] ? "" : "disabled"}
-        class="${S.select.subject === s ? "on" : ""}">${esc(s)}<i>${counts[s]}</i></button>`).join("")}
+    <div class="sel-navi">
+      <p class="navi-say" id="navisay">${esc(naviSay)}</p>
+      <img class="navi" src="${assetPath.navi("navi_ain_11_idle")}" alt="マインちゃん">
     </div>
 
-    ${worldLocked ? `<p class="fine lock">「世界」はクレオパトラを解放すると開きます。</p>` : ""}
+    <div class="sel-subs">${picks.map(k => {
+      const g = subjectGrade(DB, S, k);
+      const on = chosen === k;
+      return `<button class="scard${on ? " on" : ""}" data-k="${esc(k)}"
+        style="background-image:url('${assetPath.bg(art(k).bg)}')">
+        <img class="shero" src="${assetPath.hero(art(k).hero)}" alt="">
+        <span class="sname">${esc(subjectLabel(DB.subjects, k, g?.k))}</span>
+        <span class="sgrade">${g ? esc(gradeLabelOf(g)) : "—"}</span>
+      </button>`;
+    }).join("")}</div>
 
-    <div class="panel">
-      <label class="switch">
-        <input type="checkbox" id="showexp" ${S.settings.showExplanationOnCorrect ? "checked" : ""}>
-        <span class="sw"></span>
-        <span class="lbl">正解した問題の解説を見る</span>
-      </label>
-      <p class="fine">${S.settings.showExplanationOnCorrect
-        ? "正解しても英雄の解説と応用編が出ます。"
-        : "正解したら演出だけで次へ進みます。応用編は出ません。間違えた問題の解説は必ず出ます。"}</p>
-    </div>
-
-    ${n === 0
-      ? `<p class="fine lock">この範囲にはまだ問題がありません。</p>`
-      : short
-        ? `<p class="fine lock">この範囲は在庫が ${n}問なので、束が3つそろわないことがあります。</p>`
-        : `<p class="fine">出題できる問題 ${n}問 ・ 出せる形式 ${
-            Object.entries(modeStock(DB, S, S.select.band, S.select.subject))
-              .filter(([, c]) => c >= 3)
-              .map(([m, c]) => `${MODE_LABEL[m] || m}${c}`).join(" / ") || "なし"}</p>`}
-
-    <div class="stack"><button class="btn" id="start" ${n ? "" : "disabled"}>
-      ${n ? `${BLOCKS}つの形式で解く` : "問題がありません"}</button></div>
-
-    <div class="panel swp-entry">
-      <div class="phead"><h2>スワイプで解く</h2></div>
-      <p class="fine">写真を見て、<b>正しいと思うほうへカードをはらう</b>2択です。
-        ${Math.min(sw, RUN_LENGTH)}問ぜんぶ同じ形で、<b>途中に解説もヒントも挟みません。</b>
-        解説はセッションの終わりにまとめて出ます（外した問題は開いた状態で並びます）。
-        もらえる GUM も知識カードもクリスタルも、ふつうに解いたときと同じです。</p>
-      ${sw === 0
-        ? `<p class="fine lock">この範囲にはスワイプの問題がまだありません。</p>`
-        : sw < RUN_LENGTH
-          ? `<p class="fine lock">この範囲のスワイプは現在 ${sw}問です。${sw}問だけ出題します。</p>`
-          : ""}
-      <div class="stack"><button class="btn ghost" id="startswipe" ${sw ? "" : "disabled"}>
-        ${sw ? `スワイプで ${Math.min(sw, RUN_LENGTH)}問` : "スワイプの問題がありません"}</button></div>
-    </div>
+    <button class="btn go" id="start" ${chosen ? "" : "disabled"}>出発</button>
   </div>`;
 
   document.getElementById("back").onclick = () => go("home");
-  app.querySelectorAll("#band button").forEach(b =>
-    b.onclick = () => { S.select.band = b.dataset.k; S.select.subject = "auto"; render(); });
-  app.querySelectorAll("#sub button").forEach(b =>
+  app.querySelectorAll(".scard").forEach(b =>
     b.onclick = () => { S.select.subject = b.dataset.k; render(); });
-  document.getElementById("showexp").onchange = e => {
-    S.settings.showExplanationOnCorrect = e.target.checked; render();
+  /* 形式の札を押すと、マインちゃんがその形式を説明する。
+     **文字は最初から並べません** —— 知りたい人が押したときだけ出します */
+  app.querySelectorAll(".mcard").forEach(b =>
+    b.onclick = () => {
+      const say = document.getElementById("navisay");
+      if (say) say.textContent = MODE_SAY[b.dataset.m] || "";
+    });
+  document.getElementById("start").onclick = () => {
+    if (!chosen) return;
+    const built = S.select.run;
+    S.select.picks = null;          // 出発したら引き直す
+    S.select.run = null;
+    startRun({ built });
   };
-  document.getElementById("start").onclick = () => startRun();
-  const sws = document.getElementById("startswipe");
-  if (sws) sws.onclick = () => startRun({ swipe: true });
 }
+
+/** 学年の見出し。知識マップと同じ言い方にそろえる */
+const gradeLabelOf = g => g.band === "e" ? `小${g.l}` : g.band === "j" ? `中${g.l}` : "世界";
+
+/** 形式の札を押したときに、マインちゃんが言うこと。**押すまで出しません** */
+const MODE_SAY = {
+  swipe: "しゃしんを見て、正しいと思うほうへカードをはらってね。とちゅうで手をはなせばもどせるよ。",
+  choice: "4つのうち、正しいものを1つえらんでね。",
+  elimination: "ちがうものを ✕ で消していくよ。深く消すほど点は大きいけど、正解を消すとそこで終わり。",
+  numeric: "数字だけを打ってね。たんいは出してあるから、打たなくていいよ。",
+  range: "年を「から」「まで」のはばで答えてね。せまく当てるほど高い点になるよ。",
+  panel: "マスをなぞって読みを作ってね。ななめにもたどれるよ。",
+};
 
 function startRun(opts = {}) {
   const swipe = !!opts.swipe;
-  const built = opts.ids ? { ids: opts.ids, plan: [] }
-                         : planRun(DB, S, swipe ? { kind: "swipe" } : {});
+  /* **引いてあるものがあれば、それを使います。** 出題を選ぶ画面は、
+     予告した形式のまま出発させるために、引いた結果をそのまま渡してきます */
+  const built = opts.built ? opts.built
+              : opts.ids ? { ids: opts.ids, plan: [] }
+              : planRun(DB, S, swipe ? { kind: "swipe" } : {});
   const ids = built.ids;
   S.run = { ids, i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             right: 0, wrong: 0, appliedRight: 0,
@@ -2114,7 +2139,7 @@ function vShop() {
 /* ---------- マイページ ---------- */
 
 function vMypage() {
-  const tab = ["name", "icon", "title"].includes(S.myTab) ? S.myTab : "name";
+  const tab = ["name", "icon", "title", "setting"].includes(S.myTab) ? S.myTab : "name";
   const p = S.profile;
   const owned = heroesOwned();
   const titles = titleProgress(DB, S);
@@ -2152,6 +2177,20 @@ function vMypage() {
         </div>
         <p class="fine">称号は集めた量よりも、どこまで越えたかで付きます。</p>
       </div>`,
+    /* **出題を選ぶ画面から移してきました**（S-04 を「問題と解答だけ」にしたため）。
+       設定は遊ぶたびに触るものではないので、置き場所はここが合っています */
+    setting: `
+      <div class="panel">
+        <div class="phead"><h2>設定</h2></div>
+        <label class="switch">
+          <input type="checkbox" id="showexp" ${S.settings.showExplanationOnCorrect ? "checked" : ""}>
+          <span class="sw"></span>
+          <span class="lbl">正解した問題の解説を見る</span>
+        </label>
+        <p class="fine">${S.settings.showExplanationOnCorrect
+          ? "正解しても英雄の解説と応用編が出ます。"
+          : "正解したら演出だけで次へ進みます。応用編は出ません。間違えた問題の解説は必ず出ます。"}</p>
+      </div>`,
   };
 
   app.innerHTML = `
@@ -2169,11 +2208,16 @@ function vMypage() {
       <button data-t="name" class="${tab === "name" ? "on" : ""}">名前</button>
       <button data-t="icon" class="${tab === "icon" ? "on" : ""}">アイコン</button>
       <button data-t="title" class="${tab === "title" ? "on" : ""}">称号<i>${got}</i></button>
+      <button data-t="setting" class="${tab === "setting" ? "on" : ""}">設定</button>
     </div>
     ${panels[tab]}
   </div>`;
 
   document.getElementById("back").onclick = () => go("home");
+  const exp = document.getElementById("showexp");
+  if (exp) exp.onchange = e => {
+    S.settings.showExplanationOnCorrect = e.target.checked; render();
+  };
   app.querySelectorAll("#mytab button").forEach(b =>
     b.onclick = () => { S.myTab = b.dataset.t; render(); });
 

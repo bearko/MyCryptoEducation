@@ -18,7 +18,11 @@ const PERSISTED = ["settings", "profile", "gum", "points", "exts", "equip",
 function defaults() {
   return {
     view: "home",
-    select: { band: "auto", subject: "auto" },
+    /* 出題を選ぶ画面。**3教科はくじで引いて、引いたら覚えておきます。**
+       ホームへ戻って入り直しても引き直しません（引き直せると、欲しい教科が
+       出るまで往復することになります）。出発した時点で捨てて、次に引き直します。
+       seed はエネミーの割り当てに使う数で、くじと一緒に決まります */
+    select: { band: "auto", subject: "auto", picks: null, seed: 0, run: null },
 
     // 設定
     settings: {

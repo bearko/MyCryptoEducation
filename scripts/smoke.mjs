@@ -217,49 +217,66 @@ d.getElementById("toquiz").click();
 check("ホーム以外は方眼紙のまま", !d.getElementById("app").classList.contains("home"));
 // 開始時は第3・4章が未解放。期待値は問題データから出す（問題を足すたびに直さないため）
 const openStock = ev("inventory(DB,S,'auto','auto').length");
-check("在庫バッジが出ている", new RegExp(`おまかせ\\s*${openStock}`).test(txt()),
-  `在庫 ${openStock} / ${txt().slice(0, 120)}`);
-check("未解放ぶんは在庫から外れる", openStock < ev("DB.questions.length"),
-  `${openStock} / 全 ${ev("DB.questions.length")}問`);
-check("未解放の教科は選べない",
-  [...d.querySelectorAll("#sub button")].find(b => b.dataset.k === "情報").disabled);
+/* **出題を選ぶは作り直しました**（S-04）。文字で説明せず、選択肢を増やさず、
+   スクロールさせない。範囲の選択は外し、**学年は教科ごとに知識マップから決まります** */
+check("教科は毎回3つだけ出す", d.querySelectorAll(".scard").length === 3,
+  String(d.querySelectorAll(".scard").length));
+check("引いた教科は在庫のあるものだけ", ev(`(() => S.select.picks.every(
+  k => inventory(DB, S, "auto", k).length > 0))()`) === true, ev("JSON.stringify(S.select.picks)"));
+// **引き直せない。** 欲しい教科が出るまで往復されると、くじの意味が消える
+const picked1 = ev("JSON.stringify(S.select.picks)");
+d.getElementById("back").click(); d.getElementById("toquiz").click();
+check("入り直しても引き直さない", ev("JSON.stringify(S.select.picks)") === picked1,
+  `${picked1} → ${ev("JSON.stringify(S.select.picks)")}`);
 
-// 在庫が1セッションぶんに満たない範囲での挙動を見る。以前はここで同じ問題が繰り返し出ていた。
-// 問題を足すと薄い範囲は無くなるので、検査のあいだだけ在庫を削って作り、あとで戻す
-const THIN_BAND = "e", THIN_SUB = "国語", THIN_N = 4;
-const thin = ev(`(() => {
-  window.__allQs = DB.questions;
-  const pool = inventory(DB, S, "${THIN_BAND}", "${THIN_SUB}");
-  if (pool.length <= ${THIN_N}) return "null";
-  const drop = new Set(pool.slice(${THIN_N}).map(q => q.id));
-  DB.questions = DB.questions.filter(q => !drop.has(q.id));
-  render();
-  return JSON.stringify({ n: inventory(DB, S, "${THIN_BAND}", "${THIN_SUB}").length });
-})()`);
-check("薄い在庫を作れた（この検査の前提）", thin !== "null" && JSON.parse(thin).n === THIN_N, thin);
-const thinBand = THIN_BAND, thinSub = THIN_SUB, thinN = THIN_N;
-// 学年帯を選び直すと教科は「おまかせ」に戻るので、帯を先に押す
-[...d.querySelectorAll("#band button")].find(b => b.dataset.k === thinBand).click();
-[...d.querySelectorAll("#sub button")].find(b => b.dataset.k === thinSub).click();
-check("在庫不足の警告", txt().includes(`この範囲は在庫が ${thinN}問なので`),
-  `${thinSub} ${thinN}問 / ${txt().slice(0, 160)}`);
-check("開始ボタンは形式の数で言う",
-  d.getElementById("start").textContent.includes("3つの形式で解く"),
-  d.getElementById("start").textContent);
+// **説明を並べない。** 段の上がり方も束の組み方も、遊んでいれば分かる
+check("段の説明を並べない", !/4分の3以上|束の長さ|くじで選びます/.test(txt()), txt().slice(0, 120));
+check("範囲の選択は置かない", !d.getElementById("band") && !d.getElementById("sub"));
+check("在庫の数字を並べない", !/出題できる問題|出せる形式/.test(txt()), txt().slice(0, 120));
 
+// 学年は教科ごと。知識マップでまだ埋まっていない一番下の学年
+check("札に学年が出る", [...d.querySelectorAll(".sgrade")].every(e => /小|中|世界/.test(e.textContent)),
+  [...d.querySelectorAll(".sgrade")].map(e => e.textContent).join("/"));
+check("小1の国語は「こくご」", ev(`subjectLabel(DB.subjects, "国語", "e1")`) === "こくご");
+check("小2からは「国語」", ev(`subjectLabel(DB.subjects, "国語", "e2")`) === "国語");
+check("小1の算数は「さんすう」", ev(`subjectLabel(DB.subjects, "算数・数学", "e1")`) === "さんすう");
+check("中学からは「数学」", ev(`subjectLabel(DB.subjects, "算数・数学", "j1")`) === "数学",
+  ev(`subjectLabel(DB.subjects, "算数・数学", "j1")`));
+check("小学校のあいだは「算数」", ev(`subjectLabel(DB.subjects, "算数・数学", "e5")`) === "算数");
+
+// 選ぶまで出発できない
+check("選ぶまで出発できない", d.getElementById("start").disabled);
+d.querySelectorAll(".scard")[0].click();
+check("選ぶと出発できる", !d.getElementById("start").disabled);
+check("選んだ札は塗りつぶす", d.querySelectorAll(".scard.on").length === 1);
+
+/* **形式の札は、教科を選んでから出る。** それぞれにエネミーが1体つく */
+check("形式の札が3つ出る", d.querySelectorAll(".mcard").length === 3,
+  String(d.querySelectorAll(".mcard").length));
+check("形式ごとにエネミーがつく", d.querySelectorAll(".mfoe img").length === 3);
+check("エネミーは教科の並びから引く", ev(`(() => {
+  const k = S.select.subject, r = DB.subjects.subjects[k].enemy;
+  return S.select.run.plan.every(seg => {
+    const id = Number(enemyOf(DB.subjects, k, seg.mode, S.select.seed));
+    return id >= r[0] && id <= r[1];
+  });
+})()`) === true);
+// **描き直しても敵が化けない。** 化けると倒した手ごたえが消える
+check("描き直しても同じ敵", (() => {
+  const before = [...d.querySelectorAll(".mfoe img")].map(i => i.getAttribute("src")).join();
+  ev("render()");
+  return before === [...d.querySelectorAll(".mfoe img")].map(i => i.getAttribute("src")).join();
+})());
+// **予告した形式のまま出発する。** ここで引き直すと、予告と中身が食い違う
+const previewed = ev("JSON.stringify(S.select.run.plan.map(s => s.mode))");
 d.getElementById("start").click();
-const ids = ev("JSON.stringify(S.run.ids)");
-const arr = JSON.parse(ids);
-check("在庫ぶんだけ出す（旧: 同じ問題が繰り返し出ていた）", arr.length === thinN,
-  `${arr.length}問 / 在庫 ${thinN}問`);
-check("同じ問題が出ない", new Set(arr).size === arr.length, ids);
-
-// 削った在庫を戻す
-ev('DB.questions = window.__allQs; render();');
+check("予告した形式のまま出発する",
+  ev("JSON.stringify(S.run.plan.map(s => s.mode))") === previewed,
+  `${previewed} → ${ev("JSON.stringify(S.run.plan.map(s => s.mode))")}`);
+check("出発すると引き直す", ev("S.select.picks") === null);
 
 // おまかせで10問
-ev('S.view="select";S.select.band="auto";S.select.subject="auto";render()');
-d.getElementById("start").click();
+ev('S.select.band="auto";S.select.subject="auto";startRun()');
 const arr2 = JSON.parse(ev("JSON.stringify(S.run.ids)"));
 /* **1セッションの長さは、束の長さの合計。**（`engine.blockSize`）
    はらうだけのスワイプは8問、なぞる文字パネルは3問。同じ問題数にすると、
@@ -280,7 +297,7 @@ check("最後は越境問題", ev(`DB.byId["${lastId}"].chapter`) >= 2 ||
 /* 20セッション連続で重複が出ないか */
 let dup = 0;
 for (let i = 0; i < 20; i++) {
-  ev('S.view="select";render()'); d.getElementById("start").click();
+  ev('startRun()');
   const a = JSON.parse(ev("JSON.stringify(S.run.ids)"));
   if (new Set(a).size !== a.length) dup++;
 }
@@ -746,16 +763,22 @@ check("スワイプだけの在庫も引ける",
   ev("inventory(DB, S, 'auto', 'auto', 'swipe').every(q => q.mode === 'swipe')") === true &&
   ev("inventory(DB, S, 'auto', 'auto', 'normal').every(q => q.mode !== 'swipe')") === true);
 
-ev('S.view="select";S.select.band="auto";S.select.subject="auto";render()');
-check("出題を選ぶ画面にスワイプの入口がある", !!d.getElementById("startswipe"),
-  txt().slice(-160));
-check("入口に、解説をまとめて出すと書いてある", txt().includes("まとめて出ます"));
+/* **スワイプだけの入口は、画面から外しました。**（S-04 の作り直し・「選択肢を
+   むやみに増やさない」）。形式は毎回くじで3つ選ばれるので、スワイプもその中に
+   来ます。**引ける仕組みは engine 側に残してあります** —— 束の組み方を
+   変えずに、あとで別の入口から呼べるようにするためです */
+ev('S.select.band="auto";S.select.subject="auto";render()');
+check("スワイプ専用の入口は画面に置かない", !d.getElementById("startswipe"));
+check("それでもスワイプだけの束は組める", ev(`(() => {
+  const built = planRun(DB, S, { kind: "swipe" });
+  return built.plan.length === 1 && built.plan[0].mode === "swipe" && built.ids.length > 0;
+})()`) === true);
 
 const swKeep = `window.__keep = JSON.stringify({ score: S.score, gum: S.gum, cards: S.cards,
   points: S.points, crystals: S.crystals, seen: S.seen, cells: S.cells, days: S.days,
   totalRight: S.totalRight, crossRight: S.crossRight, countries: S.countries, runs: S.runs });`;
 ev(`(() => { ${swKeep} })()`);
-d.getElementById("startswipe").click();
+ev('startRun({ swipe: true })');
 
 // 画面は「クイズ」ひとつ。スワイプの問題のときだけカードの画面になる
 check("押すとスワイプのカードが出る",
@@ -1418,9 +1441,10 @@ check("持ち帰るカードはその英雄の関連カードだけ", ev(`(() =>
 ev('S.owned["4007"]=1;S.owned["5016"]=1;S.view="select";S.select.subject="auto";render()');
 const gatedCount = ev("DB.questions.filter(q => q.needs).length");
 const normalCount = ev("DB.questions.length");
+/* 在庫の数は画面に出さなくなったので（S-04 の作り直し）、数そのものを見る */
 check("章を全部開いても、needs の問題はまだ出てこない",
-  new RegExp(`おまかせ\\s*${normalCount - gatedCount}`).test(txt()),
-  `通常 ${normalCount}問 / 閉じ ${gatedCount}問 / ${txt().slice(0, 120)}`);
+  ev("inventory(DB, S, 'auto', 'auto').length") === normalCount - gatedCount,
+  `通常 ${normalCount}問 / 閉じ ${gatedCount}問 / 在庫 ${ev("inventory(DB, S, 'auto', 'auto').length")}`);
 
 /* ---- 正解の位置と、別表記・注釈 ---- */
 // 正解がいつも同じ位置にあると、読まずに当てられる
@@ -1503,9 +1527,9 @@ check("カードを手に入れると、その問題が開く", (() => {
   const after = ev("inventory(DB, S).length");
   return after === before + gatedCount;
 })(), `閉じ ${gatedCount}問`);
-check("開いたぶんが在庫の数字にも出る",
-  new RegExp(`おまかせ\\s*${normalCount}`).test(txt()),
-  txt().slice(0, 120));
+check("開いたぶんが在庫に加わる",
+  ev("inventory(DB, S, 'auto', 'auto').length") === normalCount,
+  `${ev("inventory(DB, S, 'auto', 'auto').length")} / 全 ${normalCount}`);
 ev(`S.cards=${keptForNeeds};render()`);
 check("カードを失えばまた閉じる", ev("inventory(DB, S).length")
   === normalCount - gatedCount);
@@ -2043,12 +2067,17 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
  */
 {
   const { SCREENS } = await import("./screens.mjs");
-  check("画面IDは24面ぶんある", SCREENS.length === 24, String(SCREENS.length));
+  check("画面IDは25面ぶんある", SCREENS.length === 25, String(SCREENS.length));
   check("画面IDは重なっていない", new Set(SCREENS.map(s => s.id)).size === SCREENS.length);
   const at = (view, patch = "") => ev(`(() => { S.view = ${JSON.stringify(view)}; ${patch} return screenId(); })()`);
   check("ホームは S-02", at("home") === "S-02", at("home"));
   check("知識マップは S-03", at("map") === "S-03", at("map"));
   check("ショップは S-21", at("shop") === "S-21", at("shop"));
+  // 教科を選ぶ前と後は、見た目が別物なので別の番号にしてある
+  check("教科を選ぶ前は S-04",
+    at("select", 'S.select.picks = ["国語"]; S.select.subject = "auto";') === "S-04");
+  check("教科を選んだ後は S-25",
+    at("select", 'S.select.picks = ["国語"]; S.select.subject = "国語";') === "S-25");
   check("ヒーローはタブで分かれる",
     at("heroes", 'S.heroesTab = "own";') === "S-15" && at("heroes", 'S.heroesTab = "codex";') === "S-16");
   // **出題は形式ごとに別の番号。** 見た目が別物なので、まとめると直す先が決まらない
