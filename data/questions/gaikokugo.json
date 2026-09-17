@@ -2956,5 +2956,65 @@
     "tip": "主語に合わせて形を変えることを「一致」という。英語の文の骨格は、この一致で支えられている。",
     "card": "be動詞の使い分け",
     "level": 1
+  },
+  {
+    "id": "gaikokugo-101",
+    "chapter": 0,
+    "grade": "j2",
+    "gradeLabel": "中学2年",
+    "subject": "外国語",
+    "unit": "過去形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "stem": "I ___ to the park yesterday.",
+    "prompt": "「わたしは昨日、公園へ行きました」の ___ に入るのは?",
+    "choices": [
+      "go",
+      "goes",
+      "went",
+      "going"
+    ],
+    "answer": 2,
+    "hints": [
+      "yesterday があるので、過去の話だ。",
+      "go の過去形は、形が大きく変わる。",
+      "-ed を付ける形ではない。"
+    ],
+    "lesson": "I went to the park yesterday. go の過去形は **went** で、-ed を付けない不規則動詞だ。英語の動詞は規則動詞（play → played）と不規則動詞（go → went、see → saw）に分かれ、よく使う動詞ほど不規則な傾向がある。**使う回数が多い語ほど、古い形が残りやすい**ためだ。",
+    "tip": "よく使う言葉ほど変化しにくいのは、どの言語でも見られる。口になじんだ形は、整理の波に流されない。",
+    "card": "不規則動詞の過去形",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-102",
+    "chapter": 0,
+    "grade": "j3",
+    "gradeLabel": "中学3年",
+    "subject": "外国語",
+    "unit": "比較",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "stem": "This book is ___ than that one.",
+    "prompt": "「この本はあの本より面白い」の ___ に入るのは?",
+    "choices": [
+      "interesting",
+      "more interesting",
+      "most interesting",
+      "interestinger"
+    ],
+    "answer": 1,
+    "hints": [
+      "2つを比べている文だ。",
+      "than があるので比較級を使う。",
+      "長い形容詞は -er を付けず、前に語を置く。"
+    ],
+    "lesson": "This book is **more interesting** than that one. 比較級は、短い形容詞には -er（taller）、**長い形容詞には more** を付ける（more beautiful）。最上級も同じで、-est か most になる。**3音節以上はほぼ more/most**と覚えておくと、迷う場面が減る。",
+    "tip": "短い語ほど語尾を変え、長い語ほど別の語を足す。言いやすさが、文法の形を決めている。",
+    "card": "比較級（more）",
+    "level": 2
   }
 ]
