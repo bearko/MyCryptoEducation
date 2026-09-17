@@ -78,14 +78,15 @@ export const SCREENS = [
   { id: "S-09", name: "出題・レンジ",    note: "年を幅で答える", go: p => quizOf(p, "range") },
   { id: "S-10", name: "出題・スワイプ",  note: "カードを正しいと思うほうへはらう", go: p => quizOf(p, "swipe") },
 
-  { id: "S-11", name: "解説", note: "正解でも不正解でも出る。知識カードとGUMもここ",
+  /* **バトル層の無い解説はここだけです。** ふつうのセッションには必ず敵が
+     いるので、答えたあとは S-26 になります（初回起動だけバトルを立てない） */
+  { id: "S-11", name: "解説（バトルなし）", note: "初回起動の解答。ふつうのセッションは S-26",
     go: async page => {
       await setup(page);
-      await page.evaluate(() => { startRun({ ids: ["sansu-105"] }); });
+      await page.evaluate(() => { startRun({ ids: ["sansu-105"], intro: true }); });
       await page.waitForTimeout(150);
       await page.evaluate(() => { const q = DB.byId["sansu-105"];
-        for (let i = 0; i < q.choices.length; i++)
-          if (i !== q.answer) document.querySelector(`.xcut[data-c="${i}"]`)?.click(); });
+        document.querySelector(`.choices .choice[data-i="${q.answer}"]`)?.click(); });
       await page.waitForTimeout(250);
     } },
 
@@ -180,5 +181,21 @@ export const SCREENS = [
       await SCREENS.find(s => s.id === "S-04").go(page);
       await page.evaluate(() => { document.querySelectorAll(".scard")[2].click(); });
       await page.waitForTimeout(300);
+    } },
+
+  { id: "S-26", name: "出題・答えたあと（バトル）", note: "正解すると敵が削れる。倒れた敵は伏せる",
+    go: async page => {
+      await setup(page);
+      await page.evaluate(() => {
+        const ids = DB.questions.filter(q => q.subject === "国語" && q.mode === "elimination")
+          .slice(0, 4).map(q => q.id);
+        S.select.subject = "国語"; S.select.seed = 3;
+        startRun({ built: { ids, plan: [{ mode: "elimination", n: 4, level: 1 }] } });
+      });
+      await page.waitForTimeout(250);
+      await page.evaluate(() => { const q = DB.byId[S.run.ids[0]];
+        for (let i = 0; i < q.choices.length; i++)
+          if (i !== q.answer) document.querySelector(`.xcut[data-c="${i}"]`)?.click(); });
+      await page.waitForTimeout(400);
     } },
 ];

@@ -16,7 +16,7 @@ export async function loadDatabase(base = "./data") {
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
   const [questionSets, figures, heroes, extensions,
-         advice, titles, crystals, images, subjects] = await Promise.all([
+         advice, titles, crystals, images, subjects, battle] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
@@ -26,9 +26,10 @@ export async function loadDatabase(base = "./data") {
     json(`${base}/crystals.json`),
     json(`${base}/images.json`),
     json(`${base}/subjects.json`),
+    json(`${base}/battle-stats.json`),
   ]);
   return index({ questions: questionSets.flat(), figures, heroes, curated: extensions,
-                 advice, titles, crystals, images, subjects });
+                 advice, titles, crystals, images, subjects, battle });
 }
 
 /**
@@ -134,4 +135,6 @@ export const assetPath = {
   enemy: id => globalThis.__ASSETS__?.["y" + id] ?? `./public/enemies/${id}.webp`,
   /* マインちゃん。原本は 96x128 のドット絵なので pixelated で出す */
   navi: name => globalThis.__ASSETS__?.["n" + name] ?? `./public/characters/${name}.webp`,
+  /* 攻撃が当たったときの絵。900x900 に 100px のコマが9×9 並んだシート */
+  fx: name => globalThis.__ASSETS__?.["f" + name] ?? `./public/effects/${name}.webp`,
 };

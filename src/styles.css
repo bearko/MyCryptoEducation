@@ -943,3 +943,89 @@
     .navi{width:100px}.sel-navi{min-height:112px}
     .mfoe,.mprize{height:48px}.mname b{font-size:17px}
   }
+
+  /* ---- 出題画面の4層（バトル） ---- */
+  /* 上から バトル演出 / 設問 / 補足 / 解答。**主役は設問と解答**なので、
+     バトルは上に小さく畳む。情報は HP と割合だけ */
+
+  .bt-bg{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center}
+  .bt-bg::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.86)}
+
+  .bt-stage{position:relative;display:flex;align-items:flex-end;justify-content:space-between;
+    gap:10px;padding:10px 14px 6px;min-height:92px}
+  .bt-side{position:relative;flex:0 0 40%;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .bt-ch{width:56px;height:56px;image-rendering:pixelated;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));transition:transform .18s}
+  .bt-side.foe .bt-ch{transform:scaleX(-1)}
+  /* 当たったら、その側が一度だけ跳ねる */
+  .bt-side.hit .bt-ch{animation:btHit .34s ease-out}
+  @keyframes btHit{0%{transform:translateX(0)}30%{transform:translateX(-7px)}
+    60%{transform:translateX(5px)}100%{transform:translateX(0)}}
+  .bt-side.foe.hit .bt-ch{animation:btHitF .34s ease-out}
+  @keyframes btHitF{0%{transform:scaleX(-1) translateX(0)}30%{transform:scaleX(-1) translateX(-7px)}
+    60%{transform:scaleX(-1) translateX(5px)}100%{transform:scaleX(-1) translateX(0)}}
+  /* 倒れているあいだは、灰色にして横たえる。**問題は続きます** */
+  .bt-side.down .bt-ch{filter:grayscale(1) opacity(.5);transform:rotate(-78deg)}
+
+  .bt-hp{width:100%;height:7px;background:#D8DCE4;border-radius:99px;overflow:hidden}
+  .bt-hp i{display:block;height:100%;background:var(--moss);transition:width .35s}
+  .bt-hp.foe i{background:var(--pen)}
+  .bt-num{display:flex;justify-content:space-between;width:100%;
+    font:600 10.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-soft)}
+  .bt-kills{align-self:center;font:700 13px/1 var(--mincho);color:var(--pen)}
+
+  .bt-count{display:flex;justify-content:space-between;padding:0 16px 2px;
+    font-size:13px;color:var(--ink-soft)}
+  .bt-count .bt-q{font-family:var(--mincho);font-size:16px;color:var(--ink)}
+
+  /* 設問エリアは、上下に余裕を取って読ませる */
+  .pad.bt-pad{padding-top:14px}
+  .pad.bt-pad .qtext{margin-bottom:14px}
+
+  /* 補足表示エリア。**ヒントは控えめに。** 押すとこの下にヒントが出る */
+  .bt-sub{display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+    margin:16px 0 10px;padding-top:11px;border-top:1px dashed var(--line)}
+  .bt-sub .unit{flex:1;min-width:0}
+  .hintbtn.sm{padding:5px 12px;font-size:12.5px}
+  .gear{flex:none;width:32px;height:32px;padding:0;font-size:15px;line-height:1;cursor:pointer;
+    background:none;border:1px solid var(--line);border-radius:4px;color:var(--ink-soft)}
+  .gear:hover{border-color:var(--ink-faint)}
+
+  /* 設定のポップアップ */
+  .modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    background:rgba(23,36,63,.35);padding:22px}
+  .msheet{background:var(--card);border:1px solid var(--line);border-radius:6px;
+    padding:20px 18px;width:100%;max-width:330px;display:flex;flex-direction:column;gap:16px}
+
+  /* 当たった瞬間の絵。900x900 に 100px のコマが 9×9 並んだシートを、
+     background-position で送って見せる。
+     **`url()` は要素の style に直書きする** —— CSS変数に入れると、Chrome が
+     styles.css からの相対パスとして解いて 404 する（このファイルの決まり） */
+  .bt-fx{position:absolute;top:-6px;left:50%;width:72px;height:72px;margin-left:-36px;
+    pointer-events:none;background-repeat:no-repeat;background-size:900% 900%;
+    animation:btFx .45s steps(8) 1 forwards}
+  @keyframes btFx{
+    from{background-position:0% 12.5%;opacity:1}
+    to{background-position:100% 12.5%;opacity:1}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .bt-fx{animation:none;background-position:50% 12.5%;opacity:.8}
+    .bt-side.hit .bt-ch,.bt-side.foe.hit .bt-ch{animation:none}
+  }
+
+  /* wave の終わりに1度だけ出る知らせ。**倒しきったか、逃げられたか** */
+  .bt-flash{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-family:var(--mincho);font-size:19px;font-weight:600;letter-spacing:.08em;
+    padding:6px 16px;border-radius:4px;background:rgba(255,255,255,.94);
+    border:1px solid var(--line);animation:btFlash 1.4s ease-out forwards;pointer-events:none}
+  .bt-flash.down{color:var(--moss);border-color:var(--moss)}
+  .bt-flash.fled{color:var(--ink-soft)}
+  @keyframes btFlash{0%{opacity:0;transform:translate(-50%,-38%)}
+    18%{opacity:1;transform:translate(-50%,-50%)}
+    78%{opacity:1}100%{opacity:0}}
+
+  .btwin{margin-top:8px;color:var(--moss)}
+
+  /* 束の帯は、バトルの下に細く敷く。**セッション全体のどこにいるか**を出す */
+  .bt-plan{padding:0 14px 8px}
+  .bt-plan .plan{margin:0}

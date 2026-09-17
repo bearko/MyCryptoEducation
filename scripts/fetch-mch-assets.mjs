@@ -27,6 +27,9 @@ const BACKGROUNDS = ["1006", "1038", "1046", "1030",
                      "1001", "1002", "1003", "1004", "1010"];
 const ICONS = ["mai_sd", "gum", "mch_icon"];
 
+/* 攻撃が当たったときに重ねる絵。1枚を透過で光らせるだけなので、これだけで足ります */
+const EFFECTS = ["01_single_damage"];
+
 /* 「出題を選ぶ」で教科の札に乗せる英雄。**ロスターとは別**で、絵だけ借ります */
 const SUBJECT_HEROES = ["4056", "10006", "5027", "10004", "3030", "4041"];
 
@@ -99,8 +102,44 @@ await mkdir(join(ROOT, "public/characters"), { recursive: true });
 for (const name of NAVI)
   await count(`${RAW}/Image/Characters/${name}.png`, `public/characters/${name}.webp`, SIZE.navi);
 
+await mkdir(join(ROOT, "public/effects"), { recursive: true });
+for (const name of EFFECTS)
+  await count(`${RAW}/Image/Effects/Battle/${name}.png`, `public/effects/${name}.webp`, SIZE.navi);
+
 await mkdir(join(ROOT, "public/icons"), { recursive: true });
 for (const name of ICONS)
   await count(`${RAW}/Image/Icons/${name}.png`, `public/icons/${name}.webp`, SIZE.icon);
+
+/* ---- バトルの数値 ---- */
+/* **使う英雄と敵のぶんだけ抜き出して data/battle-stats.json に置きます。**
+   MCH の一覧は英雄404体・敵934体あるので、丸ごと持つと単一ファイル版が太ります。
+   元は向こうにあるので、ここは取り込みのたびに作り直して構いません */
+const pick = async (url, key) => {
+  const res = await fetch(url);
+  if (!res.ok) { console.warn(`  スキップ ${url} (${res.status})`); return null; }
+  const rows = await res.json();
+  return Array.isArray(rows) ? rows : rows[key] || [];
+};
+const heroRows = await pick(`${RAW}/Data/Heroes/heroes.json`, "heroes");
+const foeRows  = await pick(`${RAW}/Data/Enemies/enemies.json`, "enemies");
+if (heroRows && foeRows) {
+  const want = new Set(SUBJECT_HEROES.map(Number));
+  const stats = { _note: "バトルに使う数値だけを MCH から抜いたもの。作り直しは node scripts/fetch-mch-assets.mjs。手で書かない。", heroes: {}, enemies: {} };
+  for (const h of heroRows) {
+    if (!want.has(h.id)) continue;
+    const st = h.max_level_stats || h.initial_stats || {};
+    stats.heroes[String(h.id)] = { name: h.name?.ja || String(h.id),
+      hp: st.hp | 0, phy: st.phy | 0, int: st.int | 0, agi: st.agi | 0 };
+  }
+  for (const e of foeRows) {
+    const id = Number(e.id);
+    if (!(id >= 310 && id <= 369)) continue;
+    const b = e.base_param || {};
+    stats.enemies[String(id)] = { name: e.name?.ja || String(id),
+      hp: b.hp | 0, phy: b.phy | 0, int: b.int | 0, agi: b.agi | 0 };
+  }
+  await writeFile(join(ROOT, "data/battle-stats.json"), JSON.stringify(stats, null, 2) + "\n");
+  console.log(`  ✓ data/battle-stats.json  英雄${Object.keys(stats.heroes).length}体 / 敵${Object.keys(stats.enemies).length}体`);
+}
 
 console.log(`${n}点を取得しました`);
