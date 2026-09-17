@@ -317,6 +317,48 @@ ok.push(["束の幅は問題数なり", await p.evaluate(`(() => {
 ok.push(["束の名前がつぶれていない", segs.every(s => s.lw >= 20 && s.label.length >= 2),
   JSON.stringify(segs.map(s => `${s.label}:${Math.round(s.lw)}`))]);
 
+/* ---- ヒントのポップアップ ------------------------------------------------
+   **開いても元の画面が動かないこと。** 流れの中に置いていたころは、開いた
+   瞬間に解答エリアが下へ押し出されて、答えるのにスクロールが要りました。
+   jsdom には寸法が無いので、ここでしか確かめられません                     */
+await p.evaluate(`(() => {
+  const list = DB.questions.filter(q => q.mode === "elimination" && (q.hints || []).length >= 2);
+  S.introDone = true; S.runs = 3;
+  S.run = { ids: list.slice(0, 2).map(q => q.id), i: 0, picked: null, hintsUsed: 0,
+            tipOpen: false, applied: null, found: [], cut: null, right: 0, wrong: 0,
+            appliedRight: 0, shortage: 0, gum: 0, results: {}, noReward: true, done: false,
+            hard: {}, verdict: null, hintOpen: false,
+            plan: [{ mode: "elimination", n: 2, level: 1 }] };
+  S.view = "quiz"; render(); window.scrollTo(0, 0);
+})()`);
+const hintBox = async () => p.evaluate(`(() => {
+  const c = document.querySelector(".choices");
+  return { top: Math.round(c.getBoundingClientRect().top),
+           page: document.documentElement.scrollHeight,
+           open: !!document.querySelector("#hintmodal .modal"),
+           used: S.run.hintsUsed };
+})()`);
+const hBefore = await hintBox();
+await p.click("#hint"); await p.waitForTimeout(250);
+const hOpen = await hintBox();
+ok.push(["ヒントを開いても解答エリアが動かない",
+  hOpen.open && hOpen.top === hBefore.top && hOpen.page === hBefore.page,
+  JSON.stringify({ hBefore, hOpen })]);
+ok.push(["ヒントを開いてもスクロールが要らない",
+  hOpen.page <= 844 + 1, `${hOpen.page}px`]);
+await p.click("#hintmore"); await p.waitForTimeout(200);
+const hMore = await hintBox();
+await p.click("#hintclose"); await p.waitForTimeout(200);
+const hShut = await hintBox();
+await p.click("#hint"); await p.waitForTimeout(200);
+const hAgain = await hintBox();
+ok.push(["もう一段でだけ本数が増える（開き直しでは増えない）",
+  hBefore.used === 0 && hOpen.used === 1 && hMore.used === 2 && hAgain.used === 2,
+  JSON.stringify([hBefore.used, hOpen.used, hMore.used, hAgain.used])]);
+ok.push(["とじると元の位置に戻る",
+  !hShut.open && hShut.top === hBefore.top && hShut.page === hBefore.page,
+  JSON.stringify(hShut)]);
+
 ok.forEach(([n, v, x]) => console.log((v ? "✓ " : "✗ ") + n + (v ? "" : "  ← " + x)));
 await b.close();
 process.exit(ok.every(o => o[1]) ? 0 : 1);
