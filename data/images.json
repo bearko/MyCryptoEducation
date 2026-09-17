@@ -572,7 +572,15 @@
       "alt": "机が1つ置いてある",
       "titleFree": true,
       "wikipedia": "ja:机",
-      "category": "Desks"
+      "category": "Desks",
+      "file": "obj-tsukue",
+      "title": "Armoire deskside",
+      "author": "wikipedia:en:user:AlainV",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AArmoire%20deskside.png",
+      "width": 408,
+      "height": 392
     },
     "obj-isu": {
       "wikipedia": "en:Chair",
@@ -625,7 +633,15 @@
       "alt": "自転車が1台、横から写っている",
       "titleFree": true,
       "wikipedia": "ja:自転車",
-      "category": "Bicycles"
+      "category": "Bicycles",
+      "file": "obj-jitensha",
+      "title": "9734Baliuag, Bulacan Province Proper 19",
+      "author": "Judgefloro",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3A9734Baliuag%2C%20Bulacan%20Province%20Proper%2019.jpg",
+      "width": 640,
+      "height": 480
     },
     "obj-mikan": {
       "entity": "ウンシュウミカン",
@@ -644,7 +660,15 @@
       "alt": "いちごの実",
       "titleFree": true,
       "wikipedia": "ja:イチゴ",
-      "category": "Strawberries"
+      "category": "Strawberries",
+      "file": "obj-ichigo",
+      "title": "Blendi speldje",
+      "author": "Alf van Beem",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABlendi%20speldje.JPG",
+      "width": 640,
+      "height": 1425
     },
     "obj-ninjin": {
       "entity": "ニンジン",
@@ -677,13 +701,29 @@
       "alt": "ランドセルが1つ",
       "titleFree": true,
       "wikipedia": "ja:ランドセル",
-      "category": "Randoseru"
+      "category": "Randoseru",
+      "file": "obj-randoseru",
+      "title": "RIKEN VITAMIN",
+      "author": "理化学研究所",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ARIKEN%20VITAMIN.png",
+      "width": 640,
+      "height": 862
     },
     "obj-supuun": {
       "alt": "スプーンが1本",
       "titleFree": true,
       "wikipedia": "ja:スプーン",
-      "category": "Spoons"
+      "category": "Spoons",
+      "file": "obj-supuun",
+      "title": "1000 Cucharita para inalar polvos",
+      "author": "Museo Soumaya",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3A1000%20Cucharita%20para%20inalar%20polvos.jpg",
+      "width": 640,
+      "height": 343
     },
     "obj-teeburu": {
       "alt": "テーブルが1台",
@@ -708,7 +748,15 @@
       "alt": "テレビが1台",
       "titleFree": true,
       "wikipedia": "ja:テレビ受像機",
-      "category": "Television sets"
+      "category": "Television sets",
+      "file": "obj-terebi",
+      "title": "3 inch TV set",
+      "author": "Unknown author",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3A3%20inch%20TV%20set.jpg",
+      "width": 364,
+      "height": 261
     },
     "obj-piano": {
       "entity": "ピアノ",
@@ -775,7 +823,15 @@
       "alt": "川が流れている",
       "_use": "理科の解説に置く（流れる水）",
       "wikipedia": "ja:河川",
-      "category": "Rivers of Japan"
+      "category": "Rivers of Japan",
+      "file": "obj-kawa",
+      "title": "Memories of travel 4",
+      "author": "SiciliasVV",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3AMemories%20of%20travel%204.JPG",
+      "width": 640,
+      "height": 480
     },
     "obj-kumo": {
       "wikipedia": "en:Cloud",
@@ -813,7 +869,15 @@
       "alt": "ウサギが1羽すわっている",
       "_use": "理科・国語の解説に置く（この生きもの）",
       "wikipedia": "ja:アナウサギ",
-      "category": "Oryctolagus cuniculus"
+      "category": "Oryctolagus cuniculus",
+      "file": "obj-usagi",
+      "title": "Conejo astronomo1",
+      "author": "Masteruk",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3AConejo%20astronomo1.jpg",
+      "width": 640,
+      "height": 480
     },
     "obj-hitsuji": {
       "entity": "ヒツジ",
@@ -882,17 +946,41 @@
     "rika-monshirocho": {
       "alt": "モンシロチョウが葉にとまっている",
       "wikipedia": "ja:モンシロチョウ",
-      "category": "Pieris rapae"
+      "category": "Pieris rapae",
+      "file": "rika-monshirocho",
+      "title": "20170809Pieris rapae",
+      "author": "AnRo0002",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3A20170809Pieris%20rapae.jpg",
+      "width": 640,
+      "height": 480
     },
     "rika-batta": {
       "alt": "バッタを横から写した写真。後ろあしが長い",
       "wikipedia": "ja:トノサマバッタ",
-      "category": "Locusta migratoria"
+      "category": "Locusta migratoria",
+      "file": "rika-batta",
+      "title": "BioAcoustica 576 15 Locusta migratoria migratorioides 253b",
+      "author": "作者不明",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABioAcoustica%20576%2015%20Locusta%20migratoria%20migratorioides%20253b.flac",
+      "width": 120,
+      "height": 120
     },
     "rika-tentou": {
       "alt": "テントウムシの背中。黒い星が見える",
       "wikipedia": "ja:ナナホシテントウ",
-      "category": "Coccinella septempunctata"
+      "category": "Coccinella septempunctata",
+      "file": "rika-tentou",
+      "title": "\" Ladybird,ladybird \" (6145298824)",
+      "author": "Phil Sangwell from United Kingdom",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3A%22%20Ladybird%2Cladybird%20%22%20(6145298824).jpg",
+      "width": 640,
+      "height": 561
     },
     "rika-kabutomushi": {
       "alt": "カブトムシを横から写した写真。角が前に出ている",
@@ -967,7 +1055,15 @@
     "rika-mamedenkyuu": {
       "alt": "小さな電球",
       "wikipedia": "ja:白熱電球",
-      "category": "Incandescent light bulbs"
+      "category": "Incandescent light bulbs",
+      "file": "rika-mamedenkyuu",
+      "title": "Edison & Swan price list 1893",
+      "author": "Edison and Swan Electric Light Company",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AEdison%20%26%20Swan%20price%20list%201893.jpg",
+      "width": 640,
+      "height": 850
     },
     "rika-chisou": {
       "alt": "がけに横じまが重なって見える地層",
@@ -1078,7 +1174,15 @@
     "shakai-kinkakuji": {
       "alt": "金色の建物が池に映っている",
       "wikipedia": "ja:金閣寺",
-      "category": "Kinkaku-ji"
+      "category": "Kinkaku-ji",
+      "file": "shakai-kinkakuji",
+      "title": "Japan 2010 IMG 2014 (5373010453)",
+      "author": "Marko Kudjerski from Toronto, Canada",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3AJapan%202010%20IMG%202014%20(5373010453).jpg",
+      "width": 640,
+      "height": 427
     },
     "shakai-nara": {
       "entity": "東大寺",
@@ -1119,12 +1223,28 @@
     "shakai-jomon": {
       "alt": "縄の文様が付いた土器",
       "wikipedia": "ja:縄文土器",
-      "category": "Jōmon pottery"
+      "category": "Jōmon pottery",
+      "file": "shakai-jomon",
+      "title": "British Museum Jomon pot",
+      "author": "作者不明",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3ABritish%20Museum%20Jomon%20pot.jpg",
+      "width": 640,
+      "height": 405
     },
     "shakai-toudai": {
       "alt": "海のそばに立つ灯台",
       "wikipedia": "ja:灯台",
-      "category": "Lighthouses in Japan"
+      "category": "Lighthouses in Japan",
+      "file": "shakai-toudai",
+      "title": "A view out to sea from on shore, with trees and a tall",
+      "author": "作者不明",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3AA%20view%20out%20to%20sea%20from%20on%20shore%2C%20with%20trees%20and%20a%20tall%20Wellcome%20V0043827.jpg",
+      "width": 640,
+      "height": 565
     },
     "obj-kawa2": {
       "wikipedia": "ja:河川",
