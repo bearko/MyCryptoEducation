@@ -32,15 +32,34 @@ const call = async (base, params) => {
 
 /* ---- ライセンスの見分け ---- */
 
-/** コモンズは "cc-by-4.0" の形で返してくる。表記ゆれを吸収する */
+/**
+ * ライセンス名を、`allow` と同じ言い方に寄せる。
+ *
+ * **コモンズの短縮名は1つに決まっていません。** 同じパブリックドメインでも
+ * `PD-old-70`・`PD-US-expired`・`PD-self`・`PD-USGov`・`PDM 1.0` と、根拠ごとに
+ * 別の名前が付きます。短縮名をそのまま返していたので、**中身はPDなのに
+ * `allow` に無いとして落としていました**（`npm run pick:commons` で候補が
+ * 全滅したのがこれです）。ここで言い方をそろえます。
+ *
+ * **CC BY-SA を先に見ます。** 後ろから見ると CC BY として拾ってしまい、
+ * 使ってはいけないものを通します（共有継承が改変物に波及するため）。
+ */
+const foldLicense = t => {
+  const v = String(t || "").trim();
+  if (!v) return "";
+  if (/^cc[-\s]?by[-\s]?sa/i.test(v)) return v;          // 共有継承。使わない
+  if (/^cc[-\s]?by[-\s]?(nc|nd)/i.test(v)) return v;      // 非営利・改変禁止。使わない
+  if (/^(pd|public\s*domain|pdm|cc\s*pdm)([-\s.]|$)/i.test(v)) return "Public domain";
+  if (/^cc0/i.test(v)) return "CC0";
+  const by = v.match(/^cc[-\s]?by[-\s]?([1-4])(?:\.(\d))?/i);
+  if (by) return `CC BY ${by[1]}.${by[2] ?? "0"}`;
+  return v;
+};
+
 export const normalizeLicense = m => {
-  const short = m?.LicenseShortName?.value || "";
-  const code = (m?.License?.value || "").toLowerCase();
+  const short = foldLicense(m?.LicenseShortName?.value);
   if (short) return short;
-  if (code.startsWith("cc-by-sa")) return "CC BY-SA " + code.split("-").pop();
-  if (code.startsWith("cc-by")) return "CC BY " + code.split("-").pop();
-  if (code === "cc0") return "CC0";
-  if (code.includes("pd")) return "Public domain";
+  const code = foldLicense((m?.License?.value || "").toLowerCase());
   return code || "不明";
 };
 

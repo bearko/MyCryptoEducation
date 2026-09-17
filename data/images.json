@@ -765,13 +765,13 @@
     "obj-kawa": {
       "entity": "川",
       "alt": "川が流れている",
-      "titleFree": true
+      "_use": "理科の解説に置く（流れる水）"
     },
     "obj-kumo": {
       "wikipedia": "en:Cloud",
       "category": "Cumulus clouds",
       "alt": "空に浮かぶ雲",
-      "titleFree": true
+      "_use": "理科の解説に置く（天気）"
     },
     "obj-yuki": {
       "entity": "雪",
@@ -802,12 +802,12 @@
     "obj-usagi": {
       "entity": "アナウサギ",
       "alt": "ウサギが1羽すわっている",
-      "titleFree": true
+      "_use": "理科・国語の解説に置く（この生きもの）"
     },
     "obj-kame": {
       "entity": "カメ",
       "alt": "カメが1匹",
-      "titleFree": true
+      "_use": "理科・国語の解説に置く（この生きもの）"
     },
     "obj-hitsuji": {
       "entity": "ヒツジ",
@@ -838,7 +838,7 @@
     "obj-uma": {
       "entity": "ウマ",
       "alt": "ウマが1頭立っている",
-      "titleFree": true
+      "_use": "国語の解説に置く（漢字の成り立ち）"
     },
     "obj-buta": {
       "entity": "ブタ",
@@ -856,7 +856,7 @@
     "obj-niwatori": {
       "entity": "ニワトリ",
       "alt": "ニワトリが1羽立っている",
-      "titleFree": true
+      "_use": "理科・国語の解説に置く（この生きもの）"
     },
     "obj-panda": {
       "entity": "ジャイアントパンダ",
@@ -1137,13 +1137,13 @@
       "wikipedia": "en:Rain",
       "category": "Rain",
       "alt": "雨が降っているようす",
-      "titleFree": true
+      "_use": "理科の解説に置く（天気）"
     },
     "obj-take": {
       "wikipedia": "en:Bamboo",
       "category": "Bamboo forests",
       "alt": "竹がまっすぐ並んで生えている",
-      "titleFree": true
+      "_use": "国語の解説に置く（漢字の成り立ち）"
     },
     "chi-tanada": {
       "wikipedia": "ja:棚田",
