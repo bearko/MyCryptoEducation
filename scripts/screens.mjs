@@ -49,8 +49,9 @@ const quizOf = async (page, want) => {
 };
 
 export const SCREENS = [
-  { id: "S-01", name: "初回起動（無説明）", note: "初めて開いた人が最初に見る画面。ホームもチュートリアルも出さない",
-    go: async page => { await page.evaluate(() => { Object.assign(S, { introDone: false }); startIntro(); }); } },
+  { id: "S-01", name: "初回起動（無説明）", note: "学年を選んだ直後。ホームもチュートリアルも出さない",
+    go: async page => { await page.evaluate(() => {
+      Object.assign(S, { introDone: false, startGrade: "e1" }); startIntro(); }); } },
 
   { id: "S-02", name: "ホーム", note: "3層。上がステータス、中が挑む相手、下がナビ",
     go: async page => { await setup(page); await page.evaluate(() => go("home")); await page.waitForTimeout(400); } },
@@ -191,6 +192,7 @@ export const SCREENS = [
           .slice(0, 4).map(q => q.id);
         S.select.subject = "国語"; S.select.seed = 3;
         startRun({ built: { ids, plan: [{ mode: "elimination", n: 4, level: 1 }] } });
+        document.getElementById("wvgo").click();   // 接敵の画面から問題へ
       });
       await page.waitForTimeout(250);
       await page.evaluate(() => { const q = DB.byId[S.run.ids[0]];
@@ -215,6 +217,46 @@ export const SCREENS = [
     go: async page => {
       await quizOf(page, "elimination");
       await page.evaluate(() => { document.getElementById("gear")?.click(); });
+      await page.waitForTimeout(200);
+    } },
+
+  /* 束の切れ目。**敵に出会った → 解いて倒す → 倒せた／逃げられた** の筋を
+     受け持つ2枚。出題の画面はバトルを小さく畳んでいるので、ここが見せ場 */
+  { id: "S-29", name: "Wave開始（接敵）", note: "英雄が画面の外から入り、敵の体力が満ちる",
+    go: async page => {
+      await setup(page);
+      await page.evaluate(() => {
+        const ids = DB.questions.filter(q => q.subject === "国語" && q.mode === "elimination")
+          .slice(0, 3).map(q => q.id);
+        S.select.subject = "国語"; S.select.seed = 3;
+        startRun({ built: { ids, plan: [{ mode: "elimination", n: 3, level: 1 }] } });
+      });
+      await page.waitForTimeout(900);          // 入ってくる演出とゲージが満ちるのを待つ
+    } },
+
+  { id: "S-30", name: "Wave終了（戦果）", note: "撃破！／逃げられた……と、その束ぶんの成績と報酬",
+    go: async page => {
+      await SCREENS.find(s => s.id === "S-29").go(page);
+      await page.evaluate(() => {
+        document.getElementById("wvgo").click();
+        for (let k = 0; k < 3; k++) {
+          const q = DB.byId[S.run.ids[S.run.i]];
+          for (let i = 0; i < q.choices.length; i++)
+            if (i !== q.answer) document.querySelector(`.xcut[data-c="${i}"]`)?.click();
+          document.getElementById("next")?.click();
+        }
+      });
+      await page.waitForTimeout(400);
+    } },
+
+  /* **初回に1度だけ出る。** 決定1をひとつだけゆるめた画面で、
+     聞くのは学年ひとつ、答えるのは1タップ。説明は置かない */
+  { id: "S-31", name: "何年生から始める?", note: "初回に1度だけ。選んだ学年が梯子の下端になる",
+    go: async page => {
+      await page.evaluate(() => {
+        Object.assign(S, { introDone: false, startGrade: null, runs: 0 });
+        startIntro();
+      });
       await page.waitForTimeout(200);
     } },
 ];
