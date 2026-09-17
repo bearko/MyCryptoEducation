@@ -154,6 +154,25 @@ for (const q of questions) {
   if (q.reading !== undefined) {
     if (!/^[ぁ-んァ-ヶー]{2,12}$/.test(q.reading))
       err(id, `reading は2〜12文字のかな・カナで書いてください（いま ${JSON.stringify(q.reading)}）`);
+    /* **`reading` は「答えそのものの読み」です。**
+       関係のある語の読みを書くと、画面には答えが出ないまま別の語をなぞらせる
+       ことになります（実際にやりました）。答えに混ざっているかなは、読みの中に
+       同じ順で出てくるはずなので、そこで食い違いを捕まえます */
+    const ans = String(answerText(q));
+    const kanaOf = t => [...t].filter(c => /[ぁ-んァ-ヶー]/.test(c)).join("");
+    const toHira = t => t.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+    if ([...ans].every(c => /[ぁ-んァ-ヶー\s]/.test(c))) {
+      if (toHira(ans).replace(/\s/g, "") !== toHira(q.reading))
+        err(id, `reading が答えと合いません（答え「${ans}」／読み「${q.reading}」）`);
+    } else {
+      const need = toHira(kanaOf(ans)), got = toHira(q.reading);
+      let i = 0;
+      for (const c of got) if (c === need[i]) i++;
+      if (i < need.length)
+        err(id, `reading が答えと合いません。答え「${ans}」のかなが読み「${q.reading}」に出てきません`);
+    }
+    if ([...q.reading].length < [...ans].length)
+      err(id, `reading が答えより短いです（答え「${ans}」／読み「${q.reading}」）`);
   }
   if (q.hardMode === "panel" && !q.reading)
     err(id, "文字パネルに振り分けていますが reading がありません");

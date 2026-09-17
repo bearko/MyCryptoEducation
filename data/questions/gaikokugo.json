@@ -2658,5 +2658,185 @@
     "image": "obj-mikan",
     "imageAt": "prompt",
     "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-091",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "あいさつ",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "朝のあいさつとして正しいのは?",
+    "choices": [
+      "Good evening.",
+      "Good morning.",
+      "Good night.",
+      "See you."
+    ],
+    "answer": 1,
+    "hints": [
+      "一日のはじめに使うあいさつだ。",
+      "morning は「朝」を表す言葉だ。",
+      "night は寝る前、evening は夕方に使う。"
+    ],
+    "lesson": "Good morning. は朝のあいさつ。正午をすぎると Good afternoon.、夕方からは Good evening. になる。Good night. は**別れるときや寝る前**だけに使い、出会ったときには使わない。同じ Good ○○ でも、使う場面が決まっている。",
+    "tip": "英語のあいさつは時刻で切り替わる。日本語の「おはよう」が、時刻ではなく その日はじめて会ったかどうかで決まるのとは、区切り方が違う。",
+    "card": "時刻ごとのあいさつ",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-092",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "曜日",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "水曜日を英語で言うと?",
+    "choices": [
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Saturday"
+    ],
+    "answer": 1,
+    "hints": [
+      "週のまん中にあたる曜日だ。",
+      "英語では、書くときに発音しない文字が入る。",
+      "d の文字が入るが、読むときにははっきり出ない。"
+    ],
+    "lesson": "水曜日は Wednesday。北欧神話の神オーディン（Woden）の日が語源で、**Wednes- の d は発音されない**という、つづりと読みのずれた語の代表だ。曜日名は、太陽・月・北欧の神々の名から来ている（Sunday＝太陽、Monday＝月）。",
+    "tip": "曜日の名前には、キリスト教以前の神々が残っている。暦は、置きかえられなかった古い層を抱えている。",
+    "card": "曜日の言い方",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-093",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "疑問詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「それはいくらですか」と たずねる言い方は?",
+    "choices": [
+      "How many is it?",
+      "How much is it?",
+      "How long is it?",
+      "How old is it?"
+    ],
+    "answer": 1,
+    "hints": [
+      "ねだん をたずねている。",
+      "数えられない量をたずねるときの言い方を使う。",
+      "many は数、もう一方は量に使う。"
+    ],
+    "lesson": "How much is it? が値段のたずね方だ。**how many は数えられるものの数、how much は量やねだん**に使う。How long は長さや時間、How old は年齢をたずねる。疑問詞のあとに続く語で、何を聞いているかが決まる。",
+    "tip": "お金は数えられるのに how much を使う。金額を「量」として見ているからで、言葉の分け方は物の分け方と必ずしも一致しない。",
+    "card": "How much と How many",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-094",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "前置詞",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「机の上に」を英語で言うと?",
+    "choices": [
+      "in the desk",
+      "on the desk",
+      "under the desk",
+      "by the desk"
+    ],
+    "answer": 1,
+    "hints": [
+      "面にふれて乗っている状態を表す。",
+      "in は中、under は下を表す。",
+      "接している「上」を表す前置詞を選ぶ。"
+    ],
+    "lesson": "on は**面に接している**ことを表すので、壁にかかった絵も on the wall になる。in は中、under は下、by はそば。前置詞は日本語の「上・中・下」と1対1に対応しないので、**位置関係の絵で覚える**のがよい。",
+    "tip": "on the train は「電車の中」を指す。乗り物は面に乗るものと見るためで、ここは覚えるしかないところだ。",
+    "card": "位置を表す前置詞",
+    "level": 3
+  },
+  {
+    "id": "gaikokugo-095",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "身の回りのもの",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この乗り物を英語で言うと?",
+    "choices": [
+      "bus",
+      "car",
+      "train",
+      "bike"
+    ],
+    "answer": 1,
+    "hints": [
+      "道路を走る、4つの車輪のついた乗り物だ。",
+      "英語では3文字で書く。",
+      "「車で行く」は by ___ と言う。"
+    ],
+    "lesson": "car は自動車。「車で行く」は by car と言い、**by のあとには a や the を付けない**（by bus / by train も同じ）。移動の手段を表すときの決まった形で、車そのものではなく「手段」を指しているためだ。",
+    "tip": "英語で乗り物の中にいることを言うとき、車は in the car、電車やバスは on the train と使い分ける。狭いか広いかで前置詞が変わるのだ。",
+    "card": "car と by car",
+    "level": 1,
+    "image": "obj-kuruma",
+    "imageAt": "prompt",
+    "hideTitle": true
+  },
+  {
+    "id": "gaikokugo-096",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "自然の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この天体を英語で言うと?",
+    "choices": [
+      "sun",
+      "star",
+      "moon",
+      "sky"
+    ],
+    "answer": 2,
+    "hints": [
+      "夜空に見える、いちばん大きく見える天体だ。",
+      "地球のまわりを回っている。",
+      "英語では4文字で書き、o が2つ入る。"
+    ],
+    "lesson": "moon は月。英語では、月や太陽のように**1つしかないものには the を付ける**（the moon / the sun / the earth）。a moon と言うと「ある衛星」の意味になり、木星の月々を指すときはこちらを使う。the の有無が、指す範囲を決めている。",
+    "tip": "冠詞は、その言葉が世界にいくつあると考えているかの表明だ。日本語には無い区別なので、意識しないと身につかない。",
+    "card": "moon と the の使い方",
+    "level": 2,
+    "image": "obj-tsuki",
+    "imageAt": "prompt",
+    "hideTitle": true
   }
 ]
