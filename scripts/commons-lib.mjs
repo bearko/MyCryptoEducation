@@ -195,14 +195,53 @@ export const deepQueries = (cat, { titleFree } = {}) => {
   return tiers;
 };
 
+/**
+ * **そのカテゴリが本当にあるか。**
+ *
+ * ここを確かめずに `deepcategory:` を投げると、**解決できなかったキーワードが
+ * 落ちて、絞りこみだけの問い合わせになります。** つまり
+ * `filetype:bitmap haswbstatement:P6216=Q19652` ——「コモンズ全体の PD 画像」です。
+ * 実際にそれが起きて、雲の行に F-22 が、地層の行にゴッホの素描が、
+ * コンテナ港の行に空母の被弾写真が来ました。**別々の行に同じ1枚が来た**のも
+ * これが理由です（馬とサバナが、どちらもペガサスの彫刻になりました）。
+ */
+const categoryExists = async cat => {
+  const r = await call(COMMONS, { action: "query", titles: `Category:${bareCat(cat)}` });
+  const page = Object.values(r?.query?.pages || {})[0];
+  return !!page && page.missing === undefined;
+};
+
+/**
+ * **絞りこみだけの問い合わせが返すもの**を1度だけ引いて覚えておきます。
+ * 候補にこれが混ざっていたら、**カテゴリも検索語も効かなかった証拠**なので落とします。
+ * 原因がこちらの読みちがいでも、この網は効きます（結果の側で見ているため）。
+ */
+let genericCache = null;
+const genericTitles = async () => {
+  if (genericCache) return genericCache;
+  genericCache = new Set();
+  for (const srsearch of ["filetype:bitmap haswbstatement:P6216=Q19652",
+                          "filetype:bitmap haswbstatement:P275=Q6938433"]) {
+    try {
+      const r = await call(COMMONS, {
+        action: "query", list: "search", srsearch, srnamespace: "6", srlimit: "50",
+      });
+      for (const p of r?.query?.search || []) genericCache.add(p.title);
+    } catch { /* 引けなければ網を張らないだけ。取り込みは止めない */ }
+  }
+  return genericCache;
+};
+
 const fromDeepCategory = async (cat, entry) => {
+  if (!await categoryExists(cat)) return [];
+  const generic = await genericTitles();
   const out = [];
   for (const srsearch of deepQueries(cat, entry)) {
     const r = await call(COMMONS, {
       action: "query", list: "search", srsearch, srnamespace: "6", srlimit: "40",
     });
     for (const p of r?.query?.search || [])
-      out.push({ title: p.title, via: "カテゴリ（深）", note: "" });
+      if (!generic.has(p.title)) out.push({ title: p.title, via: "カテゴリ（深）", note: "" });
   }
   return onlyPhotos(out);
 };
@@ -236,13 +275,14 @@ export const searchQueries = (entry) => {
 };
 
 const fromSearch = async entry => {
+  const generic = await genericTitles();
   const out = [];
   for (const srsearch of searchQueries(entry)) {
     const r = await call(COMMONS, {
       action: "query", list: "search", srsearch, srnamespace: "6", srlimit: "30",
     });
     for (const p of r?.query?.search || [])
-      out.push({ title: p.title, via: "全文検索", note: "" });
+      if (!generic.has(p.title)) out.push({ title: p.title, via: "全文検索", note: "" });
   }
   return onlyPhotos(out);
 };
