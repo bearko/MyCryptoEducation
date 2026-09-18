@@ -22,7 +22,7 @@ import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gather, describe, adopt, usability, normalizeLicense, sleep, WAIT } from "./commons-lib.mjs";
+import { gather, describe, adopt, usability, normalizeLicense, deepQueries, sleep, WAIT } from "./commons-lib.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = "public/commons";
@@ -283,6 +283,27 @@ if (SELFTEST) {
   t("CC BY-SA を CC BY として拾わない", lic("CC BY-SA 4.0") === "CC BY-SA 4.0", lic("CC BY-SA 4.0"));
   t("NC・ND も素通ししない",
     lic("CC BY-NC 3.0").includes("NC") && lic("CC BY-ND 4.0").includes("ND"));
+
+  /* **カテゴリの引き方。**
+     21行が「候補がありません／使える候補がありません」で全滅したときの原因は2つ。
+     ①大きなカテゴリは中身がほとんど下位カテゴリで、直下にファイルが無い
+     ②数件しか無いところへライセンスの網をかけるので、必ず全滅する
+     `deepcategory:` で下へたどり、構造化データで PD・CC0 を先に引く。 */
+  const q = deepQueries("Rice paddies in Japan", {});
+  t("下位カテゴリまでたどる", q.every(x => x.includes('deepcategory:"Rice paddies in Japan"')), q[0]);
+  t("写真だけに絞る", q.every(x => x.includes("filetype:bitmap")), q[0]);
+  t("PD と CC0 を先に引く",
+    q[0].includes("P6216=Q19652") && q[1].includes("P275=Q6938433"), q.slice(0, 2).join(" / "));
+  t("構造化データが無い写真も拾える（無指定の段がある）",
+    q.some(x => !x.includes("haswbstatement")), q.join(" / "));
+  /* **題名を伏せる行に、使えない候補を並べない。** choiceArt とスワイプは
+     PD・CC0 しか使えないので、無指定の段を足すと画面が全部 × で埋まる */
+  const qf = deepQueries("Footballs", { titleFree: true });
+  t("題名を伏せる行では PD・CC0 だけを引く",
+    qf.length === 2 && qf.every(x => x.includes("haswbstatement")), qf.join(" / "));
+  t("Category: が二重にならない",
+    deepQueries("Category:Dams in Japan", {})[0].includes('deepcategory:"Dams in Japan"'),
+    deepQueries("Category:Dams in Japan", {})[0]);
   server.close();
   console.log(out.every(Boolean) ? "\nすべて通過" : `\n${out.filter(x => !x).length}件 失敗`);
   process.exit(out.every(Boolean) ? 0 : 1);

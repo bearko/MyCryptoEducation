@@ -43,11 +43,13 @@ if (!wanted.length) { console.log("取りに行くものはありません。");
 let ok = 0, ng = 0, listed = 0;
 for (const [key, entry] of wanted) {
   try {
-    const { cands, errors } = await gather(entry);
+    const { cands, errors, stats } = await gather(entry);
+    const where = stats.length ? `      源ごとの件数: ${stats.join(" / ")}` : "";
     if (!cands.length) {
       console.warn(`  ${key}: 候補がありません` + (errors.length ? `（${errors.join(" / ")}）` : ""));
-      console.warn(`      → 検索語を短くするか、"entity": "<日本語の語>" か`);
-      console.warn(`        "wikipedia": "<記事名>" を台帳に足してください`);
+      if (where) console.warn(where);
+      console.warn(`      → カテゴリ名が違っているかもしれません（転送カテゴリは空を返します）。`);
+      console.warn(`        "wikipedia": "<記事名>" か "search": "<英語の語>" も足せます`);
       ng++; await sleep(WAIT); continue;
     }
     const desc = await describe(cands.map(c => c.title));
@@ -80,6 +82,7 @@ for (const [key, entry] of wanted) {
       console.warn(`  ${key}: 使える候補がありません（見えたもの: ${seen.join(" / ")}）` +
                    (entry.titleFree ? "。この行は題名を伏せる用なので PD・CC0 だけです" : ""));
       rows.slice(0, 6).forEach(r => console.warn(`      ${r.use.mark} ${r.license.padEnd(16)} ${r.title}`));
+      if (where) console.warn(where);
       console.warn(`      → node scripts/pick-commons.mjs ${key} で写真を見て選べます`);
       ng++; await sleep(WAIT); continue;
     }

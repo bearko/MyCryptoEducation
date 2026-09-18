@@ -599,7 +599,8 @@
       "alt": "船が1隻、水に浮かんでいる",
       "titleFree": true,
       "wikipedia": "ja:船",
-      "category": "Ships"
+      "category": "Ships",
+      "search": "ship at sea photograph"
     },
     "obj-mikan": {
       "entity": "ウンシュウミカン",
@@ -645,7 +646,8 @@
       "alt": "テーブルが1台",
       "titleFree": true,
       "wikipedia": "ja:テーブル",
-      "category": "Tables (furniture)"
+      "category": "Tables (furniture)",
+      "search": "wooden table furniture"
     },
     "obj-kamera": {
       "entity": "カメラ",
@@ -691,7 +693,8 @@
       "alt": "ボールが1つ",
       "titleFree": true,
       "wikipedia": "ja:サッカーボール",
-      "category": "Footballs"
+      "category": "Footballs",
+      "search": "soccer ball"
     },
     "obj-tsuki": {
       "wikipedia": "en:Moon",
@@ -725,7 +728,8 @@
       "wikipedia": "en:Cloud",
       "category": "Cumulus clouds",
       "alt": "空に浮かぶ雲",
-      "_use": "理科の解説に置く（天気）"
+      "_use": "理科の解説に置く（天気）",
+      "search": "cumulus cloud sky"
     },
     "obj-yuki": {
       "entity": "雪",
@@ -797,7 +801,8 @@
       "alt": "ウマが1頭立っている",
       "_use": "国語の解説に置く（漢字の成り立ち）",
       "wikipedia": "ja:ウマ",
-      "category": "Equus caballus"
+      "category": "Horses",
+      "search": "horse standing field"
     },
     "obj-buta": {
       "entity": "ブタ",
@@ -816,7 +821,8 @@
       "alt": "ニワトリが1羽立っている",
       "_use": "理科・国語の解説に置く（この生きもの）",
       "wikipedia": "ja:ニワトリ",
-      "category": "Gallus gallus domesticus"
+      "category": "Chickens",
+      "search": "chicken hen farm"
     },
     "obj-panda": {
       "entity": "ジャイアントパンダ",
@@ -860,7 +866,8 @@
     "rika-kabutomushi": {
       "alt": "カブトムシを横から写した写真。角が前に出ている",
       "wikipedia": "ja:カブトムシ",
-      "category": "Trypoxylus dichotomus"
+      "category": "Trypoxylus dichotomus",
+      "search": "Japanese rhinoceros beetle"
     },
     "rika-housenka": {
       "entity": "ホウセンカ",
@@ -925,12 +932,14 @@
     "rika-kandenchi": {
       "alt": "乾電池が1本",
       "wikipedia": "ja:乾電池",
-      "category": "Dry cell batteries"
+      "category": "Dry cell batteries",
+      "search": "dry cell battery AA"
     },
     "rika-chisou": {
       "alt": "がけに横じまが重なって見える地層",
       "wikipedia": "ja:地層",
-      "category": "Strata"
+      "category": "Sedimentary rocks",
+      "search": "sedimentary rock layers outcrop"
     },
     "rika-niji": {
       "entity": "虹",
@@ -983,7 +992,8 @@
     "shakai-patokaa": {
       "alt": "パトカーが1台",
       "wikipedia": "ja:パトカー",
-      "category": "Police cars in Japan"
+      "category": "Police cars in Japan",
+      "search": "Japanese police car"
     },
     "shakai-yuubin": {
       "wikipedia": "ja:郵便ポスト",
@@ -1001,7 +1011,8 @@
     "shakai-tanbo": {
       "alt": "水をはった田んぼ",
       "wikipedia": "ja:水田",
-      "category": "Rice paddies in Japan"
+      "category": "Rice paddies in Japan",
+      "search": "rice paddy field Japan"
     },
     "shakai-shinkansen": {
       "entity": "新幹線",
@@ -1031,7 +1042,8 @@
     "shakai-kokkai": {
       "alt": "国会議事堂の正面",
       "wikipedia": "ja:国会議事堂",
-      "category": "National Diet Building"
+      "category": "National Diet Building",
+      "search": "National Diet Building Tokyo"
     },
     "shakai-nara": {
       "entity": "東大寺",
@@ -1101,7 +1113,8 @@
       "wikipedia": "en:Rain",
       "category": "Rain",
       "alt": "雨が降っているようす",
-      "_use": "理科の解説に置く（天気）"
+      "_use": "理科の解説に置く（天気）",
+      "search": "rain drops falling"
     },
     "obj-take": {
       "wikipedia": "en:Bamboo",
@@ -1146,7 +1159,8 @@
     "chi-kuruma-koujou": {
       "wikipedia": "ja:自動車工場",
       "category": "Automobile factories",
-      "alt": "自動車を組み立てる工場の内部"
+      "alt": "自動車を組み立てる工場の内部",
+      "search": "car assembly line factory"
     },
     "chi-fuuryoku": {
       "wikipedia": "ja:風力発電",
@@ -1177,12 +1191,14 @@
     "chi-dam": {
       "wikipedia": "ja:ダム",
       "category": "Dams in Japan",
-      "alt": "谷をせき止めた大きなダム"
+      "alt": "谷をせき止めた大きなダム",
+      "search": "concrete dam reservoir"
     },
     "chi-container": {
       "wikipedia": "ja:コンテナ",
-      "category": "Container ports",
-      "alt": "コンテナが積まれた港"
+      "category": "Container terminals",
+      "alt": "コンテナが積まれた港",
+      "search": "container terminal cranes"
     },
     "chi-taue": {
       "wikipedia": "ja:田植え",
@@ -1213,7 +1229,8 @@
     "chi-rakunou": {
       "wikipedia": "ja:酪農",
       "category": "Dairy farming",
-      "alt": "牧場で草を食べる牛の群れ"
+      "alt": "牧場で草を食べる牛の群れ",
+      "search": "dairy cows grazing pasture"
     },
     "sek-banri": {
       "wikipedia": "ja:万里の長城",
@@ -1231,22 +1248,26 @@
     "sek-pyramid": {
       "wikipedia": "ja:ギザの大ピラミッド",
       "category": "Pyramids of Giza",
-      "alt": "砂漠に立つ四角すいの建造物"
+      "alt": "砂漠に立つ四角すいの建造物",
+      "search": "Great Pyramid of Giza"
     },
     "sek-eiffel": {
       "wikipedia": "ja:エッフェル塔",
       "category": "Eiffel Tower",
-      "alt": "鉄でできた塔"
+      "alt": "鉄でできた塔",
+      "search": "Eiffel Tower Paris"
     },
     "sek-savanna": {
       "wikipedia": "ja:サバナ気候",
-      "category": "Savanna",
-      "alt": "まばらに木の生えた草原"
+      "category": "Savannas",
+      "alt": "まばらに木の生えた草原",
+      "search": "savanna grassland acacia"
     },
     "sek-sabaku": {
       "wikipedia": "ja:砂漠",
       "category": "Sand dunes",
-      "alt": "砂の丘が続く砂漠"
+      "alt": "砂の丘が続く砂漠",
+      "search": "sand dunes desert"
     }
   },
   "_parked": {
