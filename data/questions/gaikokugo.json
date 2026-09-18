@@ -3970,5 +3970,208 @@
       "obj-tokei",
       "obj-hasami"
     ]
+  },
+  {
+    "id": "gaikokugo-135",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "時刻の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「7時30分」を英語で言うと?",
+    "choices": [
+      "seven thirty",
+      "thirty seven",
+      "seven and thirty",
+      "half seven"
+    ],
+    "answer": 0,
+    "hints": [
+      "時のほうを先に言う。",
+      "そのあとに分を続けるだけでよい。",
+      "日本語の「七時三十分」と同じ順番になる。"
+    ],
+    "lesson": "時刻は**時 → 分**の順に数を並べます（seven thirty = 7時30分）。**It's seven thirty.** のように使い、たずねるときは What time is it? です。**half past seven**（7時半）という言い方もありますが、数を並べるほうが簡単で、どこでも通じます。",
+    "tip": "ただ数を並べるだけで通じる。難しい言い方を覚える前に、通じる形をひとつ持つとよい。",
+    "card": "時刻の言い方",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-136",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "曜日をたずねる",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「What day is it today?」への答え方として正しいのは?",
+    "choices": [
+      "It's Monday.",
+      "I'm Monday.",
+      "It's sunny.",
+      "Yes, it is."
+    ],
+    "answer": 0,
+    "hints": [
+      "曜日をたずねられている。",
+      "答えの主語は it になる。",
+      "天気をたずねられているのではない。"
+    ],
+    "lesson": "曜日は **It's Monday.** と答えます（天気なら It's sunny.）。**時刻・曜日・天気・日付は、主語に it を使う**のが英語の決まりで、この it は「それ」という意味を持ちません（形式的な主語）。**日本語では主語を言わないところに、英語は it を置きます。**",
+    "tip": "意味のない主語を置く。言語には、意味より形を優先する場所がある。",
+    "card": "曜日の答え方",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-137",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "行きたい場所",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「Where do you want to go?」の意味はどれ?",
+    "choices": [
+      "あなたはどこへ行きたいですか。",
+      "あなたはどこにいますか。",
+      "あなたはどこから来ましたか。",
+      "あなたはどこで働いていますか。"
+    ],
+    "answer": 0,
+    "hints": [
+      "Where は場所をたずねる語だ。",
+      "want to 〜 は「〜したい」を表す。",
+      "go は「行く」。"
+    ],
+    "lesson": "**Where（どこ）+ do you want to 〜（〜したいですか）** の組み合わせです。疑問詞には Where（どこ）、When（いつ）、What（何）、Who（だれ）、Why（なぜ）、How（どのように）があり、**文の先頭に置いて、聞きたいところを名指しします。** Where are you from? は「どこ出身か」です。",
+    "tip": "聞きたいところを先頭に出す。英語の疑問文は、知りたいことから始まる。",
+    "card": "Where で場所をたずねる",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-138",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "調子をたずねる",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「How are you?」への答えとして自然なのはどれ?",
+    "choices": [
+      "I'm fine, thank you.",
+      "I'm Japan.",
+      "Yes, I am.",
+      "It's fine."
+    ],
+    "answer": 0,
+    "hints": [
+      "「調子はどうですか」とたずねられている。",
+      "自分のことを答えるので、主語は I になる。",
+      "「元気です、ありがとう」と返す形だ。"
+    ],
+    "lesson": "**How are you?** は調子をたずねる決まり文句で、I'm fine / I'm good / Not bad などで答えます。**答えたあとに And you? と聞き返す**のがふつうで、あいさつは**ひとことで終わらせないほうが自然**です。天気をたずねる How's the weather? と混ざりやすいので注意します。",
+    "tip": "あいさつは情報のやりとりではなく、関係を確かめる合図だ。だから聞き返す。",
+    "card": "How are you への答え",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-139",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "動作を表す語",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「I get up at seven.」の「get up」の意味はどれ?",
+    "choices": [
+      "起きる",
+      "ねる",
+      "出かける",
+      "食べる"
+    ],
+    "answer": 0,
+    "hints": [
+      "朝いちばんにすることだ。",
+      "at seven は「7時に」を表す。",
+      "ベッドから体を起こす動きを表している。"
+    ],
+    "lesson": "**get up** は「起きる」。一日の生活を言う語には go to bed（ねる）、have breakfast（朝食を食べる）、go to school、go home、do my homework があります。**2語以上で1つの意味になる言い方**（句動詞）が多く、**get だけを訳しても意味がつかめません。**",
+    "tip": "語をばらして訳すと迷子になる。かたまりで覚えるほうが早い言葉がある。",
+    "card": "get up と一日の生活",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-140",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "職業の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「I want to be a vet.」の「vet」が表す職業はどれ?",
+    "choices": [
+      "じゅうい",
+      "かんごし",
+      "びようし",
+      "うんてんしゅ"
+    ],
+    "answer": 0,
+    "hints": [
+      "動物にかかわる仕事だ。",
+      "veterinarian という長い語を短くした言い方だ。",
+      "動物の病気をみる。"
+    ],
+    "lesson": "**vet** は veterinarian（じゅうい）の短い形です。職業の英語には teacher、doctor、nurse、cook / chef、pilot、farmer、vet、programmer などがあります。**-er / -or は「〜する人」**を表すので、動詞が分かれば意味の見当がつきます（teach → teacher）。",
+    "tip": "語尾に意味がある。-er を見たら「〜する人」と読めるだけで、知らない語が半分わかる。",
+    "card": "職業の英語",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-141",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "ていねいな言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「Could you help me?」の意味として、いちばん近いのはどれ?",
+    "choices": [
+      "手伝っていただけますか。",
+      "手伝いましょうか。",
+      "手伝わなければなりません。",
+      "手伝うことができます。"
+    ],
+    "answer": 0,
+    "hints": [
+      "相手にお願いをしている。",
+      "Can you 〜? よりもていねいな言い方だ。",
+      "could は can の過去形の形だが、ここでは過去のことを言っていない。"
+    ],
+    "lesson": "**Could you 〜?** は Can you 〜? よりていねいな依頼です。**過去形の形を使うと、ていねいになる**のは英語のおもしろいところで（Would you / I would like）、**少し距離を取ることで押しつけを弱めている**と説明されます。Shall I 〜? は「〜しましょうか」と申し出るときに使います。",
+    "tip": "遠回りに言うほどていねいになる。距離が、そのまま敬意の形になっている。",
+    "card": "Could you の依頼",
+    "level": 3
   }
 ]
