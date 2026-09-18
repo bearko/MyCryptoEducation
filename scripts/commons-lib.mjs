@@ -153,25 +153,98 @@ const fromWikipedia = async spec => {
     : [];
 };
 
-/** カテゴリの中身を並べる。ものを何枚か見比べたいときに効く */
+/**
+ * **写真だけを残す。** コモンズの「ファイル」は名前空間6のことなので、
+ * `gcmtype: "file"` には音声も動画も PDF も入ります。実際に
+ * `Category:Cumulus clouds` から `De-Cumuluswolke.ogg`（雲の解説音声）が、
+ * `Category:Gallus gallus domesticus` から `Ryujin.tif` が来ました。
+ * **候補が数件しかない行では、これが混ざるだけで全滅します。**
+ */
+const BITMAP = /\.(jpe?g|png|gif|tiff?|webp)$/i;
+const onlyPhotos = list => list.filter(c => BITMAP.test(c.title));
+
+const bareCat = c => String(c).replace(/^category:/i, "");
+
+/**
+ * **カテゴリを深くたどって、ライセンスで絞った検索。**
+ *
+ * これを足した理由は2つあります。
+ *
+ * 1. **大きなカテゴリは、中身がほとんど下位カテゴリです。**
+ *    `Category:Ships` の直下にファイルはほぼ無く、`categorymembers` は空を返します。
+ *    実際、21行が「候補がありません」で全滅しました。CirrusSearch の
+ *    `deepcategory:` は下位カテゴリまで見るので、そこから実際の写真が出ます
+ * 2. **候補が数件では、ライセンスで必ず全滅します。** コモンズの写真の多くは
+ *    CC BY-SA で、こちらは使えません（共有継承が改変物に波及するため）。
+ *    **使えるものを探すのではなく、使えるものだけを検索する**ほうが確実です。
+ *    構造化データの P6216（著作権の状態）と P275（ライセンス）で先に絞ります
+ *
+ * 段は上から順に試し、**取れたところで止めません**（PD・CC0 を先頭に並べたいので、
+ * 全部足してから重複を除きます）。**最後にライセンス無指定の段を置いてあるので、
+ * 構造化データが付いていない写真も拾えます**（Q番号が違っていても、ここで拾えます）。
+ */
+export const deepQueries = (cat, { titleFree } = {}) => {
+  const base = `deepcategory:"${bareCat(cat)}" filetype:bitmap`;
+  const tiers = [
+    `${base} haswbstatement:P6216=Q19652`,    // 著作権の状態 = パブリックドメイン
+    `${base} haswbstatement:P275=Q6938433`,   // ライセンス = CC0
+  ];
+  // 題名を伏せる行（choiceArt・スワイプ）は PD・CC0 しか使えないので、
+  // 無指定の段を足しません。足すと画面が使えない候補で埋まります。
+  if (!titleFree) tiers.push(base);
+  return tiers;
+};
+
+const fromDeepCategory = async (cat, entry) => {
+  const out = [];
+  for (const srsearch of deepQueries(cat, entry)) {
+    const r = await call(COMMONS, {
+      action: "query", list: "search", srsearch, srnamespace: "6", srlimit: "40",
+    });
+    for (const p of r?.query?.search || [])
+      out.push({ title: p.title, via: "カテゴリ（深）", note: "" });
+  }
+  return onlyPhotos(out);
+};
+
+/** カテゴリの直下を並べる。小さなカテゴリではこれで足ります */
 const fromCategory = async cat => {
   const r = await call(COMMONS, {
     action: "query", generator: "categorymembers",
-    gcmtitle: /^category:/i.test(cat) ? cat : `Category:${cat}`,
-    gcmtype: "file", gcmlimit: "30",
+    gcmtitle: `Category:${bareCat(cat)}`,
+    gcmtype: "file", gcmlimit: "50",
   });
-  return Object.values(r?.query?.pages || {}).map(p => ({ title: p.title, via: "カテゴリ", note: "" }));
+  return onlyPhotos(Object.values(r?.query?.pages || {})
+    .map(p => ({ title: p.title, via: "カテゴリ", note: "" })));
 };
 
-/** 全文検索。**当たらないので最後に見ます**（上の3つが空だったときの保険） */
-const fromSearch = async (entry, limit = 30) => {
-  const q = ["filetype:bitmap", entry.insource ? `insource:"${entry.insource}"` : "", entry.search]
-    .filter(Boolean).join(" ");
+/**
+ * 全文検索。**当たらないので最後に見ます**（上のどれも空だったときの保険）。
+ * ここにもライセンスの段を付けてあります。**題名を伏せる行では、使えない候補を
+ * 並べても画面が × で埋まるだけ**だからです。
+ */
+export const searchQueries = (entry) => {
   if (!entry.search) return [];
-  const r = await call(COMMONS, {
-    action: "query", list: "search", srsearch: q, srnamespace: "6", srlimit: String(limit),
-  });
-  return (r?.query?.search || []).map(p => ({ title: p.title, via: "全文検索", note: "" }));
+  const base = ["filetype:bitmap", entry.insource ? `insource:"${entry.insource}"` : "", entry.search]
+    .filter(Boolean).join(" ");
+  const tiers = [
+    `${base} haswbstatement:P6216=Q19652`,
+    `${base} haswbstatement:P275=Q6938433`,
+  ];
+  if (!entry.titleFree) tiers.push(base);
+  return tiers;
+};
+
+const fromSearch = async entry => {
+  const out = [];
+  for (const srsearch of searchQueries(entry)) {
+    const r = await call(COMMONS, {
+      action: "query", list: "search", srsearch, srnamespace: "6", srlimit: "30",
+    });
+    for (const p of r?.query?.search || [])
+      out.push({ title: p.title, via: "全文検索", note: "" });
+  }
+  return onlyPhotos(out);
 };
 
 /**
@@ -183,18 +256,26 @@ const fromSearch = async (entry, limit = 30) => {
  * **人が選んだものを先に並べる**ので、画面の左上がいちばん確からしくなります。
  */
 export const gather = async entry => {
-  const out = [], errors = [];
+  const out = [], errors = [], stats = [];
+  /* **源ごとの件数を残します。** 全滅したときに「どの源が空だったのか」が
+     分からないと、台帳の手がかりを直しようがありません。実際、21行が
+     全滅したとき、カテゴリが空なのか写真以外が混ざったのかが出力から
+     読めず、もう一往復かかりました。 */
   const add = async (label, fn) => {
-    try { out.push(...await fn()); }
-    catch (e) { errors.push(`${label}: ${e.message}`); }
+    try { const got = await fn(); stats.push(`${label} ${got.length}`); out.push(...got); }
+    catch (e) { stats.push(`${label} ✗`); errors.push(`${label}: ${e.message}`); }
   };
   if (entry.commons) out.push({ title: asFile(entry.commons), via: "名指し", note: "" });
   if (entry.entity)    await add("ウィキデータ", () => fromEntity(entry.entity));
   if (entry.wikipedia) await add("ウィキペディア", () => fromWikipedia(entry.wikipedia));
+  if (entry.category)  await add("カテゴリ（深）", () => fromDeepCategory(entry.category, entry));
   if (entry.category)  await add("カテゴリ", () => fromCategory(entry.category));
   if (entry.search)    await add("全文検索", () => fromSearch(entry));
   const seen = new Set();
-  return { cands: out.filter(c => !seen.has(c.title) && seen.add(c.title)), errors };
+  /* **候補は120件で打ち切ります。** describe は50件ずつ束ねるので3回で済みます。
+     これ以上並べても、人が見て選べる量を超えます */
+  const cands = out.filter(c => !seen.has(c.title) && seen.add(c.title)).slice(0, 120);
+  return { cands, errors, stats };
 };
 
 /**
