@@ -3178,11 +3178,11 @@
     "prompt": "「まっすぐ行ってください」を英語で言うと?",
     "choices": [
       "Turn right.",
-      "Go straight.",
+      "Come back.",
       "Stop here.",
-      "Come back."
+      "Go straight."
     ],
-    "answer": 1,
+    "answer": 3,
     "hints": [
       "曲がらずに、そのまま進むように伝える。",
       "straight は「まっすぐ」という意味だ。",
@@ -3236,11 +3236,11 @@
     "prompt": "英語の「hand」が指すのは、体のどこ?",
     "choices": [
       "あし",
-      "手",
+      "目",
       "耳",
-      "目"
+      "手"
     ],
-    "answer": 1,
+    "answer": 3,
     "hints": [
       "あくしゅをするときに、相手に差し出す。",
       "指が五本ついている。",
@@ -3265,11 +3265,11 @@
     "prompt": "英語の「sister」が表すのはどれ?",
     "choices": [
       "兄または弟",
-      "姉または妹",
+      "いとこ",
       "おじ",
-      "いとこ"
+      "姉または妹"
     ],
-    "answer": 1,
+    "answer": 3,
     "hints": [
       "男女で呼び名が分かれている語だ。",
       "brother と対になる語にあたる。",
@@ -3538,11 +3538,11 @@
     "prompt": "大文字の「G」に対する小文字はどれ?",
     "choices": [
       "q",
-      "g",
+      "p",
       "j",
-      "p"
+      "g"
     ],
-    "answer": 1,
+    "answer": 3,
     "hints": [
       "小文字には、線が下にのびるものがある。",
       "大文字の形の面影が残っている。",
@@ -3596,11 +3596,11 @@
     "prompt": "「Do you have a pen?」に「はい」と答えるときの言い方は?",
     "choices": [
       "Yes, I am.",
-      "Yes, I do.",
+      "Yes, you do.",
       "Yes, I can.",
-      "Yes, you do."
+      "Yes, I do."
     ],
-    "answer": 1,
+    "answer": 3,
     "hints": [
       "聞かれたときに使われた語で答える。",
       "答えるのは自分なので、主語は I になる。",
@@ -3625,11 +3625,11 @@
     "prompt": "「My best memory is the school trip.」の意味はどれ?",
     "choices": [
       "修学旅行が楽しみだ。",
-      "いちばんの思い出は修学旅行です。",
+      "修学旅行は終わった。",
       "修学旅行に行きたい。",
-      "修学旅行は終わった。"
+      "いちばんの思い出は修学旅行です。"
     ],
-    "answer": 1,
+    "answer": 3,
     "hints": [
       "memory は「思い出・記憶」という意味だ。",
       "best は good のいちばん上の形にあたる。",
@@ -3639,5 +3639,121 @@
     "tip": "思い出を人に渡せる形にすること。それが、言葉を学ぶいちばん古い理由かもしれない。",
     "card": "best memory",
     "level": 2
+  },
+  {
+    "id": "gaikokugo-124",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "三人称単数",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「He ___ soccer.」の空らんに入るのはどれ?",
+    "choices": [
+      "play",
+      "played",
+      "playing",
+      "plays"
+    ],
+    "answer": 3,
+    "hints": [
+      "主語が I や you ではないときの形を考える。",
+      "he・she・it が主語のとき、動詞の形が変わる。",
+      "今のことを言っているので、過去の形ではない。"
+    ],
+    "lesson": "主語が **he・she・it（三人称単数）で現在のこと**を言うとき、動詞に **s** が付く。I play / You play / **He plays**。**日本語には無い変化**なので、いちばん落としやすい s だ。has（have の形）、goes、studies のように、形が変わるものもある。",
+    "tip": "主語によって動詞が形を変える。だれの話かを、動詞のほうも覚えている言語だ。",
+    "card": "三人称単数の s",
+    "level": 3
+  },
+  {
+    "id": "gaikokugo-125",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "a と an",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「apple」の前につく語として正しいのは?",
+    "choices": [
+      "a",
+      "two",
+      "the only",
+      "an"
+    ],
+    "answer": 3,
+    "hints": [
+      "「一つの」を表す語には二つの形がある。",
+      "あとに続く語の、最初の音で決まる。",
+      "母音（ア・イ・ウ・エ・オ）の音で始まる語の前では、言いやすい形に変わる。"
+    ],
+    "lesson": "**母音の音で始まる語の前では an** になる（an apple / an egg / an hour）。**つづりではなく音で決まる**ので、h を読まない hour は an、u を「ユ」と読む university は a だ。**言いやすさが文法を決めている**例にあたる。",
+    "tip": "決まりの理由が「言いにくいから」であることは、意外と多い。言葉は使う人の口に合わせて形を変える。",
+    "card": "a と an の使い分け",
+    "level": 3
+  },
+  {
+    "id": "gaikokugo-126",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "複数形",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「child（子ども）」の複数形はどれ?",
+    "choices": [
+      "childs",
+      "child",
+      "childes",
+      "children"
+    ],
+    "answer": 3,
+    "hints": [
+      "s を付けるだけでは正しくならない語がある。",
+      "形そのものが変わる、古い形が残っている語だ。",
+      "man → men、foot → feet と同じ仲間にあたる。"
+    ],
+    "lesson": "多くの名詞は s を付けて複数にするが、**形そのものが変わるもの**がある（child → children、man → men、foot → feet、tooth → teeth）。**古い英語の変化がそのまま残った**もので、よく使う語ほど不規則なまま残りやすい。",
+    "tip": "よく使う言葉ほど、昔の形のまま生き残る。使われる回数が、変化から守っている。",
+    "card": "不規則な複数形",
+    "level": 3
+  },
+  {
+    "id": "gaikokugo-127",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "語順",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「私は毎日ピアノをひきます。」を英語の語順に並べると?",
+    "choices": [
+      "I every day play the piano.",
+      "Play I the piano every day.",
+      "Every day I the piano play.",
+      "I play the piano every day."
+    ],
+    "answer": 3,
+    "hints": [
+      "英語は「だれが → どうする → 何を」の順に並べる。",
+      "「毎日」のような、いつを表す語はうしろに置くことが多い。",
+      "日本語と、動詞の位置がちがう。"
+    ],
+    "lesson": "英語の基本の語順は **主語 → 動詞 → 目的語**（I play the piano.）で、**時を表す語は文の終わりに置くことが多い**（every day）。日本語は動詞が最後に来るので、**語順そのものを組み替える必要がある** ——単語を置きかえるだけでは英語にならない。",
+    "tip": "並べ方が変わるということは、考えを組み立てる順番も変わるということだ。",
+    "card": "英語の語順",
+    "level": 3
   }
 ]
