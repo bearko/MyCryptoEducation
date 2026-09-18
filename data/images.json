@@ -600,7 +600,15 @@
       "titleFree": true,
       "wikipedia": "ja:船",
       "category": "Ships",
-      "search": "ship at sea photograph"
+      "search": "ship at sea photograph",
+      "file": "obj-fune",
+      "title": "Aerial view of the experimental SWATH ship Sea SLICE",
+      "author": "作者不明",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AAerial%20view%20of%20the%20experimental%20SWATH%20ship%20Sea%20SLICE.jpg",
+      "width": 640,
+      "height": 416
     },
     "obj-mikan": {
       "entity": "ウンシュウミカン",
@@ -647,7 +655,15 @@
       "titleFree": true,
       "wikipedia": "ja:テーブル",
       "category": "Tables (furniture)",
-      "search": "wooden table furniture"
+      "search": "wooden table furniture",
+      "file": "obj-teeburu",
+      "title": "Small oak dining table, Gordon Russell (Time, Taste and Furniture, Gloag, 1925)",
+      "author": "Andy Dingley (scanner)",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ASmall%20oak%20dining%20table%2C%20Gordon%20Russell%20(Time%2C%20Taste%20and%20Furniture%2C%20Gloag%2C%201925).jpg",
+      "width": 640,
+      "height": 432
     },
     "obj-kamera": {
       "entity": "カメラ",
@@ -694,7 +710,15 @@
       "titleFree": true,
       "wikipedia": "ja:サッカーボール",
       "category": "Footballs",
-      "search": "soccer ball"
+      "search": "soccer ball",
+      "file": "obj-booru",
+      "title": "Warrior Games athletes honored at Navy-Air Force football game 141004-D-DB155-022",
+      "author": "EJ Hersom",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AWarrior%20Games%20athletes%20honored%20at%20Navy-Air%20Force%20football%20game%20141004-D-DB155-022.jpg",
+      "width": 640,
+      "height": 427
     },
     "obj-tsuki": {
       "wikipedia": "en:Moon",
@@ -729,7 +753,15 @@
       "category": "Cumulus clouds",
       "alt": "空に浮かぶ雲",
       "_use": "理科の解説に置く（天気）",
-      "search": "cumulus cloud sky"
+      "search": "cumulus cloud sky",
+      "file": "obj-kumo",
+      "title": "F-22 Raptor flying at twilight 190728-F-VA182-1014",
+      "author": "2nd Lt. Samuel Eckholm",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AF-22%20Raptor%20flying%20at%20twilight%20190728-F-VA182-1014.jpg",
+      "width": 640,
+      "height": 427
     },
     "obj-yuki": {
       "entity": "雪",
@@ -802,7 +834,15 @@
       "_use": "国語の解説に置く（漢字の成り立ち）",
       "wikipedia": "ja:ウマ",
       "category": "Horses",
-      "search": "horse standing field"
+      "search": "horse standing field",
+      "file": "obj-uma",
+      "title": "Renommée chevauchant Pegase Coysevox Louvre MR1824",
+      "author": "Jebulon",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ARenomm%C3%A9e%20chevauchant%20Pegase%20Coysevox%20Louvre%20MR1824.jpg",
+      "width": 640,
+      "height": 587
     },
     "obj-buta": {
       "entity": "ブタ",
@@ -822,7 +862,15 @@
       "_use": "理科・国語の解説に置く（この生きもの）",
       "wikipedia": "ja:ニワトリ",
       "category": "Chickens",
-      "search": "chicken hen farm"
+      "search": "chicken hen farm",
+      "file": "obj-niwatori",
+      "title": "Randolph Caldecott illustration2",
+      "author": "Randolph Caldecott",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ARandolph%20Caldecott%20illustration2.jpg",
+      "width": 640,
+      "height": 745
     },
     "obj-panda": {
       "entity": "ジャイアントパンダ",
@@ -867,7 +915,15 @@
       "alt": "カブトムシを横から写した写真。角が前に出ている",
       "wikipedia": "ja:カブトムシ",
       "category": "Trypoxylus dichotomus",
-      "search": "Japanese rhinoceros beetle"
+      "search": "Japanese rhinoceros beetle",
+      "file": "rika-kabutomushi",
+      "title": "Naturalis Biodiversity Center - RMNH.ART.585 - Trypoxylus dichotomus - Yūshi Ishizaki - Cock Blomhoff Collection - pencil drawing - water colour",
+      "author": "Ishizaki Yūshi",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ANaturalis%20Biodiversity%20Center%20-%20RMNH.ART.585%20-%20Trypoxylus%20dichotomus%20-%20Y%C5%ABshi%20Ishizaki%20-%20Cock%20Blomhoff%20Collection%20-%20pencil%20drawing%20-%20water%20colour.jpg",
+      "width": 640,
+      "height": 496
     },
     "rika-housenka": {
       "entity": "ホウセンカ",
@@ -933,13 +989,29 @@
       "alt": "乾電池が1本",
       "wikipedia": "ja:乾電池",
       "category": "Dry cell batteries",
-      "search": "dry cell battery AA"
+      "search": "dry cell battery AA",
+      "file": "rika-kandenchi",
+      "title": "Philips Dry cell 1.5 volt type R 6 HD Heavy Duty made in Belgium old AA battery (51886880801)",
+      "author": "Joost J. Bakker IJmuiden",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3APhilips%20Dry%20cell%201.5%20volt%20type%20R%206%20HD%20Heavy%20Duty%20made%20in%20Belgium%20old%20AA%20battery%20(51886880801).jpg",
+      "width": 640,
+      "height": 650
     },
     "rika-chisou": {
       "alt": "がけに横じまが重なって見える地層",
       "wikipedia": "ja:地層",
       "category": "Sedimentary rocks",
-      "search": "sedimentary rock layers outcrop"
+      "search": "sedimentary rock layers outcrop",
+      "file": "rika-chisou",
+      "title": "Sorrow",
+      "author": "Vincent van Gogh",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AVincent%20van%20Gogh%20-%20Sorrow.jpg",
+      "width": 640,
+      "height": 1011
     },
     "rika-niji": {
       "entity": "虹",
@@ -993,7 +1065,15 @@
       "alt": "パトカーが1台",
       "wikipedia": "ja:パトカー",
       "category": "Police cars in Japan",
-      "search": "Japanese police car"
+      "search": "Japanese police car",
+      "file": "shakai-patokaa",
+      "title": "Japan Self-Defense Force experiences military police responsibilities 140805-M-DM081-002",
+      "author": "Lance Cpl. Brittany A. James",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AJapan%20Self-Defense%20Force%20experiences%20military%20police%20responsibilities%20140805-M-DM081-002.jpg",
+      "width": 640,
+      "height": 660
     },
     "shakai-yuubin": {
       "wikipedia": "ja:郵便ポスト",
@@ -1012,7 +1092,15 @@
       "alt": "水をはった田んぼ",
       "wikipedia": "ja:水田",
       "category": "Rice paddies in Japan",
-      "search": "rice paddy field Japan"
+      "search": "rice paddy field Japan",
+      "file": "shakai-tanbo",
+      "title": "Farmers of forty centuries - houses standing in rice paddies (Japan)",
+      "author": "Unknown photographer",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AFarmers%20of%20forty%20centuries%20-%20houses%20standing%20in%20rice%20paddies%20(Japan).jpg",
+      "width": 640,
+      "height": 387
     },
     "shakai-shinkansen": {
       "entity": "新幹線",
@@ -1043,7 +1131,15 @@
       "alt": "国会議事堂の正面",
       "wikipedia": "ja:国会議事堂",
       "category": "National Diet Building",
-      "search": "National Diet Building Tokyo"
+      "search": "National Diet Building Tokyo",
+      "file": "shakai-kokkai",
+      "title": "Architekturmuseum der Technischen Universität Berlin Inv. Nr. 7763",
+      "author": "Hermann Ende(1829 -1907), Wilhelm Böckmann(1832 - 1902), Paul Köhler(??? - 1888)",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AArchitekturmuseum%20der%20Technischen%20Universit%C3%A4t%20Berlin%20Inv.%20Nr.%207763.jpg",
+      "width": 640,
+      "height": 476
     },
     "shakai-nara": {
       "entity": "東大寺",
@@ -1114,7 +1210,15 @@
       "category": "Rain",
       "alt": "雨が降っているようす",
       "_use": "理科の解説に置く（天気）",
-      "search": "rain drops falling"
+      "search": "rain drops falling",
+      "file": "obj-ame",
+      "title": "Christmas flood 1717",
+      "author": "Unknown author",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChristmas%20flood%201717.jpg",
+      "width": 640,
+      "height": 393
     },
     "obj-take": {
       "wikipedia": "en:Bamboo",
@@ -1160,7 +1264,15 @@
       "wikipedia": "ja:自動車工場",
       "category": "Automobile factories",
       "alt": "自動車を組み立てる工場の内部",
-      "search": "car assembly line factory"
+      "search": "car assembly line factory",
+      "file": "chi-kuruma-koujou",
+      "title": "An armored car near the end of the assembly line in one of India’s war factories",
+      "author": "National Museum of the U.S. Navy",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AAn%20armored%20car%20near%20the%20end%20of%20the%20assembly%20line%20in%20one%20of%20India%E2%80%99s%20war%20factories.jpg",
+      "width": 640,
+      "height": 887
     },
     "chi-fuuryoku": {
       "wikipedia": "ja:風力発電",
@@ -1192,13 +1304,29 @@
       "wikipedia": "ja:ダム",
       "category": "Dams in Japan",
       "alt": "谷をせき止めた大きなダム",
-      "search": "concrete dam reservoir"
+      "search": "concrete dam reservoir",
+      "file": "chi-dam",
+      "title": "Nagayasuguchi Reservoir",
+      "author": "河川一等兵",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ANagayasuguchi%20Reservoir.JPG",
+      "width": 640,
+      "height": 480
     },
     "chi-container": {
       "wikipedia": "ja:コンテナ",
       "category": "Container terminals",
       "alt": "コンテナが積まれた港",
-      "search": "container terminal cranes"
+      "search": "container terminal cranes",
+      "file": "chi-container",
+      "title": "Attack on carrier USS Franklin 19 March 1945",
+      "author": "Photographed by PHC Albert Bullock Uploaded by User:Dna-webmaster to Wikimedia Commons Originally uploaded by User:Stan Shebs to English Wikipedia",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AAttack%20on%20carrier%20USS%20Franklin%2019%20March%201945.jpg",
+      "width": 640,
+      "height": 477
     },
     "chi-taue": {
       "wikipedia": "ja:田植え",
@@ -1230,7 +1358,15 @@
       "wikipedia": "ja:酪農",
       "category": "Dairy farming",
       "alt": "牧場で草を食べる牛の群れ",
-      "search": "dairy cows grazing pasture"
+      "search": "dairy cows grazing pasture",
+      "file": "chi-rakunou",
+      "title": "Harmony Community, Putnam County, Georgia. Most of the dairy cows are Jerseys or Jersey grades. This . . .",
+      "author": "Irving Rusinow",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AHarmony%20Community%2C%20Putnam%20County%2C%20Georgia.%20Most%20of%20the%20dairy%20cows%20are%20Jerseys%20or%20Jersey%20grades.%20This%20.%20.%20.%20-%20NARA%20-%20521315.jpg",
+      "width": 640,
+      "height": 522
     },
     "sek-banri": {
       "wikipedia": "ja:万里の長城",
@@ -1249,25 +1385,57 @@
       "wikipedia": "ja:ギザの大ピラミッド",
       "category": "Pyramids of Giza",
       "alt": "砂漠に立つ四角すいの建造物",
-      "search": "Great Pyramid of Giza"
+      "search": "Great Pyramid of Giza",
+      "file": "sek-pyramid",
+      "title": "Lepsius-Expedition-Cheops-Pyramide (full)",
+      "author": "Johann Jakob Frey",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ALepsius-Expedition-Cheops-Pyramide%20(full).jpg",
+      "width": 640,
+      "height": 501
     },
     "sek-eiffel": {
       "wikipedia": "ja:エッフェル塔",
       "category": "Eiffel Tower",
       "alt": "鉄でできた塔",
-      "search": "Eiffel Tower Paris"
+      "search": "Eiffel Tower Paris",
+      "file": "sek-eiffel",
+      "title": "Lightning striking the Eiffel Tower - NOAA",
+      "author": "Gabriel Loppé",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ALightning%20striking%20the%20Eiffel%20Tower%20-%20NOAA.jpg",
+      "width": 640,
+      "height": 969
     },
     "sek-savanna": {
       "wikipedia": "ja:サバナ気候",
       "category": "Savannas",
       "alt": "まばらに木の生えた草原",
-      "search": "savanna grassland acacia"
+      "search": "savanna grassland acacia",
+      "file": "sek-savanna",
+      "title": "Renommée chevauchant Pegase Coysevox Louvre MR1824",
+      "author": "Jebulon",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ARenomm%C3%A9e%20chevauchant%20Pegase%20Coysevox%20Louvre%20MR1824.jpg",
+      "width": 640,
+      "height": 587
     },
     "sek-sabaku": {
       "wikipedia": "ja:砂漠",
       "category": "Sand dunes",
       "alt": "砂の丘が続く砂漠",
-      "search": "sand dunes desert"
+      "search": "sand dunes desert",
+      "file": "sek-sabaku",
+      "title": "ISS-31 Linear dunes in the Great Sand Sea in southwest Egypt",
+      "author": "NASA",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AISS-31%20Linear%20dunes%20in%20the%20Great%20Sand%20Sea%20in%20southwest%20Egypt.jpg",
+      "width": 640,
+      "height": 425
     }
   },
   "_parked": {
