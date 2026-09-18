@@ -1024,6 +1024,14 @@ for (const s of SUBJECTS) {
 }
 
 /* ---- 出力 ---- */
+/* ID だけを出すと、「この ID はあの問題だ」と思いこんだまま別の問題を書き換えられる
+   （実際にやった。shakai-176 の貿易の問題を、砂漠の問題文で上書きした）。
+   行頭の問題IDに、教科・学年・単元を添える */
+const whereOf = new Map(questions.map(q =>
+  [q.id, `${q.subject} ${GRADE_LABEL[q.grade] || q.grade}${q.unit ? " " + q.unit : ""}`]));
+const withWhere = line => line.replace(/^([A-Za-z]+-\d+)(?=[:：\s])/,
+  (m, id) => whereOf.has(id) ? `${id}（${whereOf.get(id)}）` : m);
+
 console.log(`\n問題 ${questions.length}問（うちスワイプ ${questions.length - normal.length}問） / 英雄 ${heroes.length}体 / エクステンション ${curated.length}種（${
   RANKS.map(r => `${r}${byRank[r].length}`).join("・")}） / クリスタル ${(crystals.crystals || []).length}種\n`);
 console.table(table);
@@ -1044,11 +1052,11 @@ console.log("難モードの内訳 ・ " +
 
 if (warnings.length) {
   console.log(`\n⚠ 警告 ${warnings.length}件`);
-  warnings.forEach(w => console.log("  - " + w));
+  warnings.forEach(w => console.log("  - " + withWhere(w)));
 }
 if (errors.length) {
   console.log(`\n✗ エラー ${errors.length}件`);
-  errors.forEach(e => console.log("  - " + e));
+  errors.forEach(e => console.log("  - " + withWhere(e)));
   process.exit(1);
 }
 console.log("\n✓ 検証を通過しました\n");
