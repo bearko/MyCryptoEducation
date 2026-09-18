@@ -3494,5 +3494,150 @@
     "tip": "望みを言葉にした時点で、それは半分だけ外の世界に出ている。",
     "card": "join の使い方",
     "level": 2
+  },
+  {
+    "id": "gaikokugo-119",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "気持ちの言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「I'm happy.」の意味はどれ?",
+    "choices": [
+      "わたしはうれしい。",
+      "わたしはねむい。",
+      "わたしはおなかがすいた。",
+      "わたしはつかれた。"
+    ],
+    "answer": 0,
+    "hints": [
+      "happy は、にこにこした顔と結びつく語だ。",
+      "たん生日にプレゼントをもらったときの気持ちだ。",
+      "「Happy birthday!」のあいさつにも入っている。"
+    ],
+    "lesson": "**I'm 〜.** で今の気持ちや様子を言える。happy（うれしい）、sad（悲しい）、sleepy（ねむい）、hungry（おなかがすいた）、tired（つかれた）。**I am の短い形が I'm** で、話すときはほとんどこちらを使う。",
+    "tip": "気持ちを言える言葉をいくつか持っていると、通じる量が一気に増える。",
+    "card": "気持ちを表す英語",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-120",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "アルファベット",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "大文字の「G」に対する小文字はどれ?",
+    "choices": [
+      "q",
+      "g",
+      "j",
+      "p"
+    ],
+    "answer": 1,
+    "hints": [
+      "小文字には、線が下にのびるものがある。",
+      "大文字の形の面影が残っている。",
+      "同じ音を表す字を選ぶ。"
+    ],
+    "lesson": "アルファベットは**大文字26字・小文字26字**で、形の似ているもの（Cc・Oo・Ss）と、まるでちがうもの（Aa・Gg・Rr）がある。**下にのびる小文字**（g・j・p・q・y）はまちがえやすい。**文のはじめと人名・地名は大文字**で書く決まりだ。",
+    "tip": "同じ音に二つの形を用意する。日本語のひらがなとかたかなと、考え方は似ている。",
+    "card": "大文字と小文字",
+    "level": 1
+  },
+  {
+    "id": "gaikokugo-121",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "注文する",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "店で「What would you like?」と聞かれたときの答え方は?",
+    "choices": [
+      "I'd like a hamburger.",
+      "I like a hamburger.",
+      "I am a hamburger.",
+      "I have like hamburger."
+    ],
+    "answer": 0,
+    "hints": [
+      "「何になさいますか」とていねいに聞かれている。",
+      "答えるときも、同じようにていねいな言い方を使う。",
+      "would like は、like よりていねいに「〜がほしい」を表す。"
+    ],
+    "lesson": "**would like** は want / like よりていねいな言い方で、注文や申し出に使う。I'd like 〜.（〜をお願いします）は I would like 〜 の短い形だ。**同じ意味を、場面に応じて言い分ける** ——ていねいさの段は、どの言語にもある。",
+    "tip": "ていねいな言い方は、遠回りに聞こえて、実は相手に選ぶ余地を残している。",
+    "card": "would like",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-122",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "持ち物をたずねる",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「Do you have a pen?」に「はい」と答えるときの言い方は?",
+    "choices": [
+      "Yes, I am.",
+      "Yes, I do.",
+      "Yes, I can.",
+      "Yes, you do."
+    ],
+    "answer": 1,
+    "hints": [
+      "聞かれたときに使われた語で答える。",
+      "答えるのは自分なので、主語は I になる。",
+      "Do で聞かれているので、その語を返す。"
+    ],
+    "lesson": "**Do you 〜? には do で答える**（Yes, I do. / No, I don't.）。Are you 〜? には am、Can you 〜? には can。**問いの最初の語が、答えの形を決めている**ので、聞き取るときは最初の語に耳を向けるとよい。",
+    "tip": "最初のひと言に、答え方まで書いてある。会話は思ったより親切にできている。",
+    "card": "do への答え方",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-123",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "思い出を言う",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「My best memory is the school trip.」の意味はどれ?",
+    "choices": [
+      "修学旅行が楽しみだ。",
+      "いちばんの思い出は修学旅行です。",
+      "修学旅行に行きたい。",
+      "修学旅行は終わった。"
+    ],
+    "answer": 1,
+    "hints": [
+      "memory は「思い出・記憶」という意味だ。",
+      "best は good のいちばん上の形にあたる。",
+      "すでにあったことをふり返って話している。"
+    ],
+    "lesson": "**best** は good の最上級で「いちばんよい」。My best memory is 〜.（いちばんの思い出は〜です）は、**小学校の最後に自分の6年間をふり返って話す**単元で使う。続けて It was fun.（楽しかった）と感想を足すと、一つのまとまった話になる。",
+    "tip": "思い出を人に渡せる形にすること。それが、言葉を学ぶいちばん古い理由かもしれない。",
+    "card": "best memory",
+    "level": 2
   }
 ]
