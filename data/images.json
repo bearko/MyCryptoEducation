@@ -1207,20 +1207,6 @@
       "width": 640,
       "height": 969
     },
-    "obj-kasa": {
-      "alt": "開いた傘が1本",
-      "why": "3便とも群衆のB&W写真",
-      "category": "Umbrellas",
-      "search": "umbrella open",
-      "file": "obj-kasa",
-      "title": "Les Parapluies de Viborg",
-      "author": "W.carter",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3ALes%20Parapluies%20de%20Viborg.jpg",
-      "width": 640,
-      "height": 497
-    },
     "obj-tokei": {
       "alt": "壁掛けの時計。数字の文字盤",
       "why": "3便とも海の写真",
@@ -1262,20 +1248,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AA%20Derby%20of%20box%20calf%20leather%20with%20brogues.jpg",
       "width": 640,
       "height": 413
-    },
-    "obj-boushi": {
-      "alt": "帽子が1つ",
-      "why": "像の写真",
-      "category": "Hats",
-      "search": "hat",
-      "file": "obj-boushi",
-      "title": "Girl Ranger",
-      "author": "Wilfredor",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3AGirl%20Ranger.jpg",
-      "width": 640,
-      "height": 425
     },
     "obj-ringo": {
       "alt": "赤いリンゴ",
@@ -1360,20 +1332,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AFigure%207-%20Elephant%20in%20Ruaha%20National%20Park%2C%20Tanzania%20(30134020026).jpg",
       "width": 640,
       "height": 372
-    },
-    "obj-kaeru": {
-      "alt": "カエルが1匹",
-      "why": "カラス",
-      "category": "Frogs",
-      "search": "frog",
-      "file": "obj-kaeru",
-      "title": "Northern Leopard Frog in Ontario",
-      "author": "TheInternetWasMadeForCats",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3ANorthern%20Leopard%20Frog%20in%20Ontario.jpg",
-      "width": 640,
-      "height": 480
     },
     "shakai-himeji": {
       "alt": "白い天守閣",
@@ -1542,20 +1500,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AAt%20Taj%20Mahal%205949524472%20dbf6f5c90d%20o.jpg",
       "width": 640,
       "height": 383
-    },
-    "sek-hyouga": {
-      "alt": "谷を流れ下る氷河",
-      "why": "黒枠の中の細い帯",
-      "category": "Glaciers",
-      "search": "glacier ice",
-      "file": "sek-hyouga",
-      "title": "ISS-30 Perito Moreno Glacier near Lake Argentino, Argentina",
-      "author": "NASA",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AISS-30%20Perito%20Moreno%20Glacier%20near%20Lake%20Argentino%2C%20Argentina.jpg",
-      "width": 640,
-      "height": 425
     },
     "obj-kame": {
       "alt": "カメが1匹",
@@ -1751,21 +1695,6 @@
       "source": "https://commons.wikimedia.org/wiki/File%3AFront%20view%20of%20Statue%20of%20Liberty%20with%20pedestal%20and%20base%202024.jpg",
       "width": 640,
       "height": 1407
-    },
-    "obj-fune": {
-      "alt": "船が1隻、水に浮かんでいる",
-      "titleFree": true,
-      "wikipedia": "ja:船",
-      "category": "Ships",
-      "search": "ship at sea photograph",
-      "file": "obj-fune",
-      "title": "Flickr - Official U.S. Navy Imagery - Indonesian and U.S. Coast Guard ships transit the Java Sea while conducting ship formation exercises during the at-sea phase of Cooperation Afloat Readiness and Training 2012 Indonesia.",
-      "author": "Official Navy Page from United States of America Gregory A. Harden II/U.S. Navy",
-      "license": "Public domain",
-      "licenseUrl": "",
-      "source": "https://commons.wikimedia.org/wiki/File%3AFlickr%20-%20Official%20U.S.%20Navy%20Imagery%20-%20Indonesian%20and%20U.S.%20Coast%20Guard%20ships%20transit%20the%20Java%20Sea%20while%20conducting%20ship%20formation%20exercises%20during%20the%20at-sea%20phase%20of%20Cooperation%20Afloat%20Readiness%20and%20Training%202012%20Indonesia..jpg",
-      "width": 640,
-      "height": 457
     },
     "obj-booru": {
       "alt": "ボールが1つ",
@@ -2022,6 +1951,82 @@
       "width": 640,
       "height": 587,
       "_why": "ペガサスの彫刻（obj-uma と同一ファイル）"
+    },
+    "obj-kasa": {
+      "alt": "開いた傘が1本",
+      "why": "3便とも群衆のB&W写真",
+      "category": "Umbrellas",
+      "search": "umbrella open",
+      "file": "obj-kasa",
+      "title": "Les Parapluies de Viborg",
+      "author": "W.carter",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3ALes%20Parapluies%20de%20Viborg.jpg",
+      "width": 640,
+      "height": 497,
+      "_why": "傘が街路に吊るされたアート。1本の傘ではない"
+    },
+    "obj-boushi": {
+      "alt": "帽子が1つ",
+      "why": "像の写真",
+      "category": "Hats",
+      "search": "hat",
+      "file": "obj-boushi",
+      "title": "Girl Ranger",
+      "author": "Wilfredor",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3AGirl%20Ranger.jpg",
+      "width": 640,
+      "height": 425,
+      "_why": "帽子をかぶった人が主役。帽子を当てる形式には使えない"
+    },
+    "obj-kaeru": {
+      "alt": "カエルが1匹",
+      "why": "カラス",
+      "category": "Frogs",
+      "search": "frog",
+      "file": "obj-kaeru",
+      "title": "Northern Leopard Frog in Ontario",
+      "author": "TheInternetWasMadeForCats",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3ANorthern%20Leopard%20Frog%20in%20Ontario.jpg",
+      "width": 640,
+      "height": 480,
+      "_why": "草むらの保護色で、小さく出すと見つけられない"
+    },
+    "sek-hyouga": {
+      "alt": "谷を流れ下る氷河",
+      "why": "黒枠の中の細い帯",
+      "category": "Glaciers",
+      "search": "glacier ice",
+      "file": "sek-hyouga",
+      "title": "ISS-30 Perito Moreno Glacier near Lake Argentino, Argentina",
+      "author": "NASA",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AISS-30%20Perito%20Moreno%20Glacier%20near%20Lake%20Argentino%2C%20Argentina.jpg",
+      "width": 640,
+      "height": 425,
+      "_why": "衛星から見た氷河。縞模様にしか読めない（地上写真がほしい）"
+    },
+    "obj-fune": {
+      "alt": "船が1隻、水に浮かんでいる",
+      "titleFree": true,
+      "wikipedia": "ja:船",
+      "category": "Ships",
+      "search": "ship at sea photograph",
+      "file": "obj-fune",
+      "title": "Flickr - Official U.S. Navy Imagery - Indonesian and U.S. Coast Guard ships transit the Java Sea while conducting ship formation exercises during the at-sea phase of Cooperation Afloat Readiness and Training 2012 Indonesia.",
+      "author": "Official Navy Page from United States of America Gregory A. Harden II/U.S. Navy",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "source": "https://commons.wikimedia.org/wiki/File%3AFlickr%20-%20Official%20U.S.%20Navy%20Imagery%20-%20Indonesian%20and%20U.S.%20Coast%20Guard%20ships%20transit%20the%20Java%20Sea%20while%20conducting%20ship%20formation%20exercises%20during%20the%20at-sea%20phase%20of%20Cooperation%20Afloat%20Readiness%20and%20Training%202012%20Indonesia..jpg",
+      "width": 640,
+      "height": 457,
+      "_why": "軍艦3隻。船には見えるが、子ども向けの画面に軍艦を出すかどうかは決めていない（漁船やフェリーを採り直したい）"
     }
   }
 }
