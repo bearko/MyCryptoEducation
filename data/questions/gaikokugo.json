@@ -3786,5 +3786,189 @@
     "level": 2,
     "image": "sek-eiffel",
     "imageAt": "prompt"
+  },
+  {
+    "id": "gaikokugo-129",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "国の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "format": "swipe",
+    "image": "sek-taj",
+    "alt": "白い大理石でできた、丸い屋根と4本の塔を持つ建物の写真",
+    "prompt": "この建物があるのはどの国?",
+    "choices": [
+      "中国",
+      "インド"
+    ],
+    "answer": 1,
+    "lesson": "タージ・マハルは**インド**にあります。17世紀にムガル帝国の皇帝が、亡くなった妃のために建てた墓です。英語では India、その国の言葉（ヒンディー語）では भारत（バーラト）といいます。**国名は、外から呼ぶ名と自分で呼ぶ名がちがうことがあります。**",
+    "card": "インドとタージ・マハル",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-130",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "国の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "format": "swipe",
+    "image": "sek-jiyuu",
+    "alt": "たいまつをかかげ、冠をかぶった大きな像の写真",
+    "prompt": "この像が立っているのはどの都市?",
+    "choices": [
+      "パリ",
+      "ニューヨーク"
+    ],
+    "answer": 1,
+    "lesson": "自由の女神像は**ニューヨーク**の港に立っています。**フランスからアメリカへの贈り物**で、1886年に完成しました。作られたのはパリで、船で運ばれて組み立てられています。英語では the Statue of Liberty といいます。",
+    "card": "自由の女神とニューヨーク",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-131",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "身の回りのもの",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「book」が指しているのはどれ?",
+    "choices": [
+      "ほん",
+      "くつ",
+      "ぞう",
+      "かめ"
+    ],
+    "answer": 0,
+    "hints": [
+      "学校でも家でも、読むために開くものだ。",
+      "ページをめくって使う。",
+      "「I read a ___ every night.」のように使える。"
+    ],
+    "lesson": "**book** は本。学校で使う英語には notebook（ノート）、pencil（えんぴつ）、eraser（消しゴム）、ruler（じょうぎ）があります。**notebook は note（書きとめる）＋ book** で、語を2つに分けると意味が見えます。",
+    "tip": "知っている物に、もう一つ名前がつく。外国語を覚えるとは、世界が二重写しになることだ。",
+    "card": "book と notebook",
+    "level": 1,
+    "choiceArt": [
+      "obj-hon",
+      "obj-kutsu",
+      "obj-zou",
+      "obj-kame"
+    ]
+  },
+  {
+    "id": "gaikokugo-132",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "動物の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「elephant」が指しているのはどれ?",
+    "choices": [
+      "うま",
+      "くも",
+      "ぞう",
+      "かめ"
+    ],
+    "answer": 2,
+    "hints": [
+      "陸で いちばん大きい動物だ。",
+      "長い鼻を手のように使う。",
+      "耳が大きく、アフリカやアジアにすんでいる。"
+    ],
+    "lesson": "**elephant** はゾウ。動物の英語には horse（馬）、turtle（カメ）、sheep（ヒツジ）があります。**sheep は1頭でも何頭でも sheep** で形が変わりません（deer・fish も同じ）。**数えられる・数えられないの感覚が、日本語とはちがいます。**",
+    "tip": "形の変わらない名詞があるのは、昔の英語の名残りだ。よく使う言葉ほど古い形が残る。",
+    "card": "動物の英語（elephant）",
+    "level": 2,
+    "choiceArt": [
+      "obj-uma",
+      "obj-kumo",
+      "obj-zou",
+      "obj-kame"
+    ]
+  },
+  {
+    "id": "gaikokugo-133",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "食べ物",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「apple」が指しているのはどれ?",
+    "choices": [
+      "りんご",
+      "つくえ",
+      "とけい",
+      "はさみ"
+    ],
+    "answer": 0,
+    "hints": [
+      "木になる、あかい実だ。",
+      "「An ___ a day keeps the doctor away.」という言い方がある。",
+      "前につく語は a ではなく an になる。"
+    ],
+    "lesson": "**apple** はりんご。**母音の音で始まるので前は an** です（an apple / an orange）。果物の英語には orange、grape（ぶどう）、peach（もも）、banana があります。**grape は1粒を指す語**なので、ひとふさは a bunch of grapes といいます。",
+    "tip": "1粒か、ひとふさか。日本語がひとまとめにしているところを、英語は分けて見ている。",
+    "card": "apple と an",
+    "level": 1,
+    "choiceArt": [
+      "obj-ringo",
+      "obj-tsukue",
+      "obj-tokei",
+      "obj-hasami"
+    ]
+  },
+  {
+    "id": "gaikokugo-134",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "身の回りのもの",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「ball」が指しているのはどれ?",
+    "choices": [
+      "コップ",
+      "ボール",
+      "とけい",
+      "はさみ"
+    ],
+    "answer": 1,
+    "hints": [
+      "まるくて、ころがる。",
+      "けったり、投げたり、打ったりして遊ぶ。",
+      "「Let's play ___.」と誘うときに使う。"
+    ],
+    "lesson": "**ball** はボール。遊びの英語には play（遊ぶ・する）、catch、kick、throw があります。**play のあとにスポーツ名を置くときは the を付けません**（play soccer）が、楽器には付けます（play the piano）。**同じ play でも、あとに来るもので形が変わります。**",
+    "tip": "決まりの例外に見えるものにも、たいてい昔の事情がある。",
+    "card": "ball と play",
+    "level": 1,
+    "choiceArt": [
+      "obj-koppu",
+      "obj-booru",
+      "obj-tokei",
+      "obj-hasami"
+    ]
   }
 ]
