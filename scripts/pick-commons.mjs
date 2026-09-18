@@ -22,7 +22,8 @@ import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gather, describe, adopt, usability, normalizeLicense, deepQueries, sleep, WAIT } from "./commons-lib.mjs";
+import { gather, describe, adopt, usability, normalizeLicense, deepQueries,
+         asFresh, unpark, parkedKeys, sleep, WAIT } from "./commons-lib.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = "public/commons";
@@ -136,11 +137,28 @@ const bookBefore = await readFile(bookPath, "utf8");
 const book = JSON.parse(bookBefore);
 const allow = book.allow.map(s => s.toLowerCase());
 const keys = args.filter(a => !a.startsWith("--"));
-const wanted = Object.entries(book.images).filter(([k, v]) => keys.length
+/* **park した行も開きます。**
+   park は「自動では当たらなかった」という印で、**そういう行こそ人が見て選ぶ出番**です。
+   ここを開けないと行き止まりになります（16行を park した直後、この画面が
+   「選ぶものはありません」と言いました）。
+     npm run pick:commons -- --parked        park した行をぜんぶ並べる
+     npm run pick:commons -- obj-uma         名指し（park にあっても開く）
+   **台帳はまだ書き換えません。** 1枚が決まった時点で `images` へ戻します。 */
+const PARKED = args.includes("--parked");
+const live = Object.entries(book.images).filter(([k, v]) => keys.length
   ? keys.includes(k)
   : !v.file || !existsSync(join(ROOT, OUT, v.file + ".webp")));
+const fromPark = parkedKeys(book)
+  .filter(k => keys.length ? keys.includes(k) : PARKED)
+  .map(k => [k, asFresh(book._parked[k])]);
+const wanted = [...live, ...fromPark];
 
-if (!wanted.length && !SELFTEST) { console.log("選ぶものはありません。"); process.exit(0); }
+if (!wanted.length && !SELFTEST) {
+  console.log("選ぶものはありません。");
+  const n = parkedKeys(book).length;
+  if (n) console.log(`  park した行が ${n}件 あります → npm run pick:commons -- --parked`);
+  process.exit(0);
+}
 
 /** 実際に外へ出て候補を集める。--selftest のときは作り物で置き換える */
 const buildModel = async () => {
@@ -190,7 +208,9 @@ const fixtureModel = () => fixtureRows().map(([key, entry]) => ({
 let sharp = null;
 const takeReal = async (key, title) => {
   if (!sharp) sharp = (await import("sharp")).default;
-  const entry = book.images[key];
+  /* park から選ばれたら、ここで `images` へ戻す。**選ばれるまでは park のまま** */
+  const entry = unpark(book, key);
+  if (!entry) throw new Error("台帳にない行です");
   const desc = (await describe([title])).get(title);
   if (!desc) throw new Error("その画像の情報が引けません");
   const use = usability(desc.license, { allow, titleFree: entry.titleFree });
@@ -200,7 +220,7 @@ const takeReal = async (key, title) => {
   return `${desc.license} ・ ${Math.round(size.wide / 1024)}KB / small ${Math.round(size.small / 1024)}KB`;
 };
 const takeFake = async (key, title) => {
-  const entry = book.images[key];
+  const entry = book.images[key] || book._parked?.[key];
   const use = usability(title === "File:A.jpg" ? "Public domain" : "CC BY-SA 4.0",
                         { allow, titleFree: entry.titleFree });
   if (!use.ok) throw new Error(use.why);
@@ -210,6 +230,9 @@ const takeFake = async (key, title) => {
 /* ---- 立てる ---- */
 
 const model = SELFTEST ? fixtureModel() : await buildModel();
+/* 押せるのは、いま画面に並んでいる行だけ。**`wanted` から作ると自己テストで食い違います**
+   （作り物の行は `wanted` に無いため）。画面に出したものから作ります */
+const known = new Set(model.map(m => m.key));
 const take = SELFTEST ? takeFake : takeReal;
 const html = page(model);
 
@@ -224,7 +247,7 @@ const server = createServer(async (req, res) => {
     for await (const c of req) body += c;
     try {
       const { key, title } = JSON.parse(body || "{}");
-      if (!book.images[key]) throw new Error("台帳にない行です");
+      if (!known.has(key)) throw new Error("台帳にない行です");
       const text = await take(key, title);
       console.log(`  ✓ ${key}  ${title}  ${text}`);
       json(200, { ok: true, text });
@@ -304,6 +327,29 @@ if (SELFTEST) {
   t("Category: が二重にならない",
     deepQueries("Category:Dams in Japan", {})[0].includes('deepcategory:"Dams in Japan"'),
     deepQueries("Category:Dams in Japan", {})[0]);
+
+  /* **park を開き直せるか。**
+     park は「自動では当たらなかった」という印で、二度と触らないという意味ではない。
+     16行を park した直後にこの画面が「選ぶものはありません」と言ったので、
+     `--parked` と名指しで開けるようにした。**台帳は、1枚が決まるまで書き換えない。** */
+  const fake = {
+    images: {},
+    _parked: { _note: "見出しなので数えない",
+               "obj-x": { search: "x", titleFree: true, file: "obj-x", title: "T",
+                          author: "A", license: "Public domain", source: "S",
+                          width: 640, height: 480, _why: "別のものが来た" } },
+  };
+  t("park の行を数えられる（見出しは数えない）",
+    parkedKeys(fake).length === 1 && parkedKeys(fake)[0] === "obj-x", parkedKeys(fake).join(","));
+  const fresh = asFresh(fake._parked["obj-x"]);
+  t("開き直した行は「まだ採っていない」状態になる",
+    !fresh.file && !fresh.license && !fresh._why && fresh.search === "x" && fresh.titleFree === true,
+    JSON.stringify(fresh));
+  t("asFresh は台帳を書き換えない", !!fake._parked["obj-x"].file);
+  const moved = unpark(fake, "obj-x");
+  t("選ばれた行だけ images へ戻る",
+    !!fake.images["obj-x"] && !fake._parked["obj-x"] && !moved.file, JSON.stringify(moved));
+  t("park にも images にも無い行は null", unpark(fake, "obj-none") === null);
   server.close();
   console.log(out.every(Boolean) ? "\nすべて通過" : `\n${out.filter(x => !x).length}件 失敗`);
   process.exit(out.every(Boolean) ? 0 : 1);

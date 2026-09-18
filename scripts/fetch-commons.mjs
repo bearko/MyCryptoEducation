@@ -18,7 +18,8 @@ import { writeFile, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gather, describe, adopt, usability, isTitleFree, sleep, WAIT } from "./commons-lib.mjs";
+import { gather, describe, adopt, usability, isTitleFree,
+         asFresh, unpark, parkedKeys, sleep, WAIT } from "./commons-lib.mjs";
 
 let sharp;
 try { sharp = (await import("sharp")).default; }
@@ -34,11 +35,24 @@ const allow = book.allow.map(s => s.toLowerCase());
 const args = process.argv.slice(2);
 const LIST = args.includes("--list");
 const keys = args.filter(a => !a.startsWith("--"));
-const wanted = Object.entries(book.images).filter(([k, v]) => keys.length
+/* **park した行も取りに行けます**（`--parked`、または名指し）。park は
+   「自動では当たらなかった」という印で、二度と触らないという意味ではありません。
+   **採れた時点で `images` へ戻します** —— 採れなければ park のままです。 */
+const PARKED = args.includes("--parked");
+const live = Object.entries(book.images).filter(([k, v]) => keys.length
   ? keys.includes(k)
   : !v.file || !existsSync(join(ROOT, OUT, v.file + ".webp")));
+const fromPark = parkedKeys(book)
+  .filter(k => keys.length ? keys.includes(k) : PARKED)
+  .map(k => [k, asFresh(book._parked[k])]);
+const wanted = [...live, ...fromPark];
 
-if (!wanted.length) { console.log("取りに行くものはありません。"); process.exit(0); }
+if (!wanted.length) {
+  console.log("取りに行くものはありません。");
+  const n = parkedKeys(book).length;
+  if (n) console.log(`  park した行が ${n}件 あります → node scripts/fetch-commons.mjs --parked`);
+  process.exit(0);
+}
 
 let ok = 0, ng = 0, listed = 0;
 for (const [key, entry] of wanted) {
@@ -87,7 +101,9 @@ for (const [key, entry] of wanted) {
       ng++; await sleep(WAIT); continue;
     }
 
-    const size = await adopt({ desc: hit, key, entry, root: ROOT, out: OUT, sharp });
+    /* park から採れたら、ここで `images` へ戻す（採れなければ park のまま） */
+    const target = unpark(book, key) || entry;
+    const size = await adopt({ desc: hit, key, entry: target, root: ROOT, out: OUT, sharp });
     console.log(`  ✓ ${key}  ${hit.license}  ${hit.via}  ${Math.round(size.wide / 1024)}KB / small ${
       Math.round(size.small / 1024)}KB`);
     if (!isTitleFree(hit.license))

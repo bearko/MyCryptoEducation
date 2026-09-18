@@ -1209,178 +1209,264 @@
     }
   },
   "_parked": {
-    "_note": "何度採っても別のものが来た行。**台帳から外してある。** 使いたくなったら npm run pick:commons で写真を見て選び、commons に File 名を書いて images へ戻す。自動で探しにいっても当たらないことが確かめられている。",
+    "_note": "何度採っても別のものが来た行。**`images` の外に置いてあります。** 自動で探しても当たらないことが確かめられているので、`npm run pick:commons -- --parked` で写真を見て選んでください。**1枚が決まった時点で `images` へ戻ります。**`_why` に、前回そこで何が来たかを書いてあります",
     "obj-kasa": {
       "alt": "開いた傘が1本",
-      "why": "3便とも群衆のB&W写真"
+      "why": "3便とも群衆のB&W写真",
+      "category": "Umbrellas",
+      "search": "umbrella open"
     },
     "obj-tokei": {
       "alt": "壁掛けの時計。数字の文字盤",
-      "why": "3便とも海の写真"
+      "why": "3便とも海の写真",
+      "category": "Clocks",
+      "search": "analog clock face"
     },
     "obj-hikouki": {
       "alt": "飛行機が1機",
-      "why": "衝突実験の火の玉"
+      "why": "衝突実験の火の玉",
+      "category": "Airliners in flight",
+      "search": "airliner in flight sky"
     },
     "obj-kutsu": {
       "alt": "靴が1足ならんでいる",
-      "why": "露店の靴の山"
+      "why": "露店の靴の山",
+      "category": "Shoes",
+      "search": "pair of shoes"
     },
     "obj-boushi": {
       "alt": "帽子が1つ",
-      "why": "像の写真"
+      "why": "像の写真",
+      "category": "Hats",
+      "search": "hat"
     },
     "obj-ringo": {
       "alt": "赤いリンゴ",
-      "why": "店内の写真"
+      "why": "店内の写真",
+      "category": "Apples",
+      "search": "red apple fruit"
     },
     "obj-budou": {
       "alt": "ぶどうのふさ",
-      "why": "金属の半球"
+      "why": "金属の半球",
+      "category": "Grapes",
+      "search": "bunch of grapes"
     },
     "obj-gyuunyuu": {
       "alt": "コップに入った牛乳",
-      "why": "商品のラベルが写りこむ"
+      "why": "商品のラベルが写りこむ",
+      "category": "Milk",
+      "search": "glass of milk"
     },
     "obj-enpitsu": {
       "alt": "鉛筆が1本",
-      "why": "陳列棚"
+      "why": "陳列棚",
+      "category": "Pencils",
+      "search": "pencil"
     },
     "obj-hasami": {
       "alt": "はさみが1丁",
-      "why": "古い火ばさみ"
+      "why": "古い火ばさみ",
+      "category": "Scissors",
+      "search": "scissors"
     },
     "obj-hon": {
       "alt": "本が1冊置いてある",
-      "why": "事務所のB&W写真"
+      "why": "事務所のB&W写真",
+      "category": "Books",
+      "search": "open book"
     },
     "obj-koppu": {
       "alt": "コップが1つ",
-      "why": "装飾の鉢"
+      "why": "装飾の鉢",
+      "category": "Drinking glasses",
+      "search": "drinking glass"
     },
     "obj-zou": {
       "alt": "ゾウが1頭立っている",
-      "why": "書物の扉"
+      "why": "書物の扉",
+      "category": "Elephants",
+      "search": "elephant"
     },
     "obj-kaeru": {
       "alt": "カエルが1匹",
-      "why": "カラス"
+      "why": "カラス",
+      "category": "Frogs",
+      "search": "frog"
     },
     "rika-furiko": {
       "alt": "糸におもりを下げた振り子",
-      "why": "ニュートンのゆりかご"
+      "why": "ニュートンのゆりかご",
+      "category": "Pendulums",
+      "search": "pendulum"
     },
     "shakai-himeji": {
       "alt": "白い天守閣",
-      "why": "天守ではなく塀"
+      "why": "天守ではなく塀",
+      "category": "Himeji Castle",
+      "search": "Himeji Castle keep"
     },
     "obj-taiyou": {
       "alt": "太陽が輝いている",
-      "why": "アナレンマの図"
+      "why": "アナレンマの図",
+      "category": "Sun",
+      "search": "sun photograph"
     },
     "obj-me": {
       "alt": "人の目を近くから写した写真",
-      "why": "暗くて判別できない"
+      "why": "暗くて判別できない",
+      "category": "Human eyes",
+      "search": "human eye close up"
     },
     "obj-te": {
       "alt": "開いた手のひら",
-      "why": "人物の写真"
+      "why": "人物の写真",
+      "category": "Human hands",
+      "search": "human hand"
     },
     "obj-fude": {
       "alt": "習字に使う筆",
-      "why": "筆と判別しにくい"
+      "why": "筆と判別しにくい",
+      "category": "Calligraphy brushes",
+      "search": "calligraphy brush"
     },
     "obj-suzuri": {
       "alt": "墨をする すずり",
-      "why": "人物画"
+      "why": "人物画",
+      "category": "Inkstones",
+      "search": "inkstone"
     },
     "obj-kai": {
       "alt": "貝がらが1つ",
-      "why": "定規と並んだ微小な貝"
+      "why": "定規と並んだ微小な貝",
+      "category": "Seashells",
+      "search": "seashell"
     },
     "chi-chabatake": {
       "alt": "畝がうねる茶畑",
-      "why": "茶畑と読めない"
+      "why": "茶畑と読めない",
+      "category": "Tea plantations in Japan",
+      "search": "tea plantation Japan"
     },
     "chi-gyokou": {
       "alt": "漁船がとまっている港",
-      "why": "夕景で港と読めない"
+      "why": "夕景で港と読めない",
+      "category": "Fishing ports in Japan",
+      "search": "fishing port boats Japan"
     },
     "chi-ringoen": {
       "alt": "実のなったりんごの木が並ぶ果樹園",
-      "why": "実が写っていない"
+      "why": "実が写っていない",
+      "category": "Apple orchards",
+      "search": "apple orchard"
     },
     "chi-kuukou": {
       "alt": "旅客機がとまる空港",
-      "why": "駐車場に見える"
+      "why": "駐車場に見える",
+      "category": "Airports in Japan",
+      "search": "airport terminal"
     },
     "chi-shinrin": {
       "alt": "手入れされたスギの人工林",
-      "why": "下草の標識"
+      "why": "下草の標識",
+      "category": "Forests of Japan",
+      "search": "forest trees Japan"
     },
     "chi-yuki-country": {
       "alt": "雪におおわれた家なみ",
-      "why": "何の建物か分からない"
+      "why": "何の建物か分からない",
+      "category": "Snow in Japan",
+      "search": "snow village Japan"
     },
     "sek-taj": {
       "alt": "白い大理石の廟",
-      "why": "建物ではなく銘板"
+      "why": "建物ではなく銘板",
+      "category": "Taj Mahal",
+      "search": "Taj Mahal"
     },
     "sek-hyouga": {
       "alt": "谷を流れ下る氷河",
-      "why": "黒枠の中の細い帯"
+      "why": "黒枠の中の細い帯",
+      "category": "Glaciers",
+      "search": "glacier ice"
     },
     "obj-kame": {
       "alt": "カメが1匹",
-      "why": "街並みの写真が来た"
+      "why": "街並みの写真が来た",
+      "category": "Turtles",
+      "search": "turtle"
     },
     "obj-tsukue": {
       "alt": "机が1つ置いてある",
-      "why": "机の寸法図（写真ではない）"
+      "why": "机の寸法図（写真ではない）",
+      "category": "Desks",
+      "search": "wooden desk"
     },
     "obj-ichigo": {
       "alt": "いちごの実",
-      "why": "いちごの絵のバッジ"
+      "why": "いちごの絵のバッジ",
+      "category": "Strawberries",
+      "search": "strawberry fruit"
     },
     "obj-randoseru": {
       "alt": "ランドセルが1つ",
-      "why": "B&Wの街頭写真"
+      "why": "B&Wの街頭写真",
+      "category": "Randoseru",
+      "search": "randoseru Japanese school backpack"
     },
     "obj-supuun": {
       "alt": "スプーンが1本",
-      "why": "木彫りの置物"
+      "why": "木彫りの置物",
+      "category": "Spoons",
+      "search": "spoon"
     },
     "obj-terebi": {
       "alt": "テレビが1台",
-      "why": "B&Wの機材写真"
+      "why": "B&Wの機材写真",
+      "category": "Television sets",
+      "search": "television set"
     },
     "obj-kawa": {
       "alt": "川が流れている",
-      "why": "森の中の子ども"
+      "why": "森の中の子ども",
+      "category": "Rivers of Japan",
+      "search": "river landscape"
     },
     "obj-jitensha": {
       "alt": "自転車が1台、横から写っている",
-      "why": "街の風景（自転車は小さい）"
+      "why": "街の風景（自転車は小さい）",
+      "category": "Bicycles",
+      "search": "bicycle"
     },
     "rika-batta": {
       "alt": "バッタを横から写した写真。後ろあしが長い",
-      "why": "金属の半球"
+      "why": "金属の半球",
+      "category": "Acrididae",
+      "search": "grasshopper"
     },
     "rika-mamedenkyuu": {
       "alt": "小さな電球",
-      "why": "電球の価格表（古い印刷物）"
+      "why": "電球の価格表（古い印刷物）",
+      "category": "Incandescent light bulbs",
+      "search": "small light bulb"
     },
     "shakai-kinkakuji": {
       "alt": "金色の建物が池に映っている",
-      "why": "遊歩道の写真"
+      "why": "遊歩道の写真",
+      "category": "Kinkaku-ji",
+      "search": "Kinkaku-ji golden pavilion"
     },
     "shakai-jomon": {
       "alt": "縄の文様が付いた土器",
-      "why": "縄目の見えない壺"
+      "why": "縄目の見えない壺",
+      "category": "Jōmon pottery",
+      "search": "Jomon pottery"
     },
     "shakai-toudai": {
       "alt": "海のそばに立つ灯台",
-      "why": "判別しにくい古い絵"
+      "why": "判別しにくい古い絵",
+      "category": "Tōdai-ji",
+      "search": "Todai-ji Great Buddha hall"
     },
     "obj-ki": {
       "wikipedia": "en:Tree",
