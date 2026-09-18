@@ -3308,5 +3308,191 @@
     "tip": "数が形に出る言語と、出ない言語がある。どちらが便利かではなく、どこに注意を向けるかのちがいだ。",
     "card": "have の使い方",
     "level": 2
+  },
+  {
+    "id": "gaikokugo-113",
+    "chapter": 0,
+    "grade": "e3",
+    "gradeLabel": "小学3年",
+    "subject": "外国語",
+    "unit": "身の回りのもの",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「chair」が指しているのはどれ?",
+    "choices": [
+      "いす",
+      "つき",
+      "うみ",
+      "はな"
+    ],
+    "answer": 0,
+    "hints": [
+      "教室にも家にもあるものだ。",
+      "人がすわるために使う。",
+      "「Sit down.」と言われたときに使うもの。"
+    ],
+    "lesson": "**chair** はいす。教室で使う英語には desk（つくえ）、door（ドア）、window（まど）、clock（時計）がある。**まわりにあるものから覚えると、その場で使える言葉が増えていく。**",
+    "tip": "知っている物に、もう一つ名前がつく。外国語を覚えるとは、世界が二重写しになることだ。",
+    "card": "身の回りのものの英語",
+    "level": 1,
+    "choiceArt": [
+      "obj-isu",
+      "obj-tsuki",
+      "obj-umi",
+      "obj-hana"
+    ]
+  },
+  {
+    "id": "gaikokugo-114",
+    "chapter": 0,
+    "grade": "e4",
+    "gradeLabel": "小学4年",
+    "subject": "外国語",
+    "unit": "生きものの言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "英語の「bird」が指しているのはどれ?",
+    "choices": [
+      "すずめ",
+      "カメラ",
+      "トマト",
+      "パンダ"
+    ],
+    "answer": 0,
+    "hints": [
+      "空をとぶ生きものだ。",
+      "木のえだや電線にとまっているのを見かける。",
+      "「Look at the ___.」と指をさして言える。"
+    ],
+    "lesson": "**bird** は鳥。生きものを表す英語には dog（犬）、cat（ねこ）、fish（魚）、horse（馬）がある。**bird は「鳥」全体をまとめて指す語**で、すずめは sparrow、からすは crow と、種類ごとの名前は別にある。**まとめて指す語と、一つ一つの名前の二段構え**になっているのは日本語と同じだ。",
+    "tip": "まず大きなくくりの語を覚えると、知らない鳥に出会っても指さして話せる。",
+    "card": "生きものの英語（bird）",
+    "level": 2,
+    "choiceArt": [
+      "obj-suzume",
+      "obj-kamera",
+      "obj-tomato",
+      "obj-panda"
+    ]
+  },
+  {
+    "id": "gaikokugo-115",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "したいことを言う",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「私はピザが食べたい」を英語で言うと?",
+    "choices": [
+      "I eat pizza.",
+      "I want pizza eat.",
+      "I want to eat pizza.",
+      "I like to pizza."
+    ],
+    "answer": 2,
+    "hints": [
+      "「〜したい」は want を使って表す。",
+      "want のあとに、もう一つ動詞を続けたい。",
+      "動詞を二つ並べるときは、あいだに to を入れる。"
+    ],
+    "lesson": "**want to + 動詞の原形**で「〜したい」。I want to eat pizza.／I want to go to Italy.／I want to be a teacher. **動詞を二つ続けるときに to をはさむ**のが英語のきまりで、これを知ると言えることが一気に増える。",
+    "tip": "「したい」と言えるようになると、言葉が自分の望みを運びはじめる。",
+    "card": "want to の使い方",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-116",
+    "chapter": 0,
+    "grade": "e5",
+    "gradeLabel": "小学5年",
+    "subject": "外国語",
+    "unit": "can の答え方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「Can you swim?」に「はい」と答えるときの言い方は?",
+    "choices": [
+      "Yes, I do.",
+      "Yes, I am.",
+      "Yes, I can.",
+      "Yes, you can."
+    ],
+    "answer": 2,
+    "hints": [
+      "聞かれたときに使われた語を、そのまま返す。",
+      "答えるのは自分なので、主語は I になる。",
+      "Do で聞かれたら do、Are で聞かれたら am で返す。"
+    ],
+    "lesson": "**聞くときに使った語で答える**のが英語の決まりだ。Can you 〜? → Yes, I can. / No, I can't.　Do you 〜? → Yes, I do.　Are you 〜? → Yes, I am.　**答えの形を見れば、どの語で聞かれたかが分かる。**",
+    "tip": "問いと答えが同じ語でつながっている。会話が形の上でもかみ合うようにできている。",
+    "card": "can への答え方",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-117",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "感想を言う",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「It was fun.」の意味はどれ?",
+    "choices": [
+      "それは楽しかった。",
+      "それは楽しい。",
+      "それを楽しもう。",
+      "それは楽しくない。"
+    ],
+    "answer": 0,
+    "hints": [
+      "was は be動詞の、ある形にあたる。",
+      "is が変わった形だ。",
+      "すでに終わったことについて話している。"
+    ],
+    "lesson": "**was は is の過去形**なので「〜だった」。It is fun.（楽しい）→ It was fun.（楽しかった）。行事や旅の**感想を伝えるときによく使う形**で、It was delicious.（おいしかった）、I enjoyed it.（楽しんだ）と並べて覚えるとよい。",
+    "tip": "過ぎたことを語れるようになると、思い出が言葉で人に渡せるようになる。",
+    "card": "was の使い方",
+    "level": 2
+  },
+  {
+    "id": "gaikokugo-118",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "中学校でしたいこと",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "「I want to join the brass band.」の意味はどれ?",
+    "choices": [
+      "吹奏楽部に入りたい。",
+      "吹奏楽部に入っている。",
+      "吹奏楽を聞きたい。",
+      "吹奏楽部をやめたい。"
+    ],
+    "answer": 0,
+    "hints": [
+      "want to 〜 は「〜したい」を表す。",
+      "join は「仲間に加わる」という意味の動詞だ。",
+      "まだ入っていないので、これからの望みを言っている。"
+    ],
+    "lesson": "**join** は「加わる・入る」。I want to join the soccer team.（サッカー部に入りたい）のように使う。小学校の最後には、**中学校でやりたいことを英語で言う**単元がある。**want to は、自分の望みを人に伝える最初の道具**になる。",
+    "tip": "望みを言葉にした時点で、それは半分だけ外の世界に出ている。",
+    "card": "join の使い方",
+    "level": 2
   }
 ]

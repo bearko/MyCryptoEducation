@@ -554,20 +554,6 @@
       "width": 640,
       "height": 853
     },
-    "obj-ki": {
-      "wikipedia": "en:Tree",
-      "category": "Trees",
-      "alt": "花をつけた木が1本立っている",
-      "titleFree": true,
-      "file": "obj-ki",
-      "title": "\"Cervidae resting\"",
-      "author": "Omar García",
-      "license": "CC0",
-      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-      "source": "https://commons.wikimedia.org/wiki/File%3A%22Cervidae%20resting%22.jpg",
-      "width": 640,
-      "height": 365
-    },
     "obj-isu": {
       "wikipedia": "en:Chair",
       "category": "Chairs",
@@ -1247,19 +1233,6 @@
       "category": "Pyramids of Giza",
       "alt": "砂漠に立つ四角すいの建造物"
     },
-    "sek-jiyuu": {
-      "wikipedia": "ja:自由の女神像",
-      "category": "Statue of Liberty",
-      "alt": "たいまつをかかげる像",
-      "file": "sek-jiyuu",
-      "title": "CCG infront of Lady Liberty with PACAREA Commander. (2949498372)",
-      "author": "USCG Press",
-      "license": "CC BY 2.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-      "source": "https://commons.wikimedia.org/wiki/File%3ACCG%20infront%20of%20Lady%20Liberty%20with%20PACAREA%20Commander.%20(2949498372).jpg",
-      "width": 640,
-      "height": 479
-    },
     "sek-eiffel": {
       "wikipedia": "ja:エッフェル塔",
       "category": "Eiffel Tower",
@@ -1449,6 +1422,35 @@
     "shakai-toudai": {
       "alt": "海のそばに立つ灯台",
       "why": "判別しにくい古い絵"
+    },
+    "obj-ki": {
+      "wikipedia": "en:Tree",
+      "category": "Trees",
+      "alt": "花をつけた木が1本立っている",
+      "titleFree": true,
+      "file": "obj-ki",
+      "title": "\"Cervidae resting\"",
+      "author": "Omar García",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File%3A%22Cervidae%20resting%22.jpg",
+      "width": 640,
+      "height": 365,
+      "_why": "採れた写真の主役がシカだった（木は背景）"
+    },
+    "sek-jiyuu": {
+      "wikipedia": "ja:自由の女神像",
+      "category": "Statue of Liberty",
+      "alt": "たいまつをかかげる像",
+      "file": "sek-jiyuu",
+      "title": "CCG infront of Lady Liberty with PACAREA Commander. (2949498372)",
+      "author": "USCG Press",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File%3ACCG%20infront%20of%20Lady%20Liberty%20with%20PACAREA%20Commander.%20(2949498372).jpg",
+      "width": 640,
+      "height": 479,
+      "_why": "像が小さく暗く、手前に人の背中が写っている。CC BY なので題名も伏せられない"
     }
   }
 }
