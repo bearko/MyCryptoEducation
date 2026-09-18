@@ -3755,5 +3755,36 @@
     "tip": "並べ方が変わるということは、考えを組み立てる順番も変わるということだ。",
     "card": "英語の語順",
     "level": 3
+  },
+  {
+    "id": "gaikokugo-128",
+    "chapter": 0,
+    "grade": "e6",
+    "gradeLabel": "小学6年",
+    "subject": "外国語",
+    "unit": "国の言い方",
+    "country": null,
+    "newCurriculum": false,
+    "figure": null,
+    "format": "choice",
+    "prompt": "この塔がある国を英語で言うと?",
+    "choices": [
+      "Italy",
+      "France",
+      "Spain",
+      "Germany"
+    ],
+    "answer": 1,
+    "hints": [
+      "パリにある、鉄でできた塔だ。",
+      "1889年の万国博覧会に合わせて建てられた。",
+      "設計した技師の名前が、そのまま塔の名前になっている。"
+    ],
+    "lesson": "エッフェル塔があるのは**France（フランス）**。国名は英語と日本語で形がちがうものが多い（Japan / 日本、Germany / ドイツ、Netherlands / オランダ）。**国名の頭は必ず大文字**で書く。",
+    "tip": "国の名は、その国の人が自分で呼ぶ名とちがうことがある。名前は外から付けられることも多い。",
+    "card": "国名の英語",
+    "level": 2,
+    "image": "sek-eiffel",
+    "imageAt": "prompt"
   }
 ]

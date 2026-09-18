@@ -602,6 +602,23 @@ for (const [key, p] of Object.entries(imageBook.images || {})) {
         `題名「${p.title || ""}」の表示が条件なので伏せられません。PD・CC0 を採り直してください`);
 }
 
+/* **同じ1枚を、2つの行に入れない。**
+   カテゴリ名が解決できないと `deepcategory:` のキーワードが落ちて、絞りこみだけの
+   問い合わせ（＝コモンズ全体の PD 画像）になります。そうなると**別々の行に同じ
+   1枚が入ります** —— 実際に「馬」と「サバナ」が、どちらもペガサスの彫刻になりました。
+   取り込みの側にも網を張ってありますが、**気づけるのはここです**（コードが変わっても
+   台帳は残るため）。 */
+{
+  const bySource = new Map();
+  for (const [key, p] of Object.entries(imageBook.images || {})) {
+    if (!p.file || !p.source) continue;
+    if (bySource.has(p.source))
+      err("images.json", `写真「${key}」と「${bySource.get(p.source)}」が同じ1枚です（${p.source}）。` +
+          `カテゴリか検索語が効かずに、コモンズ全体から拾ってきた可能性があります`);
+    else bySource.set(p.source, key);
+  }
+}
+
 /* 使い先を書いたまま配線し忘れると、取り込んだ写真が誰の目にも触れない。
    **`choiceArt` も数えます** —— `image` だけ見ていたので、絵の選択肢に使っている
    4枚が「参照されていません」と出ていました */
