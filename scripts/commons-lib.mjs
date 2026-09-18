@@ -346,6 +346,38 @@ export const describe = async (titles, thumb = WIDE) => {
   return out;
 };
 
+/* ---- park した行を開き直す ---- */
+
+/** 取り込みのときに埋まる欄。park から戻すときは、ここを落として「まだ採っていない」状態に戻す */
+const FETCHED = ["file", "title", "author", "license", "licenseUrl", "source", "width", "height", "_why"];
+
+/** 採ったあとの欄を落とした写し。**台帳そのものは書き換えません**（選ばれるまで park のまま） */
+export const asFresh = row => {
+  const o = { ...row };
+  for (const k of FETCHED) delete o[k];
+  return o;
+};
+
+/**
+ * **park は「いまは使えない」という印で、二度と触らないという意味ではありません。**
+ * 選ぶ画面が park を開けないままだと、**行き止まり**になります（実際になりました：
+ * 16行を park したあと `npm run pick:commons` が「選ぶものはありません」と言いました）。
+ * 1枚が決まった時点で、この関数が `_parked` から `images` へ戻します。
+ */
+export const unpark = (book, key) => {
+  if (book.images?.[key]) return book.images[key];
+  const row = book._parked?.[key];
+  if (!row) return null;
+  delete book._parked[key];
+  return (book.images[key] = asFresh(row));
+};
+
+/** park した行のキー（`_note` のような見出しは除く） */
+export const parkedKeys = book =>
+  Object.entries(book._parked || {})
+    .filter(([k, v]) => !k.startsWith("_") && v && typeof v === "object")
+    .map(([k]) => k);
+
 /**
  * 決まった1枚を採って、webp を書き、台帳の欄を埋めます。
  * **台帳に書き戻すのはここだけです。** 画面から選んでも一括で採っても、
