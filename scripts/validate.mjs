@@ -69,6 +69,15 @@ for (const bad of ALLOWED_LICENSES)
  */
 const titleFree = p => /^(public domain|pdm|cc0)/i.test(p?.license || "");
 
+const JA_CHAR   = /[ぁ-んァ-ヶ一-龥]/;
+/** 日本語にもラテン文字にも属さない文字体系。まざったらほぼ書きかけの跡 */
+const OTHER_SCRIPT = /[\u0400-\u04FF\u1100-\u11FF\uAC00-\uD7A3\u0E00-\u0E7F\u0900-\u097F\u0600-\u06FF\u0590-\u05FF]/;
+/** 小文字の英単語が、日本語のとなりに立っている（`左side`・`road のしるし`） */
+const LOWER_MIX = /(?:[a-z]{3,}[ \u3000]?[ぁ-んァ-ヶ一-龥]|[ぁ-んァ-ヶ一-龥][ \u3000]?[a-z]{3,})/;
+/** 問いとして読む欄。ここだけを見る（解説と Tips とヒントは見ない） */
+const READ_FIELDS = ["prompt", "stem", "card", "alt"];
+
+
 /* ---- 1問ごとの検証 ---- */
 const seenIds = new Set();
 const promptsBySubject = {};
@@ -279,6 +288,69 @@ for (const q of questions) {
   if (cardOwner.has(q.card) && cardOwner.get(q.card) !== q.id)
     warn(`${id}: 知識カード「${q.card}」が ${cardOwner.get(q.card)} と重複しています`);
   else cardOwner.set(q.card, q.id);
+
+  checkLanguage(q, id);
+}
+
+
+/* ---- 書きかけの外国語が残っていないか ---- */
+/**
+ * **日本語で書くべきところに、別の言語が残っていないかを見ます。**
+ *
+ * 実際に起きたことです。日本語の選択肢に英単語がまざったまま4問が入っていました
+ * （`road のしるし`・`island が多いため`・`segment`・`industrial にもどす`）。
+ * **プレイヤーには意味の通らない選択肢として見えていました。** ロシア語やハングルが
+ * 1文字だけまざったこともあります（`20年以上발表を`）。
+ *
+ * **日本語として壊れているかどうかは機械では判定できません。** ここで見ているのは
+ * 「**日本語のつもりの場所に、明らかに別の言語の断片がある**」という一点だけです。
+ *
+ * 見ない場所を決めてあります。
+ *
+ * - **`lesson`・`tip`・`hints` は見ません。** 語源やローマ字で外国語を正しく引く欄で、
+ *   実際に20か所が正しく使っています（`ラテン語の panis`・`ヘボン式では shi`・
+ *   `kill two birds with one stone`）。ここを禁止すると、書けなくなるものが増えます
+ * - **外国語と情報の教科は見ません。** 英語そのものを教える教科と、`IPアドレス`のような
+ *   略語＋日本語が日常的に出る教科だからです
+ * - **`country` は見ません。** 海外のカリキュラム名をその国の文字で書く欄です
+ *   （`Химия 8 класс`・`중학교 1학년`）
+ *
+ * **わざと別の文字体系を使う問題には `"intl": true` を付けてください**
+ * （キリル文字を扱う `kokugo-097`、インドの国名を出す `gaikokugo-129`）。
+ */
+
+function checkLanguage(q, id) {
+  const texts = [];
+  for (const k of READ_FIELDS) if (typeof q[k] === "string") texts.push([k, q[k]]);
+  (q.choices || []).forEach((c, i) => { if (typeof c === "string") texts.push([`choices[${i}]`, c]); });
+
+  /* ① 日本語でもラテン文字でもない文字。**解説と Tips も含めて見ます** ——
+     ここは「正しく引いている」ことがまず無いためです */
+  if (!q.intl) {
+    const all = [...texts,
+      ...["lesson", "tip"].map(k => [k, q[k]]).filter(([, v]) => typeof v === "string"),
+      ...(q.hints || []).map((h, i) => [`hints[${i}]`, h])];
+    for (const [k, v] of all)
+      if (typeof v === "string" && OTHER_SCRIPT.test(v))
+        err(id, `${k} に日本語以外の文字が残っています（${v.match(OTHER_SCRIPT)[0]}）。` +
+                `わざとなら "intl": true を付けてください`);
+  }
+
+  if (q.subject === "外国語" || q.subject === "情報") return;
+
+  /* ② 小文字の英単語が日本語にくっついている */
+  for (const [k, v] of texts)
+    if (LOWER_MIX.test(v))
+      err(id, `${k} に英単語が日本語のまま混ざっています（${v.match(LOWER_MIX)[0].trim()}）。` +
+              `日本語に直してください`);
+
+  /* ③ ほかの選択肢が日本語なのに、1つだけ英語で書かれている（`segment`）。
+     数字や単位（`5g`・`1/3`）と、全部が英字の問題（ローマ字の問題）は素通しします */
+  const cs = (q.choices || []).filter(c => typeof c === "string");
+  if (cs.some(c => JA_CHAR.test(c)))
+    for (const c of cs)
+      if (!JA_CHAR.test(c) && /[a-z]{3,}/.test(c) && !/[0-9]/.test(c))
+        err(id, `選択肢「${c}」だけが英語です。ほかは日本語なので、書き直しが残っている可能性があります`);
 }
 
 /* ---- 絵の選択肢（choiceArt）---- */
