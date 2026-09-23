@@ -36,6 +36,10 @@ function defaults() {
     // 設定
     settings: {
       showExplanationOnCorrect: true,  // OFFにすると正解時は演出だけで次へ進む
+      /* **音は既定でOFFです。自動で鳴らさないでください** ——
+         電車の中で開く人がいます。音は演出だけで、報酬は1つも変わりません（原則3-2） */
+      sound: false,
+      bgm: false,
     },
 
     // ステータス層の表示。称号は「称号・カレンダー」の実装まで null のまま。

@@ -1,0 +1,27 @@
+{
+  "_note": "音の台帳。出どころは bearko/mycryptoheroes の Audio/。取り込みは node scripts/fetch-mch-assets.mjs --audio（手動）。**既定はOFFです。自動で鳴らさないでください** —— 電車の中で開く人がいます。",
+  "_rule": "音は演出だけです。**鳴らしても鳴らさなくても、GUM・知識カード・クリスタルは1つも変わりません**（原則3-2）。",
+  "_size": "SEは5〜62KBなので単一ファイル版（dist/index.html）にも畳みます。BGMは1曲1〜2.8MBあるので畳みません —— base64は元の1.33倍になるので、4曲畳むと配布ファイルが実用外の大きさになります（背景写真と同じ理由）。dist では BGM が鳴りませんが、黙って諦めます。",
+  "se": {
+    "hit":     { "src": "Audio/SE/Battle/1_single_damage.mp3",        "use": "正解して敵を殴る" },
+    "blast":   { "src": "Audio/SE/Battle/2_area_damage.mp3",          "use": "スペシャルスキル・必殺技の一撃" },
+    "heal":    { "src": "Audio/SE/Battle/3_heal_resurrection.mp3",    "use": "回復のアンサースキル" },
+    "buff":    { "src": "Audio/SE/Battle/4_buff.mp3",                 "use": "バフのアンサースキル" },
+    "debuff":  { "src": "Audio/SE/Battle/5_debuff_status_effect.mp3", "use": "デバフのアンサースキル" },
+    "damage":  { "src": "Audio/SE/Actions/crash.mp3",                 "use": "不正解・時間切れで反撃を受ける" },
+    "win":     { "src": "Audio/SE/Jingles/win.mp3",                   "use": "束を倒しきった（戦果）" },
+    "lose":    { "src": "Audio/SE/Jingles/lose.mp3",                  "use": "逃げられた（戦果）" },
+    "result":  { "src": "Audio/SE/Jingles/knight.mp3",                "use": "セッションの結果" },
+    "crystal": { "src": "Audio/SE/Actions/open_treasure.mp3",         "use": "クリスタルに出会った" },
+    "craft":   { "src": "Audio/SE/Actions/production.mp3",            "use": "クラフトが成立した" },
+    "levelup": { "src": "Audio/SE/Actions/insp.mp3",                  "use": "段が上がった・仲間が増えた" },
+    "buy":     { "src": "Audio/SE/Actions/cp-mining-complete.mp3",    "use": "ショップで買った" },
+    "equip":   { "src": "Audio/SE/Actions/tooldev.mp3",               "use": "デッキを組み替えた・装備した" }
+  },
+  "bgm": {
+    "home":      { "src": "Audio/BGM/land.mp3", "use": "ホーム・集める画面" },
+    "quest":     { "src": "Audio/BGM/pve.mp3",  "use": "クエスト（出題中）" },
+    "boss":      { "src": "Audio/BGM/raid.mp3", "use": "最後の束（ボス）" },
+    "challenge": { "src": "Audio/BGM/pvp.mp3",  "use": "チャレンジバトル" }
+  }
+}

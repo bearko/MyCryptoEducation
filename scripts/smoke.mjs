@@ -2548,6 +2548,42 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
       S.crew = keep; return r; })();
     return a === b2;
   })()`) === true);
+  console.log("\n-- 音（MCHの素材） --");
+  /* **既定はOFFです。自動で鳴らさないでください** —— 電車の中で開く人がいます */
+  check("音もBGMも既定でOFF", ev("S.settings.sound") === false && ev("S.settings.bgm") === false,
+    `${ev("S.settings.sound")} / ${ev("S.settings.bgm")}`);
+  check("台帳のSEが全部そろっている", ev("Object.keys(DB.sounds.se).length") >= 10,
+    String(ev("Object.keys(DB.sounds.se).length")));
+  check("BGMは画面ごとに決まる", ev(`(() => {
+    const keep = S.view;
+    S.view = "home"; const a = bgmFor();
+    S.view = "challenge"; const b2 = bgmFor();
+    S.view = "quiz"; const c = bgmFor();
+    S.view = keep;
+    return a === "home" && b2 === "challenge" && c === "quest";
+  })()`) === true);
+  /* **音は演出だけです**（原則3-2）。鳴らしても鳴らさなくても報酬は変わらない */
+  check("音を入れても GUM・知識カード・クリスタルが1つも変わらない", ev(`(() => {
+    const ids = DB.questions.filter(q => q.subject === "理科" && q.mode !== "swipe")
+      .slice(0, 3).map(q => q.id);
+    const take = on => {
+      S.settings.sound = on; S.settings.bgm = on;
+      setSound(on); setBgm(on);
+      Object.assign(S, { gum: 0, cards: {}, crystals: {}, points: {} });
+      const real = Math.random; Math.random = () => 0.4242;
+      startRun({ ids });
+      for (let k = 0; k < ids.length; k++) {
+        const q = DB.byId[S.run.ids[S.run.i]];
+        onPick(q.answer, true);
+        advance();
+      }
+      Math.random = real;
+      return JSON.stringify([S.gum, Object.keys(S.cards).length, S.crystals, S.points]);
+    };
+    const off = take(false), on = take(true);
+    S.settings.sound = false; S.settings.bgm = false; setSound(false); setBgm(false);
+    return off === on;
+  })()`) === true);
 }
 
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));

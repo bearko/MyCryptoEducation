@@ -21,6 +21,7 @@ import { timeLimit, judge, asCount, JUDGES, chainNext, chainBonus, CHAIN_MAX_SHO
          DECK_SIZE, costOf, deckCost, deckCap, overCost, costFactor,
          coverageOf, heroPower, asDamage, asFires, onceOnly,
          ssNeed, ssReady, SS_POWER, foeFaction, BOSS_HP } from "./battle.js";
+import { playSE, playBGM, stopBGM, setSound, setBgm, EFFECT_SE } from "./sound.js";
 import { matches } from "./normalize.js";
 import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
@@ -54,6 +55,9 @@ export function mount(db, state, root) {
   // 古い保存データに残っている名前は捨てる（残すと参照先が無くて落ちる）
   Object.keys(S.exts).forEach(k => { if (!db.extensions[k]) delete S.exts[k]; });
   Object.entries(S.equip).forEach(([id, k]) => { if (k && !db.extensions[k]) delete S.equip[id]; });
+
+  /* 保存してある設定を音の側へ渡す。**既定はOFF**なので、何もしなければ鳴りません */
+  setSound(S.settings.sound); setBgm(S.settings.bgm);
 
   // **初回はホームを出さず、いきなり小学1年の問題から始める**（決定1）
   if (!S.introDone && !S.runs) return startIntro();
@@ -186,6 +190,14 @@ function drawReviewTag() {
   el.textContent = [screenId(), q?.id].filter(Boolean).join(" ・ ");
 }
 
+/** いまの画面で鳴らす曲。**ボスの束だけ別の曲になります** */
+function bgmFor() {
+  if (S.view === "quiz" || S.view === "wave")
+    return S.run.battle?.boss ? "boss" : "quest";
+  if (S.view === "challenge") return "challenge";
+  return "home";
+}
+
 function render() {
   // ホームだけ 100dvh の3層固定。それ以外は方眼紙のまま縦に流す
   const home = S.view === "home";
@@ -199,6 +211,9 @@ function render() {
   /* **持ち時間の時計は、出題の画面にしか置きません。** 画面を離れたら必ず止めます
      （止め忘れると、ホームに戻ったあとに時間切れが走ります） */
   if (S.view !== "quiz") clearClock();
+  /* **BGMは画面ごとに決めます。同じ曲ならそのまま続けます** ——
+     描き直すたびに頭から鳴り直すと、画面を行き来しただけで曲が切れます */
+  if (S.settings.bgm) playBGM(bgmFor()); else stopBGM();
   drawToast();
   drawReviewTag();
   if (!(S.view === "quiz" && currentQ() && modeOf(currentQ()) === "swipe")) unbindSwipe();
@@ -861,6 +876,46 @@ function planStrip() {
 }
 
 
+/**
+ * **音の設定**（出題中の⚙とマイページの両方に置きます）。
+ *
+ * **既定はOFFです。自動では鳴らしません** —— 電車の中で開く人がいます。
+ * ブラウザは人が触る前の再生を止めるので、**このスイッチを押した時点が
+ * 「触った」にあたります。** そこからは鳴らせます。
+ *
+ * **音は演出だけです。** 鳴らしても鳴らさなくても、GUM・知識カード・
+ * クリスタルは1つも変わりません（原則3-2）。
+ */
+function soundSwitches() {
+  return `
+    <label class="switch">
+      <input type="checkbox" id="setse" ${S.settings.sound ? "checked" : ""}>
+      <span class="sw"></span>
+      <span class="lbl">音を出す</span>
+    </label>
+    <label class="switch">
+      <input type="checkbox" id="setbgm" ${S.settings.bgm ? "checked" : ""}>
+      <span class="sw"></span>
+      <span class="lbl">BGMを流す</span>
+    </label>`;
+}
+
+function wireSoundSwitches() {
+  const se = document.getElementById("setse");
+  if (se) se.onchange = e => {
+    S.settings.sound = e.target.checked;
+    setSound(S.settings.sound);
+    playSE("equip");        // 入れた瞬間に、どれくらいの音量か分かるように
+    render();
+  };
+  const bg = document.getElementById("setbgm");
+  if (bg) bg.onchange = e => {
+    S.settings.bgm = e.target.checked;
+    setBgm(S.settings.bgm);
+    render();
+  };
+}
+
 /* ---------- デッキ（5枚編成） ---------- */
 
 /**
@@ -1128,7 +1183,7 @@ function startBattle() {
        名前は既存のまま（heroHp / heroMax）—— 戦果の画面も検査もここを読みます */
     heroMax: partyMax, heroHp: partyMax,
     ss: new Array(DECK_SIZE).fill(0),
-    chain: 0, judge: null, fired: [], as: [], once: {}, wasHit: false,
+    chain: 0, judge: null, fired: [], as: [], once: {}, wasHit: false, seq: null, seqRank: 0,
     buff: 0, debuff: 0,
     foeId: null, foeFaction: "朱雀", foeHp: 0, foeMax: 1, foeHit: 1, boss: false,
     kills: 0, wave: 0, cleared: false, down: false, fx: null, dmg: 0,
@@ -1137,6 +1192,9 @@ function startBattle() {
 }
 
 /* バフとデバフの頭打ち。積み上げて無敵にならないところで止める */
+/** 1問につき1つだけ鳴らすときの優先順位。全体攻撃がいちばん強い */
+const SE_RANK = { 2: 4, 3: 3, 4: 2, 5: 2, 1: 1 };
+
 const BUFF_MAX = 1.0;
 const DEBUFF_MAX = 0.6;
 
@@ -1167,6 +1225,7 @@ function battleHit(ok) {
     b.fx = "hero";
     b.wasHit = true;
     if (b.heroHp === 0) b.down = true;
+    playSE("damage");
     return;
   }
 
@@ -1206,6 +1265,10 @@ function battleHit(ok) {
     dmg += applyAS(b, k, h);
   }
   b.dmg = dmg;
+  /* **鳴らすのは1問につき1つだけです。** 5体ぶんのASが乗ると5回重なって、
+     何が起きたのか分からなくなります。**いちばん強い効果を代表に出します** */
+  playSE(b.seq || "hit");
+  b.seq = null; b.seqRank = 0;
   if (dmg > 0) {
     b.foeHp = Math.max(0, b.foeHp - dmg);
     b.fx = "foe";
@@ -1222,6 +1285,8 @@ function battleHit(ok) {
 function applyAS(b, k, h) {
   const rate = h.as.rate / 100;
   const kind = h.as.effect;
+  /* 音はあとで1つだけ鳴らす。全体攻撃 > 回復 > バフ・デバフ > 単体 の順で代表を取る */
+  if ((SE_RANK[kind] || 0) > (b.seqRank || 0)) { b.seq = EFFECT_SE[kind]; b.seqRank = SE_RANK[kind]; }
   if (kind === 3) {            // 回復
     b.heroHp = Math.min(b.heroMax, b.heroHp + Math.round(b.heroMax * rate));
     b.heroHp = b.heroHp;
@@ -1439,6 +1504,7 @@ function fireSS(k) {
   const el = skillCutIn(h.id, sk.name);
   setTimeout(() => {
     el.remove();
+    playSE(EFFECT_SE[sk.effect] || "blast");
     applySS(b, k, h, sk);
     drawBattle();
     setTimeout(() => { b.fx = null; b.dmg = 0; drawBattle(); }, 460);
@@ -1525,6 +1591,8 @@ function vWaveEnd(rec) {
   /* **1体でも倒していれば「撃破！」です。** 2体目を残して終わっても、
      倒した事実は消えません。**逃げられたほうは、名前を添えて1行で補います** */
   const won = w.cleared || w.kills > 0;
+  /* **ジングルは1回だけ。** 描き直すたびに鳴らすと、⚙ を開いただけで鳴ります */
+  if (S.run.gate && !S.run.gate.rang) { S.run.gate.rang = 1; playSE(won ? "win" : "lose"); }
   const fled = !w.cleared && w.foeId
     ? (DB.battle?.enemies?.[String(w.foeId)]?.name || "エネミー") : "";
   const last = S.run.i >= S.run.ids.length;
@@ -1688,6 +1756,7 @@ function vQuiz() {
       <span class="sw"></span>
       <span class="lbl">正解した問題の解説を見る</span>
     </label>
+    ${soundSwitches()}
     <button class="btn ghost" id="setclose">とじる</button>
   </div></div>` : ""}
   <div id="hintmodal"></div><div id="ssmodal"></div>`;
@@ -1732,6 +1801,7 @@ function vQuiz() {
   if (setExp) setExp.onchange = e => {
     S.settings.showExplanationOnCorrect = e.target.checked; render();
   };
+  wireSoundSwitches();
   if (mode === "elimination") wireElimination(q);
   else if (mode === "panel") wirePanel(q);
   else if (mode === "numeric") wireNumeric(q);
@@ -1930,7 +2000,7 @@ function takeCrystal(id) {
 /* 正解1問ぶんの抽選。出会えたら幸運、外れても失うものはない（原則2の唯一の例外） */
 function rollCrystal(q, gum) {
   const id = takeCrystal(drawCrystal(DB, q.subject, gum));
-  if (id) (S.run.found ||= []).push(id);
+  if (id) { (S.run.found ||= []).push(id); playSE("crystal"); }
   return id;
 }
 
@@ -2483,6 +2553,7 @@ function fireSkill() {
   const el = skillCutIn(b.heroId, skillName(DB.battle, b.heroId));
   setTimeout(() => {
     el.remove();
+    playSE("blast");
     if (!b.down) { b.foeHp = Math.max(0, b.foeHp - hit); if (b.foeHp === 0) b.kills++; }
     b.fx = "foe"; drawBattle();
     setTimeout(() => { b.fx = null; drawBattle(); }, 460);
@@ -2863,6 +2934,11 @@ function swipeReview() {
 /* ---------- リザルト ---------- */
 
 function vResult() {
+  /* **段が上がったときと仲間が増えたときだけ、別の音にします。1回だけ鳴らします** */
+  if (!S.run.rangResult) {
+    S.run.rangResult = 1;
+    playSE((S.run.levelUps || []).length || (S.run.joined || []).length ? "levelup" : "result");
+  }
   const answered = S.run.right + S.run.wrong;
   const rate = answered ? Math.round(S.run.right / answered * 100) : 0;
   const craftable = craftableKeys(DB, S).length;
@@ -3031,6 +3107,7 @@ function vCraft() {
     if (!c.ok) return;
     c.crystals.forEach(x => { S.points[x.family] = (S.points[x.family] || 0) - x.need; });
     S.exts[id] = (S.exts[id] || 0) + 1;
+    playSE("craft");
     S.toast = `<img src="${assetPath.ext(id)}" alt=""><em>${esc(e.name)}</em>`;
     render();
     setTimeout(() => { S.toast = null; drawToast(); }, 1600);
@@ -3223,6 +3300,7 @@ function vDeck() {
     const deck = [...S.deck];
     [deck[k], deck[to]] = [deck[to], deck[k]];
     S.deck = deck;
+    playSE("equip");
     render();
   });
 }
@@ -3279,6 +3357,7 @@ function vDeckPick() {
     if (at >= 0) [deck[at], deck[k]] = [deck[k], deck[at]];   // すでに居れば入れ替え
     else deck[k] = id;
     S.deck = deck;
+    playSE("equip");
     go("deck");
   });
 }
@@ -3327,6 +3406,7 @@ function vDeckExt() {
   if (un) un.onclick = () => { delete S.deckExt[hero.id]; render(); };
   app.querySelectorAll("[data-e]").forEach(b => b.onclick = () => {
     (S.deckExt ||= {})[hero.id] = b.dataset.e;
+    playSE("equip");
     go("deck");
   });
 }
@@ -3473,6 +3553,7 @@ function vShop() {
     if (!c || !canBuy(S, c.price)) return;
     S.gum -= c.price;
     takeCrystal(c.id);   // 図鑑に残り、族ポイントに変わる（買っても落ちても同じ扱い）
+    playSE("buy");
     S.toast = `<img src="${assetPath.crystal(c.id)}" alt=""><em>${esc(c.name)}</em>`;
     render();
     setTimeout(() => { S.toast = null; drawToast(); }, 1600);
@@ -3533,6 +3614,10 @@ function vMypage() {
         <p class="fine">${S.settings.showExplanationOnCorrect
           ? "正解しても英雄の解説と応用編が出ます。"
           : "正解したら演出だけで次へ進みます。応用編は出ません。間違えた問題の解説は必ず出ます。"}</p>
+        ${soundSwitches()}
+        <p class="fine">音は My Crypto Heroes のものです。<b>はじめはOFF</b>にしてあります
+          —— 電車の中で開く人がいるので、こちらから勝手には鳴らしません。
+          <b>鳴らしても鳴らさなくても、手に入るものは1つも変わりません。</b></p>
       </div>`,
   };
 
@@ -3561,6 +3646,7 @@ function vMypage() {
   if (exp) exp.onchange = e => {
     S.settings.showExplanationOnCorrect = e.target.checked; render();
   };
+  wireSoundSwitches();
   app.querySelectorAll("#mytab button").forEach(b =>
     b.onclick = () => { S.myTab = b.dataset.t; render(); });
 
