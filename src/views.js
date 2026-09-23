@@ -16,11 +16,16 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
          CHALLENGE_QUESTIONS } from "./engine.js";
+import { FACTIONS, affinity, affinityMark } from "./faction.js";
+import { timeLimit, judge, asCount, JUDGES, chainNext, chainBonus, CHAIN_MAX_SHOWN,
+         DECK_SIZE, costOf, deckCost, deckCap, overCost, costFactor,
+         coverageOf, heroPower, asDamage, asFires, onceOnly,
+         ssNeed, ssReady, SS_POWER, foeFaction, BOSS_HP } from "./battle.js";
 import { matches } from "./normalize.js";
 import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
          CUT_SCORE, cutScore } from "./answer-mode.js";
-import { saveState, capName, NAME_MAX } from "./state.js";
+import { saveState, capName, NAME_MAX, STARTER_DECK } from "./state.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -142,6 +147,7 @@ function screenId() {
     if (document.querySelector(".skcut")) return "S-33";
     if (S.run.skill === "offer") return "S-32";
     /* ポップアップは、下の画面が何であれ見た目がそれに変わるので別の番号にする */
+    if (S.run.ssOpen) return "S-34";
     if (S.run.hintOpen) return "S-27";
     if (S.run.settingOpen) return "S-28";
     if (S.run.applied) return "S-12";
@@ -158,7 +164,8 @@ function screenId() {
   if (v === "select") return S.select.picks?.includes(S.select.subject) ? "S-25" : "S-04";
   return { home: "S-02", map: "S-03", hero: "S-17", target: "S-18",
            challenge: "S-19", craft: "S-20", shop: "S-21", calendar: "S-22",
-           day: "S-23", mypage: "S-24" }[v] || "S-??";
+           day: "S-23", mypage: "S-24",
+           deck: "S-35", deckpick: "S-36", deckext: "S-37" }[v] || "S-??";
 }
 
 /**
@@ -187,7 +194,11 @@ function render() {
 
   ({ home: vHome, grade: vGrade, select: vSelect, quiz: vQuiz, wave: vWave, result: vResult, craft: vCraft,
      heroes: vHeroes, hero: vHero, target: vTarget, challenge: vChallenge,
-     calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop, map: vMap }[S.view])();
+     calendar: vCalendar, day: vDay, mypage: vMypage, shop: vShop, map: vMap,
+     deck: vDeck, deckpick: vDeckPick, deckext: vDeckExt }[S.view])();
+  /* **持ち時間の時計は、出題の画面にしか置きません。** 画面を離れたら必ず止めます
+     （止め忘れると、ホームに戻ったあとに時間切れが走ります） */
+  if (S.view !== "quiz") clearClock();
   drawToast();
   drawReviewTag();
   if (!(S.view === "quiz" && currentQ() && modeOf(currentQ()) === "swipe")) unbindSwipe();
@@ -434,6 +445,15 @@ function vHome() {
 
   <div class="layer layer-stage">
     <button class="cal" id="tocal"><img src="${assetPath.icon("mch_icon")}" alt="">${dateText()}</button>
+    <!-- **デッキ5枚。押すと編成へ。** 上の行（知識マップ）と下の行（コスト上限）が
+         同じ理由で動くので、2つが並んでいることに意味があります -->
+    <button class="deckstrip${deckOver() ? " over" : ""}" id="todeck" aria-label="デッキ編成">
+      ${deckHeroes().map(h => h
+        ? `<span class="ds-face"><img src="${assetPath.hero(h.id)}" alt="">
+             <i class="fac ${facCls(h.faction)}"></i></span>`
+        : `<span class="ds-face empty"></span>`).join("")}
+      <b>${deckCostNow()} / ${deckCapNow()}</b>
+    </button>
     ${target ? `
     <div class="tv">
       <div class="tv-art">
@@ -483,6 +503,7 @@ function vHome() {
   document.getElementById("tomypage").onclick = () => go("mypage");
   document.getElementById("toshop").onclick = () => go("shop");
   document.getElementById("tomap").onclick = () => go("map");
+  document.getElementById("todeck").onclick = () => go("deck");
   const c = document.getElementById("tochal");
   if (c) c.onclick = () => go("target");
 
@@ -548,12 +569,20 @@ function vSelect() {
     <!-- 右側は**知識カード**の枚数。解いた数だけ確実に入る唯一のもので、
          難易度ゲージを削るのもこれです（原則1・原則3）。GUM は行動量の副産物、
          クリスタルは抽選なので、「倒したら必ずこれ」とは書けません -->
-    <div class="sel-modes">${plan.map(seg => {
+    <!-- **敵の属性をここで出します。** これがデッキを選ぶ理由になります。
+         数字（1.5倍）は出さず、▲●▼ の記号だけ —— 一目で読めるほうを取ります。
+         **持ち時間も形式ごとに違う**ので、行く前に見せます -->
+    <div class="sel-modes">${plan.map((seg, wi) => {
       const e = enemyOf(DB.subjects, chosen, seg.mode, S.select.seed);
+      const ff = foeFaction(e);
+      const lead = deckHeroes().find(Boolean);
+      const boss = plan.length > 1 && wi === plan.length - 1;
       return `<button class="mcard" data-m="${esc(seg.mode)}">
-        <span class="mfoe">${e ? `<img src="${assetPath.enemy(e)}" alt="">` : ""}<i>ENEMY</i></span>
+        <span class="mfoe">${e ? `<img src="${assetPath.enemy(e)}" alt="">` : ""}
+          <i class="fac ${facCls(ff)}">${esc(ff)}${lead ? affinityMark(lead.faction, ff) : ""}</i>
+          ${boss ? `<u>BOSS</u>` : ""}</span>
         <span class="mname"><b>${esc(MODE_LABEL[seg.mode] || seg.mode)}</b>
-          <i>Lv.${modeLevel(S, seg.mode)}</i></span>
+          <i>Lv.${modeLevel(S, seg.mode)} ・ ${timeLimit(seg.mode)}秒</i></span>
         <span class="mprize"><b>${seg.n}</b><i>カード</i></span>
       </button>`;
     }).join("")}</div>
@@ -832,6 +861,146 @@ function planStrip() {
 }
 
 
+/* ---------- デッキ（5枚編成） ---------- */
+
+/**
+ * **デッキは5枚。左が先で、右ほどASが落ちます。**
+ *
+ * 黒ウィズの芯をそのまま写した形です。速く答えるほど右まで届くので、
+ * **並び順を決めることが「どれだけ速く答えるつもりか」の宣言**になります。
+ */
+const deckHeroes = () => (S.deck || []).slice(0, DECK_SIZE).map(id => DB.crewById[id] || null);
+const crewOwned = () => DB.crew.filter(h => S.crew?.[h.id]);
+
+/** 教科ごとに、いま何枚の知識カードを持っているか */
+function haveBySubject() {
+  const out = {};
+  const seen = new Set();
+  Object.keys(S.cards || {}).forEach(c => {
+    const base = c.replace("（応用）", "");
+    if (seen.has(base)) return;
+    seen.add(base);
+    const sub = DB.cardSubject[base];
+    if (sub) out[sub] = (out[sub] || 0) + 1;
+  });
+  return out;
+}
+
+/**
+ * そのヒーローの**知識倍率**（0.5〜2.0倍）。縁のある教科の網羅率で決まります。
+ * **ここが原則1の入口です** —— レベルも進化も無いので、攻撃力を動かす手段は
+ * 「解くこと」しかありません。
+ */
+const coverageFor = (hero, have = haveBySubject()) => coverageOf(hero, have, DB.cardTotal);
+
+const deckCapNow = () => deckCap(mapProgress().done);
+const deckCostNow = () => deckCost(deckHeroes());
+const deckOver = () => overCost(deckCostNow(), deckCapNow());
+
+/** そのヒーローが仲間になるのに要る枚数。**割合なので、DBが増えても置いていかれません** */
+const unlockNeed = hero => hero?.unlock
+  ? Math.max(1, Math.ceil((DB.cardTotal[hero.unlock.subject] || 0) * hero.unlock.rate)) : 0;
+
+/**
+ * **解くとヒーローが仲間になります。ガチャは引きません**（原則2）。
+ * その教科の知識カードが規定の割合に届いた時点で、確定で加わります。
+ */
+function crewJoin() {
+  const have = haveBySubject();
+  const joined = [];
+  DB.crew.forEach(h => {
+    if (S.crew?.[h.id]) return;
+    if (h.unlock && (have[h.unlock.subject] || 0) < unlockNeed(h)) return;
+    (S.crew ||= {})[h.id] = 1;
+    joined.push(h);
+  });
+  return joined;
+}
+
+/* ---------- 持ち時間の時計 ---------- */
+
+/**
+ * **持ち時間は形式ごとです**（`battle.timeLimit`）。スワイプ8秒・4択11秒・
+ * 文字パネル22秒。その中の速さで、発動するASの本数が変わります。
+ *
+ * **報酬は速さで変わりません**（原則3-2）。GUM も知識カードもクリスタルも、
+ * 遅く答えても1つも減りません。変わるのは敵に与えるダメージだけです。
+ *
+ * **時計を止める場所が3つあります** —— ヒント・設定・SSのポップアップ。
+ * 原則5で渡した道具を使うと罰される、という形にしないためです。
+ */
+let qTimer = null;
+
+function clearClock() {
+  if (qTimer) { clearTimeout(qTimer); qTimer = null; }
+}
+
+const clockSec = () => timeLimit(S.run.clockMode || "choice");
+
+function armClock(mode) {
+  clearClock();
+  if (S.run.intro) return;          // 初回起動には持ち時間を置かない（決定1）
+  S.run.clockMode = mode;
+  S.run.qStart = Date.now();
+  S.run.qPaused = 0;
+  S.run.qPauseAt = 0;
+  qTimer = setTimeout(timeUp, timeLimit(mode) * 1000);
+}
+
+/** いま何ミリ秒たったか。止めているあいだは進みません */
+function elapsedMs() {
+  if (!S.run.qStart) return 0;
+  const held = S.run.qPaused + (S.run.qPauseAt ? Date.now() - S.run.qPauseAt : 0);
+  return Math.max(0, Date.now() - S.run.qStart - held);
+}
+
+function pauseClock() {
+  if (!S.run.qStart || S.run.qPauseAt || S.run.picked !== null) return;
+  S.run.qPauseAt = Date.now();
+  clearClock();
+}
+
+function resumeClock() {
+  if (!S.run.qStart || !S.run.qPauseAt || S.run.picked !== null) return;
+  S.run.qPaused += Date.now() - S.run.qPauseAt;
+  S.run.qPauseAt = 0;
+  qTimer = setTimeout(timeUp, Math.max(0, clockSec() * 1000 - elapsedMs()));
+}
+
+/**
+ * **時間切れは不正解と同じ扱いです。**
+ *
+ * 攻撃できず、チェインが半減し、敵の反撃を受けます。**知識カードと解説は
+ * 入ります**（原則3）。責める文言は足しません。
+ */
+function timeUp() {
+  clearClock();
+  if (!S.run.ids.length || S.run.picked !== null || S.view !== "quiz") return;
+  const q = currentQ();
+  if (!q) return;
+  S.run.timedOut = true;
+  if (modeOf(q) === "swipe") return onSwipe(q, q.answer === 0 ? 1 : 0);
+  onPick(-1, false);
+}
+
+/**
+ * 持ち時間のバー。**数字（残り秒）は出しません** —— 秒を読むと問題を読む時間が減ります。
+ *
+ * **幅ではなく `transform` を動かします**（width を動かすと再レイアウトが走ります）。
+ * 描き直しの途中でも位置がズレないよう、**いま何割たったかを `--from` に入れて
+ * そこから続けます**（⚙ を開いて閉じても巻き戻りません）。
+ */
+function timeBarHTML(mode) {
+  if (S.run.intro) return "";
+  const sec = timeLimit(mode);
+  /* 答えたあとは止める。まだ始まっていない（qStart が無い）ときは頭から */
+  const done = S.run.picked !== null;
+  const gone = done ? 1
+    : S.run.qStart ? Math.min(1, elapsedMs() / (sec * 1000)) : 0;
+  return `<div class="tbar${done ? " done" : ""}" data-sec="${sec}" aria-hidden="true"><i style="
+    animation-duration:${done ? 0 : Math.max(0, sec * (1 - gone))}s;--from:${gone}"></i></div>`;
+}
+
 /* ---------- バトル ---------- */
 
 /**
@@ -861,6 +1030,10 @@ const waveSubject = () => currentQ()?.subject || S.select.subject;
  * **残りの問題数から体力を決めます。** 1体目を早く倒したら2体目が出ますが、
  * そのときは「残り何問あるか」で決め直すので、**最後の1問で満タンの敵が
  * 湧く**ようなことになりません。
+ *
+ * **敵は属性を持ちます**（`battle.foeFaction`）。MCHの敵データは属性を
+ * 持っていないので、こちらでIDから決めています。**同じ敵はいつでも同じ属性**で、
+ * サイコロは振りません。
  */
 function spawnFoe(fresh = false) {
   const b = S.run.battle;
@@ -869,53 +1042,211 @@ function spawnFoe(fresh = false) {
   const sub = waveSubject();
   const left = Math.max(1, w.size - w.at);
   b.foeId = enemyOf(DB.subjects, sub, w.mode || "choice", (S.select.seed || 0) + b.kills);
-  b.foeMax = foeMaxHp(DB.battle, DB.subjects, sub, b.foeId, b.heroId, left);
+  b.foeFaction = foeFaction(b.foeId);
+  /* **最後の束の敵がボスです。** 体力だけ上乗せします */
+  const plan = (S.run.plan || []).filter(x => x.n > 0);
+  b.boss = plan.length > 1 && w.index === plan.length - 1;
+  b.foeMax = foeHpFor(left, b.boss);
   b.foeHp = b.foeMax;
-  b.foeHit = foeHit(DB.battle, DB.subjects, sub, b.foeId, b.heroId, S.run.ids.length || 1);
+  /* **敵の一撃は、パーティ全体のHPに合わせて測り直します。**
+     `engine.foeHit` は英雄1体ぶんで測るので、5枚ぶんのHPに対してそのまま
+     使うと、いつまでも倒れません（FALL_RATE の意味が変わります） */
+  const lead = b.deck.find(Boolean)?.id || "1006";
+  const one = Math.max(1, heroMaxHp(DB.battle, lead));
+  b.foeHit = Math.max(1, Math.round(
+    foeHit(DB.battle, DB.subjects, sub, b.foeId, lead, S.run.ids.length || 1)
+    * (b.heroMax / one)));
   b.wave = w.index;
   if (fresh) b.cleared = false;
 }
 
-/** セッションの始めに、英雄と最初の敵を立てる */
+/**
+ * **その枠の一撃。** MCHの (phy + int) / 2 に、知識倍率（0.5〜2.0）と
+ * コスト超過の補正（0.75）を掛けたものです。
+ *
+ * **装備倍率は掛けません。** 掛けると「装備の量＝攻撃力」になり、原則1が
+ * 裏返ります。エクステンションが効くのはSSの中身だけです。
+ */
+function slotPower(hero, have, factor) {
+  if (!hero) return 0;
+  return heroPower(hero.stats, coverageFor(hero, have), factor);
+}
+
+/**
+ * **動いた枠は、必ず一撃を入れます。**
+ *
+ * MCH では、ヒーローは毎ターン装備の Active Skill で殴り、パッシブはその
+ * まわりで条件つきに乗ります。ここも同じにしてあります —— 出番が回ってきた
+ * 枠は `BASIC_RATE` ぶんの攻撃を必ず入れ、**ASの条件が満たされたときだけ
+ * その効果が上乗せされます。**
+ *
+ * **こうしないとバトルが止まります。** 最初の5体は、確率40%の攻撃AS・
+ * 開始時だけのAS・回復AS・条件つきのバフASで、**そのままだと1問も敵を
+ * 削れない組み合わせ**でした（実際に止まりました）。
+ */
+const BASIC_RATE = 0.35;
+
+/**
+ * 敵の体力。**NICE（2枠しか動かない）で、その束の8割に正解したら倒れる**
+ * ところに置きます。EXCELLENTを取り続ける前提にすると、速く答えられない人が
+ * 1体も倒せません。
+ *
+ * **上は「全問正解ぶん」で頭打ちにします。** 全問正解しても届かない体力に
+ * すると、倒すことが運任せになります。
+ */
+function foeHpFor(left, boss = false) {
+  const need = Math.max(1, Math.ceil(left * ATTACK_RATE));
+  const base = Math.max(1, baseHit(2));
+  const tough = boss ? BOSS_HP : 1;
+  return Math.min(left * base, Math.max(base, Math.round(need * base * tough)));
+}
+
+/** 左から n 枠ぶんの、**必ず入る**火力（属性相性もチェインもASも乗せない） */
+function baseHit(n) {
+  const b = S.run.battle;
+  if (!b) return 1;
+  let sum = 0;
+  for (let k = 0; k < Math.min(n, DECK_SIZE); k++) {
+    if (b.deck[k]) sum += b.power[k] * BASIC_RATE;
+  }
+  return Math.max(1, Math.round(sum));
+}
+
+/** セッションの始めに、デッキ5枚と最初の敵を立てる */
 function startBattle() {
-  const sub = currentQ()?.subject || S.select.subject;
-  const heroId = DB.subjectArt[sub]?.hero || DB.subjectArt["国語"]?.hero;
+  const have = haveBySubject();
+  const factor = costFactor(deckCostNow(), deckCapNow());
+  const deck = deckHeroes();
+  const power = deck.map(h => slotPower(h, have, factor));
+  const partyMax = Math.max(1, Math.round(
+    deck.reduce((a, h) => a + (h?.stats.hp || 0), 0) * factor));
   S.run.battle = {
-    heroId, heroMax: heroMaxHp(DB.battle, heroId), heroHp: heroMaxHp(DB.battle, heroId),
-    hit: heroHit(DB.battle, heroId),
-    foeId: null, foeHp: 0, foeMax: 1, foeHit: 1,
-    kills: 0, wave: 0, cleared: false, down: false, fx: null,
+    deck, power, over: deckOver(),
+    /* 画面に顔を出すときの代表。先頭の枠です */
+    heroId: deck.find(Boolean)?.id || STARTER_DECK[0],
+    /* **パーティ全体のHPをひとつの帯で持ちます**（5体ぶんの合計）。
+       名前は既存のまま（heroHp / heroMax）—— 戦果の画面も検査もここを読みます */
+    heroMax: partyMax, heroHp: partyMax,
+    ss: new Array(DECK_SIZE).fill(0),
+    chain: 0, judge: null, fired: [], as: [], once: {}, wasHit: false,
+    buff: 0, debuff: 0,
+    foeId: null, foeFaction: "朱雀", foeHp: 0, foeMax: 1, foeHit: 1, boss: false,
+    kills: 0, wave: 0, cleared: false, down: false, fx: null, dmg: 0,
   };
   spawnFoe(true);
 }
 
+/* バフとデバフの頭打ち。積み上げて無敵にならないところで止める */
+const BUFF_MAX = 1.0;
+const DEBUFF_MAX = 0.6;
+
 /**
  * 答えたあとの殴り合い。**正解ならこちらが、外せば向こうが殴ります。**
  *
+ * 黒ウィズに寄せて、**速さでASの発動本数が変わります**（EXCELLENT 5体 /
+ * GREAT 4体 / GOOD 3体 / NICE 2体）。**落ちるのはデッキの右からです。**
+ *
  * **ヒーローが倒れても wave は続きます**（確認済み）。1問ごとの GUM も
  * 知識カードも解説も、倒れているかどうかで変わりません（原則3）。
- * 変わるのは**敵を削れなくなること**だけで、撃破の上乗せが取れなくなります。
  */
 function battleHit(ok) {
   const b = S.run.battle;
   if (!b || S.run.noReward) return;
-  if (ok) {
-    if (b.down) { b.fx = null; return; }   // 倒れているあいだは攻撃できない
-    b.foeHp = Math.max(0, b.foeHp - b.hit);
-    b.fx = "foe";
-    if (b.foeHp === 0) {
-      b.kills++;
-      /* **この wave にまだ問題が残っていれば、次の敵が出ます。**
-         残っていなければ、倒しきったまま wave が終わります */
-      const w = waveAt(S.run.i);
-      if (w.at + 1 < w.size) setTimeout(() => { spawnFoe(); drawBattle(); }, 700);
-      else b.cleared = true;
-    }
-  } else {
-    b.heroHp = Math.max(0, b.heroHp - b.foeHit);
+  const q = currentQ();
+  const mode = q ? modeOf(q) : "choice";
+  const ms = elapsedMs();
+
+  b.chain = chainNext(b.chain, ok);
+  b.judge = ok ? judge(ms, timeLimit(mode)) : null;
+  b.fired = [];
+  b.as = [];
+  b.dmg = 0;
+
+  if (!ok) {
+    b.heroHp = Math.max(0, b.heroHp - Math.round(b.foeHit * (1 - b.debuff)));
     b.fx = "hero";
+    b.wasHit = true;
     if (b.heroHp === 0) b.down = true;
+    return;
   }
+
+  /* **倒れているあいだは敵を削れません。** それでも報酬は変わりません（原則3） */
+  if (b.down) { b.fx = null; b.wasHit = false; return; }
+
+  const ctx = {
+    waveFirst: waveAt(S.run.i).at === 0,
+    wasHit: b.wasHit,
+    down: b.down,
+    hpRate: b.heroHp / Math.max(1, b.heroMax),
+  };
+  b.wasHit = false;
+
+  (S.run.judges ||= {})[b.judge] = (S.run.judges[b.judge] || 0) + 1;
+  S.run.maxChain = Math.max(S.run.maxChain || 0, b.chain);
+
+  /* **SSゲージは正解のたびに1つ溜まります。** 速さでは変わりません */
+  b.ss = b.ss.map((g, k) => b.deck[k] ? g + 1 : g);
+
+  const n = asCount(b.judge);
+  let dmg = 0;
+  for (let k = 0; k < Math.min(n, DECK_SIZE); k++) {
+    const h = b.deck[k];
+    if (!h) continue;
+    /* **出番が回ってきた枠は、必ず一撃を入れます**（＝そのヒーローが動いた） */
+    b.fired.push(k);
+    dmg += asDamage(Math.round(b.power[k] * (1 + b.buff)), BASIC_RATE,
+                    h.faction, b.foeFaction, b.chain);
+    /* **ASはその上に乗ります。条件を満たしたときだけです** */
+    const once = onceOnly(h.as.condition);
+    if (once && b.once[h.id]) continue;
+    if (!asFires({ description: { ja: { condition: h.as.condition, trigger_rate: h.as.triggerRate } } },
+                 q?.id || "", h.id, ctx)) continue;
+    if (once) b.once[h.id] = 1;
+    b.as.push(k);
+    dmg += applyAS(b, k, h);
+  }
+  b.dmg = dmg;
+  if (dmg > 0) {
+    b.foeHp = Math.max(0, b.foeHp - dmg);
+    b.fx = "foe";
+    /* **削った結果として倒れたときだけ数えます。** 倒したあと次の敵が立つまでの
+       0.7秒のあいだにもう1問答えると、同じ敵を2回数えてしまいます */
+    if (b.foeHp === 0) killFoe();
+  } else b.fx = null;
+}
+
+/**
+ * AS 1本ぶんの効き。**MCH の effect_id がそのまま種類です。**
+ * 1 単体 / 2 全体 / 3 回復・復活 / 4 バフ / 5 デバフ・状態異常。
+ */
+function applyAS(b, k, h) {
+  const rate = h.as.rate / 100;
+  const kind = h.as.effect;
+  if (kind === 3) {            // 回復
+    b.heroHp = Math.min(b.heroMax, b.heroHp + Math.round(b.heroMax * rate));
+    b.heroHp = b.heroHp;
+    if (b.heroHp > 0) b.down = false;
+    return 0;
+  }
+  if (kind === 4) {            // バフ（このセッションのあいだ火力が乗る）
+    b.buff = Math.min(BUFF_MAX, b.buff + rate);
+    return 0;
+  }
+  if (kind === 5) {            // デバフ（敵の一撃が軽くなる）
+    b.debuff = Math.min(DEBUFF_MAX, b.debuff + rate);
+    return 0;
+  }
+  const power = Math.round(b.power[k] * (1 + b.buff));
+  return asDamage(power, rate, h.faction, b.foeFaction, b.chain);
+}
+
+/** 敵を倒したとき。**この wave に問題が残っていれば、次の敵が出ます** */
+function killFoe() {
+  const b = S.run.battle;
+  b.kills++;
+  const w = waveAt(S.run.i);
+  if (w.at + 1 < w.size) setTimeout(() => { spawnFoe(); drawBattle(); }, 700);
+  else b.cleared = true;
 }
 
 /** wave が変わったら、次の敵を立て、倒しきっていた記録をつける */
@@ -936,8 +1267,9 @@ function battleStep() {
  */
 function drawBattle() {
   const el = app.querySelector(".bt-stage");
-  if (!el) return;
-  el.outerHTML = battleStage();
+  if (el) el.outerHTML = battleStage();
+  const row = app.querySelector(".bt-deck");
+  if (row) { row.outerHTML = deckRow(); wireDeckRow(); }
 }
 
 /** ヒーローと敵。**情報は最小限にします** —— 主役は設問と解答です */
@@ -945,22 +1277,173 @@ function battleStage() {
   const b = S.run.battle;
   if (!b) return "";
   const pct = (hp, max) => Math.max(0, Math.round(hp / Math.max(1, max) * 100));
-  const side = (who, img, hp, max, cls) => `
-    <div class="bt-side ${who}${S.run.battle.fx === who ? " hit" : ""}${
-      (who === "hero" && b.down) || (who === "foe" && hp === 0) ? " down" : ""}">
-      <img class="bt-ch" src="${img}" alt="">
-      <div class="bt-hp ${cls}"><i style="width:${pct(hp, max)}%"></i></div>
-      <div class="bt-num"><span>${hp}/${max}</span><b>${pct(hp, max)}%</b></div>
-      ${S.run.battle.fx === who ? `<span class="bt-fx" style="background-image:url('${
-        assetPath.fx("01_single_damage")}')"></span>` : ""}
-    </div>`;
+  const mark = affinityMark(b.deck.find(Boolean)?.faction || "朱雀", b.foeFaction);
   /* 「たおした！」「にげられた」は、**束の終わりの画面**が引き取りました
      （`vWave`）。ここに重ねると、同じことを2回言うことになります */
   return `<div class="bt-stage">
-    ${side("hero", assetPath.hero(b.heroId), b.heroHp, b.heroMax, "")}
-    ${b.kills > 0 ? `<span class="bt-kills">×${b.kills}</span>` : ""}
-    ${side("foe", assetPath.enemy(b.foeId), b.foeHp, b.foeMax, "foe")}
+    <div class="bt-side foe${b.fx === "foe" ? " hit" : ""}${b.foeHp === 0 ? " down" : ""}">
+      <img class="bt-ch" src="${assetPath.enemy(b.foeId)}" alt="">
+      <span class="fac ${facCls(b.foeFaction)}">${esc(b.foeFaction)}<i>${mark}</i></span>
+      ${b.boss ? `<span class="bt-boss">BOSS</span>` : ""}
+      <div class="bt-hp foe"><i style="width:${pct(b.foeHp, b.foeMax)}%"></i></div>
+      <div class="bt-num"><span>${b.foeHp}/${b.foeMax}</span><b>${pct(b.foeHp, b.foeMax)}%</b></div>
+      ${b.fx === "foe" ? `<span class="bt-fx" style="background-image:url('${
+        assetPath.fx("01_single_damage")}')"></span>` : ""}
+      ${b.dmg > 0 && b.fx === "foe" ? `<span class="bt-dmg">${b.dmg}</span>` : ""}
+    </div>
+    <div class="bt-meta">
+      ${b.kills > 0 ? `<span class="bt-kills">×${b.kills}</span>` : ""}
+      <span class="bt-chain${b.chain ? " on" : ""}"><b>CHAIN</b>${Math.min(CHAIN_MAX_SHOWN, b.chain)}</span>
+    </div>
   </div>`;
+}
+
+/**
+ * **デッキ5枚とパーティのHP。画面のいちばん下です。**
+ *
+ * 左から順にASが乗り、**右ほど落ちます。** どこまで届いたかが答えたあとに
+ * 光るので、速さの手ざわりがここに出ます。SSゲージが溜まった枠は縁が光り、
+ * 押すと撃つ相手を選べます。
+ */
+function deckRow() {
+  const b = S.run.battle;
+  if (!b) return "";
+  const pct = Math.max(0, Math.round(b.heroHp / Math.max(1, b.heroMax) * 100));
+  const tight = ["panel", "numeric"].includes(S.run.clockMode);
+  return `<div class="bt-deck${tight ? " tight" : ""}${b.down ? " down" : ""}">
+    <div class="bt-party">
+      <div class="bt-hp"><i style="width:${pct}%"></i></div>
+      <div class="bt-num"><span>${b.heroHp}/${b.heroMax}</span><b>${pct}%</b></div>
+    </div>
+    <div class="bt-slots">${b.deck.map((h, k) => {
+      if (!h) return `<span class="slot empty"></span>`;
+      const ext = DB.extensions[S.deckExt?.[h.id]];
+      const need = ext ? ssNeed(ext) : 0;
+      const ready = ext && ssReady(b.ss[k], ext);
+      return `<button class="slot${b.fired.includes(k) ? " fired" : ""}${
+        b.as.includes(k) ? " asfired" : ""}${
+        ready ? " ready" : ""}" data-slot="${k}" ${ready ? "" : "disabled"}
+        aria-label="${esc(h.name)}">
+        <img src="${assetPath.hero(h.id)}" alt="">
+        <i class="fac ${facCls(h.faction)}"></i>
+        <span class="ssg">${ext ? Array.from({ length: need }, (_, i) =>
+          `<i class="${i < b.ss[k] ? "on" : ""}"></i>`).join("") : ""}</span>
+      </button>`;
+    }).join("")}</div>
+  </div>`;
+}
+
+/* ---------- スペシャルスキル（装備したエクステンションの Active Skill） ---------- */
+
+/**
+ * **SSはデッキの枠から撃ちます**（S-34）。
+ *
+ * ゲージは正解のたびに1つ溜まり、ランクぶん（初伝3・中伝4・奥伝6）たまると
+ * 撃てます。**撃つとカウントは0に戻ります。**
+ *
+ * **SSはクイズに干渉しません。** 黒ウィズのSSには「選択肢を減らす」
+ * 「制限時間を止める」がありますが、入れていません —— 難易度のつまみは
+ * ヒントと「4択に切り替える」がすでに持っていて、そこはプレイヤーの手に
+ * 置いてあります（決定2）。**SSが動かすのは敵とパーティの数値だけです。**
+ */
+function wireDeckRow() {
+  app.querySelectorAll(".bt-slots .slot[data-slot]").forEach(btn => {
+    btn.onclick = () => { S.run.ssOpen = true; pauseClock(); drawSS(); };
+  });
+}
+
+/** そのヒーローに装備してあるSS（エクステンションの Active Skill） */
+const ssOf = hero => hero ? DB.extSkills?.[S.deckExt?.[hero.id]] : null;
+
+function drawSS() {
+  const slot = document.getElementById("ssmodal");
+  const b = S.run.battle;
+  if (!slot || !b) return;
+  if (!S.run.ssOpen) { slot.innerHTML = ""; return; }
+  slot.innerHTML = `
+  <div class="modal" id="ssmodal-bg"><div class="msheet sssheet">
+    <b class="sstitle">スペシャルスキル</b>
+    <div class="sslist">${b.deck.map((h, k) => {
+      if (!h) return "";
+      const ext = DB.extensions[S.deckExt?.[h.id]];
+      const sk = ssOf(h);
+      if (!ext || !sk) return `<div class="ssrow none">
+        <img src="${assetPath.hero(h.id)}" alt="">
+        <div><b>${esc(h.name)}</b><p class="fine">エクステンションを装備すると、その品の技が使えます。</p></div>
+      </div>`;
+      const need = ssNeed(ext), have = b.ss[k], ready = ssReady(have, ext);
+      return `<div class="ssrow${ready ? " ready" : ""}">
+        <img src="${assetPath.hero(h.id)}" alt="">
+        <div>
+          <b>${esc(h.name)} ・ ${esc(ext.name)}</b>
+          <em>${esc(sk.name)}</em>
+          <p class="fine">${esc(sk.text)}</p>
+          <span class="ssg big">${Array.from({ length: need }, (_, i) =>
+            `<i class="${i < have ? "on" : ""}"></i>`).join("")}</span>
+        </div>
+        ${ready ? `<button class="btn sm" data-fire="${k}">撃つ</button>`
+                : `<span class="fine">あと${need - have}問</span>`}
+      </div>`;
+    }).join("")}</div>
+    <button class="btn ghost" id="ssclose">とじる</button>
+  </div></div>`;
+  slot.querySelectorAll("[data-fire]").forEach(btn =>
+    btn.onclick = () => fireSS(Number(btn.dataset.fire)));
+  const close = document.getElementById("ssclose");
+  if (close) close.onclick = () => { S.run.ssOpen = false; resumeClock(); drawSS(); };
+}
+
+/** SSのカットインの長さ。MCH のパッシブスキル演出と同じ尺 */
+const SS_CUT_MS = 1200;
+
+/**
+ * SSを撃つ。**カットインは MCH の `Style/Cutins/passive_skill_cutin.css` を
+ * 写したもので、技の名前は `active_skill.name.ja` そのものです。**
+ *
+ * **`app` の下に置かないでください。** 最中に `render()` が走ると
+ * `app.innerHTML` ごと消えます。`document.body` に置いてあります。
+ */
+function fireSS(k) {
+  const b = S.run.battle;
+  const h = b?.deck[k];
+  const ext = h && DB.extensions[S.deckExt?.[h.id]];
+  const sk = ssOf(h);
+  if (!b || !h || !ext || !sk || !ssReady(b.ss[k], ext)) return;
+  b.ss[k] = 0;
+  S.run.ssOpen = false;
+  drawSS();
+  const el = skillCutIn(h.id, sk.name);
+  setTimeout(() => {
+    el.remove();
+    applySS(b, k, h, sk);
+    drawBattle();
+    setTimeout(() => { b.fx = null; b.dmg = 0; drawBattle(); }, 460);
+    resumeClock();
+  }, SS_CUT_MS);
+}
+
+/**
+ * SSの効き。ASと同じ `effect_id` の表を使い、**倍率だけ `SS_POWER` 倍**です。
+ * **GUM も知識カードも増えません**（原則3-2・原則6）。
+ */
+function applySS(b, k, h, sk) {
+  const rate = sk.rate / 100;
+  if (sk.effect === 3) {
+    b.heroHp = Math.min(b.heroMax, b.heroHp + Math.round(b.heroMax * rate * SS_POWER));
+    b.heroHp = b.heroHp;
+    if (b.heroHp > 0) b.down = false;
+    b.fx = "hero";
+    return;
+  }
+  if (sk.effect === 4) { b.buff = Math.min(BUFF_MAX, b.buff + rate * SS_POWER); b.fx = "hero"; return; }
+  if (sk.effect === 5) { b.debuff = Math.min(DEBUFF_MAX, b.debuff + rate * SS_POWER); b.fx = "foe"; return; }
+  if (b.down) return;
+  const power = Math.round(b.power[k] * (1 + b.buff) * SS_POWER);
+  const dmg = asDamage(power, rate, h.faction, b.foeFaction, b.chain);
+  b.dmg = dmg;
+  b.foeHp = Math.max(0, b.foeHp - dmg);
+  b.fx = "foe";
+  if (b.foeHp === 0) killFoe();
 }
 
 /**
@@ -1118,7 +1601,8 @@ function vQuiz() {
   </div>
   <!-- **3つの束と進み具合。** Q.1／あと3問 は「いまの束の中」の話なので、
        セッション全体のどこにいるかは、この帯でしか分かりません -->
-  <div class="bt-plan">${planStrip()}</div>`}
+  <div class="bt-plan">${planStrip()}</div>
+  ${timeBarHTML(mode)}`}
   <div class="pad${intro ? " intro" : " bt-pad"}">
     ${q.stem ? `<div class="qstem">${esc(q.stem)}</div>` : ""}
     <div class="qtext">${esc(q.prompt)}</div>
@@ -1174,6 +1658,7 @@ function vQuiz() {
           <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
     <div id="verdict"></div>
   </div>
+  ${intro ? "" : deckRow()}
   ${S.run.settingOpen ? `<div class="modal" id="setmodal"><div class="msheet">
     <label class="switch">
       <input type="checkbox" id="showexp" ${S.settings.showExplanationOnCorrect ? "checked" : ""}>
@@ -1182,7 +1667,7 @@ function vQuiz() {
     </label>
     <button class="btn ghost" id="setclose">とじる</button>
   </div></div>` : ""}
-  <div id="hintmodal"></div>`;
+  <div id="hintmodal"></div><div id="ssmodal"></div>`;
 
   /* **1本も見ていないときだけ、開くと同時に1本目が出ます。**
      2回目からは読み直すだけなので、本数は増えません（点が勝手に減りません） */
@@ -1190,14 +1675,17 @@ function vQuiz() {
   if (hintBtn) hintBtn.onclick = () => {
     if (S.run.hintsUsed === 0) S.run.hintsUsed++;
     S.run.hintOpen = true;
+    /* **開いているあいだ、持ち時間の時計を止めます。** 原則5で渡した道具を
+       使うと罰される、という形にしないためです */
+    pauseClock();
     drawHints(q, h);
   };
   /* 設定は⚙から。**ヒントの隣に置くと押し間違えます**が、どちらも小さく畳んで
      あるので、解答エリアの邪魔にはなりません */
   const gear = document.getElementById("gear");
-  if (gear) gear.onclick = () => { S.run.settingOpen = true; render(); };
+  if (gear) gear.onclick = () => { S.run.settingOpen = true; pauseClock(); render(); };
   const setClose = document.getElementById("setclose");
-  if (setClose) setClose.onclick = () => { S.run.settingOpen = false; render(); };
+  if (setClose) setClose.onclick = () => { S.run.settingOpen = false; resumeClock(); render(); };
   const setExp = document.getElementById("showexp");
   if (setExp) setExp.onchange = e => {
     S.settings.showExplanationOnCorrect = e.target.checked; render();
@@ -1208,8 +1696,16 @@ function vQuiz() {
   else app.querySelectorAll(".choices .choice").forEach(b =>
     b.onclick = () => onPick(Number(b.dataset.i)));
   if (mode !== "numeric" && mode !== "panel" && q.format === "range") wireRange(q);
+  wireDeckRow();
   drawHints(q, h);
+  /* **SSのポップアップも、描き直したら描き直します。** `#ssmodal` へ命令的に
+     差しこんでいるので、`render()` が走ると消えます（⚙ を押しただけで
+     消えていました——解説と同じ話です） */
+  drawSS();
   replayVerdict(q, h);
+  /* **予告した持ち時間のまま始めます。** 答えたあとに描き直しても
+     数え直さないよう、まだ答えていないときだけ時計を立てます */
+  if (S.run.picked === null && !S.run.hintOpen && !S.run.settingOpen) armClock(mode);
 }
 
 /**
@@ -1262,6 +1758,7 @@ function wireRange(q) {
 /* レンジ回答の採点と報酬。4択と同じ流れに合流させる */
 function onRange(q) {
   if (S.run.picked !== null) return;
+  clearClock();
   const lo = parseInt(document.getElementById("ra").value, 10);
   const hi = parseInt(document.getElementById("rb").value, 10);
   if (!Number.isInteger(lo) || !Number.isInteger(hi)) return;
@@ -1342,7 +1839,7 @@ function drawHints(q, h) {
     const more = document.getElementById("hintmore");
     if (more) more.onclick = () => { S.run.hintsUsed++; drawHints(q, h); };
     const close = document.getElementById("hintclose");
-    if (close) close.onclick = () => { S.run.hintOpen = false; drawHints(q, h); };
+    if (close) close.onclick = () => { S.run.hintOpen = false; resumeClock(); drawHints(q, h); };
   }
 
   if (!b) return;
@@ -1437,6 +1934,8 @@ function grantAnswer(q, ok, bonusRoll = 0) {
     if (reward && !S.cells[cellKey(q)]) S.cells[cellKey(q)] = "ng";
   }
   if (reward) S.cards[q.card] = true;
+  /* **解くとヒーローが仲間になります。ガチャは引きません**（原則2） */
+  if (reward) (S.run.joined ||= []).push(...crewJoin());
   return { gum, found, opened: reward && isNew ? unlockedBy(DB, q.card) : [] };
 }
 
@@ -1784,7 +2283,8 @@ function onPick(idx, forcedOk = null) {
   S.run.picked = idx;
   if (!S.run.noReward) S.seen[q.id] = 1;
 
-  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, .xcut[data-c]")
+  clearClock();
+  app.querySelectorAll(".keypad .key, #nsubmit, #tochoice, .pcell, #psubmit, .xcut[data-c], #ra, #rb, #rsubmit")
     .forEach(b => b.disabled = true);
   revealChoiceWords(q);
   app.querySelectorAll(".choices .choice").forEach((b, i) => {
@@ -1820,6 +2320,7 @@ function onPick(idx, forcedOk = null) {
   }
   const opened = reward && isNew ? unlockedBy(DB, q.card) : [];
   if (reward) S.cards[q.card] = true;
+  if (reward) (S.run.joined ||= []).push(...crewJoin());
   S.run.hintOpen = false;   // 解説と重ねない。答えたらヒントは引っこめる
   drawHints(q, h);
 
@@ -1971,13 +2472,18 @@ function drawVerdict(q, h, ok, gum = 0, rangeScore = null, found = null, opened 
      持つと localStorage が太ります */
   S.run.verdict = { qid: q.id, ok, gum, rangeScore, found,
                     opened: (opened || []).map(x => ({ subject: x.subject })) };
+  /* **判定はその場かぎりの表示です。** 集計して見せません（原則3-2）——
+     速さで変わるのは敵に与えるダメージだけで、報酬は1つも動きません */
+  const j = ok && S.run.battle?.judge ? S.run.battle.judge : null;
   const head = ok
     ? (rangeScore !== null
         ? (rangeScore === 1000 ? "言い切って、当てた。" : "その幅の中にある。")
         : S.run.hintsUsed ? "正解。ヒントを使っても、解けたことに変わりはない。" : "正解。")
     : "面白い単元に当たった。ここは聞いていこう。";
   document.getElementById("verdict").innerHTML = `
-  <div class="verdict"><div class="vhead ${ok ? "ok" : "ng"}">${esc(head)}</div>
+  <div class="verdict"><div class="vhead ${ok ? "ok" : "ng"}">${
+    j ? `<span class="vjudge ${j}">${j}</span>` : ""}${
+    S.run.timedOut && !ok ? `<span class="vjudge NICE">時間切れ</span>` : ""}${esc(head)}</div>
     <div class="lesson">
       <div class="speaker"><img class="ava sm" src="${assetPath.hero(h.id)}" alt="">
         <span>${esc(h.name)}</span></div>
@@ -2099,6 +2605,11 @@ function advance() {
       ended = true;
     }
   }
+  clearClock();
+  /* **次の問題の時計は、まだ動いていません。** ここを消しておかないと、
+     次の設問を描くときに前の問題の経過ぶんだけバーが減った状態で出ます */
+  S.run.timedOut = false;
+  S.run.qStart = 0; S.run.qPaused = 0; S.run.qPauseAt = 0;
   S.run.i++; S.run.picked = null; S.run.hintsUsed = 0; S.run.cut = null;
   S.run.tipOpen = false; S.run.applied = null; S.run.settingOpen = false;
   S.run.verdict = null; S.run.hintOpen = false; S.run.skill = null;
@@ -2156,7 +2667,7 @@ function vSwipe() {
   <header><div class="hbar">
     <div class="place">${place} ・ ${esc(q.subject)}</div>
     <div class="score">${S.run.i + 1} / ${S.run.ids.length}</div></div>
-    ${planStrip()}</header>
+    ${planStrip()}${timeBarHTML("swipe")}</header>
   <div class="pad swp">
     <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
       <span class="unit">${esc(q.unit)}</span>${levelChip(q, "swipe")}</div>
@@ -2180,6 +2691,7 @@ function vSwipe() {
   </div>`;
 
   wireSwipe(q);
+  if (S.run.picked === null) armClock("swipe");
 }
 
 function wireSwipe(q) {
@@ -2246,6 +2758,7 @@ function wireSwipe(q) {
  */
 function onSwipe(q, side) {
   if (S.run.picked !== null) return;
+  clearClock();
   S.run.picked = side;
   if (!S.run.noReward) S.seen[q.id] = 1;
   const ok = side === q.answer;
@@ -2325,7 +2838,29 @@ function vResult() {
       const b = S.run.battleBonus;
       if (!b || (!b.kills && !b.cleared)) return "";
       return `<p class="fine btwin"><b>たおした敵 ${b.kills}体</b>${
-        b.cleared ? ` ・ 倒しきった束 ${b.cleared}つ` : ""} ・ GUM +${b.gum}</p>`;
+        b.cleared ? ` ・ 倒しきった束 ${b.cleared}つ` : ""}${
+        b.gum ? ` ・ GUM +${b.gum}` : ""} ・ 点 +${b.score}</p>`;
+    })()}
+    ${(() => {
+      /* **チェインと判定の内訳。そのセッションかぎりの記録です。**
+         集計して持ち越しません（原則3-2）。平均回答時間のような統計も出しません */
+      const js = S.run.judges || {};
+      const any = JUDGES.some(j => js[j]);
+      if (!S.run.maxChain && !any) return "";
+      return `<p class="fine btchain">最高チェイン <b>${S.run.maxChain || 0}</b>${
+        any ? " ・ " + JUDGES.filter(j => js[j]).map(j => `${j} ${js[j]}`).join(" / ") : ""}</p>`;
+    })()}
+    ${(() => {
+      /* **解くと仲間が増えます。ガチャは引きません**（原則2） */
+      const joined = S.run.joined || [];
+      if (!joined.length) return "";
+      return `<div class="panel lvup">
+        <div class="phead"><h2>仲間になりました</h2></div>
+        ${joined.map(h => `<p class="lvrow">
+          <b>${esc(h.name)}</b><span>${esc(h.faction)} ・ AS ${esc(h.as.name)}</span></p>`).join("")}
+        <p class="fine">解いた教科の知識カードが届いたので、確定で加わりました。
+          <b>デッキに入れられます。</b></p>
+      </div>`;
     })()}
     ${S.run.shortage ? `<p class="cue">この範囲では形式の束が ${
       (S.run.plan || []).length}つしか組めなかったので、${S.run.ids.length}問で終わりました。</p>` : ""}
@@ -2552,6 +3087,200 @@ function vHero() {
       S.equip[h.id] = k;
     } else delete S.equip[h.id];
     render();
+  });
+}
+
+/* ---------- デッキ編成（S-35 / S-36 / S-37） ---------- */
+
+/** 属性の札。色は data/factions.json が持つ。クラス名は英字表記のほうを使う */
+const facCls = f => "f-" + (DB.factionInfo?.[f]?.en || "X");
+const facChip = (f, cls = "") =>
+  `<span class="fac ${facCls(f)} ${cls}">${esc(f)}</span>`;
+
+/**
+ * **デッキ編成**（S-35）。黒ウィズの芯がここにあります。
+ *
+ * 見せたいことは1つだけ —— **左が先で、右ほど落ちる。**
+ * 速く答えるほど右まで届くので、**並び順を決めることが「どれだけ速く
+ * 答えるつもりか」の宣言**になります。
+ */
+function vDeck() {
+  const heroes = deckHeroes();
+  const have = haveBySubject();
+  const cost = deckCostNow(), cap = deckCapNow(), over = cost > cap;
+  const mp = mapProgress();
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">デッキ</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="dk-cost${over ? " over" : ""}">
+      <b>コスト ${cost} / ${cap}</b>
+      ${over ? `<em>超過 −25%</em>` : ""}
+      <span class="fine">上限は知識マップが伸ばします（${mp.done}/${mp.total}マス）</span>
+    </div>
+
+    <div class="dk-slots">${heroes.map((h, k) => {
+      const ext = h && DB.extensions[S.deckExt?.[h.id]];
+      const sk = ssOf(h);
+      const mul = h ? (0.5 + Math.min(1, coverageFor(h, have)) * 1.5) : 0;
+      return `<div class="dk-slot${h ? "" : " empty"}">
+        <span class="dk-no">${k + 1}</span>
+        <button class="dk-face" data-pick="${k}">
+          ${h ? `<img src="${assetPath.hero(h.id)}" alt="${esc(h.name)}">` : `<i>＋</i>`}
+        </button>
+        <div class="dk-body">
+          ${h ? `<b>${esc(h.name)}</b>${facChip(h.faction)}
+            <span class="hr r${esc(h.rarity)}">${esc(h.rarity)}</span>
+            <span class="dk-c">${h.cost}</span>
+            <p class="dk-as"><em>AS</em> ${esc(h.as.name)}</p>
+            <p class="fine">${esc(h.as.text)}</p>
+            <p class="dk-mul">攻撃 ×${mul.toFixed(2)}<span class="fine">${
+              esc(h.fit.join("・"))}の知識で伸びます</span></p>
+            <button class="dk-ext" data-ext="${h.id}">
+              ${ext && sk ? `<img src="${assetPath.ext(ext.id)}" alt=""><em>SS</em> ${esc(sk.name)}
+                <span class="ssg">${Array.from({ length: ssNeed(ext) },
+                  () => "<i></i>").join("")}</span>`
+                : `<em>SS</em> エクステンションを装備する`}
+            </button>`
+          : `<b class="fine">空いています</b>`}
+        </div>
+        <div class="dk-move">
+          <button class="dk-arw" data-mv="${k}:-1" ${k === 0 ? "disabled" : ""} aria-label="左へ">◀</button>
+          <button class="dk-arw" data-mv="${k}:1" ${k === DECK_SIZE - 1 ? "disabled" : ""} aria-label="右へ">▶</button>
+        </div>
+      </div>`;
+    }).join("")}</div>
+
+    <div class="dk-order">
+      <p class="dk-lead">速く答えるほど、右まで届く</p>
+      ${JUDGES.map(j => `<div class="dk-j">
+        <b class="j${j}">${j}</b>
+        <span>${Array.from({ length: DECK_SIZE }, (_, k) =>
+          `<i class="${k < asCount(j) ? "on" : ""}"></i>`).join("")}</span>
+      </div>`).join("")}
+    </div>
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("home");
+  app.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => {
+    S.deckPick = Number(b.dataset.pick); go("deckpick");
+  });
+  app.querySelectorAll("[data-ext]").forEach(b => b.onclick = () => {
+    S.deckPick = b.dataset.ext; go("deckext");
+  });
+  app.querySelectorAll("[data-mv]").forEach(b => b.onclick = () => {
+    const [k, d] = b.dataset.mv.split(":").map(Number);
+    const to = k + d;
+    if (to < 0 || to >= DECK_SIZE) return;
+    const deck = [...S.deck];
+    [deck[k], deck[to]] = [deck[to], deck[k]];
+    S.deck = deck;
+    render();
+  });
+}
+
+/**
+ * **枠に入れるヒーローを選ぶ**（S-36）。
+ *
+ * **未解放のヒーローは、名前を伏せて条件と進み具合だけ見せます。**
+ * 「あと◯枚で仲間になる」が、そのまま次の問いになります（原則7）。
+ * **ガチャはありません**（原則2）。
+ */
+function vDeckPick() {
+  const k = Number(S.deckPick) || 0;
+  const have = haveBySubject();
+  const list = [...DB.crew].sort((a, b) =>
+    (S.crew?.[b.id] ? 1 : 0) - (S.crew?.[a.id] ? 1 : 0) ||
+    DB.factionOrder.indexOf(a.faction) - DB.factionOrder.indexOf(b.faction) ||
+    a.cost - b.cost);
+  const used = new Set((S.deck || []).filter((id, i) => i !== k));
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">枠 ${k + 1} に入れる</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    <div class="dk-list">${list.map(h => {
+      const own = !!S.crew?.[h.id];
+      const need = unlockNeed(h);
+      const got = have[h.unlock?.subject] || 0;
+      const mul = 0.5 + Math.min(1, coverageFor(h, have)) * 1.5;
+      if (!own) return `<div class="dk-row locked">
+        <span class="dk-face mini"><img src="${assetPath.hero(h.id)}" alt="" class="silhouette"></span>
+        <div><b>???</b>${facChip(h.faction)}
+          <p class="fine">${esc(h.unlock.subject)}の知識カード ${got}/${need} で仲間になります</p>
+          <span class="mp-bar sm"><i style="width:${Math.min(100, Math.round(got / Math.max(1, need) * 100))}%"></i></span>
+        </div></div>`;
+      return `<button class="dk-row${used.has(h.id) ? " used" : ""}" data-h="${h.id}">
+        <span class="dk-face mini"><img src="${assetPath.hero(h.id)}" alt=""></span>
+        <div><b>${esc(h.name)}</b>${facChip(h.faction)}
+          <span class="hr r${esc(h.rarity)}">${esc(h.rarity)}</span>
+          <span class="dk-c">${h.cost}</span>
+          <p class="dk-as"><em>AS</em> ${esc(h.as.name)}</p>
+          <p class="fine">${esc(h.fit.join("・"))} ・ 攻撃 ×${mul.toFixed(2)}</p>
+        </div>
+        ${used.has(h.id) ? `<span class="fine">編成中</span>` : ""}
+      </button>`;
+    }).join("")}</div>
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("deck");
+  app.querySelectorAll("[data-h]").forEach(b => b.onclick = () => {
+    const id = b.dataset.h;
+    const deck = [...S.deck];
+    const at = deck.indexOf(id);
+    if (at >= 0) [deck[at], deck[k]] = [deck[k], deck[at]];   // すでに居れば入れ替え
+    else deck[k] = id;
+    S.deck = deck;
+    go("deck");
+  });
+}
+
+/**
+ * **エクステンションを装備してSSを決める**（S-37）。
+ *
+ * **クラフトの出口がSSになります。** 何を作るかが、そのままどう戦うかに
+ * なるので、「作りたい品が、解く教科を選ぶ理由になる」という筋がもう一段
+ * つながります。
+ */
+function vDeckExt() {
+  const hero = DB.crewById[S.deckPick];
+  if (!hero) return go("deck");
+  const owned = Object.keys(S.exts || {}).filter(id => DB.extensions[id]);
+  const now = S.deckExt?.[hero.id];
+
+  app.innerHTML = `
+  <header><div class="hbar"><div class="place">${esc(hero.name)} に装備</div>
+    <button class="mapbtn" id="back">もどる</button></div></header>
+  <div class="pad">
+    ${owned.length ? `<div class="dk-list">${
+      RANK_ORDER.flatMap(rank => owned.filter(id => DB.extensions[id].rank === rank)).map(id => {
+      const e = DB.extensions[id], sk = DB.extSkills?.[id];
+      if (!sk) return "";
+      return `<button class="dk-row${now === id ? " on" : ""}" data-e="${id}">
+        <span class="dk-face mini"><img src="${assetPath.ext(id)}" alt=""></span>
+        <div><b>${esc(e.name)}</b><span class="rank">${esc(e.rank)}</span>
+          <p class="dk-as"><em>SS</em> ${esc(sk.name)}</p>
+          <p class="fine">${esc(sk.text)}</p>
+          <span class="ssg">${Array.from({ length: ssNeed(e) }, () => "<i></i>").join("")}
+            <small>${ssNeed(e)}問で撃てます</small></span>
+        </div></button>`;
+      }).join("")}</div>`
+    : `<p class="cue">まだ何も作っていません。クラフトで品を作ると、その品の技が
+        スペシャルスキルになります。</p>`}
+    <div class="stack">
+      ${now ? `<button class="btn ghost" id="unequip">外す</button>` : ""}
+      <button class="btn ghost" id="tocraft2">クラフトへ</button>
+    </div>
+  </div>`;
+
+  document.getElementById("back").onclick = () => go("deck");
+  document.getElementById("tocraft2").onclick = () => go("craft");
+  const un = document.getElementById("unequip");
+  if (un) un.onclick = () => { delete S.deckExt[hero.id]; render(); };
+  app.querySelectorAll("[data-e]").forEach(b => b.onclick = () => {
+    (S.deckExt ||= {})[hero.id] = b.dataset.e;
+    go("deck");
   });
 }
 

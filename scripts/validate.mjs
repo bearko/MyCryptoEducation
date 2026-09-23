@@ -10,6 +10,9 @@ import { fileURLToPath } from "node:url";
 import { answerMode, hintGroup, hintsFor, normalizeHints, answerText, numericParts }
   from "../src/answer-mode.js";
 import { panelLayout, MAX_LEVEL, levelOf, blockSize } from "../src/engine.js";
+/* 黒ウィズ型リデザイン。**相性も持ち時間もアプリと同じ関数を呼びます**（2箇所に分けると必ずズレる） */
+import { affinity, ringOk } from "../src/faction.js";
+import { timeLimit } from "../src/battle.js";
 /* 釣り合いはアプリと同じ式から導く。2箇所に分けると必ずズレる */
 import { buildExtensions } from "../src/data.js";
 
@@ -985,6 +988,99 @@ const normal = questions.filter(q => (q.format || "choice") !== "swipe");
 const stock = (band, subject) => normal.filter(q =>
   (band === "auto" || BANDS[band].includes(q.grade)) &&
   (subject === "auto" || q.subject === subject)).length;
+
+/* ---- 黒ウィズ型リデザイン（属性・ロスター・持ち時間） ---- */
+/* 仕様は docs/wiz-redesign-spec.md。**数字を動かしたらそちらも直してください** */
+{
+  const factions = await json("data/factions.json");
+  const roster = await json("data/roster.json");
+  const curatedRoster = (await json("data/roster-curated.json")).filter(r => r.id);
+  const order = factions.order || [];
+  const info = factions.factions || {};
+
+  if (order.length !== 5) err("factions.json", `勢力は5つにしてください（いま ${order.length}）`);
+  order.forEach(f => { if (!info[f]) err("factions.json", `${f} の中身がありません`); });
+
+  /* **相剋の輪が閉じているか。** 1つでも欠けると、有利も不利も無い勢力ができます */
+  if (!ringOk(Object.fromEntries(order.map(f => [f, info[f]?.beats])), order))
+    err("factions.json", "相剋の輪が閉じていません（beats を1周させてください）");
+
+  /* **どの勢力にも、剋す相手と剋される相手が1つずつ。** 五行相剋の形 */
+  order.forEach(a => {
+    const good = order.filter(b => affinity(a, b) === 1.5).length;
+    const bad = order.filter(b => affinity(a, b) === 0.5).length;
+    if (good !== 1 || bad !== 1)
+      err("factions.json", `${a} の相性が偏っています（有利${good}・不利${bad}）`);
+  });
+
+  /* ---- ロスター ---- */
+  const byFaction = {};
+  const stats = await json("data/battle-stats.json");
+  roster.heroes.forEach(h => {
+    byFaction[h.faction] = (byFaction[h.faction] || 0) + 1;
+    if (!order.includes(h.faction))
+      err(`roster ${h.id}`, `知らない勢力 "${h.faction}"`);
+    if (!h.as?.name)
+      err(`roster ${h.id} ${h.name}`, "アンサースキル（MCHのPassive）がありません");
+    if (!stats.heroes?.[h.id])
+      err(`roster ${h.id} ${h.name}`, "battle-stats.json に数値がありません（build-roster を走らせてください）");
+    if (!(h.fit || []).length)
+      err(`roster ${h.id} ${h.name}`, "fit（縁のある教科）がありません");
+    (h.fit || []).forEach(sub => {
+      if (!SUBJECTS.includes(sub)) err(`roster ${h.id} ${h.name}`, `知らない教科 "${sub}"`);
+    });
+    if (h.unlock && !SUBJECTS.includes(h.unlock.subject))
+      err(`roster ${h.id} ${h.name}`, `解放条件の教科が知らないもの "${h.unlock.subject}"`);
+  });
+
+  /* **台帳と生成物がズレていないか。** roster-curated.json を手で触ったとき用 */
+  if (curatedRoster.length !== roster.heroes.length)
+    err("roster.json", `台帳 ${curatedRoster.length}体 に対して生成物が ${roster.heroes.length}体 です（build-roster を走らせてください）`);
+  curatedRoster.forEach(c => {
+    const h = roster.heroes.find(x => x.id === String(c.id));
+    if (!h) return err(`roster-curated ${c.id}`, "生成物にいません");
+    if (h.faction !== c.faction)
+      err(`roster-curated ${c.id} ${h.name}`, `台帳は ${c.faction} ですが生成物は ${h.faction} です`);
+  });
+
+  /* **勢力を空にしないでください。** 5枚デッキに属性の選びようが無くなります */
+  order.forEach(f => {
+    const n = byFaction[f] || 0;
+    if (!n) err("roster.json", `${f} のヒーローが1人もいません`);
+    else if (n < 5) warn(`${f} のヒーローが ${n}体 しかいません（5体以上ほしい）`);
+  });
+
+  /* **最初から5勢力に1体ずついること。** 初日から5枚デッキが組めて、
+     最初の1組がそのまま属性の話になります */
+  const starters = roster.heroes.filter(h => !h.unlock);
+  const starterFactions = new Set(starters.map(h => h.faction));
+  if (starterFactions.size !== order.length)
+    err("roster.json", `最初から使えるヒーローが ${starterFactions.size} 勢力ぶんしかいません（5勢力に1体ずつ要ります）`);
+
+  /* ---- スペシャルスキル ---- */
+  const exts = buildExtensions(curated, crystals);
+  Object.keys(exts).forEach(id => {
+    const sk = roster.extSkills?.[id];
+    if (!sk?.name)
+      err(`ext ${id} ${exts[id].name}`, "スペシャルスキル（MCHのActive Skill）がありません");
+  });
+
+  /* ---- 持ち時間 ---- */
+  /* **手数（MODE_WORK）から導いています。** 表を手で書くと必ずズレます */
+  const modes = ["swipe", "choice", "elimination", "range", "numeric", "panel"];
+  modes.forEach((m, i) => {
+    if (!timeLimit(m)) return err("battle.js", `${m} の持ち時間が出せません`);
+    if (i && timeLimit(m) < timeLimit(modes[i - 1]))
+      err("battle.js", `${m} の持ち時間が ${modes[i - 1]} より短くなっています（手数の順と食い違います）`);
+  });
+  if (timeLimit("swipe") < 5)
+    warn(`スワイプの持ち時間が ${timeLimit("swipe")}秒 です。実機で触って足りるか確かめてください`);
+
+  console.log(`\n属性 ${order.length}勢力 ・ ロスター ${roster.heroes.length}体（${
+    order.map(f => `${f}${byFaction[f] || 0}`).join(" / ")}） ・ SS ${
+    Object.keys(roster.extSkills || {}).length}件`);
+  console.log(`持ち時間 ・ ${modes.map(m => `${MODE_LABEL_V[m] || m} ${timeLimit(m)}秒`).join(" / ")}`);
+}
 
 const GRADE_LABEL = { e1: "小1", e2: "小2", e3: "小3", e4: "小4", e5: "小5", e6: "小6",
                       j1: "中1", j2: "中2", j3: "中3", w: "世界" };

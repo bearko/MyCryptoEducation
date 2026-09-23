@@ -1154,3 +1154,181 @@
   /* 束の帯は、バトルの下に細く敷く。**セッション全体のどこにいるか**を出す */
   .bt-plan{padding:0 14px 8px}
   .bt-plan .plan{margin:0}
+
+  /* ===== 黒ウィズ型バトル ===== */
+
+  /* 属性（MCH の5勢力）。色は data/factions.json と同じ値を写してある。
+     **クラス名は英字表記のほうを使います**（CSSの識別子に漢字を書かない） */
+  .fac{display:inline-flex;align-items:center;gap:3px;flex:none;
+    font:700 10px/1 var(--gothic);letter-spacing:.04em;color:#fff;
+    padding:3px 6px;border-radius:2px;background:var(--ink-soft)}
+  .fac i{font-style:normal;font-size:11px}
+  .f-SUZAKU{background:#e0503c}
+  .f-GENBU{background:#2f6fb0}
+  .f-SEIRYU{background:#2f9b6a}
+  .f-BYAKKO{background:#8a949c}
+  .f-KORYU{background:#d0a03a}
+
+  /* 持ち時間のバー。**数字（残り秒）は出しません** —— 秒を読むと問題を読む
+     時間が減ります。4つの帯が判定（EXCELLENT / GREAT / GOOD / NICE）で、
+     暗くなったところまでが経過ぶん。**幅ではなく transform を動かします**
+     （width を動かすと再レイアウトが走ります） */
+  .tbar{position:relative;height:6px;margin:6px 16px 0;border-radius:99px;overflow:hidden;
+    background:linear-gradient(90deg,#C8A227 0 25%,#9AA3AD 25% 50%,#2E5E8C 50% 75%,#B8BFC6 75% 100%)}
+  .tbar i{position:absolute;inset:0;transform-origin:left;transform:scaleX(var(--from,0));
+    background:rgba(23,36,63,.72);animation:tDrain linear forwards}
+  @keyframes tDrain{to{transform:scaleX(1)}}
+  @media (prefers-reduced-motion:reduce){.tbar i{animation:none}}
+
+  /* チェインは**右上**（黒ウィズと同じ位置）。連続正解がそのまま資産になる */
+  .bt-meta{position:absolute;right:12px;top:6px;display:flex;flex-direction:column;
+    align-items:flex-end;gap:3px}
+  .bt-chain{font:700 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-faint)}
+  .bt-chain.on{color:var(--brass)}
+  .bt-boss{position:absolute;left:50%;top:-4px;transform:translateX(-50%);
+    font:700 9px/1 var(--gothic);letter-spacing:.14em;color:#fff;background:var(--pen);
+    padding:2px 5px;border-radius:2px}
+  .bt-dmg{position:absolute;left:50%;top:10px;transform:translateX(-50%);
+    font:700 22px/1 var(--mincho);color:var(--pen);text-shadow:0 1px 0 #fff,0 0 6px #fff;
+    animation:dmgPop .5s ease-out}
+  @keyframes dmgPop{0%{transform:translate(-50%,6px);opacity:0}
+    30%{transform:translate(-50%,-6px);opacity:1}100%{transform:translate(-50%,-14px);opacity:0}}
+
+  /* 敵はひとりで中央に立つ。**主役は設問と解答**なので、ここは細く畳む */
+  .bt-stage .bt-side.foe{flex:1;max-width:220px;margin:0 auto}
+
+  /* デッキ5枚とパーティHP。**画面のいちばん下**。左が先で、右ほどASが落ちる */
+  .bt-deck{max-width:560px;margin:10px auto 0;padding:8px 16px 14px;
+    border-top:1px solid var(--line)}
+  .bt-deck.down{opacity:.6}
+  .bt-party{margin-bottom:6px}
+  .bt-slots{display:flex;gap:6px}
+  .bt-slots .slot{flex:1;min-width:0;position:relative;border:1px solid var(--line);
+    background:var(--card);border-radius:4px;padding:3px 2px 2px;cursor:default;
+    display:flex;flex-direction:column;align-items:center;gap:2px}
+  .bt-slots .slot:disabled{cursor:default}
+  .bt-slots .slot img{width:34px;height:34px;image-rendering:pixelated}
+  .bt-slots .slot.empty{border-style:dashed;min-height:46px}
+  /* 答えたあと、**左から順に光ります。** どこまで届いたかが速さの手ざわり */
+  .bt-slots .slot.fired{border-color:var(--brass);box-shadow:0 0 0 2px rgba(168,134,60,.35)}
+  .bt-slots .slot.ready{border-color:var(--pen);cursor:pointer;
+    box-shadow:0 0 0 2px rgba(196,54,44,.22)}
+  .bt-slots .slot .fac{position:absolute;left:2px;top:2px;width:6px;height:6px;
+    padding:0;border-radius:99px}
+  .bt-deck.tight .bt-slots .slot img{width:26px;height:26px}
+  .bt-deck.tight{padding-bottom:8px}
+
+  /* SSゲージ。●の数が必要正解数（初伝3・中伝4・奥伝6） */
+  .ssg{display:inline-flex;gap:2px;align-items:center}
+  .ssg i{width:4px;height:4px;border-radius:99px;background:var(--line);display:block}
+  .ssg i.on{background:var(--pen)}
+  .ssg.big i{width:7px;height:7px}
+  .ssg small{margin-left:5px;font-size:10.5px;color:var(--ink-faint)}
+
+  /* SSを撃つ（S-34） */
+  .sssheet{max-height:80vh;overflow:auto}
+  .sstitle{display:block;font:600 15px/1.4 var(--mincho);margin-bottom:10px}
+  .ssrow{display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+  .ssrow img{width:38px;height:38px;image-rendering:pixelated;flex:none}
+  .ssrow div{flex:1;min-width:0}
+  .ssrow b{display:block;font-size:12.5px}
+  .ssrow em{font-style:normal;font-family:var(--mincho);color:var(--pen);font-size:13.5px}
+  .ssrow.none{opacity:.55}
+  .ssrow .btn.sm{width:auto;flex:none;padding:8px 12px;font-size:13px;align-self:center}
+
+  /* ホームのデッキ帯。**押すと編成へ** */
+  /* **日付チップ（.cal）が右上に絶対配置で重なります。** コストが隠れるので、
+     その幅ぶんだけ右を空けてあります（実際に「9月23日」の下に隠れました） */
+  .deckstrip{display:flex;align-items:center;gap:4px;width:100%;
+    border:1px solid var(--line);background:rgba(255,255,255,.88);border-radius:4px;
+    padding:5px 116px 5px 8px;margin:0 0 6px;cursor:pointer;font:inherit}
+  .deckstrip b{margin-left:auto;font:600 11.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    color:var(--ink-soft)}
+  .deckstrip.over b{color:var(--pen)}
+  .ds-face{position:relative;width:30px;height:30px;flex:none}
+  .ds-face img{width:100%;height:100%;image-rendering:pixelated}
+  .ds-face .fac{position:absolute;left:0;bottom:0;width:6px;height:6px;padding:0;border-radius:99px}
+  .ds-face.empty{border:1px dashed var(--line);border-radius:3px}
+
+  /* デッキ編成（S-35） */
+  .dk-cost{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:16px 0 12px;
+    padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .dk-cost b{font:600 17px/1 var(--mincho)}
+  .dk-cost em{font-style:normal;color:var(--pen);font-size:12.5px;font-weight:600}
+  .dk-cost .fine{margin:0;flex-basis:100%}
+  .dk-cost.over b{color:var(--pen)}
+  .dk-slot{display:flex;gap:9px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+  .dk-no{font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-faint);
+    width:14px;flex:none;padding-top:6px}
+  .dk-face{width:54px;height:54px;flex:none;border:1px solid var(--line);background:var(--card);
+    border-radius:4px;padding:2px;cursor:pointer}
+  .dk-face img{width:100%;height:100%;image-rendering:pixelated}
+  .dk-face i{font-style:normal;font-size:20px;color:var(--ink-faint)}
+  .dk-face.mini{width:42px;height:42px}
+  .dk-face .silhouette{filter:brightness(0) opacity(.22)}
+  .dk-body{flex:1;min-width:0}
+  .dk-body b{font-size:13.5px;margin-right:6px}
+  .dk-c{display:inline-block;font:700 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    color:var(--ink-soft);border:1px solid var(--line);border-radius:2px;padding:2px 4px;margin-left:4px}
+  .dk-as{margin:4px 0 0;font-size:12.5px}
+  .dk-as em{font-style:normal;font:700 9.5px/1 var(--gothic);letter-spacing:.1em;color:#fff;
+    background:var(--ai);padding:2px 4px;border-radius:2px;margin-right:5px}
+  .dk-mul{margin:6px 0 0;font:600 13px/1.4 var(--mincho);color:var(--moss)}
+  .dk-mul .fine{display:block;margin:0}
+  .dk-ext{display:flex;align-items:center;gap:6px;width:100%;margin-top:7px;
+    border:1px solid var(--line);background:var(--paper);border-radius:3px;padding:6px 8px;
+    font:inherit;font-size:12px;cursor:pointer;text-align:left}
+  .dk-ext img{width:24px;height:24px;image-rendering:pixelated;flex:none}
+  .dk-ext em{font-style:normal;font:700 9.5px/1 var(--gothic);letter-spacing:.1em;color:#fff;
+    background:var(--pen);padding:2px 4px;border-radius:2px}
+  .dk-move{display:flex;flex-direction:column;gap:4px;flex:none}
+  .dk-arw{border:1px solid var(--line);background:var(--card);color:var(--ink-soft);
+    font:inherit;font-size:11px;width:28px;height:26px;border-radius:3px;cursor:pointer}
+  .dk-arw:disabled{opacity:.3;cursor:default}
+
+  /* **見せたいことは1つだけ —— 左が先で、右ほど落ちる** */
+  .dk-order{margin-top:18px;padding:12px;border:1px solid var(--line);
+    background:var(--card);border-radius:4px}
+  .dk-lead{margin:0 0 9px;font:600 13.5px/1.5 var(--mincho)}
+  .dk-j{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+  .dk-j b{font:700 10px/1 var(--gothic);letter-spacing:.08em;width:74px;flex:none}
+  .dk-j .jEXCELLENT{color:#C8A227}
+  .dk-j .jGREAT{color:#6E7883}
+  .dk-j .jGOOD{color:var(--ai)}
+  .dk-j .jNICE{color:var(--ink-faint)}
+  .dk-j span{display:flex;gap:4px}
+  .dk-j i{width:16px;height:6px;border-radius:99px;background:var(--line);display:block}
+  .dk-j i.on{background:var(--ink)}
+
+  .dk-list{margin-top:14px}
+  .dk-row{display:flex;gap:9px;align-items:flex-start;width:100%;text-align:left;
+    border:none;border-bottom:1px solid var(--line);background:none;font:inherit;
+    padding:10px 0;cursor:pointer}
+  .dk-row div{flex:1;min-width:0}
+  .dk-row b{font-size:13.5px;margin-right:6px}
+  .dk-row.locked{opacity:.8;cursor:default}
+  .dk-row.used{opacity:.5}
+  .dk-row.on{background:rgba(46,94,140,.06)}
+  .dk-row .rank{font-size:11px;color:var(--brass);margin-left:6px}
+  .mp-bar.sm{display:block;height:4px;margin-top:5px;max-width:160px}
+
+  /* 判定（EXCELLENT / GREAT / GOOD / NICE）。**その場かぎりの表示で、
+     集計して見せません**（原則3-2） */
+  .vjudge{display:inline-block;font:700 12px/1 var(--gothic);letter-spacing:.1em;
+    padding:4px 8px;border-radius:2px;color:#fff;margin-right:8px}
+  .vjudge.EXCELLENT{background:#C8A227}
+  .vjudge.GREAT{background:#6E7883}
+  .vjudge.GOOD{background:var(--ai)}
+  .vjudge.NICE{background:var(--ink-faint)}
+
+  .mfoe u{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);
+    font:700 8px/1 var(--gothic);letter-spacing:.12em;color:#fff;background:var(--pen);
+    padding:2px 4px;border-radius:2px;text-decoration:none}
+  /* ASまで乗った枠は、動いただけの枠よりはっきり光る */
+  .bt-slots .slot.asfired{border-color:var(--pen);
+    box-shadow:0 0 0 2px rgba(196,54,44,.35),0 0 10px rgba(196,54,44,.25)}
+  .bt-chain b{font:700 8.5px/1 var(--gothic);letter-spacing:.1em;margin-right:4px;
+    color:var(--ink-faint);vertical-align:1px}
+  .bt-chain.on b{color:var(--brass)}
+  /* 答えたあとは止める（そのまま数え続けると、解説を読むあいだに時間切れの色になる） */
+  .tbar.done i{animation:none;transform:scaleX(1)}

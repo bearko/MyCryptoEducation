@@ -294,4 +294,56 @@ export const SCREENS = [
       });
       await page.waitForTimeout(150);
     } },
+
+  /* ---- 黒ウィズ型リデザイン ---- */
+
+  /* SSを撃つ（デッキの枠から開く）。**下に何があっても見た目はポップアップのもの** */
+  { id: "S-34", name: "スペシャルスキルを撃つ",
+    note: "デッキの枠から開く。溜まっていないものも、あと何問かを出して並べる",
+    viewport: true,
+    go: async page => {
+      await setup(page);
+      await page.evaluate(() => {
+        const ext = Object.values(DB.extensions).find(e => DB.extSkills[e.id].effect <= 2);
+        S.exts[ext.id] = 1;
+        const q = DB.questions.find(x => x.subject === "国語" && x.mode === "elimination");
+        S.select.subject = "国語"; S.select.seed = 3;
+        startRun({ built: { ids: [q.id], plan: [{ mode: "elimination", n: 1, level: 1 }] } });
+        document.getElementById("wvgo").click();
+        S.deckExt[S.run.battle.deck[0].id] = ext.id;
+        S.run.battle.ss[0] = ssNeed(ext);
+        S.run.ssOpen = true;
+        drawSS();
+      });
+      await page.waitForTimeout(200);
+    } },
+
+  /* **デッキ編成。黒ウィズの芯がここにあります。**
+     見せたいことは1つだけ —— 左が先で、右ほど落ちる */
+  { id: "S-35", name: "デッキ編成", note: "5枚。左が先で、右ほどASが落ちる。コスト上限は知識マップが伸ばす",
+    go: async page => {
+      await setup(page);
+      await page.evaluate(() => { S.view = "deck"; render(); });
+      await page.waitForTimeout(150);
+    } },
+
+  { id: "S-36", name: "枠に入れるヒーローを選ぶ",
+    note: "未解放は名前を伏せ、条件と進み具合だけ見せる。ガチャは無い",
+    go: async page => {
+      await setup(page);
+      await page.evaluate(() => { S.deckPick = 2; S.view = "deckpick"; render(); });
+      await page.waitForTimeout(150);
+    } },
+
+  { id: "S-37", name: "エクステンションを装備してSSを決める",
+    note: "クラフトの出口がSSになる。●の数が必要正解数",
+    go: async page => {
+      await setup(page);
+      await page.evaluate(() => {
+        Object.keys(DB.extensions).slice(0, 6).forEach(id => S.exts[id] = 1);
+        S.deckPick = S.deck[0];
+        S.view = "deckext"; render();
+      });
+      await page.waitForTimeout(150);
+    } },
 ];

@@ -1,0 +1,13 @@
+{
+  "_note": "属性。MCH の5勢力をそのまま使う。名前も英字表記もこちらで作らない。相性は五行相剋の輪で、黒ウィズの 1.5 / 1.0 / 0.5 をそのまま当てている。詳しくは docs/wiz-redesign-spec.md §2。",
+  "_beats": "beats はその勢力が剋す相手。青龍(木)→黄竜(土)→玄武(水)→朱雀(火)→白虎(金)→青龍(木) と一周する。",
+  "order": ["朱雀", "玄武", "青龍", "白虎", "黄竜"],
+  "factions": {
+    "朱雀": { "en": "SUZAKU", "gogyo": "火", "beats": "白虎", "color": "#e0503c", "ink": "#7a2418" },
+    "玄武": { "en": "GENBU",  "gogyo": "水", "beats": "朱雀", "color": "#2f6fb0", "ink": "#16375c" },
+    "青龍": { "en": "SEIRYU", "gogyo": "木", "beats": "黄竜", "color": "#2f9b6a", "ink": "#154d33" },
+    "白虎": { "en": "BYAKKO", "gogyo": "金", "beats": "青龍", "color": "#8a949c", "ink": "#3d444a" },
+    "黄竜": { "en": "KORYU",  "gogyo": "土", "beats": "玄武", "color": "#d0a03a", "ink": "#6b4f10" }
+  },
+  "affinity": { "good": 1.5, "even": 1.0, "bad": 0.5 }
+}

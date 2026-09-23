@@ -359,6 +359,110 @@ ok.push(["とじると元の位置に戻る",
   !hShut.open && hShut.top === hBefore.top && hShut.page === hBefore.page,
   JSON.stringify(hShut)]);
 
+/* ---- 黒ウィズ型リデザイン（見た目の崩れは、ここでしか捕まりません） ---- */
+
+/** 消去法の1問を立てて、バトルの層ごと描く */
+const battleUp = async () => p.evaluate(`(() => {
+  const q = DB.questions.find(x => x.mode === "elimination" && x.subject === "国語");
+  S.select.subject = "国語"; S.select.seed = 3;
+  startRun({ built: { ids: [q.id], plan: [{ mode: "elimination", n: 1, level: 1 }] } });
+  document.getElementById("wvgo").click();
+  return true;
+})()`);
+
+/* **座標は書類の側で測ります。** ビューポート基準だと、playwright が
+   押す前に要素を見える位置へスクロールした時点で数字が動きます
+   （実際に「SSを開くと解答エリアが動いた」と出ました。動いたのは画面のほうです） */
+const boxOf = async sel => p.evaluate(`(() => {
+  const el = document.querySelector(${JSON.stringify(sel)});
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { x: Math.round(r.left), y: Math.round(r.top + window.scrollY),
+           w: Math.round(r.width), h: Math.round(r.height) };
+})()`);
+
+await battleUp();
+await p.waitForTimeout(300);
+
+/* **持ち時間のバーは幅ではなく transform を動かします**（width を動かすと
+   再レイアウトが走ります）。細い帯のまま、横いっぱいに出ていること */
+const tbar = await boxOf(".tbar");
+ok.push(["持ち時間のバーが細い帯として出る",
+  !!tbar && tbar.h <= 8 && tbar.w > 250, JSON.stringify(tbar)]);
+
+/* 1秒たってもレイアウトが動かない（減るのは中の塗りだけ） */
+const answersBefore = await boxOf(".choices");
+await p.waitForTimeout(1000);
+const answersAfter = await boxOf(".choices");
+ok.push(["時間が減っても解答エリアが動かない",
+  !!answersBefore && answersAfter.y === answersBefore.y, 
+  JSON.stringify({ answersBefore, answersAfter })]);
+
+/* **デッキ5枠が横に並ぶ。** 顔が読めない大きさに潰れていないこと */
+const slots = await p.evaluate(`(() => {
+  const list = [...document.querySelectorAll(".bt-slots .slot")];
+  return list.map(el => { const r = el.getBoundingClientRect();
+    return { x: Math.round(r.left), y: Math.round(r.top),
+             w: Math.round(r.width), h: Math.round(r.height) }; });
+})()`);
+ok.push(["デッキ5枠が横に並ぶ",
+  slots.length === 5 && slots.every(s => s.y === slots[0].y) && slots.every(s => s.w >= 40),
+  JSON.stringify(slots)]);
+ok.push(["デッキ行が画面の外へはみ出さない", await p.evaluate(`(() => {
+  const el = document.querySelector(".bt-deck");
+  const r = el.getBoundingClientRect();
+  return r.left >= -1 && r.right <= window.innerWidth + 1;
+})()`), "bt-deck"]);
+
+/* **チェインは右上**（黒ウィズと同じ位置） */
+const chain = await p.evaluate(`(() => {
+  const el = document.querySelector(".bt-chain");
+  const s = document.querySelector(".bt-stage");
+  if (!el || !s) return null;
+  const r = el.getBoundingClientRect(), b = s.getBoundingClientRect();
+  return { x: Math.round(r.left), fromTop: Math.round(r.top - b.top) };
+})()`);
+ok.push(["チェインはバトル層の右上に出る",
+  !!chain && chain.x > 390 / 2 && chain.fromTop < 40, JSON.stringify(chain)]);
+
+/* **SSのポップアップは元の画面を動かしません**（ヒントと同じ線） */
+await p.evaluate(`(() => {
+  const ext = Object.values(DB.extensions).find(e => DB.extSkills[e.id].effect <= 2);
+  S.exts[ext.id] = 1;
+  S.deckExt[S.run.battle.deck[0].id] = ext.id;
+  S.run.battle.ss[0] = ssNeed(ext);
+  drawBattle();
+})()`);
+await p.waitForTimeout(200);
+const ssBefore = await boxOf(".choices");
+await p.click(".bt-slots .slot.ready");
+await p.waitForTimeout(250);
+const ssOpen = await boxOf(".choices");
+const sheet = await boxOf(".sssheet");
+ok.push(["SSを開いても解答エリアが動かない",
+  !!sheet && ssOpen.y === ssBefore.y, JSON.stringify({ ssBefore, ssOpen })]);
+ok.push(["SSのポップアップが画面に収まる",
+  !!sheet && sheet.h <= 844, JSON.stringify(sheet)]);
+/* **開いているあいだは時計が止まります**（撃つかどうかの判断を急かさない） */
+ok.push(["SSを開くと持ち時間が止まる", await p.evaluate("!!S.run.qPauseAt"), "qPauseAt"]);
+await p.click("#ssclose"); await p.waitForTimeout(200);
+ok.push(["とじると時計が動き出す", await p.evaluate("!S.run.qPauseAt"), "qPauseAt"]);
+
+/* **デッキ編成（S-35）が1画面の幅に収まるか** */
+await p.evaluate(`(() => { S.view = "deck"; render(); })()`);
+await p.waitForTimeout(250);
+ok.push(["デッキ編成が横にはみ出さない", await p.evaluate(`(() => {
+  return [...document.querySelectorAll(".dk-slot, .dk-order, .dk-cost")]
+    .every(el => { const r = el.getBoundingClientRect();
+      return r.left >= -1 && r.right <= window.innerWidth + 1; });
+})()`), "dk-*"]);
+ok.push(["5枠ぶんが並ぶ", await p.evaluate(`document.querySelectorAll(".dk-slot").length`) === 5,
+  String(await p.evaluate(`document.querySelectorAll(".dk-slot").length`))]);
+/* **見せたいことは1つだけ —— 左が先で、右ほど落ちる** */
+ok.push(["判定ごとにどこまで届くかが4段で出る",
+  await p.evaluate(`document.querySelectorAll(".dk-j").length`) === 4,
+  String(await p.evaluate(`document.querySelectorAll(".dk-j").length`))]);
+
 ok.forEach(([n, v, x]) => console.log((v ? "✓ " : "✗ ") + n + (v ? "" : "  ← " + x)));
 await b.close();
 process.exit(ok.every(o => o[1]) ? 0 : 1);

@@ -876,7 +876,12 @@ check("○ をその場で出す", d.getElementById("swpseal")?.textContent === 
 check("GUM は学年なりに入る", ev("S.gum") - gumBefore === swQ.gum,
   `${ev("S.gum") - gumBefore} / 正 ${swQ.gum}`);
 check("知識カードも入る", ev(`!!S.cards[${JSON.stringify(swQ.card)}]`) === true);
-check("解説はその場では出さない", !txt().includes(ev(`DB.byId['${swQ.id}'].lesson`).slice(0, 12)));
+/* **解説の枠そのものが無いことを見ます。** 本文の頭12文字で見ていたころは、
+   引いた問題によっては問題文や選択肢と重なって、たまに落ちていました
+   （スワイプはくじで引くので、落ちる回と落ちない回がありました） */
+check("解説はその場では出さない",
+  !d.querySelector(".verdict") && !d.querySelector(".lesson"),
+  d.querySelector(".verdict") ? "verdict" : "lesson");
 
 check("勝手に次へ進む", await (async () => {
   await wait(1100);
@@ -2111,7 +2116,7 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
  */
 {
   const { SCREENS } = await import("./screens.mjs");
-  check("画面IDは33面ぶんある", SCREENS.length === 33, String(SCREENS.length));
+  check("画面IDは37面ぶんある", SCREENS.length === 37, String(SCREENS.length));
   check("画面IDは重なっていない", new Set(SCREENS.map(s => s.id)).size === SCREENS.length);
   const at = (view, patch = "") => ev(`(() => { S.view = ${JSON.stringify(view)}; ${patch} return screenId(); })()`);
   check("ホームは S-02", at("home") === "S-02", at("home"));
@@ -2143,6 +2148,11 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
     return screenId(); })()`) === "S-11");
   check("応用編は S-12", ev(`(() => { S.run.applied = { picked: null }; return screenId(); })()`) === "S-12");
   ev('S.run.applied = null; S.run.results = {}; S.view = "home";');
+  /* 黒ウィズ型リデザインで足した画面 */
+  check("デッキ編成は S-35", at("deck") === "S-35", at("deck"));
+  check("ヒーローを選ぶは S-36", at("deckpick", "S.deckPick = 0;") === "S-36", at("deckpick"));
+  check("装備は S-37", at("deckext", "S.deckPick = S.deck[0];") === "S-37", at("deckext"));
+
   // **`#review` を付けたときだけ番号を出す。** ふだんの画面には出さない
   check("ふだんは画面IDを出さない", d.getElementById("revtag") === null);
 }
@@ -2172,16 +2182,23 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
 
   setup(4);
   check("バトルが立っている", ev("!!S.run.battle"));
-  check("英雄は教科なりで決まる",
-    ev("S.run.battle.heroId") === ev(`DB.subjectArt["国語"].hero`), ev("S.run.battle.heroId"));
+  /* **バトルに立つのは編成したデッキです**（黒ウィズ型リデザイン）。
+     教科ごとの1体ではなくなったので、先頭の枠が顔になります */
+  check("デッキの先頭がバトルに立つ",
+    ev("S.run.battle.heroId") === ev("S.deck[0]"), ev("S.run.battle.heroId"));
+  check("デッキ5枚ぶんが立っている", ev("S.run.battle.deck.filter(Boolean).length") === 5,
+    ev("S.run.battle.deck.filter(Boolean).length"));
+  check("敵は属性を持つ", ev(`FACTIONS.includes(S.run.battle.foeFaction)`), ev("S.run.battle.foeFaction"));
   check("敵は教科の並びから出る", ev(`(() => {
     const r = DB.subjects.subjects["国語"].enemy, id = Number(S.run.battle.foeId);
     return id >= r[0] && id <= r[1];
   })()`) === true, ev("S.run.battle.foeId"));
   // **その wave で倒せる敵しか出さない。** 全問正解しても届かないと、運任せになる
+  /* **NICE（2枠しか動かない）でも全問正解すれば届く**ところで頭打ちにしてある。
+     速く答えられない人が1体も倒せない釣り合いにはしない */
   check("全問正解すれば必ず倒せる",
-    ev("S.run.battle.foeMax") <= ev("S.run.battle.hit") * 4,
-    `${ev("S.run.battle.foeMax")} / 一撃 ${ev("S.run.battle.hit")} × 4問`);
+    ev("S.run.battle.foeMax") <= ev("baseHit(2)") * 4,
+    `${ev("S.run.battle.foeMax")} / 必ず入る一撃 ${ev("baseHit(2)")} × 4問`);
 
   const foe0 = ev("S.run.battle.foeHp"), hero0 = ev("S.run.battle.heroHp");
   cut(true);
@@ -2222,6 +2239,13 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
   check("倒しきると上乗せがつく", !!bonus && bonus.kills >= 1 && bonus.cleared >= 1,
     JSON.stringify(bonus));
   check("上乗せはGUMと点だけ", !!bonus && bonus.gum > 0 && bonus.score > 0);
+  /* **GUM は「倒しきった束の数」でしか動きません**（原則3-2）。
+     速く答えるほど敵を早く倒して倒した数が増えるので、そこに GUM を付けると
+     答える速さが持ち物の差になります。倒した数が動かすのは点だけです */
+  check("倒した数では GUM が動かない", ev("battleBonus(5, false).gum") === 0,
+    String(ev("battleBonus(5, false).gum")));
+  check("倒した数が動かすのは点のほう", ev("battleBonus(5, false).score") > 0);
+  check("倒しきった束の数は速さで増えない（束は3つ）", ev("BLOCKS") === 3);
   check("リザルトに倒したぶんが出る", txt().includes("たおした敵"), txt().slice(0, 120));
 
   /* ---- 束の切れ目（S-29 接敵 / S-30 戦果）----------------------------
@@ -2350,6 +2374,180 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
   ev('S.introDone = false; S.runs = 0; S.run.done = true; startIntro();');
   check("初回起動にバトルは出さない", ev("S.run.battle") === null && !d.querySelector(".bt-stage"));
   ev('S.introDone = true; S.runs = 3;');
+}
+
+/* ============ 黒ウィズ型リデザイン ============ */
+/* 仕様は docs/wiz-redesign-spec.md。**数字を動かしたらここも直してください** */
+{
+  console.log("\n-- 属性（MCHの5勢力） --");
+  check("勢力は5つ", ev("FACTIONS.length") === 5, ev("JSON.stringify(FACTIONS)"));
+  check("相剋の輪が閉じている", ev("ringOk()") === true);
+  check("剋す相手へは1.5倍", ev(`affinity("朱雀","白虎")`) === 1.5);
+  check("剋される相手へは0.5倍", ev(`affinity("白虎","朱雀")`) === 0.5);
+  check("それ以外は等倍", ev(`affinity("朱雀","青龍")`) === 1);
+  check("全部の勢力が、剋す相手と剋される相手を1つずつ持つ", ev(`(() => {
+    return FACTIONS.every(a => FACTIONS.filter(b => affinity(a, b) === 1.5).length === 1
+                            && FACTIONS.filter(b => affinity(a, b) === 0.5).length === 1);
+  })()`) === true);
+  check("ロスターは5勢力に散っている", ev(`(() => {
+    const n = {}; DB.crew.forEach(h => n[h.faction] = (n[h.faction] || 0) + 1);
+    return FACTIONS.every(f => n[f] >= 5);
+  })()`) === true, ev(`JSON.stringify(DB.crew.reduce((a,h)=>(a[h.faction]=(a[h.faction]||0)+1,a),{}))`));
+
+  console.log("\n-- 持ち時間と判定 --");
+  /* **持ち時間は形式ごと**（手数 × 8秒）。一律にすると重い形式だけ理不尽になる */
+  check("スワイプがいちばん短い", ev(`timeLimit("swipe")`) === 8, ev(`timeLimit("swipe")`));
+  check("文字パネルがいちばん長い", ev(`timeLimit("panel")`) === 22, ev(`timeLimit("panel")`));
+  check("持ち時間は手数どおり", ev(`(() => {
+    const m = ["swipe","choice","elimination","range","numeric","panel"];
+    return m.every((a, i) => i === 0 || timeLimit(a) >= timeLimit(m[i - 1]));
+  })()`) === true);
+  /* 黒ウィズの 20秒 / 5秒 ＝ 1/4 を、比のほうで写してある */
+  check("EXCELLENT は持ち時間の4分の1", ev(`judge(2000, 8)`) === "EXCELLENT" &&
+    ev(`judge(2001, 8)`) === "GREAT", ev(`judge(2001, 8)`));
+  check("判定でASの本数が変わる",
+    ev("asCount('EXCELLENT')") === 5 && ev("asCount('GREAT')") === 4 &&
+    ev("asCount('GOOD')") === 3 && ev("asCount('NICE')") === 2);
+  check("正解すれば最低2体は動く", ev("Math.min(...JUDGES.map(asCount))") === 2);
+
+  console.log("\n-- チェイン --");
+  check("正解で +1", ev("chainNext(7, true)") === 8);
+  /* **0には戻しません。** 外した1問がそれまでの積み上げを全部消すのは原則3とぶつかる */
+  check("誤答で半減（0には戻さない）", ev("chainNext(7, false)") === 3);
+  check("ダメージ補正は (100+チェイン)%", ev("chainBonus(12)") === 1.12);
+
+  console.log("\n-- デッキ --");
+  check("デッキは5枚", ev("DECK_SIZE") === 5);
+  check("最初から5勢力に1体ずついる", ev(`(() => {
+    const f = S.deck.map(id => DB.crewById[id].faction);
+    return new Set(f).size === 5;
+  })()`) === true, ev("JSON.stringify(S.deck)"));
+  /* **プレイヤーレベルという数値を新しく作りません。** 知識マップが埋まることが、
+     そのまま編成の自由になります（進行の数値を2つ持つと必ず食い違う） */
+  check("コスト上限は知識マップのマス数そのもの",
+    ev("deckCap(0)") === 20 && ev("deckCap(31)") === 51 &&
+    ev("deckCapNow()") === ev("20 + mapProgress().done"),
+    `${ev("deckCapNow()")} / ${ev("mapProgress().done")}マス`);
+  /* **禁止ではなく代償です**（決定2・降りるかどうかはプレイヤーの手） */
+  check("コスト超過でも挑めて、25%ダウンになる",
+    ev("costFactor(90, 20)") === 0.75 && ev("costFactor(20, 90)") === 1);
+  check("レアリティが決めるのはコストだけ", ev(`(() => {
+    const a = DB.crew.find(h => h.rarity === "Common");
+    const b = DB.crew.find(h => h.rarity === "Legendary");
+    return b.cost > a.cost;
+  })()`) === true);
+  /* **強さの源は知識**（原則1）。知識ゼロなら 0.5倍、埋めきると 2.0倍 */
+  check("攻撃力は知識の網羅率で決まる",
+    ev("knowledgeMul(0)") === 0.5 && ev("knowledgeMul(1)") === 2);
+
+  console.log("\n-- 報酬は速さで変わらない（原則3-2） --");
+  /* **ここが機械の関所です。** 「速く答えたら得をする」実装がうっかり入っても止まる */
+  check("速さを変えても GUM・知識カード・クリスタルが1つも動かない", ev(`(() => {
+    const ids = DB.questions.filter(q => q.subject === "社会" && q.mode !== "swipe")
+      .slice(0, 4).map(q => q.id);
+    const take = ms => {
+      Object.assign(S, { gum: 0, cards: {}, crystals: {}, points: {}, score: 0 });
+      startRun({ ids });
+      let gum = 0;
+      for (let k = 0; k < ids.length; k++) {
+        const q = DB.byId[S.run.ids[S.run.i]];
+        S.run.qStart = Date.now() - ms;       // 答えるまでの時間を差し替える
+        onPick(q.answer, true);
+        gum = S.run.gum;
+        advance();
+      }
+      return { gum, cards: Object.keys(S.cards).length,
+               crystals: JSON.stringify(S.crystals), points: JSON.stringify(S.points) };
+    };
+    /* **クリスタルの抽選だけは乱数です**（原則2の唯一の例外）。
+       速さのせいで変わっていないことを見たいので、乱数のほうは固定して比べる */
+    const real = Math.random;
+    Math.random = () => 0.123456;
+    const fast = take(100), slow = take(9000);
+    Math.random = real;
+    return fast.gum === slow.gum && fast.cards === slow.cards
+        && fast.crystals === slow.crystals && fast.points === slow.points;
+  })()`) === true);
+  check("速さで変わるのは敵に与えるダメージのほう", ev(`(() => {
+    const q = DB.questions.find(q => q.subject === "社会" && q.mode !== "swipe");
+    const hit = ms => {
+      startRun({ ids: [q.id] });
+      const b = S.run.battle;
+      b.chain = 0; b.buff = 0;
+      S.run.qStart = Date.now() - ms;
+      battleHit(true);
+      return b.dmg;
+    };
+    return hit(100) > hit(9000);
+  })()`) === true);
+
+  console.log("\n-- スペシャルスキル --");
+  check("SSの必要正解数はランクなり", ev(`(() => {
+    const r = Object.values(DB.extensions);
+    const f = rank => ssNeed(r.find(e => e.rank === rank));
+    return f("初伝") === 3 && f("中伝") === 4 && f("奥伝") === 6;
+  })()`) === true);
+  check("SSは装備したエクステンションの Active Skill", ev(`(() => {
+    const id = Object.keys(DB.extensions)[0];
+    const sk = DB.extSkills[id];
+    return !!sk && typeof sk.name === "string" && sk.name.length > 0;
+  })()`) === true);
+  check("108種すべてにSSがある",
+    ev("Object.keys(DB.extSkills).length") === ev("Object.keys(DB.extensions).length"),
+    `${ev("Object.keys(DB.extSkills).length")} / ${ev("Object.keys(DB.extensions).length")}`);
+  check("SSを撃つとゲージが0に戻り、敵が削れる", ev(`(() => {
+    const q = DB.questions.find(q => q.subject === "社会" && q.mode !== "swipe");
+    const ext = Object.values(DB.extensions).find(e => DB.extSkills[e.id].effect <= 2);
+    S.exts[ext.id] = 1;
+    startRun({ ids: [q.id] });
+    const b = S.run.battle;
+    S.deckExt[b.deck[0].id] = ext.id;
+    b.ss[0] = ssNeed(ext);
+    b.foeHp = b.foeMax = 999999;
+    fireSS(0);
+    return b.ss[0] === 0;
+  })()`) === true);
+  await wait(1400);
+  check("SSのカットインに技の名前が出て、敵の体力だけが動く", ev(`(() => {
+    const b = S.run.battle;
+    return b.foeHp < 999999;
+  })()`) === true, ev("S.run.battle.foeHp"));
+
+  console.log("\n-- 時間切れ --");
+  /* **不正解と同じ扱いですが、知識カードと解説は入ります**（原則3） */
+  check("時間切れは不正解扱いで、知識カードは入る", ev(`(() => {
+    const q = DB.questions.find(q => q.subject === "理科" && q.mode === "elimination");
+    S.cards = {};
+    startRun({ ids: [q.id] });
+    S.view = "quiz"; render();
+    timeUp();
+    return S.run.results[q.id] === "ng" && !!S.cards[q.card];
+  })()`) === true);
+  /* **ヒントは罰の対象ではありません**（原則5の道具なので、時計を止める） */
+  check("ヒントを開くと持ち時間が止まる", ev(`(() => {
+    const q = DB.questions.find(q => q.hints && q.hints.length && q.mode === "elimination");
+    startRun({ ids: [q.id] });
+    S.view = "quiz"; render();
+    document.getElementById("hint").click();
+    return !!S.run.qPauseAt;
+  })()`) === true);
+
+  console.log("\n-- 仲間になる（ガチャを引かない・原則2） --");
+  check("解くとヒーローが仲間になる", ev(`(() => {
+    S.crew = { "1002": 1 };
+    const want = DB.crew.find(h => h.unlock && h.unlock.subject === "社会");
+    S.cards = {};
+    DB.questions.filter(q => q.subject === "社会").forEach(q => S.cards[q.card] = true);
+    const got = crewJoin();
+    return got.some(h => h.id === want.id);
+  })()`) === true);
+  check("仲間の増え方に抽選が無い", ev(`(() => {
+    const a = JSON.stringify(Object.keys(S.crew).sort());
+    const b2 = (() => { const keep = { ...S.crew }; S.crew = { "1002": 1 };
+      crewJoin(); const r = JSON.stringify(Object.keys(S.crew).sort());
+      S.crew = keep; return r; })();
+    return a === b2;
+  })()`) === true);
 }
 
 check("実行時エラーなし", errs.length === 0, errs.slice(0, 3).join(" / "));

@@ -16,7 +16,7 @@ export async function loadDatabase(base = "./data") {
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
   const [questionSets, figures, heroes, extensions,
-         advice, titles, crystals, images, subjects, battle] = await Promise.all([
+         advice, titles, crystals, images, subjects, battle, roster, factions] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
@@ -27,9 +27,11 @@ export async function loadDatabase(base = "./data") {
     json(`${base}/images.json`),
     json(`${base}/subjects.json`),
     json(`${base}/battle-stats.json`),
+    json(`${base}/roster.json`),
+    json(`${base}/factions.json`),
   ]);
   return index({ questions: questionSets.flat(), figures, heroes, curated: extensions,
-                 advice, titles, crystals, images, subjects, battle });
+                 advice, titles, crystals, images, subjects, battle, roster, factions });
 }
 
 /**
@@ -104,6 +106,15 @@ function index(raw) {
   db.defaultBg = db.subjects?.defaultBg || "1030";
   db.extensions = buildExtensions(db.curated, db.crystals);
 
+  /* デッキに入れるヒーローと、そのアンサースキル。**生成物です**
+     （data/roster.json ← scripts/build-roster.mjs）。手で書きません */
+  db.crew = db.roster?.heroes || [];
+  db.crewById = Object.fromEntries(db.crew.map(h => [h.id, h]));
+  /* エクステンションID → スペシャルスキル（MCH の Active Skill そのまま） */
+  db.extSkills = db.roster?.extSkills || {};
+  db.factionOrder = db.factions?.order || [];
+  db.factionInfo = db.factions?.factions || {};
+
   // 教科 ↔ 族。クラフトの要求先と、どの教科を解けばその族が貯まるかを結ぶ
   db.families = db.crystals?.families || [];
   db.subjectToFamily = db.crystals?.subjectToFamily || {};
@@ -115,6 +126,14 @@ function index(raw) {
   db.questions.forEach(q => {
     db.cardSubject[q.card] = q.subject;
     db.cardSubject[q.card + "（応用）"] = q.subject;
+  });
+  /* 教科ごとの知識カードの総数。ヒーローの知識倍率（＝攻撃力）を網羅率で
+     測るのに使います。**総量ではなく割合で見ます** —— 総量は問題を足すほど
+     青天井に増えるので、DBを育てるほど飽和します（既存のゲージと同じ理由） */
+  db.cardTotal = {};
+  Object.entries(db.cardSubject).forEach(([card, subject]) => {
+    if (card.endsWith("（応用）")) return;
+    db.cardTotal[subject] = (db.cardTotal[subject] || 0) + 1;
   });
   return db;
 }
