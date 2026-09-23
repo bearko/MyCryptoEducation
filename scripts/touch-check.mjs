@@ -160,7 +160,9 @@ await p.evaluate(`(() => {
   S.run = { ids: [q.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
             found: [], cut: null, right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0,
             results: {}, noReward: true, done: false, hard: {} };
-  S.view = "quiz"; render();
+  /* **デッキ行（ヒーロー）まで含めて見たいので、バトルも立てます** */
+  startBattle();
+  S.view = "quiz"; render(); window.scrollTo(0, 0);
 })()`);
 
 const view = await p.evaluate("({ w: innerWidth, h: innerHeight })");
@@ -189,6 +191,16 @@ const lastRow = await p.evaluate(`(() => {
   const r = e.getBoundingClientRect(); return { y: r.bottom };
 })()`);
 const downBtn = await box("#tochoice");
+/* **ヒーローは答えているあいだ必ず見えていること。**
+   消去法は解答が長いので、下に置いただけでは画面の外に出ていました */
+ok.push(["消去法でもデッキ行が画面の中にある", await p.evaluate(`(() => {
+  const d = document.querySelector(".bt-deck");
+  if (!d) return false;
+  const r = d.getBoundingClientRect();
+  const faces = d.querySelectorAll(".bt-slots .slot img").length;
+  return faces === 5 && r.bottom <= window.innerHeight + 1 && r.top >= 0;
+})()`), "bt-deck"]);
+
 ok.push(["4択への降り口が選択肢の下に出る",
   !!downBtn && downBtn.y > lastRow.y && downBtn.h >= 28 && downBtn.w >= 60,
   downBtn ? `y${Math.round(downBtn.y)} / 選択肢の下端 ${Math.round(lastRow.y)} / ${Math.round(downBtn.w)}x${Math.round(downBtn.h)}` : "降り口が無い"]);
@@ -212,6 +224,7 @@ const swipeSetup = async () => p.evaluate(`(() => {
             tipOpen: false, applied: null, found: [], cut: null, right: 0, wrong: 0,
             appliedRight: 0, shortage: 0, gum: 0, results: {}, noReward: true,
             done: false, hard: {}, swipe: true, plan: [{ mode: "swipe", n: 2 }] };
+  startBattle();
   S.view = "quiz"; render(); window.scrollTo(0, 0);
   const q = DB.byId[S.run.ids[0]];
   return { id: q.id, answer: q.answer };
@@ -306,6 +319,24 @@ const swOver = await p.evaluate(`(() => {
     .filter(e => !e.closest(".swp-stage"))   // 演出で飛ばす場所は除く
     .slice(0, 3).map(e => e.className || e.tagName);
 })()`);
+/* **スワイプにもバトルの帯が出るか。** ここだけ帯が無いと、8問のあいだ
+   戦いが画面から消えます（実機で指摘されました） */
+ok.push(["スワイプにもバトルの帯が出る", await p.evaluate(`(() => {
+  const b = document.querySelector(".qz.swipe .qz-battle");
+  const ch = document.querySelector(".qz.swipe .bt-ch");
+  if (!b || !ch) return false;
+  const r = b.getBoundingClientRect();
+  return r.top === 0 && r.height > 120;
+})()`), "qz-battle"]);
+/* **デッキ行（ヒーロー）は、答えているあいだ必ず画面の中にあること。**
+   消去法のように解答が長い方式では、下にあるだけだと画面の外に出ます */
+ok.push(["スワイプでもデッキ行が画面の中にある", await p.evaluate(`(() => {
+  const d = document.querySelector(".bt-deck");
+  if (!d) return false;
+  const r = d.getBoundingClientRect();
+  return r.bottom <= window.innerHeight + 1 && r.top >= 0;
+})()`), "bt-deck"]);
+
 ok.push(["スワイプの画面も横にはみ出さない", swOver.length === 0, swOver.join(" / ")]);
 
 /* ---- 形式の束の帯（ヘッダ）----------------------------------------------

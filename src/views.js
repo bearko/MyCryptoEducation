@@ -1333,6 +1333,30 @@ function deckRow() {
   </div>`;
 }
 
+/**
+ * **バトルの帯**（画面のいちばん上・全体の32%）。
+ *
+ * 背景・敵・チェイン・Q.◯／あと◯問・3つの束の帯が入ります。
+ * **出題の画面とスワイプで同じものを使います** —— スワイプだけ帯が無いと、
+ * 8問のあいだ戦いが画面から消えます（実際に消えていました）。
+ */
+function battleBandHTML(q) {
+  const w = waveAt(S.run.i);
+  const bg = DB.subjectArt[q.subject]?.bg || DB.defaultBg;
+  return `
+    <div class="qz-battle" style="background-image:url('${assetPath.bg(bg)}')">
+      <i class="qz-shade"></i>
+      ${battleStage()}
+      <div class="bt-count">
+        <span class="bt-q">Q.${w.at + 1}</span>
+        <span class="bt-left">${w.size - w.at - 1 > 0 ? `あと${w.size - w.at - 1}問` : "この束の最後"}</span>
+      </div>
+      <!-- **3つの束と進み具合。** Q.1／あと3問 は「いまの束の中」の話なので、
+           セッション全体のどこにいるかは、この帯でしか分かりません -->
+      <div class="bt-plan">${planStrip()}</div>
+    </div>`;
+}
+
 /* ---------- スペシャルスキル（装備したエクステンションの Active Skill） ---------- */
 
 /**
@@ -1567,7 +1591,6 @@ function vQuiz() {
   const mode = modeOf(q);
   // スワイプは画面ごと別。束で出るので、ふつうのセッションの途中にも現れる
   if (mode === "swipe") return vSwipe();
-  const place = q.country ? `<b>${esc(q.country)}</b>` : `日本 <b>${esc(q.gradeLabel)}</b>`;
   /**
    * **初回起動は、問題と解答だけにします**（決定1）。
    *
@@ -1597,8 +1620,6 @@ function vQuiz() {
    *
    * 初回起動（決定1）はこの帯立てに乗せません——問題と解答だけにするためです。
    */
-  const w = waveAt(S.run.i);
-  const bg = DB.subjectArt[q.subject]?.bg || DB.defaultBg;
   const tall = mode === "panel" || mode === "numeric";
 
   /* 設問の帯。**補足（教科・単元・段・ヒント・⚙）は問題文の下**に置きます */
@@ -1682,17 +1703,7 @@ function vQuiz() {
   <div class="pad intro">${askHTML}${ansHTML}</div>
   ${modals}` : `
   <div class="qz${tall ? " tall" : ""}">
-    <div class="qz-battle" style="background-image:url('${assetPath.bg(bg)}')">
-      <i class="qz-shade"></i>
-      ${battleStage()}
-      <div class="bt-count">
-        <span class="bt-q">Q.${w.at + 1}</span>
-        <span class="bt-left">${w.size - w.at - 1 > 0 ? `あと${w.size - w.at - 1}問` : "この束の最後"}</span>
-      </div>
-      <!-- **3つの束と進み具合。** Q.1／あと3問 は「いまの束の中」の話なので、
-           セッション全体のどこにいるかは、この帯でしか分かりません -->
-      <div class="bt-plan">${planStrip()}</div>
-    </div>
+    ${battleBandHTML(q)}
     ${timeBarHTML(mode)}
     <div class="qz-ask">${askHTML}</div>
     <div class="qz-ans">${ansHTML}</div>
@@ -2692,33 +2703,38 @@ function vSwipe() {
   if (S.run.i >= S.run.ids.length) return go("result");
   const q = currentQ();
   const p = DB.photos?.[q.image];
-  const place = q.country ? `<b>${esc(q.country)}</b>` : `日本 <b>${esc(q.gradeLabel)}</b>`;
 
+  /* **スワイプも出題の画面と同じ帯立てです。** ここだけ帯が無いと、
+     8問のあいだ戦いが画面から消えます（実際に消えていました）。
+     **写真に高さが要るので、バトルの帯だけ少し詰めます**（`.qz.swipe`） */
   app.innerHTML = `
-  <header><div class="hbar">
-    <div class="place">${place} ・ ${esc(q.subject)}</div>
-    <div class="score">${S.run.i + 1} / ${S.run.ids.length}</div></div>
-    ${planStrip()}${timeBarHTML("swipe")}</header>
-  <div class="pad swp">
-    <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
-      <span class="unit">${esc(q.unit)}</span>${levelChip(q, "swipe")}</div>
-    <div class="swp-q">${esc(q.prompt)}</div>
-    <div class="swp-picks">
-      <button class="swp-pick l" data-s="0"><i aria-hidden="true">←</i>
-        <span>${esc(q.choices[0])}</span></button>
-      <button class="swp-pick r" data-s="1"><span>${esc(q.choices[1])}</span>
-        <i aria-hidden="true">→</i></button>
+  <div class="qz swipe">
+    ${battleBandHTML(q)}
+    ${timeBarHTML("swipe")}
+    <div class="qz-ask">
+      <div class="swp-q">${esc(q.prompt)}</div>
+      <div class="qmeta"><span class="grade ${q.newCurriculum ? "alt" : ""}">${esc(q.gradeLabel)}</span>
+        <span class="unit">${esc(q.unit)}</span>${levelChip(q, "swipe")}</div>
     </div>
-    <div class="swp-stage">
-      <div class="swp-card" id="swpcard" tabindex="0"
-        role="group" aria-label="${esc(q.prompt)}">
-        ${p && p.file ? `<img src="${assetPath.photo(p.file)}" alt="${esc(q.alt || "")}"
-          ${p.width ? `width="${p.width}" height="${p.height}"` : ""} draggable="false">` : ""}
-        <div class="swp-seal" id="swpseal" aria-live="polite"></div>
+    <div class="qz-ans swp">
+      <div class="swp-picks">
+        <button class="swp-pick l" data-s="0"><i aria-hidden="true">←</i>
+          <span>${esc(q.choices[0])}</span></button>
+        <button class="swp-pick r" data-s="1"><span>${esc(q.choices[1])}</span>
+          <i aria-hidden="true">→</i></button>
       </div>
+      <div class="swp-stage">
+        <div class="swp-card" id="swpcard" tabindex="0"
+          role="group" aria-label="${esc(q.prompt)}">
+          ${p && p.file ? `<img src="${assetPath.photo(p.file)}" alt="${esc(q.alt || "")}"
+            ${p.width ? `width="${p.width}" height="${p.height}"` : ""} draggable="false">` : ""}
+          <div class="swp-seal" id="swpseal" aria-live="polite"></div>
+        </div>
+      </div>
+      <p class="swp-cred" id="swpcred">${p ? creditLine(p, !titleFree(p)) : ""}</p>
+      <p class="fine swp-how">カードを、正しいと思うほうへはらう。左右のボタンや矢印キーでも答えられます。</p>
     </div>
-    <p class="swp-cred" id="swpcred">${p ? creditLine(p, !titleFree(p)) : ""}</p>
-    <p class="fine swp-how">カードを、正しいと思うほうへはらう。左右のボタンや矢印キーでも答えられます。</p>
+    ${deckRow()}
   </div>`;
 
   wireSwipe(q);
