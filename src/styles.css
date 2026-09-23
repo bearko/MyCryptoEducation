@@ -748,6 +748,10 @@
   .swp-card.thrown{opacity:.45}
   .swp-card img{display:block;width:100%;height:auto;max-height:46vh;object-fit:contain;
     user-select:none;-webkit-user-drag:none}
+  /* **帯立ての中では、カードは残りの高さに合わせます。**
+     46vh のままだと、バトルの帯とデッキ行のぶんだけ下へはみ出します */
+  .qz.swipe .swp-card img{max-height:30dvh}
+  .qz.swipe .swp-how{margin-top:6px}
   .swp-card:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 
   /* ○✕ はカードの上に大きく出す。**マルバツは必ず出す** */
@@ -969,6 +973,12 @@
      **指でなぞれないマスができます**（実際に3問できました）。図版の大きい問題では
      設問の帯のほうをスクロールさせて、解答の位置を動かしません */
   .qz.tall .qz-ask{max-height:26dvh;overflow-y:auto;justify-content:flex-start}
+  /* **スワイプは写真が主役です。** バトルの帯を少し詰めて、カードに高さを回します */
+  .qz.swipe .qz-battle{flex-basis:25dvh;min-height:170px}
+  .qz.swipe .bt-ch{width:128px;height:128px}
+  .qz-ans.swp{padding-top:0}
+  .qz.swipe .swp-q{margin:0 0 8px}
+  .qz.swipe .qmeta{margin:0}
   .qz-shade{position:absolute;inset:0;background:linear-gradient(
     rgba(255,255,255,.34),rgba(255,255,255,.34) 62%,rgba(251,251,247,.84))}
   .qz-battle > *:not(.qz-shade){position:relative;z-index:1}
@@ -1231,9 +1241,11 @@
      （実際に頭が切れました）。行として積むと、そのぶん高さを食います */
   .bt-stage .bt-side.foe .fac{position:absolute;left:50%;top:-13px;transform:translateX(-50%);
     z-index:1;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-  .bt-boss{position:absolute;left:50%;top:-4px;transform:translateX(-50%);
+  /* **属性の札と重ねないでください。** どちらも絵の上の中央に置いたら、
+     BOSS が青龍の札の裏に隠れました（実機で見つかりました） */
+  .bt-boss{position:absolute;right:6px;top:-13px;
     font:700 9px/1 var(--gothic);letter-spacing:.14em;color:#fff;background:var(--pen);
-    padding:2px 5px;border-radius:2px}
+    padding:3px 5px;border-radius:2px;z-index:2}
   .bt-dmg{position:absolute;left:50%;top:10px;transform:translateX(-50%);
     font:700 22px/1 var(--mincho);color:var(--pen);text-shadow:0 1px 0 #fff,0 0 6px #fff;
     animation:dmgPop .5s ease-out}
@@ -1244,8 +1256,14 @@
   .bt-stage .bt-side.foe{flex:1;max-width:220px;margin:0 auto}
 
   /* デッキ5枚とパーティHP。**画面のいちばん下**。左が先で、右ほどASが落ちる */
-  .bt-deck{flex:0 0 auto;max-width:560px;width:100%;margin:0 auto;padding:4px 16px 6px;
-    border-top:1px solid var(--line);background:var(--paper)}
+  /* **デッキ行は画面の下に貼り付けます**（`position:sticky`）。
+     消去法のように解答が長い方式では、**ヒーローが画面の外に出て見えません**
+     でした（実機で指摘されました）。パーティは戦いのUIなので、答えている
+     あいだは必ず見えているようにします */
+  .bt-deck{position:sticky;bottom:0;z-index:5;
+    flex:0 0 auto;max-width:560px;width:100%;margin:0 auto;padding:4px 16px 6px;
+    border-top:1px solid var(--line);background:rgba(251,251,247,.96);
+    backdrop-filter:blur(4px)}
   .bt-deck.down{opacity:.6}
   /* **パーティの数字もバーの中へ。** 行を1つ減らすと、そのぶん解答が広がります */
   .bt-party{position:relative;margin-bottom:5px}
