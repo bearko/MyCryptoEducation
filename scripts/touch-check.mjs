@@ -118,6 +118,30 @@ const sweep = async wobble => {
   }
   ok.push([`ぶれ${wobble}pxでも全${ids.length}問をなぞれる`, bad.length === 0, bad.slice(0, 3).join(" / ")]);
 };
+
+/* **盤面のマスが1つでも画面の外に出ていないか。**
+   `document.elementFromPoint` は画面の外を拾えないので、はみ出したマスは
+   **指でなぞれません**。図版の大きい問題で実際に3問はみ出しました */
+const offBoard = async () => {
+  const ids = await p.evaluate(`DB.questions.filter(q => q.mode === "panel").map(q => q.id)`);
+  const bad = [];
+  for (const id of ids) {
+    const n = await p.evaluate(`(() => {
+      const x = DB.byId["${id}"];
+      S.run = { ids: [x.id], i: 0, picked: null, hintsUsed: 0, tipOpen: false, applied: null,
+                right: 0, wrong: 0, appliedRight: 0, shortage: 0, gum: 0, results: {},
+                noReward: true, done: false, hard: {} };
+      S.view = "quiz"; render(); window.scrollTo(0, 0);
+      return [...document.querySelectorAll(".pcell")].filter(e => {
+        const r = e.getBoundingClientRect();
+        return r.top < 0 || r.bottom > window.innerHeight;
+      }).length;
+    })()`);
+    if (n) bad.push(`${id} ${n}マス`);
+  }
+  ok.push([`盤面のマスが全${ids.length}問とも画面の中にある`, bad.length === 0, bad.slice(0, 3).join(" / ")]);
+};
+await offBoard();
 for (const w of [3, 9, 14]) await sweep(w);
 
 /* ---- 画面が崩れていないか（実寸で見る）----------------------------------
@@ -344,8 +368,17 @@ const hOpen = await hintBox();
 ok.push(["ヒントを開いても解答エリアが動かない",
   hOpen.open && hOpen.top === hBefore.top && hOpen.page === hBefore.page,
   JSON.stringify({ hBefore, hOpen })]);
-ok.push(["ヒントを開いてもスクロールが要らない",
-  hOpen.page <= 844 + 1, `${hOpen.page}px`]);
+/* **ポップアップそのものが画面に収まっているか**を見ます。ページ全体の高さで
+   見ていたころは、設問の帯が伸びただけで落ちていました（ポップアップは
+   `position:fixed` なので、ページの高さとは関係がありません） */
+const hSheet = await p.evaluate(`(() => {
+  const el = document.querySelector("#hintmodal .msheet");
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { top: Math.round(r.top), bottom: Math.round(r.bottom) };
+})()`);
+ok.push(["ヒントのポップアップが画面に収まる",
+  !!hSheet && hSheet.top >= 0 && hSheet.bottom <= 844 + 1, JSON.stringify(hSheet)]);
 await p.click("#hintmore"); await p.waitForTimeout(200);
 const hMore = await hintBox();
 await p.click("#hintclose"); await p.waitForTimeout(200);

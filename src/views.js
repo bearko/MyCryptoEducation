@@ -1580,30 +1580,29 @@ function vQuiz() {
    */
   const intro = !!S.run.intro;
 
-  /* **画面は4つの層です。** 主役は設問と解答なので、バトルは上に小さく畳みます。
-     初回起動（決定1）はこの層立てに乗せません——問題と解答だけにするためです */
+  /**
+   * **画面は4つの帯です**（`docs/wiz-redesign-screens.md`）。
+   *
+   * ```
+   * バトル 37% ／ 設問 18% ／ 解答 のこり ／ デッキ行
+   * ```
+   *
+   * **比率は黒ウィズの実画面から採りました。** バトルを細く畳んでいたころは、
+   * 敵が 56px しかなく、戦っている感じがありませんでした。**背景も
+   * バトルの帯の中だけに敷きます** —— 画面ぜんぶに薄く敷くと、
+   * 絵が効かないうえに設問が読みにくくなります。
+   *
+   * **文字パネルと数値入力だけは帯を詰めます**（`.tall`）。盤面とテンキーに
+   * 高さが要るので、バトルを 37% のまま取ると解答がはみ出します。
+   *
+   * 初回起動（決定1）はこの帯立てに乗せません——問題と解答だけにするためです。
+   */
   const w = waveAt(S.run.i);
   const bg = DB.subjectArt[q.subject]?.bg || DB.defaultBg;
+  const tall = mode === "panel" || mode === "numeric";
 
-  /* **ヒントはポップアップで出します**（`#hintmodal`）。流れの中に置くと、
-     開いた瞬間に解答エリアが下へ押し出されてスクロールが要りました。
-     中身は `drawHints` が入れます——空のあいだは何も描かないので、
-     場所も取りません。**HTMLコメントをテンプレートリテラルの中に書くときは
-     バッククォートを入れないでください**（そこで文字列が閉じます）。 */
-
-  app.innerHTML = `
-  ${intro ? `<div class="introtop"></div>` : `
-  <div class="bt-bg" style="background-image:url('${assetPath.bg(bg)}')"></div>
-  ${battleStage()}
-  <div class="bt-count">
-    <span class="bt-q">Q.${w.at + 1}</span>
-    <span class="bt-left">${w.size - w.at - 1 > 0 ? `あと${w.size - w.at - 1}問` : "この束の最後"}</span>
-  </div>
-  <!-- **3つの束と進み具合。** Q.1／あと3問 は「いまの束の中」の話なので、
-       セッション全体のどこにいるかは、この帯でしか分かりません -->
-  <div class="bt-plan">${planStrip()}</div>
-  ${timeBarHTML(mode)}`}
-  <div class="pad${intro ? " intro" : " bt-pad"}">
+  /* 設問の帯。**補足（教科・単元・段・ヒント・⚙）は問題文の下**に置きます */
+  const askHTML = `
     ${q.stem ? `<div class="qstem">${esc(q.stem)}</div>` : ""}
     <div class="qtext">${esc(q.prompt)}</div>
     ${photoAt(q, "prompt")}
@@ -1613,7 +1612,10 @@ function vQuiz() {
       <span class="unit">${esc(q.unit)}</span>${levelChip(q, mode)}
       <button class="hintbtn sm" id="hint">ヒント</button>
       <button class="gear" id="gear" aria-label="設定">⚙</button>
-    </div>`}
+    </div>`}`;
+
+  /* 解答の帯 */
+  const ansHTML = `
     ${mode === "panel" ? panelHTML(q)
     : mode === "numeric" ? `
       <div class="numbox">
@@ -1656,9 +1658,9 @@ function vQuiz() {
           まちがえて消すとそこで終わりますが、消せたぶんの点は残ります。</p>
         <div class="elimbar">
           <button class="lnk" id="tochoice">4択に切り替える</button></div>` : ""}`}
-    <div id="verdict"></div>
-  </div>
-  ${intro ? "" : deckRow()}
+    <div id="verdict"></div>`;
+
+  const modals = `
   ${S.run.settingOpen ? `<div class="modal" id="setmodal"><div class="msheet">
     <label class="switch">
       <input type="checkbox" id="showexp" ${S.settings.showExplanationOnCorrect ? "checked" : ""}>
@@ -1668,6 +1670,35 @@ function vQuiz() {
     <button class="btn ghost" id="setclose">とじる</button>
   </div></div>` : ""}
   <div id="hintmodal"></div><div id="ssmodal"></div>`;
+
+  /* **ヒントはポップアップで出します**（`#hintmodal`）。流れの中に置くと、
+     開いた瞬間に解答エリアが下へ押し出されてスクロールが要りました。
+     中身は `drawHints` が入れます——空のあいだは何も描かないので、
+     場所も取りません。**HTMLコメントをテンプレートリテラルの中に書くときは
+     バッククォートを入れないでください**（そこで文字列が閉じます）。 */
+
+  app.innerHTML = intro ? `
+  <div class="introtop"></div>
+  <div class="pad intro">${askHTML}${ansHTML}</div>
+  ${modals}` : `
+  <div class="qz${tall ? " tall" : ""}">
+    <div class="qz-battle" style="background-image:url('${assetPath.bg(bg)}')">
+      <i class="qz-shade"></i>
+      ${battleStage()}
+      <div class="bt-count">
+        <span class="bt-q">Q.${w.at + 1}</span>
+        <span class="bt-left">${w.size - w.at - 1 > 0 ? `あと${w.size - w.at - 1}問` : "この束の最後"}</span>
+      </div>
+      <!-- **3つの束と進み具合。** Q.1／あと3問 は「いまの束の中」の話なので、
+           セッション全体のどこにいるかは、この帯でしか分かりません -->
+      <div class="bt-plan">${planStrip()}</div>
+    </div>
+    ${timeBarHTML(mode)}
+    <div class="qz-ask">${askHTML}</div>
+    <div class="qz-ans">${ansHTML}</div>
+    ${deckRow()}
+  </div>
+  ${modals}`;
 
   /* **1本も見ていないときだけ、開くと同時に1本目が出ます。**
      2回目からは読み直すだけなので、本数は増えません（点が勝手に減りません） */

@@ -435,7 +435,7 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:radial-gradient(ellipse 32% 6px at 50% calc(100% - 3px),
       rgba(23,36,63,.22),rgba(23,36,63,0) 70%)}
-  .tv-figure img{height:100%;width:auto;max-width:100%;max-height:208px;object-fit:contain;
+  .tv-figure img{height:100%;width:auto;max-width:100%;max-height:256px;object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 3px 8px rgba(0,0,0,.32))}
   .tv-name{display:flex;align-items:center;gap:7px;font-family:var(--mincho);
     background:rgba(251,251,247,.86);border:1px solid var(--line);border-radius:3px;padding:3px 12px}
@@ -488,7 +488,7 @@
     background:var(--card);border:1px solid var(--line);border-radius:3px}
   .trow:hover{border-color:var(--ink-faint)}
   .trow.on{border-color:var(--brass)}
-  .trow img{width:56px;height:56px;flex:none;image-rendering:pixelated}
+  .trow img{width:72px;height:72px;flex:none;image-rendering:pixelated}
   .trow .ti{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
   .trow .tn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600}
   .trow .tg{display:block;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
@@ -897,10 +897,10 @@
     font:inherit;text-align:left;background:rgba(255,255,255,.92);
     border:1px solid var(--line);border-radius:4px;overflow:hidden}
   .mcard:hover{border-color:var(--ink-faint)}
-  .mfoe,.mprize{position:relative;flex:none;width:62px;height:56px;display:flex;
+  .mfoe,.mprize{position:relative;flex:none;width:72px;height:66px;display:flex;
     align-items:center;justify-content:center;background:#EEF0F5}
   .mprize{background:#F7B733}
-  .mfoe img,.mprize img{width:44px;height:44px;object-fit:contain;image-rendering:pixelated}
+  .mfoe img,.mprize img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated}
   .mfoe i,.mprize i{position:absolute;top:1px;left:0;right:0;text-align:center;
     font-size:8px;font-style:normal;letter-spacing:.06em;color:#5A6472}
   .mprize i{top:auto;bottom:2px;color:#6B4E06;font-weight:700}
@@ -930,7 +930,7 @@
     border:1px solid var(--line);border-radius:4px;overflow:hidden}
   .scard::before{content:"";position:absolute;inset:0;background:rgba(255,255,255,.8)}
   .scard.on::before{background:rgba(0,0,0,.8)}
-  .shero{position:relative;width:74px;height:74px;image-rendering:pixelated}
+  .shero{position:relative;width:96px;height:96px;image-rendering:pixelated}
   /* 押すと背景が反転するので、文字には白い縁を付けておく */
   .sname{position:relative;font-family:var(--mincho);font-size:19px;font-weight:600;
     line-height:1.2;color:var(--ink);
@@ -953,13 +953,41 @@
   /* 上から バトル演出 / 設問 / 補足 / 解答。**主役は設問と解答**なので、
      バトルは上に小さく畳む。情報は HP と割合だけ */
 
+  /* **出題の画面は4つの帯です。比率は黒ウィズの実画面から採りました。**
+     バトル 37% ／ 設問 18% ／ 解答 のこり ／ デッキ行。
+     **背景はバトルの帯の中だけに敷きます** —— 画面ぜんぶに薄く敷くと、
+     絵が効かないうえに設問が読みにくくなります */
+  .qz{display:flex;flex-direction:column;min-height:100dvh}
+  .qz-battle{position:relative;flex:0 0 32dvh;min-height:190px;max-height:330px;
+    display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
+    background-size:cover;background-position:center 30%;
+    border-bottom:1px solid var(--line)}
+  /* **文字パネルと数値入力だけは帯を詰めます。** 盤面とテンキーに高さが要ります */
+  .qz.tall .qz-battle{flex-basis:20dvh;min-height:150px}
+  /* **盤面とテンキーは、必ず画面の中に収めます。**
+     `document.elementFromPoint` は画面の外を拾えないので、盤面が下へはみ出すと
+     **指でなぞれないマスができます**（実際に3問できました）。図版の大きい問題では
+     設問の帯のほうをスクロールさせて、解答の位置を動かしません */
+  .qz.tall .qz-ask{max-height:26dvh;overflow-y:auto;justify-content:flex-start}
+  .qz-shade{position:absolute;inset:0;background:linear-gradient(
+    rgba(255,255,255,.34),rgba(255,255,255,.34) 62%,rgba(251,251,247,.84))}
+  .qz-battle > *:not(.qz-shade){position:relative;z-index:1}
+  .qz-battle .bt-stage{flex:1;align-items:center}
+  .qz-ask{flex:0 0 auto;min-height:16dvh;padding:6px 16px 2px;
+    display:flex;flex-direction:column;justify-content:center}
+  .qz-ans{flex:1 0 auto;padding:4px 16px 8px}
+
   .bt-bg{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center}
   .bt-bg::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.86)}
 
+  /* **ドット絵は原本が 64x64 です。** 大きく出すときは 64 の整数倍
+     （128 / 192 / 256）にしてください。半端な倍率だと、1ドットが 1px の
+     ところと 2px のところができて、輪郭がガタつきます */
   .bt-stage{position:relative;display:flex;align-items:flex-end;justify-content:space-between;
-    gap:10px;padding:10px 14px 6px;min-height:92px}
+    gap:10px;padding:14px 14px 2px;min-height:92px}
+  .qz.tall .bt-ch{width:128px;height:128px}
   .bt-side{position:relative;flex:0 0 40%;display:flex;flex-direction:column;align-items:center;gap:3px}
-  .bt-ch{width:56px;height:56px;image-rendering:pixelated;
+  .bt-ch{width:192px;height:192px;image-rendering:pixelated;
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));transition:transform .18s}
   /* **2体は向かい合わせます。** 英雄は左、敵は右に立ちます。MCH の絵は
      どちらも**左を向いている**ので、そのまま並べると2体とも同じほうを
@@ -984,19 +1012,28 @@
   .bt-hp.foe i{background:var(--pen)}
   .bt-num{display:flex;justify-content:space-between;width:100%;
     font:600 10.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-soft)}
+  /* **敵の数字はバーに重ねます。** 絵を大きくしたぶんを、行の数で取り返さない */
+  .bt-stage .bt-side.foe .bt-hp{height:11px}
+  .bt-stage .bt-side.foe .bt-num{position:absolute;left:0;right:0;bottom:0;
+    padding:0 5px;font-size:8.5px;line-height:11px;color:#fff;
+    text-shadow:0 1px 1px rgba(0,0,0,.45);pointer-events:none}
   .bt-kills{align-self:center;font:700 13px/1 var(--mincho);color:var(--pen)}
 
   .bt-count{display:flex;justify-content:space-between;padding:0 16px 2px;
     font-size:13px;color:var(--ink-soft)}
+  .qz-battle .bt-count{padding-bottom:2px}
+  .qz-battle .bt-plan{padding-bottom:3px}
   .bt-count .bt-q{font-family:var(--mincho);font-size:16px;color:var(--ink)}
 
   /* 設問エリアは、上下に余裕を取って読ませる */
-  .pad.bt-pad{padding-top:14px}
-  .pad.bt-pad .qtext{margin-bottom:14px}
+  /* **下の 72px は、デッキ行が受け持ちます。** 解答エリアとデッキのあいだに
+     72px の空白が挟まっていると、絵を大きくしたぶんがそのまま下へ押し出されます */
+  .pad.bt-pad{padding-top:6px;padding-bottom:16px}
+  .pad.bt-pad .qtext{margin-bottom:10px}
 
   /* 補足表示エリア。**ヒントは控えめに。** 押すとこの下にヒントが出る */
   .bt-sub{display:flex;align-items:center;gap:7px;flex-wrap:wrap;
-    margin:16px 0 10px;padding-top:11px;border-top:1px dashed var(--line)}
+    margin:10px 0 8px;padding-top:8px;border-top:1px dashed var(--line)}
   .bt-sub .unit{flex:1;min-width:0}
   .hintbtn.sm{padding:5px 12px;font-size:12.5px}
   .gear{flex:none;width:32px;height:32px;padding:0;font-size:15px;line-height:1;cursor:pointer;
@@ -1010,7 +1047,7 @@
   .skmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;
     justify-content:center;background:rgba(23,36,63,.35);padding:22px}
   .sksheet{align-items:center;text-align:center;gap:12px}
-  .skface{width:96px;height:96px;image-rendering:pixelated;transform:scaleX(-1);
+  .skface{width:128px;height:128px;image-rendering:pixelated;transform:scaleX(-1);
     filter:drop-shadow(0 2px 5px rgba(0,0,0,.28))}
   .sktitle{font:700 19px/1.3 var(--mincho);color:var(--brass);letter-spacing:.04em}
   .skwhy{margin:0;font-size:13.5px;line-height:1.7}
@@ -1035,8 +1072,8 @@
     display:flex;align-items:center;justify-content:center;gap:26px;
     transform:translateY(-50%) skewY(-10deg);
     animation:skBand 1.2s cubic-bezier(.2,.8,.3,1) both}
-  .skcut-unit img{width:64px;height:64px;image-rendering:pixelated;
-    transform:scale(1.7) skewY(10deg) scaleX(-1)}
+  .skcut-unit img{width:128px;height:128px;image-rendering:pixelated;
+    transform:scale(1.2) skewY(10deg) scaleX(-1)}
   .skcut-unit p{margin:0;font:700 25px/1.1 var(--mincho);color:#fff;opacity:.92;
     transform:skewY(10deg);
     text-shadow:2px 2px 0 #333,-2px 2px 0 #333,-2px -2px 0 #333,2px -2px 0 #333}
@@ -1073,10 +1110,15 @@
   .wv-stage::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.34)}
   .wv-hero,.wv-foe{position:absolute;bottom:16%;z-index:1;
     display:flex;flex-direction:column;align-items:center;gap:4px}
-  .wv-hero{left:6%}
-  .wv-foe{right:4%}
+  .wv-hero{left:4%}
+  .wv-foe{right:2%}
   /* **128px（原本の2倍）。** ここは英雄と敵を見せる画面なので、大きく出す */
+  /* **敵を 192px（原本の3倍）、英雄を 128px（2倍）で出します。**
+     2体とも 192 にすると、横 390px の画面では 384px になって、槍と敵が
+     ぶつかります（実際にぶつかりました）。**接敵の画面で見るのは敵のほう**
+     なので、大きいほうを敵に渡しました */
   .wv .bt-ch{width:128px;height:128px}
+  .wv-foe .bt-ch{width:192px;height:192px}
   /* 英雄は左に立って右を向く。敵の絵は元から左向きなので、そのまま */
   .wv-hero .bt-ch{transform:scaleX(-1);animation:wvIn .5s cubic-bezier(.2,.9,.3,1) both}
   @keyframes wvIn{from{transform:scaleX(-1) translateX(180px);opacity:0}
@@ -1085,11 +1127,11 @@
   @keyframes wvFoeIn{from{transform:translateX(-90px);opacity:0}
     to{transform:translateX(0);opacity:1}}
   /* **接敵してから体力が満ちる。** 0 から 100% へ、遅れて伸びる */
-  .wv-hp{width:128px;height:8px;background:rgba(216,220,228,.9);border-radius:99px;overflow:hidden}
+  .wv-hp{width:192px;height:8px;background:rgba(216,220,228,.9);border-radius:99px;overflow:hidden}
   .wv-hp i{display:block;height:100%;background:var(--moss);
     width:100%;animation:wvCharge .7s .5s ease-out both}
   @keyframes wvCharge{from{width:0}to{width:100%}}
-  .wv-foe .bt-num{width:128px;text-shadow:0 1px 2px rgba(255,255,255,.9)}
+  .wv-foe .bt-num{width:192px;text-shadow:0 1px 2px rgba(255,255,255,.9)}
   /* 戦果のほうは、満ちる演出をしない（結果の数字がそのまま出る） */
   .wv-stage.end .wv-hp i{animation:none}
   .wv-stage.end .wv-hero .bt-ch{animation:none;transform:scaleX(-1)}
@@ -1106,7 +1148,7 @@
   /* 逃げられたときだけ、マイちゃんが手の打ち方を言う。**罰ではなく道順です** */
   .wv-tip{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;
     padding:11px 13px;background:#FBF7EC;border-left:2px solid var(--brass);border-radius:0 3px 3px 0}
-  .wv-tip img{width:42px;height:56px;flex:none;image-rendering:pixelated;align-self:center}
+  .wv-tip img{width:48px;height:64px;flex:none;image-rendering:pixelated;align-self:center}
   .wv-tip div{min-width:0}
   .wv-tip b{display:block;font-size:13px;color:var(--brass);margin-bottom:3px}
   .wv-tip p{margin:0;font-size:13px;line-height:1.7}
@@ -1185,6 +1227,10 @@
     align-items:flex-end;gap:3px}
   .bt-chain{font:700 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-faint)}
   .bt-chain.on{color:var(--brass)}
+  /* **属性の札は絵の上に出します。** 絵に重ねると、敵の顔や得物が隠れます
+     （実際に頭が切れました）。行として積むと、そのぶん高さを食います */
+  .bt-stage .bt-side.foe .fac{position:absolute;left:50%;top:-13px;transform:translateX(-50%);
+    z-index:1;box-shadow:0 1px 3px rgba(0,0,0,.3)}
   .bt-boss{position:absolute;left:50%;top:-4px;transform:translateX(-50%);
     font:700 9px/1 var(--gothic);letter-spacing:.14em;color:#fff;background:var(--pen);
     padding:2px 5px;border-radius:2px}
@@ -1198,24 +1244,29 @@
   .bt-stage .bt-side.foe{flex:1;max-width:220px;margin:0 auto}
 
   /* デッキ5枚とパーティHP。**画面のいちばん下**。左が先で、右ほどASが落ちる */
-  .bt-deck{max-width:560px;margin:10px auto 0;padding:8px 16px 14px;
-    border-top:1px solid var(--line)}
+  .bt-deck{flex:0 0 auto;max-width:560px;width:100%;margin:0 auto;padding:4px 16px 6px;
+    border-top:1px solid var(--line);background:var(--paper)}
   .bt-deck.down{opacity:.6}
-  .bt-party{margin-bottom:6px}
+  /* **パーティの数字もバーの中へ。** 行を1つ減らすと、そのぶん解答が広がります */
+  .bt-party{position:relative;margin-bottom:5px}
+  .bt-party .bt-hp{height:11px}
+  .bt-party .bt-num{position:absolute;left:0;right:0;top:0;padding:0 5px;
+    font-size:8.5px;line-height:11px;color:#fff;
+    text-shadow:0 1px 1px rgba(0,0,0,.45);pointer-events:none}
   .bt-slots{display:flex;gap:6px}
   .bt-slots .slot{flex:1;min-width:0;position:relative;border:1px solid var(--line);
-    background:var(--card);border-radius:4px;padding:3px 2px 2px;cursor:default;
-    display:flex;flex-direction:column;align-items:center;gap:2px}
+    background:var(--card);border-radius:4px;padding:2px 2px 1px;cursor:default;
+    display:flex;flex-direction:column;align-items:center;gap:1px}
   .bt-slots .slot:disabled{cursor:default}
-  .bt-slots .slot img{width:34px;height:34px;image-rendering:pixelated}
-  .bt-slots .slot.empty{border-style:dashed;min-height:46px}
+  .bt-slots .slot img{width:48px;height:48px;image-rendering:pixelated}
+  .bt-slots .slot.empty{border-style:dashed;min-height:60px}
   /* 答えたあと、**左から順に光ります。** どこまで届いたかが速さの手ざわり */
   .bt-slots .slot.fired{border-color:var(--brass);box-shadow:0 0 0 2px rgba(168,134,60,.35)}
   .bt-slots .slot.ready{border-color:var(--pen);cursor:pointer;
     box-shadow:0 0 0 2px rgba(196,54,44,.22)}
   .bt-slots .slot .fac{position:absolute;left:2px;top:2px;width:6px;height:6px;
     padding:0;border-radius:99px}
-  .bt-deck.tight .bt-slots .slot img{width:26px;height:26px}
+  .bt-deck.tight .bt-slots .slot img{width:32px;height:32px}
   .bt-deck.tight{padding-bottom:8px}
 
   /* SSゲージ。●の数が必要正解数（初伝3・中伝4・奥伝6） */
@@ -1229,7 +1280,7 @@
   .sssheet{max-height:80vh;overflow:auto}
   .sstitle{display:block;font:600 15px/1.4 var(--mincho);margin-bottom:10px}
   .ssrow{display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
-  .ssrow img{width:38px;height:38px;image-rendering:pixelated;flex:none}
+  .ssrow img{width:56px;height:56px;image-rendering:pixelated;flex:none}
   .ssrow div{flex:1;min-width:0}
   .ssrow b{display:block;font-size:12.5px}
   .ssrow em{font-style:normal;font-family:var(--mincho);color:var(--pen);font-size:13.5px}
@@ -1245,7 +1296,7 @@
   .deckstrip b{margin-left:auto;font:600 11.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
     color:var(--ink-soft)}
   .deckstrip.over b{color:var(--pen)}
-  .ds-face{position:relative;width:30px;height:30px;flex:none}
+  .ds-face{position:relative;width:40px;height:40px;flex:none}
   .ds-face img{width:100%;height:100%;image-rendering:pixelated}
   .ds-face .fac{position:absolute;left:0;bottom:0;width:6px;height:6px;padding:0;border-radius:99px}
   .ds-face.empty{border:1px dashed var(--line);border-radius:3px}
@@ -1260,11 +1311,11 @@
   .dk-slot{display:flex;gap:9px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
   .dk-no{font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink-faint);
     width:14px;flex:none;padding-top:6px}
-  .dk-face{width:54px;height:54px;flex:none;border:1px solid var(--line);background:var(--card);
+  .dk-face{width:72px;height:72px;flex:none;border:1px solid var(--line);background:var(--card);
     border-radius:4px;padding:2px;cursor:pointer}
   .dk-face img{width:100%;height:100%;image-rendering:pixelated}
   .dk-face i{font-style:normal;font-size:20px;color:var(--ink-faint)}
-  .dk-face.mini{width:42px;height:42px}
+  .dk-face.mini{width:56px;height:56px}
   .dk-face .silhouette{filter:brightness(0) opacity(.22)}
   .dk-body{flex:1;min-width:0}
   .dk-body b{font-size:13.5px;margin-right:6px}
