@@ -1,0 +1,1966 @@
+{
+  "_note": "生成物です。手で書かないでください（node scripts/build-roster.mjs）。台帳は data/roster-curated.json。",
+  "_source": "bearko/mycryptoheroes ・ Data/Heroes/heroes.json と Data/Extensions/extensions.json",
+  "heroes": [
+    {
+      "id": "1002",
+      "name": "甲斐姫",
+      "faction": "朱雀",
+      "rarity": "Common",
+      "cost": 4,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1106,
+        "name": "浪切",
+        "effect": 1,
+        "icon": "phy.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 40,
+        "text": "自身がActive Skillを使用した後に40%の確率で発動 / 先頭の味方のPHYを自身のPHYの15%ダウン / 先頭の敵に自身のPHYの50%ダメージ",
+        "rate": 50
+      },
+      "stats": {
+        "hp": 162,
+        "phy": 79,
+        "int": 45,
+        "agi": 118
+      },
+      "unlock": null
+    },
+    {
+      "id": "2002",
+      "name": "スパルタクス",
+      "faction": "朱雀",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1020,
+        "name": "剣闘士の反乱",
+        "effect": 1,
+        "icon": "phy.png",
+        "condition": "自身のHPが60%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身のHPが60%未満の時に100%の確率で1回だけ発動 / 自身のPHYを敵全体のINT増加量合計の100%アップ / 「INTが最も高い敵に自身のPHYの30 ~ 50%ダメージ」を2回繰り返す / 自身のPHYを敵全体のINT増加量合計の100%ダウン",
+        "rate": 40
+      },
+      "stats": {
+        "hp": 573,
+        "phy": 59,
+        "int": 42,
+        "agi": 42
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "2032",
+      "name": "モンゴメリ",
+      "faction": "朱雀",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "国語",
+        "外国語"
+      ],
+      "as": {
+        "id": 1139,
+        "name": "グリーンゲイブルズ",
+        "effect": 2,
+        "icon": "int.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 40,
+        "text": "自身がActive Skillを使用した後に40%の確率で発動 / 最後尾の敵に自身のINTの30%ダメージ / 最後尾の敵に自身のINT減少量の50%ダメージ",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 255,
+        "phy": 35,
+        "int": 116,
+        "agi": 104
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "3050",
+      "name": "メイヴ",
+      "faction": "朱雀",
+      "rarity": "Rare",
+      "cost": 9,
+      "fit": [
+        "国語"
+      ],
+      "as": {
+        "id": 1196,
+        "name": "女王のトリスケリオン",
+        "effect": 5,
+        "icon": "DBF_phy.png",
+        "condition": "自身がActive Skillでダメージを受けた後に{triggerRate}%の確率で発動",
+        "triggerRate": 80,
+        "text": "自身がActive Skillでダメージを受けた後に80%の確率で発動 / PHYが最も高い敵のPHYを対象のPHY増加量の30%ダウン / AGIが最も高い敵のAGIを対象のAGI増加量の40%ダウン / 自身のHPを回復係数の25%回復",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 153,
+        "phy": 111,
+        "int": 111,
+        "agi": 111
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.18
+      }
+    },
+    {
+      "id": "4047",
+      "name": "ハンニバル",
+      "faction": "朱雀",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1164,
+        "name": "豊穣神バアルの雷光",
+        "effect": 1,
+        "icon": "phy.png",
+        "condition": "敵の誰かがActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 35,
+        "text": "敵の誰かがActive Skillを使用した後に35%の確率で発動 / HPが最も低い敵に味方全体のAGI減少量合計の100%ダメージ / 味方全体に敵全体のAGI減少量合計の80%ダメージ",
+        "rate": 100
+      },
+      "stats": {
+        "hp": 246,
+        "phy": 116,
+        "int": 104,
+        "agi": 146
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "4048",
+      "name": "周瑜",
+      "faction": "朱雀",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "国語",
+        "社会"
+      ],
+      "as": {
+        "id": 1172,
+        "name": "赤壁の戦い",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "敵の誰かがActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 15,
+        "text": "敵の誰かがActive Skillを使用した後に15%の確率で発動 / 味方全体のPHY/INTの高い方を自身のINTの20 ~ 25%アップ / 自身に27%の確率で恐怖を付与",
+        "rate": 23
+      },
+      "stats": {
+        "hp": 375,
+        "phy": 98,
+        "int": 147,
+        "agi": 78
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "5013",
+      "name": "チンギス・ハン",
+      "faction": "朱雀",
+      "rarity": "Legendary",
+      "cost": 18,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1058,
+        "name": "蒼狼",
+        "effect": 1,
+        "icon": "phy.png",
+        "condition": "自身がActive Skillでダメージを受けた後に{triggerRate}%の確率で発動",
+        "triggerRate": 100,
+        "text": "自身がActive Skillでダメージを受けた後に100%の確率で発動 / 先頭の敵に自身のPHYの40%ダメージ / 自身のチャージを敵全体のAGI増加量合計の25 ~ 35%アップ",
+        "rate": 40
+      },
+      "stats": {
+        "hp": 345,
+        "phy": 149,
+        "int": 71,
+        "agi": 193
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.5
+      }
+    },
+    {
+      "id": "5017",
+      "name": "アレキサンダー",
+      "faction": "朱雀",
+      "rarity": "Legendary",
+      "cost": 18,
+      "fit": [
+        "社会",
+        "外国語"
+      ],
+      "as": {
+        "id": 1111,
+        "name": "征服王の偉業",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身が死亡した後に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身が死亡した後に100%の確率で1回だけ発動 / 先頭の味方のPHYを自身のPHYの120 ~ 140%アップ / 先頭の味方のINTを自身のINTの120 ~ 140%アップ / 先頭の味方のAGIを自身のAGIの120 ~ 140%アップ",
+        "rate": 130
+      },
+      "stats": {
+        "hp": 483,
+        "phy": 123,
+        "int": 123,
+        "agi": 121
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.5
+      }
+    },
+    {
+      "id": "1004",
+      "name": "シートン",
+      "faction": "玄武",
+      "rarity": "Common",
+      "cost": 4,
+      "fit": [
+        "理科"
+      ],
+      "as": {
+        "id": 1160,
+        "name": "狼王ロボ",
+        "effect": 2,
+        "icon": "int.png",
+        "condition": "バトル開始時に{triggerRate}%の確率で発動",
+        "triggerRate": 100,
+        "text": "バトル開始時に100%の確率で発動 / PHYが最も高い敵に自身のINTの40%ダメージ / PHYが最も高い敵に50%の確率で出血を付与",
+        "rate": 40
+      },
+      "stats": {
+        "hp": 345,
+        "phy": 66,
+        "int": 69,
+        "agi": 46
+      },
+      "unlock": null
+    },
+    {
+      "id": "2022",
+      "name": "アンデルセン",
+      "faction": "玄武",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "国語",
+        "外国語"
+      ],
+      "as": {
+        "id": 1115,
+        "name": "マッチ売りの少女",
+        "effect": 2,
+        "icon": "int.png",
+        "condition": "自身のHPが60%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身のHPが60%未満の時に100%の確率で1回だけ発動 / 敵全体に自身のINTの35 ~ 55%ダメージ",
+        "rate": 45
+      },
+      "stats": {
+        "hp": 234,
+        "phy": 46,
+        "int": 100,
+        "agi": 116
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "2025",
+      "name": "サトシ・ナカモト ALPHA CC",
+      "faction": "玄武",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "情報"
+      ],
+      "as": {
+        "id": 1122,
+        "name": "マイニング ALPHA CC",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 35,
+        "text": "自身がActive Skillを使用した後に35%の確率で発動 / 最後尾の味方のPHYを自身のPHYの10%アップ / 最後尾の味方のAGIを自身のPHYの10%アップ",
+        "rate": 10
+      },
+      "stats": {
+        "hp": 312,
+        "phy": 105,
+        "int": 37,
+        "agi": 94
+      },
+      "unlock": {
+        "subject": "情報",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "3016",
+      "name": "松尾芭蕉",
+      "faction": "玄武",
+      "rarity": "Rare",
+      "cost": 9,
+      "fit": [
+        "国語"
+      ],
+      "as": {
+        "id": 1059,
+        "name": "おくのほそ道",
+        "effect": 4,
+        "icon": "BUF_agi.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 80,
+        "text": "自身がActive Skillを使用した後に80%の確率で発動 / 自身のAGIを自身のAGIの8%アップ / 先頭の味方のAGIを自身のAGIの8%アップ",
+        "rate": 8
+      },
+      "stats": {
+        "hp": 210,
+        "phy": 86,
+        "int": 102,
+        "agi": 125
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.18
+      }
+    },
+    {
+      "id": "3030",
+      "name": "シェイクスピア",
+      "faction": "玄武",
+      "rarity": "Rare",
+      "cost": 9,
+      "fit": [
+        "国語",
+        "外国語"
+      ],
+      "as": {
+        "id": 1107,
+        "name": "エイボンの吟遊詩人",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 50,
+        "text": "自身がActive Skillを使用した後に50%の確率で発動 / 味方全体のINTを自身のINTの20%アップ / 敵全体に24%の確率で睡眠を付与 / 味方全体に24%の確率で睡眠を付与 / 自身のINTを自身のINT増加量の100%ダウン",
+        "rate": 20
+      },
+      "stats": {
+        "hp": 198,
+        "phy": 49,
+        "int": 118,
+        "agi": 151
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.18
+      }
+    },
+    {
+      "id": "4014",
+      "name": "マリー・アントワネット",
+      "faction": "玄武",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1031,
+        "name": "ブリオッシュート",
+        "effect": 2,
+        "icon": "int.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 50,
+        "text": "自身がActive Skillを使用した後に50%の確率で発動 / 敵全体に自身のINTの25%ダメージ / 自身のHPを与えたダメージの30%回復 / 自身に100%の確率で毒を付与",
+        "rate": 25
+      },
+      "stats": {
+        "hp": 480,
+        "phy": 88,
+        "int": 112,
+        "agi": 88
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "4056",
+      "name": "夏目漱石",
+      "faction": "玄武",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "国語"
+      ],
+      "as": {
+        "id": 1199,
+        "name": "日月切落、天地粉韲",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身のPHY/INT/AGI合計が元の値の65%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身のPHY/INT/AGI合計が元の値の65%未満の時に100%の確率で1回だけ発動 / 味方全体のPHYを対象のPHY減少量の100 ~ 150%アップ / 味方全体のINTを対象のINT減少量の100 ~ 150%アップ / 味方全体のAGIを対象のAGI減少量の100 ~ 150%アップ",
+        "rate": 125
+      },
+      "stats": {
+        "hp": 318,
+        "phy": 72,
+        "int": 141,
+        "agi": 129
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "5016",
+      "name": "クレオパトラ",
+      "faction": "玄武",
+      "rarity": "Legendary",
+      "cost": 18,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1086,
+        "name": "戦乱を呼ぶ美貌",
+        "effect": 5,
+        "icon": "confused.png",
+        "condition": "自身がActive Skillでダメージを受けた後に{triggerRate}%の確率で発動",
+        "triggerRate": 100,
+        "text": "自身がActive Skillでダメージを受けた後に100%の確率で発動 / AGIが最も高い敵に40%の確率で魅了を付与 / AGIが最も高い敵のAGIを受けたダメージの25%ダウン",
+        "rate": 0
+      },
+      "stats": {
+        "hp": 534,
+        "phy": 58,
+        "int": 142,
+        "agi": 150
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.5
+      }
+    },
+    {
+      "id": "1006",
+      "name": "ピタゴラス",
+      "faction": "青龍",
+      "rarity": "Common",
+      "cost": 4,
+      "fit": [
+        "算数・数学"
+      ],
+      "as": {
+        "id": 1165,
+        "name": "テトラクテュス",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身のHPが40%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身のHPが40%未満の時に100%の確率で1回だけ発動 / PHYが最も高い味方のPHYを自身のINTの28%アップ / INTが最も高い味方のINTを自身のPHYの28%アップ",
+        "rate": 28
+      },
+      "stats": {
+        "hp": 216,
+        "phy": 84,
+        "int": 84,
+        "agi": 56
+      },
+      "unlock": null
+    },
+    {
+      "id": "2031",
+      "name": "ビスマルク",
+      "faction": "青龍",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1138,
+        "name": "鉄血演説",
+        "effect": 5,
+        "icon": "confused.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 80,
+        "text": "自身がActive Skillを使用した後に80%の確率で発動 / 中衛の敵に21%の確率で恐怖を付与 / 最後尾の敵に21%の確率で恐怖を付与",
+        "rate": 0
+      },
+      "stats": {
+        "hp": 354,
+        "phy": 113,
+        "int": 56,
+        "agi": 53
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "2039",
+      "name": "ドストエフスキー",
+      "faction": "青龍",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "国語"
+      ],
+      "as": {
+        "id": 1170,
+        "name": "カラマーゾフの兄弟",
+        "effect": 5,
+        "icon": "BUF_int.png",
+        "condition": "味方全体のHP合計が75%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "味方全体のHP合計が75%未満の時に100%の確率で1回だけ発動 / 自身のPHYを自身のINTの100%ダウン / 味方全体のINTを自身のPHY減少量の60%アップ / 味方全体のAGIを自身のPHY減少量の30%アップ",
+        "rate": 100
+      },
+      "stats": {
+        "hp": 336,
+        "phy": 34,
+        "int": 134,
+        "agi": 60
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "3046",
+      "name": "マリア・テレジア",
+      "faction": "青龍",
+      "rarity": "Rare",
+      "cost": 9,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1186,
+        "name": "七年戦争",
+        "effect": 3,
+        "icon": "confused.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 90,
+        "text": "自身がActive Skillを使用した後に90%の確率で発動 / HPが最も低い敵に24%の確率で睡眠を付与 / 味方全体のAGIを自身のINTの3 ~ 7%ダウン / 敵全体のAGIを自身のINTの7%ダウン",
+        "rate": 0
+      },
+      "stats": {
+        "hp": 462,
+        "phy": 28,
+        "int": 132,
+        "agi": 70
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.18
+      }
+    },
+    {
+      "id": "4005",
+      "name": "勝海舟",
+      "faction": "青龍",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "社会",
+        "国語"
+      ],
+      "as": {
+        "id": 1010,
+        "name": "無血開城",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身がActive Skillを使用した後かつ自身のHPが60%未満の時に{triggerRate}%の確率で発動",
+        "triggerRate": 45,
+        "text": "自身がActive Skillを使用した後かつ自身のHPが60%未満の時に45%の確率で発動 / 味方全体のPHYを自身のINTの30%アップ / 味方全体のINTを自身のINTの30%アップ",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 387,
+        "phy": 112,
+        "int": 95,
+        "agi": 112
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "4026",
+      "name": "カエサル",
+      "faction": "青龍",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "社会",
+        "外国語"
+      ],
+      "as": {
+        "id": 1081,
+        "name": "来た、見た、勝った",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身のHPが60%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身のHPが60%未満の時に100%の確率で1回だけ発動 / 味方全体のPHYを自身のPHYの20 ~ 30%アップ / 敵全体のINTを自身のPHYの25 ~ 35%ダウン / 先頭の敵に敵全体のINT減少量合計の20 ~ 40%ダメージ",
+        "rate": 25
+      },
+      "stats": {
+        "hp": 366,
+        "phy": 131,
+        "int": 56,
+        "agi": 139
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "4033",
+      "name": "エイブラハム・リンカーン",
+      "faction": "青龍",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1118,
+        "name": "奴隷解放宣言",
+        "effect": 3,
+        "icon": "hp.png",
+        "condition": "味方全体のHP合計が50%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "味方全体のHP合計が50%未満の時に100%の確率で1回だけ発動 / 味方全体のHPを回復係数の50%回復 / 敵全体に自身のINTの40 ~ 50%ダメージ",
+        "rate": 50
+      },
+      "stats": {
+        "hp": 300,
+        "phy": 82,
+        "int": 146,
+        "agi": 120
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "5004",
+      "name": "ジョージ・ワシントン",
+      "faction": "青龍",
+      "rarity": "Legendary",
+      "cost": 18,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1004,
+        "name": "1stプレジデント",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 35,
+        "text": "自身がActive Skillを使用した後に35%の確率で発動 / 味方全体のINTを自身のINTの30%アップ / 味方全体のAGIを自身のINTの30%アップ",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 420,
+        "phy": 120,
+        "int": 140,
+        "agi": 129
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.5
+      }
+    },
+    {
+      "id": "1007",
+      "name": "大長今",
+      "faction": "白虎",
+      "rarity": "Common",
+      "cost": 4,
+      "fit": [
+        "理科"
+      ],
+      "as": {
+        "id": 1166,
+        "name": "李氏朝鮮、宮廷医女",
+        "effect": 3,
+        "icon": "hp.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 20,
+        "text": "自身がActive Skillを使用した後に20%の確率で発動 / HPが最も低い味方のHPを回復係数の15%回復",
+        "rate": 15
+      },
+      "stats": {
+        "hp": 261,
+        "phy": 40,
+        "int": 115,
+        "agi": 54
+      },
+      "unlock": null
+    },
+    {
+      "id": "2015",
+      "name": "モンテスキュー",
+      "faction": "白虎",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "社会"
+      ],
+      "as": {
+        "id": 1089,
+        "name": "法の精神",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "バトル開始時に{triggerRate}%の確率で発動",
+        "triggerRate": 100,
+        "text": "バトル開始時に100%の確率で発動 / INTが最も高い敵のINTを自身のINTの30%ダウン / INTが最も低い敵のINTを対象のINTの20%アップ / 自身のINTを自身のINTの5%アップ / 自身のAGIを自身のINTの5%アップ",
+        "rate": 20
+      },
+      "stats": {
+        "hp": 186,
+        "phy": 51,
+        "int": 116,
+        "agi": 111
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "2044",
+      "name": "ソクラテス",
+      "faction": "白虎",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "国語",
+        "外国語"
+      ],
+      "as": {
+        "id": 1187,
+        "name": "アレテー",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "バトル開始時に{triggerRate}%の確率で発動",
+        "triggerRate": 100,
+        "text": "バトル開始時に100%の確率で発動 / 味方全体のINTを対象のINT増加量の60%ダウン / 敵全体のINTを対象のINT増加量の60%ダウン / 味方全体のINTを対象のINTの30%アップ / 敵全体のINTを対象のINTの30%アップ",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 231,
+        "phy": 84,
+        "int": 90,
+        "agi": 89
+      },
+      "unlock": {
+        "subject": "国語",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "3003",
+      "name": "平賀源内",
+      "faction": "白虎",
+      "rarity": "Rare",
+      "cost": 9,
+      "fit": [
+        "理科",
+        "情報"
+      ],
+      "as": {
+        "id": 1038,
+        "name": "エレキテル",
+        "effect": 4,
+        "icon": "int.png",
+        "condition": "自身のHPが60%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身のHPが60%未満の時に100%の確率で1回だけ発動 / 自身のINTを自身のINT減少量の90%アップ / 敵全体に自身のINTの40%ダメージ",
+        "rate": 90
+      },
+      "stats": {
+        "hp": 303,
+        "phy": 82,
+        "int": 119,
+        "agi": 82
+      },
+      "unlock": {
+        "subject": "理科",
+        "rate": 0.18
+      }
+    },
+    {
+      "id": "3043",
+      "name": "ニュートン",
+      "faction": "白虎",
+      "rarity": "Rare",
+      "cost": 9,
+      "fit": [
+        "算数・数学",
+        "理科"
+      ],
+      "as": {
+        "id": 1171,
+        "name": "万有引力",
+        "effect": 5,
+        "icon": "DBF_agi.png",
+        "condition": "味方全体のHP合計が80%未満の時に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "味方全体のHP合計が80%未満の時に100%の確率で1回だけ発動 / 味方全体のAGIを対象のAGI増加量の100%ダウン / 味方全体のAGIを対象のAGI減少量の100%アップ / 敵全体のAGIを対象のAGI増加量の100%ダウン / 敵全体のAGIを対象のAGI減少量の100%アップ / 味方全体に100%の確率でバリアを付与",
+        "rate": 100
+      },
+      "stats": {
+        "hp": 387,
+        "phy": 101,
+        "int": 86,
+        "agi": 68
+      },
+      "unlock": {
+        "subject": "算数・数学",
+        "rate": 0.18
+      }
+    },
+    {
+      "id": "4002",
+      "name": "ナイチンゲール",
+      "faction": "白虎",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "理科"
+      ],
+      "as": {
+        "id": 1007,
+        "name": "白衣の天使",
+        "effect": 3,
+        "icon": "hp.png",
+        "condition": "自身がActive Skillを使用した後かつ自身のHPが60%未満の時に{triggerRate}%の確率で発動",
+        "triggerRate": 70,
+        "text": "自身がActive Skillを使用した後かつ自身のHPが60%未満の時に70%の確率で発動 / 味方全体のHPを回復係数の100%回復",
+        "rate": 100
+      },
+      "stats": {
+        "hp": 345,
+        "phy": 88,
+        "int": 133,
+        "agi": 112
+      },
+      "unlock": {
+        "subject": "理科",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "4034",
+      "name": "サトシ・ナカモト OMEGA CC",
+      "faction": "白虎",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "情報"
+      ],
+      "as": {
+        "id": 1120,
+        "name": "マイニング OMEGA CC",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 40,
+        "text": "自身がActive Skillを使用した後に40%の確率で発動 / 最後尾の味方のPHYを自身のPHYの25 ~ 30%アップ / 最後尾の味方のAGIを自身のPHYの25 ~ 30%アップ",
+        "rate": 28
+      },
+      "stats": {
+        "hp": 411,
+        "phy": 139,
+        "int": 48,
+        "agi": 124
+      },
+      "unlock": {
+        "subject": "情報",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "5027",
+      "name": "ガリレオ・ガリレイ",
+      "faction": "白虎",
+      "rarity": "Legendary",
+      "cost": 18,
+      "fit": [
+        "理科",
+        "算数・数学"
+      ],
+      "as": {
+        "id": 1174,
+        "name": "天文対話",
+        "effect": 2,
+        "icon": "int.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 45,
+        "text": "自身がActive Skillを使用した後に45%の確率で発動 / 最後尾の敵に自身のINTの100%ダメージ / 最後尾の味方のINTを対象のINT減少量の80%アップ / 味方全体に自身のPHYの20%ダメージ",
+        "rate": 100
+      },
+      "stats": {
+        "hp": 468,
+        "phy": 71,
+        "int": 164,
+        "agi": 137
+      },
+      "unlock": {
+        "subject": "理科",
+        "rate": 0.5
+      }
+    },
+    {
+      "id": "1005",
+      "name": "伊能忠敬",
+      "faction": "黄竜",
+      "rarity": "Common",
+      "cost": 4,
+      "fit": [
+        "算数・数学",
+        "社会"
+      ],
+      "as": {
+        "id": 1161,
+        "name": "大日本沿海輿地全図",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "自身が死亡した後に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 100,
+        "text": "自身が死亡した後に100%の確率で1回だけ発動 / 味方全体のINTを自身のAGIの25 ~ 30%アップ",
+        "rate": 28
+      },
+      "stats": {
+        "hp": 132,
+        "phy": 20,
+        "int": 74,
+        "agi": 158
+      },
+      "unlock": null
+    },
+    {
+      "id": "2001",
+      "name": "ライト兄弟",
+      "faction": "黄竜",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "理科",
+        "情報"
+      ],
+      "as": {
+        "id": 1016,
+        "name": "ライトフライヤー号",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "バトル開始時に{triggerRate}%の確率で発動",
+        "triggerRate": 100,
+        "text": "バトル開始時に100%の確率で発動 / 味方全体のAGIを自身のINTの10%アップ",
+        "rate": 10
+      },
+      "stats": {
+        "hp": 219,
+        "phy": 47,
+        "int": 85,
+        "agi": 135
+      },
+      "unlock": {
+        "subject": "理科",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "2006",
+      "name": "アルキメデス",
+      "faction": "黄竜",
+      "rarity": "Uncommon",
+      "cost": 6,
+      "fit": [
+        "算数・数学",
+        "理科"
+      ],
+      "as": {
+        "id": 1045,
+        "name": "ヘウレーカ！ヘウレーカ！",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "バトル開始時に{triggerRate}%の確率で発動",
+        "triggerRate": 100,
+        "text": "バトル開始時に100%の確率で発動 / 自身のシールドを対象の最大HPの100%に更新",
+        "rate": 100
+      },
+      "stats": {
+        "hp": 174,
+        "phy": 75,
+        "int": 103,
+        "agi": 98
+      },
+      "unlock": {
+        "subject": "算数・数学",
+        "rate": 0.08
+      }
+    },
+    {
+      "id": "3037",
+      "name": "マゼラン",
+      "faction": "黄竜",
+      "rarity": "Rare",
+      "cost": 9,
+      "fit": [
+        "社会",
+        "外国語"
+      ],
+      "as": {
+        "id": 1133,
+        "name": "受け継がれた世界一周",
+        "effect": 3,
+        "icon": "hp.png",
+        "condition": "自身が死亡した後に{triggerRate}%の確率で1回だけ発動",
+        "triggerRate": 90,
+        "text": "自身が死亡した後に90%の確率で1回だけ発動 / 自身を自身の最大HPの50%回復した状態で復活 / 味方全体のPHYを自身のPHYの25%アップ",
+        "rate": 50
+      },
+      "stats": {
+        "hp": 192,
+        "phy": 112,
+        "int": 62,
+        "agi": 146
+      },
+      "unlock": {
+        "subject": "社会",
+        "rate": 0.18
+      }
+    },
+    {
+      "id": "4007",
+      "name": "トーマス・エジソン",
+      "faction": "黄竜",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "情報",
+        "理科"
+      ],
+      "as": {
+        "id": 1012,
+        "name": "エジソン・エフェクト",
+        "effect": 4,
+        "icon": "BUF_int.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 35,
+        "text": "自身がActive Skillを使用した後に35%の確率で発動 / 味方全体のINTを自身のINTの30%アップ",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 459,
+        "phy": 88,
+        "int": 119,
+        "agi": 88
+      },
+      "unlock": {
+        "subject": "情報",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "4017",
+      "name": "キュリー夫人",
+      "faction": "黄竜",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "理科"
+      ],
+      "as": {
+        "id": 1051,
+        "name": "プチ・キュリー",
+        "effect": 4,
+        "icon": "hp.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 50,
+        "text": "自身がActive Skillを使用した後に50%の確率で発動 / 味方全体のPHYを自身のINTの10 ~ 15%アップ / 味方全体のHPを回復係数の25%回復 / 味方全体のシールドを対象のPHYの100%に更新",
+        "rate": 13
+      },
+      "stats": {
+        "hp": 267,
+        "phy": 86,
+        "int": 150,
+        "agi": 123
+      },
+      "unlock": {
+        "subject": "理科",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "4041",
+      "name": "ニコラ・テスラ",
+      "faction": "黄竜",
+      "rarity": "Epic",
+      "cost": 13,
+      "fit": [
+        "情報"
+      ],
+      "as": {
+        "id": 1146,
+        "name": "テスラコイル",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 25,
+        "text": "自身がActive Skillを使用した後に25%の確率で発動 / 味方全体のPHYを自身のPHYの30%アップ / 味方全体の混乱を90%の確率で解除",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 327,
+        "phy": 130,
+        "int": 62,
+        "agi": 147
+      },
+      "unlock": {
+        "subject": "情報",
+        "rate": 0.32
+      }
+    },
+    {
+      "id": "5010",
+      "name": "アインシュタイン",
+      "faction": "黄竜",
+      "rarity": "Legendary",
+      "cost": 18,
+      "fit": [
+        "理科",
+        "算数・数学"
+      ],
+      "as": {
+        "id": 1030,
+        "name": "相対性理論",
+        "effect": 4,
+        "icon": "BUF_phy.png",
+        "condition": "自身がActive Skillを使用した後に{triggerRate}%の確率で発動",
+        "triggerRate": 50,
+        "text": "自身がActive Skillを使用した後に50%の確率で発動 / 味方全体のPHYを自身のINTの30%アップ / 味方全体のAGIを自身のINTの30%アップ",
+        "rate": 30
+      },
+      "stats": {
+        "hp": 453,
+        "phy": 67,
+        "int": 176,
+        "agi": 132
+      },
+      "unlock": {
+        "subject": "理科",
+        "rate": 0.5
+      }
+    }
+  ],
+  "extSkills": {
+    "1105": {
+      "id": 2936,
+      "name": "レディエイション",
+      "effect": 4,
+      "text": "INTが最も高い味方のINTを自身のINTの7%アップ / 敵味方の誰かに38%の確率で毒を付与",
+      "rate": 7
+    },
+    "2143": {
+      "id": 20236,
+      "name": "ソラに想いを馳せる",
+      "effect": 2,
+      "text": "INTが最も低い敵に自身のINTの15 ~ 40%ダメージ、対象が毒なら45 ~ 70%ダメージ / INTが最も低い敵に41%の確率で毒を付与 / AGIが最も高い敵に41%の確率で毒を付与",
+      "rate": 28
+    },
+    "2156": {
+      "id": 20312,
+      "name": "エリートマグナビゲート",
+      "effect": 5,
+      "text": "PHYが最も高い敵のINTを対象のPHY増加量の60%ダウン / PHYが最も高い敵に21%の確率で睡眠を付与 / PHYが最も高い敵に自身のINTの40 ~ 50%ダメージ",
+      "rate": 60
+    },
+    "3111": {
+      "id": 2986,
+      "name": "気高き愚行",
+      "effect": 2,
+      "text": "先頭の敵に対象のHP減少量の40 ~ 60%ダメージ / 最後尾の敵に対象のHP減少量の40 ~ 60%ダメージ / 自身のAGIを自身のAGIの10%ダウン",
+      "rate": 50
+    },
+    "3143": {
+      "id": 20235,
+      "name": "無意識の深淵",
+      "effect": 2,
+      "text": "INTが最も低い敵に自身のINTの20 ~ 45%ダメージ、対象が毒なら50 ~ 75%ダメージ / INTが最も低い敵に44%の確率で毒を付与 / AGIが最も高い敵に44%の確率で毒を付与",
+      "rate": 33
+    },
+    "3156": {
+      "id": 20311,
+      "name": "ウィズダムマグナビゲート",
+      "effect": 5,
+      "text": "PHYが最も高い敵のINTを対象のPHY増加量の60%ダウン / PHYが最も高い敵に24%の確率で睡眠を付与 / PHYが最も高い敵に自身のINTの45 ~ 55%ダメージ",
+      "rate": 60
+    },
+    "4002": {
+      "id": 2016,
+      "name": "三銃士の一斉射撃",
+      "effect": 2,
+      "text": "敵全体に自身のINTの40 ~ 45%ダメージ / 自身のINTを自身のINTの5%アップ",
+      "rate": 43
+    },
+    "4003": {
+      "id": 2028,
+      "name": "ムジカノーヴァ",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の60 ~ 70%回復 / 自身のINTを自身のINTの5%アップ",
+      "rate": 65
+    },
+    "4005": {
+      "id": 2052,
+      "name": "一日千里",
+      "effect": 1,
+      "text": "味方全体のAGIを自身のAGIの5 ~ 10%アップ",
+      "rate": 8
+    },
+    "4006": {
+      "id": 2064,
+      "name": "剣豪の一撃",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの60 ~ 70%ダメージ / 先頭の敵のPHYを自身のPHYの5%ダウン",
+      "rate": 65
+    },
+    "4008": {
+      "id": 2079,
+      "name": "現代の予言書",
+      "effect": 2,
+      "text": "敵全体に自身のINTの40 ~ 45%ダメージ / 先頭の敵のINTを自身のINTの5%ダウン",
+      "rate": 43
+    },
+    "4010": {
+      "id": 2103,
+      "name": "聖女の祈り",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの32 ~ 37%ダメージ / 先頭の敵のAGIを自身のPHYの10%ダウン",
+      "rate": 35
+    },
+    "4011": {
+      "id": 2115,
+      "name": "テカムセの呪い",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの60 ~ 70%ダメージ / 先頭の敵のINTを自身のPHYの5%ダウン",
+      "rate": 65
+    },
+    "4013": {
+      "id": 2132,
+      "name": "鵺殺し",
+      "effect": 1,
+      "text": "INTが最も高い敵に自身のPHYの50 ~ 60%ダメージ / 自身のPHYを自身のPHYの5%アップ",
+      "rate": 55
+    },
+    "4014": {
+      "id": 2144,
+      "name": "鬼武蔵",
+      "effect": 1,
+      "text": "「先頭の敵に自身のPHYの30 ~ 35%ダメージ」を2回繰り返す / 先頭の味方のPHYを自身のPHYの5%アップ",
+      "rate": 33
+    },
+    "4015": {
+      "id": 2156,
+      "name": "旋風斬り",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの55 ~ 65%ダメージ / 先頭の敵に27%の確率で混乱を付与 / HPが最も低い味方のPHYを自身のPHYの5%アップ",
+      "rate": 60
+    },
+    "4016": {
+      "id": 2168,
+      "name": "五事七計",
+      "effect": 2,
+      "text": "敵全体に自身のINTの30 ~ 35%ダメージ / AGIが最も高い敵に47%の確率で毒を付与 / HPが最も低い味方のINTを自身のINTの5%アップ",
+      "rate": 33
+    },
+    "4017": {
+      "id": 2180,
+      "name": "ドルイドの秘法",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の15 ~ 25%回復 / 自身のHPを回復係数の15 ~ 25%回復 / 自身のINTを自身のINTの5%アップ",
+      "rate": 20
+    },
+    "4018": {
+      "id": 2192,
+      "name": "軍神の加護",
+      "effect": 4,
+      "text": "自身のPHYを自身のPHYの9 ~ 14%アップ / 自身のINTを自身のINTの9 ~ 14%アップ / HPが最も低い敵のINTを自身のINTの5%ダウン",
+      "rate": 12
+    },
+    "4020": {
+      "id": 2216,
+      "name": "ファイティングクック",
+      "effect": 4,
+      "text": "先頭の敵に自身のPHYの35 ~ 40%ダメージ / 自身のAGIを自身のAGIの13%アップ",
+      "rate": 13
+    },
+    "4028": {
+      "id": 2312,
+      "name": "黄金世紀の一閃",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの55 ~ 65%ダメージ / 先頭の敵に自身のPHY減少量の52 ~ 56%ダメージ",
+      "rate": 60
+    },
+    "4030": {
+      "id": 2336,
+      "name": "敦盛",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の45 ~ 55%回復 / 味方全体のPHYを対象のPHY減少量の23%アップ / 味方全体のINTを対象のINT減少量の23%アップ",
+      "rate": 50
+    },
+    "4037": {
+      "id": 2398,
+      "name": "上覧相撲の奉仕",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの32 ~ 37%ダメージ / HPが最も低い味方のINTを自身のINTの10%アップ / 自身のPHYを自身のINTの5%アップ",
+      "rate": 35
+    },
+    "4040": {
+      "id": 2470,
+      "name": "仏の掌",
+      "effect": 5,
+      "text": "敵全体のPHYを自身のPHYの9%ダウン / 最後尾の敵に自身のPHYの50%ダメージ",
+      "rate": 9
+    },
+    "4042": {
+      "id": 2446,
+      "name": "ソノラ",
+      "effect": 1,
+      "text": "HPが最も低い敵に自身のPHYの30 ~ 50%ダメージ / 最後尾の敵に27%の確率で恐怖を付与",
+      "rate": 40
+    },
+    "4043": {
+      "id": 2406,
+      "name": "ナパ・バレー",
+      "effect": 5,
+      "text": "敵全体のAGIを自身のPHYの2 ~ 7%ダウン / 後衛の敵に自身のINTの40 ~ 50%ダメージ",
+      "rate": 5
+    },
+    "4044": {
+      "id": 2462,
+      "name": "スマッジング",
+      "effect": 4,
+      "text": "味方全体のAGIを自身のPHYの4 ~ 6%アップ / 最後尾の敵に27%の確率で睡眠を付与",
+      "rate": 5
+    },
+    "4046": {
+      "id": 2438,
+      "name": "オリジンミャンマー",
+      "effect": 4,
+      "text": "先頭の敵に自身のPHYの30 ~ 35%ダメージ / 自身に60%の確率でバリアを付与 / 自身のAGIを自身のAGIの4%ダウン",
+      "rate": 33
+    },
+    "4047": {
+      "id": 2511,
+      "name": "榎本艦隊",
+      "effect": 2,
+      "text": "AGIが最も高い敵に自身のINTの0 ~ 70%ダメージ / AGIが最も高い敵に自身のPHYの0 ~ 70%ダメージ",
+      "rate": 35
+    },
+    "4048": {
+      "id": 2519,
+      "name": "ククリ",
+      "effect": 1,
+      "text": "AGIが最も高い敵に自身のPHYの55 ~ 65%ダメージ / AGIが最も高い敵に27%の確率で恐怖を付与 / AGIが最も高い敵のPHYを自身のPHYの5%ダウン",
+      "rate": 60
+    },
+    "4049": {
+      "id": 2527,
+      "name": "雑賀衆",
+      "effect": 2,
+      "text": "AGIが最も高い敵に自身のINTの50 ~ 60%ダメージ / AGIが最も高い敵に27%の確率で混乱を付与 / AGIが最も高い敵のINTを自身のINTの5%ダウン",
+      "rate": 55
+    },
+    "4050": {
+      "id": 2535,
+      "name": "ヒエログリフ",
+      "effect": 3,
+      "text": "先頭の味方のHPを回復係数の25 ~ 35%回復 / 自身のHPを回復係数の25 ~ 35%回復 / 自身のINTを自身のINTの5%アップ",
+      "rate": 30
+    },
+    "4058": {
+      "id": 2578,
+      "name": "鬼殺し",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の45 ~ 55%回復 / 敵全体のPHYを対象のPHY増加量の35%ダウン / 敵全体のAGIを対象のAGI増加量の35%ダウン",
+      "rate": 50
+    },
+    "4059": {
+      "id": 2586,
+      "name": "勝は知る可くして為す可からず",
+      "effect": 4,
+      "text": "自身のINTを自身のINTの20 ~ 25%アップ / 自身のHPを回復係数の5%回復",
+      "rate": 23
+    },
+    "4063": {
+      "id": 2624,
+      "name": "ワイルドカード",
+      "effect": 4,
+      "text": "PHYが最も高い味方のPHYを自身のPHYの12%アップ / INTが最も高い味方のINTを自身のINTの12%アップ / 中衛の敵に27%の確率で気絶を付与 / 自身のAGIを自身のAGIの5%アップ",
+      "rate": 12
+    },
+    "4065": {
+      "id": 2640,
+      "name": "神変浄化の音色",
+      "effect": 2,
+      "text": "最後尾の敵に自身のINTの50 ~ 60%ダメージ / 最後尾の敵に27%の確率で睡眠を付与",
+      "rate": 55
+    },
+    "4067": {
+      "id": 2656,
+      "name": "ローシュ・ハッシャーナー",
+      "effect": 5,
+      "text": "最大HPが最も高い味方に60%の確率でバリアを付与 / 敵全体のAGIを対象のAGI増加量の35%ダウン / 味方全体のAGIを対象のAGI減少量の36%アップ",
+      "rate": 0
+    },
+    "4069": {
+      "id": 2672,
+      "name": "戦場のソリスト",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の40 ~ 50%回復 / INTが最も高い味方のAGIを自身のAGIの13%アップ",
+      "rate": 45
+    },
+    "4071": {
+      "id": 2688,
+      "name": "世界を駆けたドラムライン",
+      "effect": 3,
+      "text": "「HPが最も低い味方のHPをPHY回復係数の22%回復」を3回繰り返す / HPが最も低い味方のINTを自身のPHYの8%アップ",
+      "rate": 22
+    },
+    "4073": {
+      "id": 2704,
+      "name": "現世と 夢路の境 うちくづし",
+      "effect": 1,
+      "text": "INTが最も低い敵に自身のPHYの50 ~ 65%ダメージ、対象が睡眠なら100 ~ 115%ダメージ",
+      "rate": 58
+    },
+    "4074": {
+      "id": 2712,
+      "name": "砲尾装填式砲",
+      "effect": 2,
+      "text": "PHYが最も低い敵に自身のINTの50 ~ 60%ダメージ / 最大HPが最も高い敵に27%の確率で出血を付与",
+      "rate": 55
+    },
+    "4082": {
+      "id": 2755,
+      "name": "短橋狭馬",
+      "effect": 1,
+      "text": "PHYが最も低い敵に自身のPHYの50 ~ 55%ダメージ / PHYが最も低い敵に自身のPHYの10 ~ 15%ダメージ / 最後尾の味方のPHYを自身のPHYの8%アップ",
+      "rate": 53
+    },
+    "4090": {
+      "id": 2817,
+      "name": "衝角",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の45 ~ 55%回復 / 味方全体のAGIを自身のINTの1 ~ 3%アップ、対象がバリアなら15 ~ 17%アップ",
+      "rate": 50
+    },
+    "4091": {
+      "id": 2825,
+      "name": "グレイプフル デッド",
+      "effect": 4,
+      "text": "HPが最も低い味方のPHYを対象のHP減少量の10 ~ 20%アップ / HPが最も低い味方のHPを回復係数の45 ~ 60%回復",
+      "rate": 15
+    },
+    "4094": {
+      "id": 2849,
+      "name": "ルージュインパクト",
+      "effect": 1,
+      "text": "PHYが最も高い敵に自身のPHYの50 ~ 60%ダメージ / PHYが最も高い敵に対象のPHY増加量の22 ~ 27%ダメージ / PHYが最も高い敵に対象のINT増加量の22 ~ 27%ダメージ",
+      "rate": 55
+    },
+    "4107": {
+      "id": 2949,
+      "name": "スパミング クイーンニーナ",
+      "effect": 2,
+      "text": "後衛の敵に自身のINTの62%ダメージ / 最後尾の敵に自身のINTの42%ダメージ",
+      "rate": 62
+    },
+    "4143": {
+      "id": 20234,
+      "name": "日月星辰",
+      "effect": 2,
+      "text": "INTが最も低い敵に自身のINTの25 ~ 50%ダメージ、対象が毒なら55 ~ 80%ダメージ / INTが最も低い敵に47%の確率で毒を付与 / AGIが最も高い敵に47%の確率で毒を付与",
+      "rate": 38
+    },
+    "4147": {
+      "id": 20249,
+      "name": "高天原のとばり",
+      "effect": 3,
+      "text": "HPが最も低い味方のシールドを800に更新 / 味方全体のシールドを対象のPHY/INT/AGI増加量合計の300%に更新、対象がデコイなら420%に更新 / 味方全体のPHYを対象のPHY増加量の90%ダウン / 味方全体のINTを対象のINT増加量の90%ダウン / 味方全体のAGIを対象のAGI増加量の90%ダウン",
+      "rate": 800
+    },
+    "4156": {
+      "id": 20310,
+      "name": "終焉を告げる針",
+      "effect": 5,
+      "text": "PHYが最も高い敵のINTを対象のPHY増加量の60%ダウン / PHYが最も高い敵に27%の確率で睡眠を付与 / PHYが最も高い敵に自身のINTの50 ~ 60%ダメージ",
+      "rate": 60
+    },
+    "4161": {
+      "id": 20335,
+      "name": "冥界の大河",
+      "effect": 5,
+      "text": "自身のPHYを自身のHP減少量の55%ダウン / 自身のINTを自身のHP減少量の55%ダウン / 最後尾の敵に自身のPHY/INT/AGI減少量合計の40 ~ 50%ダメージ / 自身のPHYを自身のPHY減少量の80%アップ / 自身のINTを自身のINT減少量の80%アップ",
+      "rate": 55
+    },
+    "5002": {
+      "id": 2015,
+      "name": "グランダルメ一斉射撃",
+      "effect": 2,
+      "text": "敵全体に自身のINTの45 ~ 50%ダメージ / 自身のINTを自身のINTの10%アップ",
+      "rate": 48
+    },
+    "5003": {
+      "id": 2027,
+      "name": "カーテンコール",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の70 ~ 80%回復 / 自身のINTを自身のINTの10%アップ",
+      "rate": 75
+    },
+    "5005": {
+      "id": 2051,
+      "name": "神託の軍馬",
+      "effect": 1,
+      "text": "味方全体のAGIを自身のAGIの5 ~ 15%アップ",
+      "rate": 10
+    },
+    "5006": {
+      "id": 2063,
+      "name": "天下統一の一斬",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの65 ~ 75%ダメージ / 先頭の敵のPHYを自身のPHYの10%ダウン",
+      "rate": 70
+    },
+    "5008": {
+      "id": 2078,
+      "name": "万能人の遺稿",
+      "effect": 2,
+      "text": "敵全体に自身のINTの45 ~ 50%ダメージ / 先頭の敵のINTを自身のINTの10%ダウン",
+      "rate": 48
+    },
+    "5010": {
+      "id": 2102,
+      "name": "石化の呪い",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの35 ~ 40%ダメージ / 先頭の敵のAGIを自身のPHYの15%ダウン",
+      "rate": 38
+    },
+    "5011": {
+      "id": 2114,
+      "name": "ヴァルハラ",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの65 ~ 75%ダメージ / 先頭の敵のINTを自身のPHYの10%ダウン",
+      "rate": 70
+    },
+    "5013": {
+      "id": 2131,
+      "name": "扇落とし",
+      "effect": 1,
+      "text": "INTが最も高い敵に自身のPHYの55 ~ 75%ダメージ / 自身のPHYを自身のPHYの10%アップ",
+      "rate": 65
+    },
+    "5014": {
+      "id": 2143,
+      "name": "古今独歩の一突き",
+      "effect": 1,
+      "text": "「先頭の敵に自身のPHYの30 ~ 40%ダメージ」を2回繰り返す / 先頭の味方のPHYを自身のPHYの10%アップ",
+      "rate": 35
+    },
+    "5015": {
+      "id": 2155,
+      "name": "裏切りの一撃",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの60 ~ 70%ダメージ / 先頭の敵に30%の確率で混乱を付与 / HPが最も低い味方のPHYを自身のPHYの10%アップ",
+      "rate": 65
+    },
+    "5016": {
+      "id": 2167,
+      "name": "求法の旅",
+      "effect": 2,
+      "text": "敵全体に自身のINTの35 ~ 40%ダメージ / AGIが最も高い敵に50%の確率で毒を付与 / HPが最も低い味方のINTを自身のINTの10%アップ",
+      "rate": 38
+    },
+    "5017": {
+      "id": 2179,
+      "name": "太陽神の涙",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の20 ~ 30%回復 / 自身のHPを回復係数の20 ~ 30%回復 / 自身のINTを自身のINTの10%アップ",
+      "rate": 25
+    },
+    "5024": {
+      "id": 2263,
+      "name": "戦象部隊の突撃",
+      "effect": 4,
+      "text": "先頭の敵に自身のPHYの35 ~ 40%ダメージ / 味方全体のPHYを自身のPHYの10%アップ",
+      "rate": 10
+    },
+    "5026": {
+      "id": 2287,
+      "name": "太陽神の加護",
+      "effect": 3,
+      "text": "HPが最も低い味方のPHYを自身のINTの15 ~ 25%アップ / HPが最も低い味方のHPを回復係数の20 ~ 40%回復",
+      "rate": 30
+    },
+    "5027": {
+      "id": 2299,
+      "name": "猿神退治",
+      "effect": 2,
+      "text": "INTが最も高い敵に自身のINTの50 ~ 60%ダメージ / INTが最も高い敵のINTを自身のINTの10%ダウン",
+      "rate": 55
+    },
+    "5028": {
+      "id": 2311,
+      "name": "揺らめく炎の刺突",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの60 ~ 70%ダメージ / 先頭の敵に自身のPHY減少量の54 ~ 58%ダメージ",
+      "rate": 65
+    },
+    "5030": {
+      "id": 2335,
+      "name": "復活の奇跡",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の50 ~ 60%回復 / 味方全体のPHYを対象のPHY減少量の25%アップ / 味方全体のINTを対象のINT減少量の25%アップ",
+      "rate": 55
+    },
+    "5032": {
+      "id": 2359,
+      "name": "策士の舞",
+      "effect": 2,
+      "text": "敵全体に自身のINTの35 ~ 40%ダメージ / HPが最も低い味方のHPを回復係数の10%回復 / 自身のINTを自身のINTの10%アップ",
+      "rate": 38
+    },
+    "5035": {
+      "id": 2381,
+      "name": "崩城の一撃",
+      "effect": 2,
+      "text": "先頭の敵に自身のINTの55 ~ 65%ダメージ / 自身のINTを自身のINT増加量の25%アップ / 自身のHPを回復係数の10%回復",
+      "rate": 60
+    },
+    "5036": {
+      "id": 2389,
+      "name": "皇帝の威光",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の50 ~ 60%回復 / 自身のAGIを自身のAGI増加量の25%アップ / 自身のHPを回復係数の10%回復",
+      "rate": 55
+    },
+    "5039": {
+      "id": 2453,
+      "name": "フリッグの祈り",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の50 ~ 60%回復 / PHYが最も高い味方のAGIを自身のAGIの15%アップ",
+      "rate": 55
+    },
+    "5041": {
+      "id": 2429,
+      "name": "ライミーズアタック",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの60 ~ 70%ダメージ / 自身のHPを与えたダメージの40 ~ 60%回復",
+      "rate": 65
+    },
+    "5042": {
+      "id": 2445,
+      "name": "サバラガムワ",
+      "effect": 1,
+      "text": "HPが最も低い敵に自身のPHYの40 ~ 60%ダメージ / 最後尾の敵に30%の確率で恐怖を付与",
+      "rate": 50
+    },
+    "5047": {
+      "id": 2510,
+      "name": "マゼラン海峡",
+      "effect": 2,
+      "text": "AGIが最も高い敵に自身のINTの0 ~ 80%ダメージ / AGIが最も高い敵に自身のPHYの0 ~ 80%ダメージ",
+      "rate": 40
+    },
+    "5048": {
+      "id": 2518,
+      "name": "パラケルススの一閃",
+      "effect": 1,
+      "text": "AGIが最も高い敵に自身のPHYの60 ~ 70%ダメージ / AGIが最も高い敵に30%の確率で恐怖を付与 / AGIが最も高い敵のPHYを自身のPHYの10%ダウン",
+      "rate": 65
+    },
+    "5050": {
+      "id": 2534,
+      "name": "モーセの声",
+      "effect": 3,
+      "text": "先頭の味方のHPを回復係数の30 ~ 40%回復 / 自身のHPを回復係数の30 ~ 40%回復 / 自身のINTを自身のINTの10%アップ",
+      "rate": 35
+    },
+    "5057": {
+      "id": 2569,
+      "name": "友好の証",
+      "effect": 2,
+      "text": "PHYが最も低い敵に自身のINTの55 ~ 65%ダメージ / PHYが最も低い敵に自身のINT減少量の62 ~ 66%ダメージ",
+      "rate": 60
+    },
+    "5058": {
+      "id": 2577,
+      "name": "呪われた神酒",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の50 ~ 60%回復 / 敵全体のPHYを対象のPHY増加量の40%ダウン / 敵全体のAGIを対象のAGI増加量の40%ダウン",
+      "rate": 55
+    },
+    "5059": {
+      "id": 2585,
+      "name": "マン・オブ・ウォー",
+      "effect": 4,
+      "text": "自身のINTを自身のINTの25 ~ 30%アップ / 自身のHPを回復係数の10%回復",
+      "rate": 28
+    },
+    "5064": {
+      "id": 2631,
+      "name": "バガヴァッド・ギーター",
+      "effect": 3,
+      "text": "味方全体のHPを自身の最大HPの12 ~ 15%回復 / 先頭の味方の混乱を95%の確率で解除 / 先頭の味方の恐怖を85%の確率で解除 / 最後尾の味方の混乱を95%の確率で解除 / 最後尾の味方の恐怖を85%の確率で解除",
+      "rate": 14
+    },
+    "5066": {
+      "id": 2647,
+      "name": "ブバスティスの女主",
+      "effect": 4,
+      "text": "味方全体のPHYを対象のPHY減少量の30%アップ / 味方全体のINTを対象のINT減少量の20%アップ / 最後尾の敵に自身のPHYの60 ~ 70%ダメージ",
+      "rate": 30
+    },
+    "5067": {
+      "id": 2655,
+      "name": "世界の終焉を告げる魔笛",
+      "effect": 5,
+      "text": "最大HPが最も高い味方に65%の確率でバリアを付与 / 敵全体のAGIを対象のAGI増加量の40%ダウン / 味方全体のAGIを対象のAGI減少量の40%アップ",
+      "rate": 0
+    },
+    "5072": {
+      "id": 2695,
+      "name": "マハー・デーヴィ・リグ",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの50%ダメージ / 中衛の敵に自身のPHYの75%ダメージ / 最後尾の敵に30%の確率で恐怖を付与",
+      "rate": 50
+    },
+    "5073": {
+      "id": 2703,
+      "name": "青天の霹靂",
+      "effect": 1,
+      "text": "INTが最も低い敵に自身のPHYの55 ~ 70%ダメージ、対象が睡眠なら105 ~ 120%ダメージ",
+      "rate": 63
+    },
+    "5074": {
+      "id": 2711,
+      "name": "哪吒太子の焔撃",
+      "effect": 2,
+      "text": "PHYが最も低い敵に自身のINTの55 ~ 65%ダメージ / 最大HPが最も高い敵に30%の確率で出血を付与",
+      "rate": 60
+    },
+    "5079": {
+      "id": 2730,
+      "name": "忉利天",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの35 ~ 40%ダメージ / 最後尾の敵に自身のPHYの30 ~ 40%ダメージ / 自身のPHYを味方全体のINT増加量合計の16%アップ",
+      "rate": 38
+    },
+    "5081": {
+      "id": 2746,
+      "name": "雀躍虎哮",
+      "effect": 4,
+      "text": "自身のPHYを自身のPHYの20 ~ 25%アップ / 自身のINTを自身のINTの20 ~ 25%アップ / 自身のAGIを自身のPHY/INT/AGI増加量合計の10%ダウン",
+      "rate": 23
+    },
+    "5086": {
+      "id": 2784,
+      "name": "海の神秘",
+      "effect": 5,
+      "text": "敵全体のPHY/INTの高い方を自身のINTの10 ~ 13%ダウン",
+      "rate": 12
+    },
+    "5096": {
+      "id": 2864,
+      "name": "プリペアー・ラグナロク",
+      "effect": 4,
+      "text": "AGIが最も低い味方のAGIを敵全体のAGI増加量合計の20 ~ 22%アップ / 敵全体のPHYを対象のPHY増加量の40%ダウン / 敵全体のINTを対象のINT増加量の40%ダウン",
+      "rate": 21
+    },
+    "5099": {
+      "id": 2888,
+      "name": "霜の巨人殺し",
+      "effect": 4,
+      "text": "最後尾の味方のPHYを自身のPHYの20%アップ / 最後尾の味方のAGIを自身のPHYの15%アップ / 最後尾の敵に自身のPHYの20%ダメージ / 最後尾の味方に自身のPHYの5%ダメージ",
+      "rate": 20
+    },
+    "5107": {
+      "id": 2948,
+      "name": "リファクタリング バイオレットキング",
+      "effect": 2,
+      "text": "後衛の敵に自身のINTの65%ダメージ / 最後尾の敵に自身のINTの45%ダメージ",
+      "rate": 65
+    },
+    "5111": {
+      "id": 2984,
+      "name": "命の刻限",
+      "effect": 2,
+      "text": "先頭の敵に対象のHP減少量の60 ~ 70%ダメージ / 最後尾の敵に対象のHP減少量の60 ~ 70%ダメージ / 自身のAGIを自身のAGIの10%ダウン",
+      "rate": 65
+    },
+    "5112": {
+      "id": 2992,
+      "name": "誇り高き輝き",
+      "effect": 4,
+      "text": "敵味方の誰かのINTを対象のINTの8%アップ / 敵味方の誰かに自身のINTの30%ダメージ / 先頭の敵に自身のINTの75%ダメージ / 自身のINTを自身のINTの8%アップ",
+      "rate": 8
+    },
+    "5127": {
+      "id": 20108,
+      "name": "春の弥生のこの佳き日",
+      "effect": 4,
+      "text": "HPが最も低い味方のチャージを対象のHP減少量の80%アップ / HPが最も低い味方のHPをPHY回復係数の60%回復",
+      "rate": 80
+    },
+    "5157": {
+      "id": 20314,
+      "name": "海神の食卓",
+      "effect": 5,
+      "text": "自身のPHYを対象のPHY増加量の100%ダウン / HPが最も低い味方のINTを対象のINT増加量の100%ダウン / 味方全体のAGIを対象のAGI増加量の50 ~ 70%ダウン / HPが最も低い味方のHPをPHY回復係数の135 ~ 140%回復",
+      "rate": 100
+    },
+    "5159": {
+      "id": 20324,
+      "name": "エニューオー",
+      "effect": 1,
+      "text": "PHYが最も低い敵に自身のPHYの60 ~ 65%ダメージ / 自身のINTを自身のPHYの90%アップ / PHYが最も低い敵に30%の確率で混乱を付与 / 自身のINTを自身のPHYの90%ダウン",
+      "rate": 63
+    },
+    "5162": {
+      "id": 20339,
+      "name": "呪王の咆哮",
+      "effect": 5,
+      "text": "AGIが最も高い敵に20%の確率で呪いを付与 / AGIが最も高い敵のAGIを対象のAGI増加量の80%ダウン / AGIが最も高い敵に対象のAGIの60 ~ 70%ダメージ、対象が呪いなら100 ~ 110%ダメージ / 自身に20%の確率で呪いを付与",
+      "rate": 0
+    },
+    "5163": {
+      "id": 20344,
+      "name": "生命の樹の恩寵",
+      "effect": 3,
+      "text": "味方全体のHPを回復係数の15 ~ 20%回復 / 味方全体のHPをPHY回復係数の15 ~ 20%回復 / 自身のPHYを与えた回復量の35%アップ / 自身のINTを与えた回復量の35%アップ",
+      "rate": 18
+    },
+    "5171": {
+      "id": 20376,
+      "name": "因果断絶",
+      "effect": 1,
+      "text": "敵全体に自身のPHYの35 ~ 40%ダメージ[インバース(4)] / 自身のPHYを自身のPHYの4%アップ[インバース(2)]",
+      "rate": 38
+    },
+    "5172": {
+      "id": 20381,
+      "name": "ソウルバウンドトーメント",
+      "effect": 5,
+      "text": "敵全体に30%の確率でバインドを付与 / AGIが最も低い敵に自身のAGIの20 ~ 25%ダメージ / 自身のチャージを敵全体のHP合計の70 ~ 90%アップ / 自身のチャージを与えたダメージの2000%ダウン",
+      "rate": 0
+    },
+    "5179": {
+      "id": 20424,
+      "name": "ホロウ・ギフト",
+      "effect": 5,
+      "text": "中衛の敵に30%の確率で気絶を付与 / 最後尾の敵に30%の確率で気絶を付与 / 自身のPHYを60アップ / 敵全体のINTを対象のINT増加量の45%ダウン / 敵全体のAGIを対象のAGI増加量の45%ダウン",
+      "rate": 0
+    },
+    "5187": {
+      "id": 20468,
+      "name": "因果収束",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの55 ~ 65%ダメージ / 前衛の敵に自身のPHYの40%ダメージ",
+      "rate": 60
+    },
+    "5192": {
+      "id": 20493,
+      "name": "刻の輪",
+      "effect": 2,
+      "text": "敵全体に自身のINTの50 ~ 60%ダメージ / 敵全体の全ての状態異常を100%の確率で解除 / 自身のINTを自身のINT増加量の70%ダウン",
+      "rate": 55
+    },
+    "5506": {
+      "id": 2780,
+      "name": "三日月の一斬",
+      "effect": 1,
+      "text": "先頭の敵に自身のPHYの65 ~ 75%ダメージ / 先頭の敵のPHYを自身のPHYの15%ダウン",
+      "rate": 70
+    },
+    "5508": {
+      "id": 2781,
+      "name": "空はなぜ青いのか",
+      "effect": 2,
+      "text": "敵全体に自身のINTの45 ~ 50%ダメージ / 先頭の敵のINTを自身のINTの15%ダウン",
+      "rate": 48
+    },
+    "5509": {
+      "id": 2782,
+      "name": "希望の燐光",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の70 ~ 80%回復 / 先頭の味方のINTを自身のINTの15%アップ",
+      "rate": 75
+    },
+    "5556": {
+      "id": 20257,
+      "name": "天滅",
+      "effect": 1,
+      "text": "PHYが最も低い敵に自身のPHYの70 ~ 75%ダメージ / PHYが最も低い敵のINTを自身のPHYの15%ダウン",
+      "rate": 73
+    },
+    "5558": {
+      "id": 20259,
+      "name": "リグ・ヴェーダ第9巻",
+      "effect": 3,
+      "text": "HPが最も低い味方のHPを回復係数の50 ~ 60%回復 / 敵全体のPHYを対象のPHY増加量の40 ~ 45%ダウン / 敵全体のAGIを対象のAGI増加量の40 ~ 45%ダウン",
+      "rate": 55
+    }
+  }
+}

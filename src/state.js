@@ -13,7 +13,16 @@ export function capName(name) {
 const PERSISTED = ["settings", "profile", "gum", "points", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score", "days",
                    "totalRight", "crossRight", "countries", "crystals", "introDone", "startGrade",
-                   "modeLevel"];
+                   "modeLevel", "crew", "deck", "deckExt"];
+
+/**
+ * **最初から仲間にいる5体。5勢力にひとりずつです。**
+ *
+ * 5枚デッキは初日から組めます。そのかわり最初の1組は
+ * 朱雀・玄武・青龍・白虎・黄竜がそろっているので、**どれを外して誰を入れるかが
+ * そのまま属性の話**になります（`data/roster-curated.json` の Common 5体）。
+ */
+export const STARTER_DECK = ["1002", "1004", "1006", "1007", "1005"];
 
 function defaults() {
   return {
@@ -37,6 +46,16 @@ function defaults() {
     exts: {},
     equip: {},
     owned: { "10001": 1, "10002": 1, "10003": 1 },
+
+    /* デッキに入れられるヒーロー（data/roster.json）。**ガチャでは増えません** ——
+       その教科の知識カードが規定の割合に届くと仲間になります（原則2） */
+    crew: Object.fromEntries(STARTER_DECK.map(id => [id, 1])),
+    /* 5枠。**左が先で、右ほどASが落ちます**（回答が遅いと右から外れる）。
+       並び順そのものがルールなので、順番を保って持ちます */
+    deck: [...STARTER_DECK],
+    /* ヒーローID → 装備したエクステンションID。エクステンションの Active Skill が
+       そのヒーローのスペシャルスキル（SS）になります */
+    deckExt: {},
     cards: {},
     cells: {},
     seen: {},
@@ -60,6 +79,9 @@ function defaults() {
     // カレンダーの記録。"YYYY-MM-DD" → { runs, right, wrong, appliedRight, results }
     // 連続日数は数えない。ボーナスもペナルティも持たせないため
     days: {},
+
+    deckPick: null,      // デッキ編成で開いている枠（ヒーロー選択・装備）
+    deckReach: null,     // 到達度の before/after を誰で見るか
 
     // 現在のセッション。noReward は記録からの再挑戦（報酬なし）
     // hard は問題IDごとの難モードの状態。4択に降りたら "choice" が入る。

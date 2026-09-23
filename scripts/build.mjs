@@ -27,6 +27,8 @@ const db = {
   subjects:   await json("data/subjects.json"),
   battle:     await json("data/battle-stats.json"),
   images:     await json("data/images.json"),
+  roster:     await json("data/roster.json"),
+  factions:   await json("data/factions.json"),
 };
 
 /* --- 画像を data URI に --- */
@@ -56,8 +58,8 @@ await embed("public/commons/small", "p");
 
 /* --- スクリプト（import/export を剥がして結合） --- */
 /* answer-mode.js は engine / data / views が使うので先頭に置く */
-const ORDER = ["answer-mode.js", "normalize.js", "engine.js", "data.js",
-               "state.js", "views.js", "main.js"];
+const ORDER = ["answer-mode.js", "normalize.js", "engine.js", "faction.js", "battle.js",
+               "data.js", "state.js", "views.js", "main.js"];
 const sources = [];
 for (const f of ORDER) {
   let src = await read(`src/${f}`);
