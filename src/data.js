@@ -16,7 +16,7 @@ export async function loadDatabase(base = "./data") {
   if (globalThis.__EMBEDDED_DB__) return index(globalThis.__EMBEDDED_DB__);
 
   const [questionSets, figures, heroes, extensions,
-         advice, titles, crystals, images, subjects, battle, roster, factions] = await Promise.all([
+         advice, titles, crystals, images, subjects, battle, roster, factions, sounds] = await Promise.all([
     Promise.all(SUBJECT_FILES.map(f => json(`${base}/questions/${f}.json`))),
     json(`${base}/figures.json`),
     json(`${base}/heroes.json`),
@@ -29,9 +29,10 @@ export async function loadDatabase(base = "./data") {
     json(`${base}/battle-stats.json`),
     json(`${base}/roster.json`),
     json(`${base}/factions.json`),
+    json(`${base}/sounds.json`),
   ]);
   return index({ questions: questionSets.flat(), figures, heroes, curated: extensions,
-                 advice, titles, crystals, images, subjects, battle, roster, factions });
+                 advice, titles, crystals, images, subjects, battle, roster, factions, sounds });
 }
 
 /**
@@ -156,4 +157,10 @@ export const assetPath = {
   navi: name => globalThis.__ASSETS__?.["n" + name] ?? `./public/characters/${name}.webp`,
   /* 攻撃が当たったときの絵。900x900 に 100px のコマが9×9 並んだシート */
   fx: name => globalThis.__ASSETS__?.["f" + name] ?? `./public/effects/${name}.webp`,
+  /* **効果音は単一ファイル版にも畳みます**（5〜62KBなので入ります） */
+  se: key => globalThis.__ASSETS__?.["s" + key] ?? `./public/audio/se/${key}.mp3`,
+  /* **BGMは畳みません。** 1曲1〜2.8MBあり、base64は元の1.33倍になるので、
+     4曲畳むと配布ファイルが実用外の大きさになります（背景写真と同じ理由）。
+     単一ファイル版では鳴りませんが、黙って諦めます */
+  bgm: key => `./public/audio/bgm/${key}.mp3`,
 };

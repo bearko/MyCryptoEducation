@@ -29,10 +29,12 @@ const db = {
   images:     await json("data/images.json"),
   roster:     await json("data/roster.json"),
   factions:   await json("data/factions.json"),
+  sounds:     await json("data/sounds.json"),
 };
 
 /* --- 画像を data URI に --- */
-const MIME = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml" };
+const MIME = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml",
+               ".mp3": "audio/mpeg" };
 const assets = {};
 async function embed(dir, prefix) {
   let files;
@@ -51,6 +53,9 @@ await embed("public/extensions", "e");
 await embed("public/enemies", "y");
 await embed("public/characters", "n");
 await embed("public/effects", "f");
+/* **効果音も畳みます**（5〜62KB）。**BGMは畳みません** —— 1曲1〜2.8MBあり、
+   base64は元の1.33倍になるので、配布ファイルが実用外の大きさになります */
+await embed("public/audio/se", "s");
 /* 背景は縮小コピーのほうを畳む。1080px のまま base64 にすると配布ファイルが実用外の大きさになる */
 await embed("public/backgrounds/small", "b");
 /* コモンズの写真も縮小コピーのほう。base64 は元の1.33倍になるので、大きいままでは畳めない */
@@ -59,7 +64,7 @@ await embed("public/commons/small", "p");
 /* --- スクリプト（import/export を剥がして結合） --- */
 /* answer-mode.js は engine / data / views が使うので先頭に置く */
 const ORDER = ["answer-mode.js", "normalize.js", "engine.js", "faction.js", "battle.js",
-               "data.js", "state.js", "views.js", "main.js"];
+               "data.js", "sound.js", "state.js", "views.js", "main.js"];
 const sources = [];
 for (const f of ORDER) {
   let src = await read(`src/${f}`);

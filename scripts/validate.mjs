@@ -1076,6 +1076,39 @@ const stock = (band, subject) => normal.filter(q =>
   if (timeLimit("swipe") < 5)
     warn(`スワイプの持ち時間が ${timeLimit("swipe")}秒 です。実機で触って足りるか確かめてください`);
 
+  /* ---- 音 ---- */
+  /* **既定はOFFです。自動で鳴らさないでください** —— 電車の中で開く人がいます。
+     音は演出だけで、鳴らしても鳴らさなくても報酬は1つも変わりません（原則3-2） */
+  const sounds = await json("data/sounds.json");
+  let se = 0, bgm = 0;
+  for (const [key, v] of Object.entries(sounds.se || {})) {
+    if (!v.use) err("sounds.json", `SE "${key}" に use（どこで鳴らすか）がありません`);
+    if (!existsSync(join(ROOT, `public/audio/se/${key}.mp3`)))
+      err("sounds.json", `SE "${key}" の音が取り込まれていません（node scripts/fetch-mch-assets.mjs --audio）`);
+    else se++;
+  }
+  for (const key of Object.keys(sounds.bgm || {})) {
+    if (!existsSync(join(ROOT, `public/audio/bgm/${key}.mp3`)))
+      err("sounds.json", `BGM "${key}" の音が取り込まれていません`);
+    else bgm++;
+  }
+  /* **アプリが鳴らそうとしているキーが、台帳にあるか。**
+     台帳から消したのに呼び出しが残っていると、黙って鳴らないだけになります */
+  const viewsSrc = await readFile(join(ROOT, "src/views.js"), "utf8");
+  /* `playSE(won ? "win" : "lose")` のような書き方もあるので、
+     呼び出しの中に出てくる文字列を全部拾います */
+  const used = new Set([...viewsSrc.matchAll(/playSE\([^\n]*/g)]
+    .flatMap(m => [...m[0].matchAll(/"([a-z]+)"/g)].map(x => x[1])));
+  used.forEach(k => {
+    if (!sounds.se?.[k]) err("views.js", `playSE("${k}") の音が data/sounds.json にありません`);
+  });
+  /* 台帳にあるのに、どこからも鳴らしていない音は警告（採っただけの行をためない） */
+  Object.keys(sounds.se || {}).forEach(k => {
+    if (!used.has(k) && !/^(heal|buff|debuff|blast)$/.test(k))
+      warn(`SE "${k}" はどこからも鳴らしていません（${sounds.se[k].use}）`);
+  });
+  console.log(`音 ・ SE ${se}点 / BGM ${bgm}点（既定はOFF）`);
+
   console.log(`\n属性 ${order.length}勢力 ・ ロスター ${roster.heroes.length}体（${
     order.map(f => `${f}${byFaction[f] || 0}`).join(" / ")}） ・ SS ${
     Object.keys(roster.extSkills || {}).length}件`);
