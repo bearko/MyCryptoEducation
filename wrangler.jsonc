@@ -1,5 +1,8 @@
 {
   "name": "mycryptoeducation",
   "compatibility_date": "2026-10-06",
-  "assets": { "directory": "." }
+  "assets": { "directory": "." },
+  // 本番以外のブランチ（プレビュー）のビルドで `wrangler preview` を使うために必要。
+  // 空なので、プレビューには本番の D1・変数・シークレットはつながらない（本番のデータに書き込まない）
+  "previews": {}
 }
