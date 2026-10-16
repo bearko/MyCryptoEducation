@@ -64,7 +64,7 @@ await embed("public/commons/small", "p");
 /* --- スクリプト（import/export を剥がして結合） --- */
 /* answer-mode.js は engine / data / views が使うので先頭に置く */
 const ORDER = ["answer-mode.js", "normalize.js", "engine.js", "faction.js", "battle.js",
-               "data.js", "sound.js", "state.js", "views.js", "main.js"];
+               "data.js", "sound.js", "state.js", "platform.js", "views.js", "main.js"];
 const sources = [];
 for (const f of ORDER) {
   let src = await read(`src/${f}`);
