@@ -1,6 +1,10 @@
 import { loadDatabase } from "./data.js";
 import { createState } from "./state.js";
 import { mount } from "./views.js";
+import { initPlatform } from "./platform.js";
+
+/* bearko.games 共通基盤（総合スコア）。SDK がなければ何もしない */
+initPlatform("web");
 
 const root = document.getElementById("app");
 

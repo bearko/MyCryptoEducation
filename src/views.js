@@ -27,6 +27,7 @@ import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
          CUT_SCORE, cutScore } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX, STARTER_DECK } from "./state.js";
+import { notePlatformProgress } from "./platform.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -219,6 +220,7 @@ function render() {
   if (!(S.view === "quiz" && currentQ() && modeOf(currentQ()) === "swipe")) unbindSwipe();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
+  notePlatformProgress(S); // 知識カードが増えたら bearko.games の総合スコアへ（1分に1回まで）
 }
 
 /* ステータス層の時刻。1画面に留まったままでも進むように、20秒ごとに差し替える */
