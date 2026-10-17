@@ -705,6 +705,21 @@ for (const [key, p] of Object.entries(imageBook.images || {})) {
     warn(`写真「${key}」の実体がありません: public/commons/${p.file}.webp`);
 }
 
+/* ---- ゲームクリア（docs/game-clear.md）----
+   クリアの英雄は "clear": true の印1体だけで決まる。その英雄が一番奥の章を開くこと */
+{
+  const marked = heroes.filter(h => h.clear);
+  if (marked.length !== 1)
+    err("heroes.json", `"clear": true の英雄はちょうど1体にしてください（いま ${marked.length}体）`);
+  else {
+    const top = Math.max(...heroes.map(h => h.unlocks ?? -1));
+    if (marked[0].unlocks !== top)
+      err(marked[0].name, `クリアの英雄が一番奥の章（${top}）を開いていません（unlocks: ${marked[0].unlocks}）`);
+    if (!marked[0].ch || !marked[0].rel)
+      err(marked[0].name, "クリアの英雄にチャレンジ（ch・rel）がありません");
+  }
+}
+
 /* ---- 英雄 ---- */
 const heroIds = new Set();
 for (const h of heroes) {

@@ -13,7 +13,7 @@ export function capName(name) {
 const PERSISTED = ["settings", "profile", "gum", "points", "exts", "equip",
                    "owned", "cards", "cells", "seen", "runs", "score", "days",
                    "totalRight", "crossRight", "countries", "crystals", "introDone", "startGrade",
-                   "modeLevel", "crew", "deck", "deckExt"];
+                   "modeLevel", "crew", "deck", "deckExt", "clearedAt"];
 
 /**
  * **最初から仲間にいる5体。5勢力にひとりずつです。**
@@ -70,6 +70,9 @@ function defaults() {
     // 無説明の初回起動（決定1）を終えたか。終えるまでホームは出さない
     introDone: false,
     startGrade: null,   // 初回に選んだ学年。梯子の下端になる
+    /* ゲームクリアした日 "YYYY-MM-DD"（docs/game-clear.md）。まだなら空。
+       クリアで増える報酬は無く、ここは記録だけです */
+    clearedAt: "",
     score: 0,
 
     crystals: {},         // 出会ったクリスタル { "001": 個数, ... }。図鑑。減らない

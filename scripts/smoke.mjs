@@ -1461,6 +1461,65 @@ answerAll(true);
 check("必要正答数を満たせば解放", ev("S.challenge.won") === true,
   ev("JSON.stringify(S.challenge.results)"));
 check("解放されて手持ちに入る", ev(`!!S.owned[S.challenge.heroId]`));
+
+/* ---- ゲームクリア（docs/game-clear.md）---- */
+check("クレオパトラ以外を解放してもクリアにならない",
+  ev("S.challenge.heroId") !== "5016" && ev("gameCleared(DB, S)") === false &&
+  ev("S.clearedAt") === "" && !d.getElementById("cleared"), ev("S.challenge.heroId"));
+check("最初の英雄で RTA の区切り hero1 に届く",
+  ev(`JSON.stringify(checkpointsReached(DB, {"10001":1}, {"10001":1,"1006":1}))`) === '["hero1"]');
+check("最初の挑戦でクレオパトラに勝つと hero1 → clear の順に届く",
+  ev(`JSON.stringify(checkpointsReached(DB, {"10001":1}, {"10001":1,"5016":1}))`) === '["hero1","clear"]');
+check("2体目からは区切りにならない",
+  ev(`JSON.stringify(checkpointsReached(DB, {"1006":1}, {"1006":1,"1005":1}))`) === "[]");
+check("RTA の区切りを送るのは計測中だけ（ふだんは何もしない）", ev(`(() => {
+  const sent = [];
+  window.BearkoGames = { rta: { current: () => null, checkpoint: id => { sent.push(id); return Promise.resolve({ ok: true }); } } };
+  platformCheckpoint("hero1");
+  window.BearkoGames.rta.current = () => ({ runId: 1, regulation: "survivor-normal" });
+  platformCheckpoint("hero1");
+  window.BearkoGames.rta.current = () => ({ runId: 2, regulation: "education-clear" });
+  platformCheckpoint("hero1");
+  delete window.BearkoGames;
+  return JSON.stringify(sent) === '["hero1"]';
+})()`));
+{
+  // クレオパトラに勝つ。共通基盤の SDK を差しかえて、送った成績を見る
+  ev(`window.__sent = []; window.BearkoGames = {
+    submitScore: (m, o) => { window.__sent.push({ m, o }); return Promise.resolve({ ok: true }); } };`);
+  const keep = () => ev(`JSON.stringify({ gum: S.gum, crystals: S.crystals, points: S.points,
+    score: S.score, cards: Object.keys(S.cards).length })`);
+  const before = JSON.parse(keep());
+  ev('render()'); // 開いた時点（まだクリアしていない）を共通基盤の窓口に覚えさせる
+  ev('startChallenge("5016")');
+  d.getElementById("fight").click();
+  await wait(1500);
+  answerAll(true);
+  const after = JSON.parse(keep());
+  check("クレオパトラに勝つとゲームクリア",
+    ev("gameCleared(DB, S)") === true && !!d.getElementById("cleared") && txt().includes("ゲームクリア"),
+    txt().slice(0, 200));
+  check("クリアした日を記録する", ev("S.clearedAt") === ev("dayKey()"), String(ev("S.clearedAt")));
+  check("クリアの分だけ増える報酬は無い（ふつうのチャレンジの勝ちと同じ）",
+    after.gum === before.gum && after.score === before.score &&
+    JSON.stringify(after.crystals) === JSON.stringify(before.crystals) &&
+    JSON.stringify(after.points) === JSON.stringify(before.points) &&
+    after.cards - before.cards === (ev("S.challenge.gotCard") ? 1 : 0),
+    `${JSON.stringify(before)} → ${JSON.stringify(after)}`);
+  const sent = JSON.parse(ev("JSON.stringify(window.__sent)"));
+  const last = sent[sent.length - 1];
+  check("クリアした瞬間に成績を送り、通知を出す",
+    !!last && last.m.cleared === true && last.o.quiet === false, JSON.stringify(sent));
+  check("送る成績は 知識カード・クリア・英雄・称号・マス だけ（答え方も点も入れない）",
+    !!last && JSON.stringify(Object.keys(last.m).sort()) ===
+      JSON.stringify(["cards", "cells", "cleared", "heroes", "titles"]) &&
+    last.m.heroes === ev("unlockedHeroCount(DB, S)") && last.m.cells === ev("knowledgeMapProgress(DB, S).done"),
+    last && JSON.stringify(last.m));
+  ev("delete window.BearkoGames; delete window.__sent");
+  ev('S.view="mypage";S.myTab="name";render()');
+  check("マイページにクリアした日が出る", !!d.querySelector(".mycleared") && txt().includes("ゲームクリア ・ "),
+    txt().slice(0, 120));
+}
 check("レアリティで必要正答数が変わる",
   ev('challengeNeed({rarity:"Common"})') === 1 && ev('challengeNeed({rarity:"Rare"})') === 2 &&
   ev('challengeNeed({rarity:"Legendary"})') === 3);
