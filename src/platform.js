@@ -1,5 +1,5 @@
 /* bearko.games 共通基盤への窓口（総合スコア。bearko/mycryptoportfolio の SPEC-002 3.6、docs/game-clear.md）。
-   送るのは「知識カード・クリア・解放した英雄・称号・知識マップのマス」の数だけ。点の計算は共通基盤のサーバーが行う。
+   送るのは「知識カード・クリア・解放した英雄・称号・知識マップのマス」の数と、それで決まるトロフィーだけ。点の計算は共通基盤のサーバーが行う。
    **報酬にも遊び方にも触りません**（原則3-2）。どれも答え方や速さで変わらないので、点も変わりません。
    ゲーム内の点（S.score）は送りません（点を称号やほかの数字につなげない）。
    SDK（https://bearko.games/sdk/v1.js）が読めない・通信に失敗しても何もしません。
@@ -63,10 +63,46 @@ export function initPlatform(version) {
   }
 }
 
+/* ---- トロフィー（docs/game-clear.md §5。定義は共通基盤の platform/trophies.js） ---- */
+
+export const PLATFORM_CARDS_TROPHY = 300;
+
+/** 満たしているトロフィーの ID。純粋関数。どれも持ち物の数だけで決まり、答え方や速さでは変わらない */
+export function platformTrophies(db, S) {
+  const m = platformMetrics(db, S);
+  const map = knowledgeMapProgress(db, S);
+  const out = [];
+  if (m.heroes > 0) out.push("education.hero1");
+  if (m.cleared) out.push("education.clear");
+  if (map.total > 0 && map.done >= map.total) out.push("education.map");
+  if (m.cards >= PLATFORM_CARDS_TROPHY) out.push("education.cards300");
+  return out;
+}
+
+const platformTrophiesSent = new Set(); // このページを開いてから送ったもの（保存しない）
+/* 1つずつ順に送る。未ログインで同時に送ると、Cookie がまだないので仮アカウントが送った数だけできてしまう */
+let platformTrophyChain = Promise.resolve();
+
+/** まだ送っていないトロフィーを送る、ただ1か所。通知は SDK が出す（はじめて取ったときだけ） */
+export function platformSyncTrophies(db, S) {
+  const bg = platformSdk();
+  if (!bg || typeof bg.unlockTrophy !== "function") return platformTrophyChain;
+  for (const id of platformTrophies(db, S)) {
+    if (platformTrophiesSent.has(id)) continue;
+    platformTrophiesSent.add(id);
+    platformTrophyChain = platformTrophyChain
+      .then(() => bg.unlockTrophy(id))
+      .then(r => { if (r && r.ok === false) console.warn("[platform] trophy", id, r.error); })
+      .catch(e => console.warn("[platform] trophy", id, e));
+  }
+  return platformTrophyChain;
+}
+
 /** 保存のたびに呼ぶ。どれかが増えたときだけ、1分に1回まで送る。
     **クリアした瞬間だけは待たずに送り、自己ベストの通知を出す**（ほかは積み上げなので通知なし） */
 export function notePlatformProgress(db, S) {
   if (!platformSdk()) return;
+  platformSyncTrophies(db, S); // トロフィー（§5）。増えたかどうかに関係なく、まだ送っていないものを送る
   const m = platformMetrics(db, S);
   if (platformWasCleared === null) platformWasCleared = m.cleared;
   if (!platformAhead(m, platformSent)) return;
