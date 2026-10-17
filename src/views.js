@@ -28,7 +28,7 @@ import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
          CUT_SCORE, cutScore } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX, STARTER_DECK } from "./state.js";
-import { notePlatformProgress, platformCheckpoint } from "./platform.js";
+import { notePlatformProgress, platformCheckpoint, platformChatVisible, platformChatHiddenFor } from "./platform.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -238,6 +238,7 @@ function render() {
   if (S.settings.bgm) playBGM(bgmFor()); else stopBGM();
   drawToast();
   drawReviewTag();
+  platformChatVisible(!platformChatHiddenFor(S.view)); // 全体チャットの 💬（共通基盤 SPEC-004）。出題の最中と学年選びでは隠す
   if (!(S.view === "quiz" && currentQ() && modeOf(currentQ()) === "swipe")) unbindSwipe();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);

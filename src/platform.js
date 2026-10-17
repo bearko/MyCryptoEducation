@@ -51,7 +51,9 @@ export function initPlatform(version) {
   const bg = platformSdk();
   if (!bg) return;
   try {
-    Promise.resolve(bg.init({ game: "education", version })).catch(e => console.warn("[platform] init", e));
+    Promise.resolve(bg.init({ game: "education", version }))
+      .then(() => platformChatApply())   // SDK が後から読めても、いまの画面の出す／隠すをそろえる
+      .catch(e => console.warn("[platform] init", e));
   } catch (e) {
     console.warn("[platform] init", e);
   }
@@ -61,6 +63,30 @@ export function initPlatform(version) {
       if (document.visibilityState === "hidden" && platformPending) { platformSend(platformPending); platformPending = null; }
     });
   }
+}
+
+/* ---- 全体チャット（共通基盤 SPEC-004。SDK 1.6.0 から） ----
+   窓そのものは SDK が描きます（右下の 💬）。ここでは出す・隠すだけです。
+   **出題の最中（quiz / wave / challenge）と、最初の学年選び（grade）では隠します。**
+   問題を解いているあいだは問題に集中してもらうため、学年選びは説明も案内も置かない1画面だからです（決定1）。
+   SDK が無い・古い（chat が無い）ときは何もしません */
+let platformChatWanted = true;
+
+function platformChatApply() {
+  const bg = platformSdk();
+  if (!bg || !bg.chat || typeof bg.chat.setVisible !== "function") return;
+  try { bg.chat.setVisible(platformChatWanted); } catch (e) { console.warn("[platform] chat", e); }
+}
+
+/** 💬 を出す（true）／隠す（false）。SDK が後から読めたときは、覚えておいた値をそろえます */
+export function platformChatVisible(on) {
+  platformChatWanted = !!on;
+  platformChatApply();
+}
+
+/** 出題の画面と学年選びでは隠す。純粋関数 */
+export function platformChatHiddenFor(view) {
+  return view === "quiz" || view === "wave" || view === "challenge" || view === "grade";
 }
 
 /* ---- トロフィー（docs/game-clear.md §5。定義は共通基盤の platform/trophies.js） ---- */
