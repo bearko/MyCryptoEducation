@@ -3647,6 +3647,7 @@ function vMypage() {
         ${S.clearedAt ? `<div class="mycleared">ゲームクリア ・ ${esc(S.clearedAt)}</div>` : ""}
       </div>
     </div>
+    <p class="myplatform"><a href="https://bearko.games/score/?game=education" target="_blank" rel="noopener">bearko.games の総合ランキング ↗</a></p>
     <div class="seg" id="mytab">
       <button data-t="name" class="${tab === "name" ? "on" : ""}">名前</button>
       <button data-t="icon" class="${tab === "icon" ? "on" : ""}">アイコン</button>
