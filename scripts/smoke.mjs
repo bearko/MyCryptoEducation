@@ -2652,6 +2652,20 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
   /* **既定はOFFです。自動で鳴らさないでください** —— 電車の中で開く人がいます */
   check("音もBGMも既定でOFF", ev("S.settings.sound") === false && ev("S.settings.bgm") === false,
     `${ev("S.settings.sound")} / ${ev("S.settings.bgm")}`);
+  /* **音量は20段階**（0〜100%・5%刻み、0 は OFF）。既定は 1（元の大きさ）で、
+     スイッチの既定 OFF はそのまま。つまみは描き直さずに数字だけ書き換える */
+  check("音量の既定は100%で、つまみは 0〜100 を 5 刻み（0 は OFF と出る）", ev(`(() => {
+    const dflt = S.settings.seVolume === 1 && S.settings.bgmVolume === 1;
+    S.view = "mypage"; S.myTab = "setting"; render();
+    const se = document.getElementById("setsevol"), bg = document.getElementById("setbgmvol");
+    const ok = el => !!el && el.type === "range" && el.min === "0" && el.max === "100" && el.step === "5";
+    const out = () => document.getElementById("setsevol-val").textContent;
+    const shown = ok(se) && out() === "100%";
+    se.value = "0"; se.dispatchEvent(new Event("input"));
+    const off = S.settings.seVolume === 0 && out() === "OFF";
+    se.value = "100"; se.dispatchEvent(new Event("input"));
+    return dflt && ok(bg) && shown && off && S.settings.seVolume === 1 && S.settings.sound === false;
+  })()`) === true, `${ev("S.settings.seVolume")} / ${ev("S.settings.bgmVolume")}`);
   check("台帳のSEが全部そろっている", ev("Object.keys(DB.sounds.se).length") >= 10,
     String(ev("Object.keys(DB.sounds.se).length")));
   check("BGMは画面ごとに決まる", ev(`(() => {
@@ -2669,6 +2683,9 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
     const take = on => {
       S.settings.sound = on; S.settings.bgm = on;
       setSound(on); setBgm(on);
+      // 音量を変えても同じ（0.35 は 20段階のひとつ）
+      S.settings.seVolume = S.settings.bgmVolume = on ? 0.35 : 1;
+      setSoundVolume(S.settings.seVolume); setBgmVolume(S.settings.bgmVolume);
       Object.assign(S, { gum: 0, cards: {}, crystals: {}, points: {} });
       const real = Math.random; Math.random = () => 0.4242;
       startRun({ ids });
@@ -2682,6 +2699,7 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
     };
     const off = take(false), on = take(true);
     S.settings.sound = false; S.settings.bgm = false; setSound(false); setBgm(false);
+    S.settings.seVolume = S.settings.bgmVolume = 1; setSoundVolume(1); setBgmVolume(1);
     return off === on;
   })()`) === true);
 }
