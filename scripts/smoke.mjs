@@ -2590,6 +2590,13 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
     document.getElementById("hint").click();
     return !!S.run.qPauseAt;
   })()`) === true);
+  /* Esc は「とじる」と同じ道を通す（docs/release-v1.md）。別の道で閉じると時計が止まったままになる */
+  check("ヒントのポップアップは Esc で閉じて、持ち時間が動き出す", ev(`(() => {
+    const dlg = document.querySelector("#hintmodal-bg");
+    const was = !!dlg && dlg.getAttribute("role") === "dialog" && dlg.getAttribute("aria-modal") === "true";
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    return was && !document.querySelector("#hintmodal-bg") && !S.run.hintOpen && !S.run.qPauseAt;
+  })()`) === true);
 
   console.log("\n-- 仲間になる（ガチャを引かない・原則2） --");
   check("解くとヒーローが仲間になる", ev(`(() => {
@@ -2642,6 +2649,30 @@ ev('S.cards = JSON.parse(window.__cards); S.view="home"; render()');
     const off = take(false), on = take(true);
     S.settings.sound = false; S.settings.bgm = false; setSound(false); setBgm(false);
     return off === on;
+  })()`) === true);
+}
+
+console.log("\n-- 公開版（docs/release-v1.md） --");
+{
+  const { readFileSync, existsSync } = await import("node:fs");
+  const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+  check("共通基盤に送る版が package.json と同じ", ev("APP_VERSION") === pkg.version,
+    `${ev("APP_VERSION")} / ${pkg.version}`);
+  const man = JSON.parse(readFileSync("manifest.json", "utf8"));
+  /* PNG の幅と高さはファイルの 16〜24 バイト目 */
+  const size = f => { const b = readFileSync(f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+  check("manifest のアイコンが揃っていて、書いた大きさのとおり", man.icons.length >= 2 && man.icons.every(i =>
+    existsSync(i.src) && size(i.src).join("x") === i.sizes), JSON.stringify(man.icons));
+  const head = readFileSync("index.html", "utf8");
+  check("theme-color・manifest・apple-touch-icon・OGP・Twitter カードがある",
+    ["theme-color", 'rel="manifest"', "apple-touch-icon", "og:image", "summary_large_image"].every(k => head.includes(k)));
+  check("OGP の画像は 1200×630", size("public/app/og-image.png").join("x") === "1200x630",
+    size("public/app/og-image.png").join("x"));
+  check("トーストは読み上げに届く（role=status）", ev(`(() => {
+    S.toast = "テスト"; drawToast();
+    const ok = document.querySelector(".toast")?.getAttribute("role") === "status";
+    S.toast = null; drawToast();
+    return ok;
   })()`) === true);
 }
 
