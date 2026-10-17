@@ -9,3 +9,4 @@ bearko.games の総合スコア（[bearko/mycryptoportfolio の SPEC-002](https:
 - RTA の区切り（`hero1` → `clear`）は `platformCheckpoint` の 1 か所から送る。計測中のときだけ送り、ふだんは何もしない（計測を始める入口はまだ無い）
 - SDK（`https://bearko.games/sdk/v1.js`）が読めない・通信に失敗しても何もしない。単一ファイル版（`npm run build`）には SDK を入れない（オフライン配布のため）
 - 単一ファイル版はモジュールを結合するので、`src/platform.js` の名前は `platform〜` で始めている。`scripts/build.mjs` の `ORDER` に足してある
+- **総合ランキングへの導線**（作者の決定 2026-10-17、MyCryptoPortfolio#29）：マイページ（S-24）の名前の下に、小さく「bearko.games の総合ランキング ↗」（`https://bearko.games/score/?game=education`、新しいタブ）。**ゲームの中には順位を出さない**（ホーム・リザルト・チャレンジには置かない。`docs/research-edtech.md` §3 の「順位という外からの圧力」を持ちこまないため）。マイページは自分の記録を見に行く場所なので、そこからだけ外へ出られるようにする

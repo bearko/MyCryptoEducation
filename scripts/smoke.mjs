@@ -1549,6 +1549,10 @@ check("トロフィー：まだ送っていないものだけを、1つずつ順
   ev('S.view="mypage";S.myTab="name";render()');
   check("マイページにクリアした日が出る", !!d.querySelector(".mycleared") && txt().includes("ゲームクリア ・ "),
     txt().slice(0, 120));
+  check("マイページから bearko.games の総合ランキングへ（新しいタブ）", (() => {
+    const a = d.querySelector(".myplatform a");
+    return !!a && a.getAttribute("href") === "https://bearko.games/score/?game=education" && a.target === "_blank" && a.rel === "noopener";
+  })());
 }
 check("レアリティで必要正答数が変わる",
   ev('challengeNeed({rarity:"Common"})') === 1 && ev('challengeNeed({rarity:"Rare"})') === 2 &&
