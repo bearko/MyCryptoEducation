@@ -28,7 +28,7 @@ import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
          CUT_SCORE, cutScore } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX, STARTER_DECK } from "./state.js";
-import { notePlatformProgress, platformCheckpoint, platformChatVisible, platformChatHiddenFor } from "./platform.js";
+import { notePlatformProgress, platformCheckpoint, platformChatVisible, platformChatHiddenFor, platformCanPickAvatar, platformOpenAvatarPicker } from "./platform.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -3634,6 +3634,10 @@ function vMypage() {
             <img src="${assetPath.hero(h.id)}" alt="">
             <span class="hn">${esc(h.name)}</span></button>`).join("")}</div>
         <p class="fine">解放した英雄が増えるほど、選べる顔も増えます。</p>
+        ${platformCanPickAvatar() ? `
+        <div class="phead" style="margin-top:14px"><h2>bearko.games のアイコン</h2><span class="sub">全ゲームとチャットで共通</span></div>
+        <button class="btn" id="pfavatar">アイコンを変える</button>
+        <p class="fine">こちらは bearko.games 全体（すべてのゲームとチャット）で同じ絵になります。上の英雄の顔はこのゲームの中だけです。</p>` : ""}
       </div>`,
     title: `
       <div class="panel">
@@ -3701,6 +3705,7 @@ function vMypage() {
   app.querySelectorAll("#mytab button").forEach(b =>
     b.onclick = () => { S.myTab = b.dataset.t; render(); });
 
+  document.getElementById("pfavatar")?.addEventListener("click", () => platformOpenAvatarPicker());
   const save = document.getElementById("savename");
   if (save) {
     const input = document.getElementById("nameinput");
