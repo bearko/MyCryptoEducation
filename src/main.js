@@ -3,8 +3,11 @@ import { createState } from "./state.js";
 import { mount } from "./views.js";
 import { initPlatform } from "./platform.js";
 
+/* 版。package.json の version と同じにする（smoke が見ています） */
+export const APP_VERSION = "1.0.0";
+
 /* bearko.games 共通基盤（総合スコア）。SDK がなければ何もしない */
-initPlatform("web");
+initPlatform(APP_VERSION);
 
 const root = document.getElementById("app");
 

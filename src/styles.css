@@ -40,6 +40,8 @@
     font:inherit;font-size:15px;font-weight:600;padding:14px;cursor:pointer;letter-spacing:.04em}
   .btn:hover{background:#22345C}
   .btn:disabled{opacity:.4;cursor:default}
+  /* 押した手ごたえ。**transform は使わない**——英雄の絵やカードに transform の演出が多く、重ねると崩れる */
+  button:not(:disabled):active{filter:brightness(.92)}
   .btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);font-weight:400;font-size:13.5px;padding:11px}
   .btn.ghost:hover{border-color:var(--ink-faint);background:var(--card)}
   .btn.stretch{background:transparent;color:var(--moss);border:1px solid var(--moss);font-size:14px;padding:12px}

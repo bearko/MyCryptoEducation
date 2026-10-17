@@ -50,6 +50,22 @@ const STAGE_LABELS = [
 
 let DB, S, app;
 
+/**
+ * **Esc は「とじる」を押したのと同じにします。** 持ち時間の時計を動かし直すのは
+ * 「とじる」の側なので、別の道で閉じると時計が止まったままになります
+ * （原則5の道具を使った人を罰さないため、止める・動かすは1つの道に揃える）。
+ * 重なっていたら上から閉じる：SS → ヒント → 設定
+ */
+const ESC_CLOSERS = ["ssclose", "hintclose", "setclose"];
+let escBound = false;
+function closeOnEscape(e) {
+  if (e.key !== "Escape") return;
+  const btn = ESC_CLOSERS.map(id => document.getElementById(id)).find(Boolean);
+  if (!btn) return;
+  e.preventDefault();
+  btn.click();
+}
+
 export function mount(db, state, root) {
   DB = db; S = state; app = root;
 
@@ -57,6 +73,9 @@ export function mount(db, state, root) {
   // 古い保存データに残っている名前は捨てる（残すと参照先が無くて落ちる）
   Object.keys(S.exts).forEach(k => { if (!db.extensions[k]) delete S.exts[k]; });
   Object.entries(S.equip).forEach(([id, k]) => { if (k && !db.extensions[k]) delete S.equip[id]; });
+
+  /* ポップアップは Esc でも閉じる。1度だけ付ける */
+  if (!escBound) { document.addEventListener("keydown", closeOnEscape); escBound = true; }
 
   /* 保存してある設定を音の側へ渡す。**既定はOFF**なので、何もしなければ鳴りません */
   setSound(S.settings.sound); setBgm(S.settings.bgm);
@@ -407,6 +426,7 @@ function drawToast() {
   if (!S.toast) return;
   const el = document.createElement("div");
   el.className = "toast";
+  el.setAttribute("role", "status"); // 読み上げにも届ける（aria-live="polite" と同じ）
   el.innerHTML = S.toast;
   document.body.appendChild(el);
 }
@@ -1444,7 +1464,7 @@ function drawSS() {
   if (!slot || !b) return;
   if (!S.run.ssOpen) { slot.innerHTML = ""; return; }
   slot.innerHTML = `
-  <div class="modal" id="ssmodal-bg"><div class="msheet sssheet">
+  <div class="modal" id="ssmodal-bg" role="dialog" aria-modal="true" aria-label="スペシャルスキル"><div class="msheet sssheet">
     <b class="sstitle">スペシャルスキル</b>
     <div class="sslist">${b.deck.map((h, k) => {
       if (!h) return "";
@@ -1744,7 +1764,7 @@ function vQuiz() {
     <div id="verdict"></div>`;
 
   const modals = `
-  ${S.run.settingOpen ? `<div class="modal" id="setmodal"><div class="msheet">
+  ${S.run.settingOpen ? `<div class="modal" id="setmodal" role="dialog" aria-modal="true" aria-label="設定"><div class="msheet">
     <label class="switch">
       <input type="checkbox" id="showexp" ${S.settings.showExplanationOnCorrect ? "checked" : ""}>
       <span class="sw"></span>
@@ -1933,7 +1953,7 @@ function drawHints(q, h) {
 
   if (slot) {
     slot.innerHTML = !S.run.hintOpen || !used ? "" : `
-      <div class="modal" id="hintmodal-bg"><div class="msheet hintsheet">
+      <div class="modal" id="hintmodal-bg" role="dialog" aria-modal="true" aria-label="ヒント"><div class="msheet hintsheet">
         <div class="hintlist">${list.slice(0, used)
           .map((t, i) => `<div class="hint"><b>ヒント ${i + 1}</b>${esc(t.text)}` +
             (i + 1 === withPhoto ? photoHTML(q.image, "hint") : "") + `</div>`).join("")}</div>
@@ -3783,7 +3803,7 @@ function vMap() {
       ${blanks.map(esc).join("・")}です。</p>`
       : `<p class="cue">すべてのマスに一度は手が届きました。</p>`}
     <div class="stack">
-      <button class="btn" id="toquiz2">${RUN_LENGTH}問を解く</button>
+      <button class="btn" id="toquiz2">問題を解く</button>
       <button class="btn ghost" id="home3">ホームへ</button></div>
   </div>`;
   document.getElementById("back").onclick = () => go("home");
