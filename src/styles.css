@@ -546,6 +546,7 @@
   .myhead .st-title{flex:none;text-align:left;display:inline-block}
   .myname{font-family:var(--mincho);font-size:20px;font-weight:600;margin-top:6px;
     word-break:break-all;line-height:1.4}
+  .mycleared{font-size:11.5px;letter-spacing:.06em;color:var(--brass);margin-top:2px}
   .hcard.on{border-color:var(--brass);background:#FDFBF4}
 
   .eqi{flex-wrap:wrap}

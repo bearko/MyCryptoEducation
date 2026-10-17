@@ -790,6 +790,49 @@ export function titleProgress(db, state) {
 
 export const earnedTitles = (db, state) => titleProgress(db, state).filter(t => t.done);
 
+/* ---- ゲームクリア（docs/game-clear.md）---- */
+
+/** クリアの英雄。heroes.json で "clear": true の印が付いた1体（いまはクレオパトラ） */
+export const clearHero = db => db.heroes.find(h => h.clear) || null;
+
+/** クレオパトラのチャレンジに勝っていればクリア（作者の決定・#1） */
+export function gameCleared(db, state) {
+  const h = clearHero(db);
+  return !!(h && state.owned[h.id]);
+}
+
+/** チャレンジで解放した英雄の数。最初からいる MCH の3体（rel を持たない）は数えない */
+export const unlockedHeroCount = (db, state) =>
+  db.heroes.filter(h => h.rel && state.owned[h.id]).length;
+
+/** 知識マップの埋まり具合。知識マップの画面の「◯ / 48マス」と同じ数え方 */
+export function knowledgeMapProgress(db, state) {
+  let done = 0, total = 0;
+  SUBJECTS.forEach(sub => GRADES.forEach(g => {
+    if (!db.questions.some(q => q.subject === sub && q.grade === g.k)) return;
+    total++;
+    const st = state.cells[sub + "|" + g.k];
+    if (st === "ok" || st === "st") done++;
+  }));
+  return { done, total, rate: total ? done / total : 0 };
+}
+
+/**
+ * RTA の区切り。**章はクリアの道順になっていない**（クレオパトラにはいつでも挑める）ので、
+ * どの順に解いても必ず通る2つで区切ります。決めた順にしか送れないので、順番は変えないでください
+ */
+export const RTA_CHECKPOINTS = ["hero1", "clear"];
+
+/** 手持ち（owned）が before → after に変わったとき、新しく届いた区切りを順番どおりに返す */
+export function checkpointsReached(db, before, after) {
+  const count = owned => db.heroes.filter(h => h.rel && owned[h.id]).length;
+  const cleared = owned => { const h = clearHero(db); return !!(h && owned[h.id]); };
+  const out = [];
+  if (count(before) === 0 && count(after) > 0) out.push("hero1");
+  if (!cleared(before) && cleared(after)) out.push("clear");
+  return out;
+}
+
 /* ---- クリスタル ---- */
 
 /**

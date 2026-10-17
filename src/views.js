@@ -15,7 +15,8 @@ import { SUBJECTS, GRADES, RUN_LENGTH, inventory, inventoryBySubject,
          CRYSTAL_UNIT, craftCheck,
          rangeWidth, scoreRange, RANGE_BONUS_SCORE,
          challengeNeed, challengePrompt, challengeCard,
-         CHALLENGE_QUESTIONS } from "./engine.js";
+         CHALLENGE_QUESTIONS, gameCleared, checkpointsReached,
+         knowledgeMapProgress } from "./engine.js";
 import { FACTIONS, affinity, affinityMark } from "./faction.js";
 import { timeLimit, judge, asCount, JUDGES, chainNext, chainBonus, CHAIN_MAX_SHOWN,
          DECK_SIZE, costOf, deckCost, deckCap, overCost, costFactor,
@@ -27,7 +28,7 @@ import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
          CUT_SCORE, cutScore } from "./answer-mode.js";
 import { saveState, capName, NAME_MAX, STARTER_DECK } from "./state.js";
-import { notePlatformProgress } from "./platform.js";
+import { notePlatformProgress, platformCheckpoint } from "./platform.js";
 
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -220,7 +221,7 @@ function render() {
   if (!(S.view === "quiz" && currentQ() && modeOf(currentQ()) === "swipe")) unbindSwipe();
   if (home) { startClock(); drawBattery(); fitAdvice(); } else stopCarousel();
   saveState(S);
-  notePlatformProgress(S); // 知識カードが増えたら bearko.games の総合スコアへ（1分に1回まで）
+  notePlatformProgress(DB, S); // 成績が増えたら bearko.games の総合スコアへ（1分に1回まで。クリアはすぐ）
 }
 
 /* ステータス層の時刻。1画面に留まったままでも進むように、20秒ごとに差し替える */
@@ -384,16 +385,7 @@ const cardCount = () => Object.keys(S.cards).length;
  * 次いでコンセプトマップで、仮想通貨は下位でした（docs/research-edtech.md）。
  * 知識マップはコンセプトマップそのものなので、ここをホームの一等地に出します。
  */
-function mapProgress() {
-  let done = 0, total = 0;
-  SUBJECTS.forEach(sub => GRADES.forEach(g => {
-    if (!DB.questions.some(q => q.subject === sub && q.grade === g.k)) return;
-    total++;
-    const st = S.cells[sub + "|" + g.k];
-    if (st === "ok" || st === "st") done++;
-  }));
-  return { done, total, rate: total ? done / total : 0 };
-}
+const mapProgress = () => knowledgeMapProgress(DB, S);
 const currentQ = () => DB.byId[S.run.ids[S.run.i]];
 
 function heroFor(q) {
@@ -3632,6 +3624,7 @@ function vMypage() {
       <div>
         <div class="st-title ${p.title ? "" : "none"}">${p.title ? esc(p.title) : "称号なし"}</div>
         <div class="myname">${esc(p.name || "旅人")}</div>
+        ${S.clearedAt ? `<div class="mycleared">ゲームクリア ・ ${esc(S.clearedAt)}</div>` : ""}
       </div>
     </div>
     <div class="seg" id="mytab">
@@ -3849,7 +3842,14 @@ function finishChallenge() {
   const right = c.results.filter(Boolean).length;
   c.done = true;
   c.won = right >= challengeNeed(h);
-  if (c.won) S.owned[h.id] = 1;
+  if (c.won) {
+    const before = { ...S.owned };
+    S.owned[h.id] = 1;
+    // RTA の区切り（docs/game-clear.md §4）。計測中でなければ platformCheckpoint は何もしない
+    checkpointsReached(DB, before, S.owned).forEach(platformCheckpoint);
+    // ゲームクリアは記録だけ。**クリアの分だけ増える報酬はありません**（原則2・3-2・7）
+    if (gameCleared(DB, S) && !S.clearedAt) S.clearedAt = dayKey();
+  }
 
   // 挑んだ以上は、その人物にまつわる知識カードを1枚持って帰る。
   // 負けるほど次が有利になる。プールはこの英雄の関連カードだけなので、
@@ -3906,6 +3906,8 @@ function vChallenge() {
           <span>解放 ・ <em>${esc(h.name)}</em></span></div>` : ""}
         ${c.won && h.unlocks != null ? `<div class="gain alt"><span class="seal">＋</span>
           <span>新しい出題範囲が開きました</span></div>` : ""}
+        ${c.won && h.clear ? `<div class="gain alt" id="cleared"><span class="seal">＋</span>
+          <span><em>ゲームクリア</em> ・ 世界の教室の、いちばん奥の扉が開きました</span></div>` : ""}
         ${c.gotCard ? `<div class="gain alt"><span class="seal">＋</span>
           <span>知識カード ・ <em>${esc(c.gotCard)}</em></span></div>` : ""}</div>
       ${c.won ? "" : `<p class="cue">負けても、いま受け取った知識カードのぶんだけ次はゲージが削れた状態から始まります。</p>`}
