@@ -4,7 +4,7 @@
 |---|---|
 | 状態 | 合意済み（作者の決定 2026-10-16、#1）。数字は暫定で、遊ばれた成績を見て直す |
 | 作成 | 2026-10-17 |
-| 関連 | #1、bearko/MyCryptoPortfolio の SPEC-002 3.6（総合スコア）・SPEC-001 6 章（RTA）・docs/ROADMAP.md 2 章 |
+| 関連 | #1、bearko/MyCryptoPortfolio の SPEC-002 3.6（総合スコア）・SPEC-001 6 章（RTA）・9.4（トロフィー）・docs/ROADMAP.md 2 章 |
 
 ## 1. 作者の決定（#1）
 
@@ -68,7 +68,25 @@
 - 区切りに届いたかは純粋関数 `engine.checkpointsReached(db, before, after)` で決め、送るのは `platform.js` の `platformCheckpoint(id)` **1 か所だけ**
 - いまは RTA の計測を始める入口がありません（進行を端末に保存しているので、RTA には「最初から」の入口が要る）。**`platformCheckpoint` は、計測中（`BearkoGames.rta.current()` が Education のレギュレーション）のときだけ送り、それ以外は何もしません。** 入口とレギュレーションの登録は、あとで別に作る
 
-## 5. 検査
+## 5. bearko.games のトロフィー
+
+作者の決定（2026-10-17）。名前はマイクリのパッシブスキル名（共通基盤の SPEC-001 D9）。定義は共通基盤の `platform/trophies.js`（MyCryptoPortfolio#37）。
+
+| ID | 名前 | 由来 | 条件 |
+|---|---|---|---|
+| `education.hero1` | ヘウレーカ！ヘウレーカ！ | アルキメデス | チャレンジで最初の英雄を仲間にする（`unlockedHeroCount` が 1 以上。RTA の `hero1` と同じ） |
+| `education.clear` | 戦乱を呼ぶ美貌 | クレオパトラ | クレオパトラに勝つ（`gameCleared`。横断トロフィー「征服王の偉業」の条件にも入る） |
+| `education.map` | 大日本沿海輿地全図 | 伊能忠敬 | 知識マップのマスをすべて埋める（`knowledgeMapProgress` の `done` が `total` に届く） |
+| `education.cards300` | 種の起源 | ダーウィン | 知識カードを 300 枚集める |
+
+- **ゲーム内の報酬は 1 つも足しません。** トロフィーは bearko.games のマイページに並ぶ記録で、GUM・知識カード・クリスタル・称号は変わりません（原則3-2・原則7）。条件はどれも持ち物の数で、**答え方や速さでは変わりません**
+- どれを満たしているかは純粋関数 `platformTrophies(db, S)`（`src/platform.js`）。送るのは `platformSyncTrophies` **1 か所だけ**で、`notePlatformProgress`（保存のたび）から呼ぶ
+- このページを開いてからまだ送っていないものだけを、**1 つずつ順に**送る（未ログインで同時に送ると、Cookie がまだないので仮アカウントが送った数だけできてしまう）。サーバーは同じものを二度数えない
+- 開いた時点ですでに満たしているもの（トロフィーが入る前から遊んでいた人）も、最初の描画で送られる。通知は SDK が出す（はじめて取ったときだけ）
+- SDK が読めない・通信に失敗しても何もしない
+
+## 6. 検査
 
 - smoke：クレオパトラに勝つとクリアになる・ほかの英雄ではならない、クリアの分だけ増える GUM・知識カード・クリスタルが無い（ふつうのチャレンジの勝ちと同じ）、送る成績の形、`checkpointsReached` の順番
 - validate：`clear` の印がちょうど 1 体、一番奥の章を開く英雄に付いている
+- smoke：`platformTrophies` の条件、同じトロフィーを二度送らないこと、順に送ること
