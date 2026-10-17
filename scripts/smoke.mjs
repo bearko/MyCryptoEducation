@@ -1483,6 +1483,36 @@ check("RTA の区切りを送るのは計測中だけ（ふだんは何もしな
   delete window.BearkoGames;
   return JSON.stringify(sent) === '["hero1"]';
 })()`));
+check("トロフィー：条件は持ち物の数だけ（docs/game-clear.md §5）", ev(`(() => {
+  const base = { owned: {}, cards: {}, cells: {} };
+  const ids = st => platformTrophies(DB, { ...S, ...base, ...st }).join(",");
+  const cards = n => Object.fromEntries(Array.from({ length: n }, (_, i) => ["c" + i, 1]));
+  const allCells = {};
+  for (const q of DB.questions) allCells[q.subject + "|" + q.grade] = "ok";
+  return [
+    ids({}) === "",
+    ids({ owned: { "10001": 1 } }) === "",
+    ids({ owned: { "1006": 1 } }) === "education.hero1",
+    ids({ owned: { "5016": 1 } }) === "education.hero1,education.clear",
+    ids({ cards: cards(299) }) === "",
+    ids({ cards: cards(300) }) === "education.cards300",
+    ids({ cells: allCells }) === "education.map",
+  ].every(Boolean);
+})()`));
+check("トロフィー：まだ送っていないものだけを、1つずつ順に送る", await ev(`(async () => {
+  const log = [];
+  let release = null;
+  window.BearkoGames = { unlockTrophy: id => { log.push("start " + id); return new Promise(r => { release = () => { log.push("end " + id); r({ ok: true }); }; }); } };
+  const st = { ...S, owned: { "5016": 1 } };
+  const done = platformSyncTrophies(DB, st);
+  platformSyncTrophies(DB, st);
+  await new Promise(r => setTimeout(r, 0));
+  const first = log.join("|") === "start education.hero1";
+  release(); await new Promise(r => setTimeout(r, 0));
+  release(); await done;
+  delete window.BearkoGames;
+  return first && log.join("|") === "start education.hero1|end education.hero1|start education.clear|end education.clear";
+})()`));
 {
   // クレオパトラに勝つ。共通基盤の SDK を差しかえて、送った成績を見る
   ev(`window.__sent = []; window.BearkoGames = {
