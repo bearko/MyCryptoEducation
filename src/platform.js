@@ -89,6 +89,20 @@ export function platformChatHiddenFor(view) {
   return view === "quiz" || view === "wave" || view === "challenge" || view === "grade";
 }
 
+/* ---- bearko.games 共通のアイコン（共通基盤 SPEC-005 5.3。SDK 1.7.0） ----
+   このゲームのユーザーアイコン（手持ちの英雄）とは別のものです。共通基盤のほうは、すべてのゲームとチャットで同じ絵になります。
+   選ぶ窓は SDK が持っているので、ここでは開くだけ。SDK が無い・古いときは入口を出しません */
+export function platformCanPickAvatar() {
+  const bg = platformSdk();
+  return !!(bg && typeof bg.openAvatarPicker === "function");
+}
+export function platformOpenAvatarPicker() {
+  const bg = platformSdk();
+  if (!bg || typeof bg.openAvatarPicker !== "function") return false;
+  try { bg.openAvatarPicker(); } catch (e) { console.warn("[platform] avatar", e); }
+  return true;
+}
+
 /* ---- トロフィー（docs/game-clear.md §5。定義は共通基盤の platform/trophies.js） ---- */
 
 export const PLATFORM_CARDS_TROPHY = 300;
