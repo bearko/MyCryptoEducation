@@ -22,7 +22,7 @@ import { timeLimit, judge, asCount, JUDGES, chainNext, chainBonus, CHAIN_MAX_SHO
          DECK_SIZE, costOf, deckCost, deckCap, overCost, costFactor,
          coverageOf, heroPower, asDamage, asFires, onceOnly,
          ssNeed, ssReady, SS_POWER, foeFaction, BOSS_HP } from "./battle.js";
-import { playSE, playBGM, stopBGM, setSound, setBgm, EFFECT_SE } from "./sound.js";
+import { playSE, playBGM, stopBGM, setSound, setBgm, setSoundVolume, setBgmVolume, EFFECT_SE } from "./sound.js";
 import { matches } from "./normalize.js";
 import { assetPath, RANK_ORDER } from "./data.js";
 import { answerText, hintGroup, hintsFor, numericParts, sameNumber,
@@ -79,6 +79,7 @@ export function mount(db, state, root) {
 
   /* 保存してある設定を音の側へ渡す。**既定はOFF**なので、何もしなければ鳴りません */
   setSound(S.settings.sound); setBgm(S.settings.bgm);
+  setSoundVolume(S.settings.seVolume); setBgmVolume(S.settings.bgmVolume);
 
   // **初回はホームを出さず、いきなり小学1年の問題から始める**（決定1）
   if (!S.introDone && !S.runs) return startIntro();
@@ -907,11 +908,29 @@ function soundSwitches() {
       <span class="sw"></span>
       <span class="lbl">音を出す</span>
     </label>
+    ${volumeSlider("setsevol", "音の大きさ", S.settings.seVolume, S.settings.sound)}
     <label class="switch">
       <input type="checkbox" id="setbgm" ${S.settings.bgm ? "checked" : ""}>
       <span class="sw"></span>
       <span class="lbl">BGMを流す</span>
-    </label>`;
+    </label>
+    ${volumeSlider("setbgmvol", "BGMの大きさ", S.settings.bgmVolume, S.settings.bgm)}`;
+}
+
+const volLabel = v => (v <= 0 ? "OFF" : `${Math.round(v * 100)}%`);
+
+/**
+ * **音量のつまみ。** 0〜100% を 5% 刻み（20段階）で、0 は OFF。
+ * スイッチが切れているあいだは薄く出しますが、**動かせます** —— 鳴らす前に
+ * 小さくしておきたい人（電車の中）がいるためです。鳴る大きさは 元の音量 × この値。
+ */
+function volumeSlider(id, label, value, on) {
+  return `
+    <div class="vol${on ? "" : " dim"}">
+      <label for="${id}">${label}</label>
+      <input type="range" id="${id}" min="0" max="100" step="5" value="${Math.round(value * 100)}">
+      <output for="${id}" id="${id}-val">${volLabel(value)}</output>
+    </div>`;
 }
 
 function wireSoundSwitches() {
@@ -928,6 +947,21 @@ function wireSoundSwitches() {
     setBgm(S.settings.bgm);
     render();
   };
+  /* つまみは描き直しません（動かしている途中で消えるため）。数字だけ書き換えて、
+     離したときに保存する。音の側は離したときに1回鳴らして大きさを確かめる */
+  const wireVolume = (id, key, apply, onRelease) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.oninput = e => {
+      S.settings[key] = Number(e.target.value) / 100;
+      apply(S.settings[key]);
+      const out = document.getElementById(`${id}-val`);
+      if (out) out.textContent = volLabel(S.settings[key]);
+    };
+    el.onchange = () => { onRelease?.(); saveState(S); };
+  };
+  wireVolume("setsevol", "seVolume", setSoundVolume, () => playSE("equip"));
+  wireVolume("setbgmvol", "bgmVolume", setBgmVolume);
 }
 
 /* ---------- デッキ（5枚編成） ---------- */

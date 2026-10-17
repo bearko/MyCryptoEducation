@@ -301,6 +301,12 @@
   .switch input:checked + .sw::after{transform:translateX(17px)}
   .switch input:focus-visible + .sw{outline:2px solid var(--ai);outline-offset:2px}
   .switch .lbl{font-size:14px;font-weight:600}
+  /* --- 音量のつまみ（0〜100%・5%刻み・0はOFF）。スイッチの文字の下にそろえる --- */
+  .vol{display:flex;align-items:center;gap:10px;margin:4px 0 12px 51px}
+  .vol.dim{opacity:.55}
+  .vol label{flex:none;font-size:12.5px;color:var(--ink-faint)}
+  .vol input[type=range]{flex:1;min-width:0;margin:0;accent-color:var(--moss)}
+  .vol output{flex:none;min-width:3.4em;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums}
 
   /* --- テンポ優先モードのトースト --- */
   .toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:60;

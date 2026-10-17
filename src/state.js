@@ -40,6 +40,10 @@ function defaults() {
          電車の中で開く人がいます。音は演出だけで、報酬は1つも変わりません（原則3-2） */
       sound: false,
       bgm: false,
+      /* 音量。0〜1 を 5% 刻み（20段階）で、0 は OFF。**既定は 1（元の大きさ）**で、
+         上のスイッチが入っているときだけ効く。音量を変えても報酬は1つも変わらない */
+      seVolume: 1,
+      bgmVolume: 1,
     },
 
     // ステータス層の表示。称号は「称号・カレンダー」の実装まで null のまま。
@@ -159,5 +163,10 @@ export function createState() {
       ? { ...state[k], ...v } : v;
   }
   state.profile.name = capName(state.profile.name);
+  /* 音量は 0〜1。壊れた値は 1（元の大きさ）に戻す */
+  for (const k of ["seVolume", "bgmVolume"]) {
+    const n = Number(state.settings[k]);
+    state.settings[k] = Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1;
+  }
   return state;
 }

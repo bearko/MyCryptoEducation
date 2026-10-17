@@ -17,10 +17,13 @@ import { assetPath } from "./data.js";
 
 let seOn = false;
 let bgmOn = false;
+let seLevel = 1;    // 音量の設定 0〜1。スイッチが入っているときだけ効く
+let bgmLevel = 1;
 let bgmEl = null;
 let bgmKey = null;
 const cache = new Map();
 
+/** 設定が 100% のときの大きさ。**鳴る音量はこれ × 設定（0〜1）です** */
 export const SE_VOLUME = 0.55;
 export const BGM_VOLUME = 0.3;
 
@@ -28,6 +31,15 @@ export const setSound = on => { seOn = !!on; };
 export const setBgm = on => { bgmOn = !!on; if (!bgmOn) stopBGM(); };
 export const soundOn = () => seOn;
 export const bgmPlaying = () => bgmKey;
+
+/* 音量は 0〜1（0 = OFF、1 = 元の大きさ）。壊れた値は 1 に戻す */
+const level01 = v => { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1; };
+export const setSoundVolume = v => { seLevel = level01(v); };
+/** **流れている曲にもその場で効きます** —— つまみを動かしながら大きさが分かるように */
+export const setBgmVolume = v => {
+  bgmLevel = level01(v);
+  try { if (bgmEl) bgmEl.volume = BGM_VOLUME * bgmLevel; } catch { /* 変わらないだけ */ }
+};
 
 /** 鳴らせない場所（jsdom・古い環境）でも、黙って何もしないで済ませる */
 const makeAudio = src => {
@@ -48,7 +60,7 @@ export function playSE(key) {
       el.preload = "auto";
       cache.set(key, el);
     }
-    el.volume = SE_VOLUME;
+    el.volume = SE_VOLUME * seLevel;
     el.currentTime = 0;
     el.play?.()?.catch?.(() => {});
   } catch { /* 鳴らないだけ。止めない */ }
@@ -65,7 +77,7 @@ export function playBGM(key) {
   const el = makeAudio(assetPath.bgm(key));
   if (!el) return;
   el.loop = true;
-  el.volume = BGM_VOLUME;
+  el.volume = BGM_VOLUME * bgmLevel;
   bgmEl = el;
   bgmKey = key;
   try { el.play?.()?.catch?.(() => {}); } catch { /* 鳴らないだけ */ }
