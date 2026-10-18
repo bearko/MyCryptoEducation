@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# 読むだけ（GITHUB_TOKEN に書き込みの権限を持たせない。セキュリティの見直し 2026-10-18）
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
