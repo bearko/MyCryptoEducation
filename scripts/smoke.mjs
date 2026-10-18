@@ -1483,23 +1483,50 @@ check("RTA の区切りを送るのは計測中だけ（ふだんは何もしな
   delete window.BearkoGames;
   return JSON.stringify(sent) === '["hero1"]';
 })()`));
-check("トロフィー：条件は持ち物の数だけ（docs/game-clear.md §5）", ev(`(() => {
-  const base = { owned: {}, cards: {}, cells: {} };
+check("アチーブメント：条件は持ち物と積み上げの数だけ（docs/game-clear.md §5）", ev(`(() => {
+  const base = { owned: {}, cards: {}, cells: {}, crew: {}, exts: {}, crystals: {}, totalRight: 0 };
   const ids = st => platformTrophies(DB, { ...S, ...base, ...st }).join(",");
   const cards = n => Object.fromEntries(Array.from({ length: n }, (_, i) => ["c" + i, 1]));
-  const allCells = {};
-  for (const q of DB.questions) allCells[q.subject + "|" + q.grade] = "ok";
+  const keys = [...new Set(DB.questions.map(q => q.subject + "|" + q.grade))];
+  const cellsOf = list => Object.fromEntries(list.map(k => [k, "ok"]));
+  const allCells = cellsOf(keys);
+  const oneEach = cellsOf(SUBJECTS.map(s => keys.find(k => k.startsWith(s + "|"))));
+  const challenge = DB.heroes.filter(h => h.rel).map(h => h.id);
+  const ownedOf = list => Object.fromEntries(list.map(id => [id, 1]));
+  const crew = n => Object.fromEntries(DB.crew.slice(0, n).map(h => [h.id, 1]));
+  const ext = rank => Object.values(DB.extensions).find(e => e.rank === rank).id;
+  const nonClear = challenge.filter(id => id !== "5016" && id !== "4007");
   return [
     ids({}) === "",
+    ids({ score: 999999, runs: 50, days: { "2026-10-01": { runs: 9 } } }) === "",   // 点・回数・日数は条件にしない
     ids({ owned: { "10001": 1 } }) === "",
     ids({ owned: { "1006": 1 } }) === "education.hero1",
     ids({ owned: { "5016": 1 } }) === "education.hero1,education.clear",
+    ids({ owned: { "4007": 1 } }) === "education.hero1,education.edison",
+    ids({ owned: ownedOf(nonClear.slice(0, 4)) }) === "education.hero1",
+    ids({ owned: ownedOf(nonClear.slice(0, 5)) }) === "education.hero1,education.heroes5",
+    ids({ owned: ownedOf(challenge) }) ===
+      "education.hero1,education.heroes5,education.edison,education.clear,education.heroes9",
+    ids({ crew: crew(5) }) === "",
+    ids({ crew: crew(6) }) === "education.crew6",
+    ids({ crew: { ...crew(5), "nobody": 1 } }) === "",       // ロスターにいない ID は数えない
+    ids({ cells: oneEach }) === "education.six",
+    ids({ cells: { ...oneEach, [Object.keys(oneEach)[0]]: "ng" } }) === "",   // 外しただけのマスは数えない
+    ids({ cells: cellsOf(keys.filter(k => !k.startsWith("情報|")).slice(0, 23)) }) === "",
+    ids({ cells: cellsOf(keys.filter(k => !k.startsWith("情報|")).slice(0, 24)) }) === "education.map24",
+    ids({ cells: allCells }) === "education.six,education.map24,education.map",
+    ids({ exts: { [ext("初伝")]: 1 } }) === "education.firstcraft",
+    ids({ exts: { [ext("中伝")]: 1 } }) === "education.chuden,education.firstcraft",
+    ids({ exts: { [ext("中伝")]: 0 } }) === "",
+    ids({ crystals: { "001": 1 } }) === "education.crystal",
+    ids({ crystals: { "001": 0 } }) === "",
+    ids({ totalRight: 99 }) === "",
+    ids({ totalRight: 100 }) === "education.right100",
     ids({ cards: cards(299) }) === "",
     ids({ cards: cards(300) }) === "education.cards300",
-    ids({ cells: allCells }) === "education.map",
   ].every(Boolean);
 })()`));
-check("トロフィー：まだ送っていないものだけを、1つずつ順に送る", await ev(`(async () => {
+check("アチーブメント：まだ送っていないものだけを、1つずつ順に送る", await ev(`(async () => {
   const log = [];
   let release = null;
   window.BearkoGames = { unlockTrophy: id => { log.push("start " + id); return new Promise(r => { release = () => { log.push("end " + id); r({ ok: true }); }; }); } };

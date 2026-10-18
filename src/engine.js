@@ -767,10 +767,13 @@ export const countryOf = q => (q.country || "").split(" / ")[0].trim();
  * 「量」より「越境」を目立たせたいので、並べ替えはせずファイルの順を守る。
  * 返すのは { ...title, have, goal, done }。
  */
+/** 正解したことのある教科の数（知識マップのどこかが ok / st）。称号「六芸に通ず」とアチーブメント six が同じ数え方を使う */
+export const subjectsCleared = state => SUBJECTS.filter(s =>
+  GRADES.some(g => ["ok", "st"].includes((state.cells || {})[s + "|" + g.k]))).length;
+
 export function titleProgress(db, state) {
   const list = db.titles?.titles || [];
-  const subjectsDone = SUBJECTS.filter(s =>
-    GRADES.some(g => ["ok", "st"].includes(state.cells[s + "|" + g.k]))).length;
+  const subjectsDone = subjectsCleared(state);
 
   return list.map(t => {
     let have = 0, goal = t.n || 1;

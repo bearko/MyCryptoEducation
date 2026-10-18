@@ -1,11 +1,11 @@
 /* bearko.games 共通基盤への窓口（総合スコア。bearko/mycryptoportfolio の SPEC-002 3.6、docs/game-clear.md）。
-   送るのは「知識カード・クリア・解放した英雄・称号・知識マップのマス」の数と、それで決まるトロフィーだけ。点の計算は共通基盤のサーバーが行う。
+   送るのは「知識カード・クリア・解放した英雄・称号・知識マップのマス」の数と、それで決まるアチーブメントだけ。点の計算は共通基盤のサーバーが行う。
    **報酬にも遊び方にも触りません**（原則3-2）。どれも答え方や速さで変わらないので、点も変わりません。
    ゲーム内の点（S.score）は送りません（点を称号やほかの数字につなげない）。
    SDK（https://bearko.games/sdk/v1.js）が読めない・通信に失敗しても何もしません。
    単一ファイル版はモジュールを結合するので、名前は platform〜 で始めて重ならないようにしています */
 
-import { gameCleared, unlockedHeroCount, earnedTitles, knowledgeMapProgress } from "./engine.js";
+import { gameCleared, unlockedHeroCount, earnedTitles, knowledgeMapProgress, subjectsCleared, crystalKinds } from "./engine.js";
 
 const PLATFORM_EVERY = 60 * 1000; // 送るのは多くても1分に1回
 let platformSent = null;           // 最後に送った成績
@@ -103,19 +103,41 @@ export function platformOpenAvatarPicker() {
   return true;
 }
 
-/* ---- トロフィー（docs/game-clear.md §5。定義は共通基盤の platform/trophies.js） ---- */
+/* ---- アチーブメント（docs/game-clear.md §5。定義は共通基盤の platform/trophies.js、SPEC-008）----
+   以前の「トロフィー」。SDK の関数名（unlockTrophy）に合わせて、コードの名前は platformTrophies のまま */
 
 export const PLATFORM_CARDS_TROPHY = 300;
+export const PLATFORM_CREW_TROPHY = 6;     // 仲間 6 人（最初の 5 人に 1 人加わる）
+export const PLATFORM_MAP_TROPHY = 24;     // 知識マップのマス
+export const PLATFORM_HEROES_TROPHY = 5;   // チャレンジで仲間にした英雄
+export const PLATFORM_RIGHT_TROPHY = 100;  // 通算の正解数（正答率ではない）
+const PLATFORM_EDISON = "4007";            // エジソン。勝つと新しい課程（第3章）が開く
 
-/** 満たしているトロフィーの ID。純粋関数。どれも持ち物の数だけで決まり、答え方や速さでは変わらない */
+/** 満たしているアチーブメントの ID。純粋関数。
+    **どれもセーブに残る持ち物と積み上げの数だけで決まり、答え方・速さ・正答率では変わらない**（原則3-2） */
 export function platformTrophies(db, S) {
   const m = platformMetrics(db, S);
   const map = knowledgeMapProgress(db, S);
+  const owned = (S && S.owned) || {};
+  const exts = Object.keys((S && S.exts) || {}).filter(id => S.exts[id] > 0);
+  const crewIds = Object.keys((S && S.crew) || {}).filter(id => S.crew[id]);
+  const crew = db.crewById ? crewIds.filter(id => db.crewById[id]).length : crewIds.length;
+  const challengeHeroes = db.heroes.filter(h => h.rel).length;
   const out = [];
   if (m.heroes > 0) out.push("education.hero1");
+  if (crew >= PLATFORM_CREW_TROPHY) out.push("education.crew6");
+  if (subjectsCleared(S) >= 6) out.push("education.six");
+  if (map.done >= PLATFORM_MAP_TROPHY) out.push("education.map24");
+  if (m.heroes >= PLATFORM_HEROES_TROPHY) out.push("education.heroes5");
+  if (owned[PLATFORM_EDISON]) out.push("education.edison");
+  if (exts.some(id => db.extensions?.[id]?.rank === "中伝")) out.push("education.chuden");
   if (m.cleared) out.push("education.clear");
-  if (map.total > 0 && map.done >= map.total) out.push("education.map");
   if (m.cards >= PLATFORM_CARDS_TROPHY) out.push("education.cards300");
+  if (challengeHeroes > 0 && m.heroes >= challengeHeroes) out.push("education.heroes9");
+  if (map.total > 0 && map.done >= map.total) out.push("education.map");
+  if (exts.length > 0) out.push("education.firstcraft");
+  if (crystalKinds(S) >= 1) out.push("education.crystal");
+  if (((S && S.totalRight) || 0) >= PLATFORM_RIGHT_TROPHY) out.push("education.right100");
   return out;
 }
 
@@ -123,7 +145,7 @@ const platformTrophiesSent = new Set(); // このページを開いてから送�
 /* 1つずつ順に送る。未ログインで同時に送ると、Cookie がまだないので仮アカウントが送った数だけできてしまう */
 let platformTrophyChain = Promise.resolve();
 
-/** まだ送っていないトロフィーを送る、ただ1か所。通知は SDK が出す（はじめて取ったときだけ） */
+/** まだ送っていないアチーブメントを送る、ただ1か所。通知は SDK が出す（はじめて取ったときだけ） */
 export function platformSyncTrophies(db, S) {
   const bg = platformSdk();
   if (!bg || typeof bg.unlockTrophy !== "function") return platformTrophyChain;
@@ -142,7 +164,7 @@ export function platformSyncTrophies(db, S) {
     **クリアした瞬間だけは待たずに送り、自己ベストの通知を出す**（ほかは積み上げなので通知なし） */
 export function notePlatformProgress(db, S) {
   if (!platformSdk()) return;
-  platformSyncTrophies(db, S); // トロフィー（§5）。増えたかどうかに関係なく、まだ送っていないものを送る
+  platformSyncTrophies(db, S); // アチーブメント（§5）。増えたかどうかに関係なく、まだ送っていないものを送る
   const m = platformMetrics(db, S);
   if (platformWasCleared === null) platformWasCleared = m.cleared;
   if (!platformAhead(m, platformSent)) return;
