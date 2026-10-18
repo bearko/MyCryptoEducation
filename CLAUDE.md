@@ -1210,7 +1210,7 @@ node scripts/fetch-commons.mjs --parked
   判定は `heroes.json` の `"clear": true` の印だけを見る。**クリアで増える報酬は無く**、記録
   （`S.clearedAt`）だけ。称号・英雄の解放・知識マップは bearko.games の総合スコアへの加点で、
   **ゲーム内の点 `S.score` も答え方も送らない**。RTA の区切りは `hero1` → `clear`。
-  bearko.games のトロフィーは4つ（`docs/game-clear.md` §5）。**報酬は1つも足さない**
+  bearko.games のアチーブメントはゲームから14個送る（来訪は SDK が送る。`docs/game-clear.md` §5）。**報酬は1つも足さない**
 - 4択・**レンジ回答（年代当て）**・応用編・3段階ヒント・別の英雄によるTips
 - **何年生から始める?**（S-31）— 初回に1度だけ、学年をひとつ聞く。選んだ学年が
   **梯子の下端**になる（`S.startGrade`）。進行そのものは知識マップのまま。
